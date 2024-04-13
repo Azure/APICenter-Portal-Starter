@@ -1,0 +1,51 @@
+{
+    "settings": {
+        "react": {
+            "version": "detect"
+        }
+    },
+    "extends": [
+        "eslint:recommended",
+        "plugin:@typescript-eslint/recommended",
+        "plugin:react/recommended",
+        "plugin:react-hooks/recommended",
+        "plugin:jsx-a11y/recommended",
+        "plugin:prettier/recommended" // Make sure this is always the last element in the array.
+    ],
+    "plugins": ["simple-import-sort", "prettier"],
+    "rules": {
+        "prettier/prettier": ["error", {}, { "usePrettierrc": true }],
+        "react/prop-types": "off",
+        "react/react-in-jsx-scope": "off",
+        "react/jsx-curly-brace-presence": [
+            "error",
+            {
+                "props": "always",
+                "children": "never",
+                "propElementValues": "always"
+            }
+        ],
+        "jsx-a11y/accessible-emoji": "off",
+        "@typescript-eslint/ban-ts-comment": "off",
+        "@typescript-eslint/explicit-function-return-type": "off",
+        "@typescript-eslint/no-empty-interface": "off",
+        "@typescript-eslint/no-explicit-any": "off",
+        "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }],
+        "simple-import-sort/imports": [
+            "warn",
+            {
+                "groups": [
+                    // Packages. `react` related packages come first.
+                    ["^react", "^@?\\w"],
+                    // Regular imports
+                    ["^\\.\\.(?!/?$)", "^\\.\\./?$", "^\\./(?=.*/)(?!/?$)", "^\\.(?!/?$)", "^\\./?$"],
+                    // Side effect imports.
+                    ["^\\u0000"],
+                    // Style imports.
+                    ["^.+\\.s?css$"]
+                ]
+            }
+        ],
+        "simple-import-sort/exports": "error"
+    }
+}

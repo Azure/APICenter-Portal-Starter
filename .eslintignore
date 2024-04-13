@@ -1,0 +1,6 @@
+env.d.ts
+node_modules/
+src/assets/*
+.prettierrc
+.eslintrc.json
+

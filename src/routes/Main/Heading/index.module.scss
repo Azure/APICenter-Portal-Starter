@@ -1,0 +1,149 @@
+@import "/src/styles/index";
+
+.heading {
+	padding: 3.125rem 3.125rem 4rem;
+	background: linear-gradient(45deg, hsla(204, 65%, 71%, 1) 0%, hsla(273, 34%, 75%, 1) 43%, hsla(358, 43%, 75%, 1) 57%, hsla(43, 96%, 63%, 1) 100%);
+	color: white;
+	text-align: center;
+
+	h1 {
+		margin: 0 0 1rem;
+		font-size: 2.5rem;
+		font-weight: 600;
+		line-height: 3.25rem;
+		/* 130% */
+	}
+
+	h2 {
+		margin: 1rem 0;
+		font-size: 0.875rem;
+		font-weight: 600;
+		line-height: 1.25rem;
+		/* 142.857% */
+	}
+
+	.link {
+		margin-top: 1rem;
+		font-size: 0.875rem;
+		font-weight: 600;
+		line-height: 1.25rem;
+		/* 142.857% */
+
+		a {
+			color: white;
+			text-decoration: none;
+
+			&:hover {
+				text-decoration: underline;
+			}
+		}
+
+		svg {
+			display: inline-block;
+			vertical-align: bottom;
+		}
+	}
+}
+
+.searchContainer {
+	position: relative;
+	width: 42rem;
+	margin: 0 auto;
+
+	.input {
+		width: 100%;
+	}
+
+	.popup {
+		box-sizing: border-box;
+		position: absolute;
+		width: 100%;
+		background: white;
+		color: black;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.50);
+		z-index: 1;
+
+		.header {
+			display: flex;
+			justify-content: space-between;
+			margin: .5rem .75rem .125rem;
+			padding-bottom: .5rem;
+			border-bottom: 1px solid $grayLight;
+
+			h6 {
+				font-size: 0.75rem;
+				font-weight: 400;
+				letter-spacing: 0.02rem;
+			}
+
+			button {
+				color: $blue;
+				font-size: 0.75rem;
+				font-weight: 400;
+				line-height: 1rem;
+
+				&:hover {
+					text-decoration: underline;
+				}
+			}
+		}
+
+		.record {
+			display: flex;
+			justify-content: space-between;
+			width: 100%;
+
+			.recordSelect {
+				display: flex;
+				width: 100%;
+				padding: .5rem .625rem;
+				align-items: center;
+				gap: 1rem;
+				letter-spacing: 0.01rem;
+				font-size: 0.875rem;
+			}
+
+			&:hover {
+				background: $grayXLight;
+
+				.recordDelete {
+					display: block;
+				}
+			}
+
+			.recordDelete {
+				display: none;
+				width: 2rem;
+				height: 2rem;
+				flex-shrink: 0;
+				background: #E1DFDD;
+
+				&:hover {
+					background: $grayLight;
+				}
+			}
+			
+			.apiName,
+			.apiMeta {
+				text-align: left;
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+			}
+
+			.apiName {
+				width: 10rem;
+			}
+
+			.apiMeta {
+				color: $gray;
+				width: 25rem;
+			}
+		}
+
+		.noResults {
+			padding: 3rem 0;
+			color: $gray;
+		}
+	}
+}

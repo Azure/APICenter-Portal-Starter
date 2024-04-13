@@ -1,0 +1,13 @@
+.restrictedContent {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    svg {
+        padding-bottom: 1rem;
+    }
+
+    div {
+        text-align: center;
+    }
+}
