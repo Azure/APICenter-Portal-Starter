@@ -108,7 +108,7 @@ const Search = () => {
                     const value = e.target.value;
                     if (timeoutId != null) clearTimeout(timeoutId);
                     setIsLoading(true);
-                    timeoutId = setTimeout(() => submit(value), 500);
+                    timeoutId = setTimeout(() => submit(value), 500) as unknown as number;
                     setInputValue(value);
                 }}
                 onFocus={() => {
