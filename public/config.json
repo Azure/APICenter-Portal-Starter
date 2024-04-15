@@ -1,5 +1,5 @@
 {
-  "dataApiHostName": "<service name>.data.centraluseuap.azure-apicenter.ms",
+  "dataApiHostName": "<service name>.data.<region>.azure-apicenter.ms",
   "title": "API portal",
   "authentication": {
       "clientId": "<client ID>",
