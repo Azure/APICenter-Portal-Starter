@@ -5,6 +5,6 @@
       "clientId": "<client ID>",
       "tenantId": "<tenant ID>",
       "scopes": ["https://azure-apicenter.net/user_impersonation"],
-      "azureAdInstance": "https://login.microsoftonline.com/"
+      "authority": "https://login.microsoftonline.com/"
   }
 }
