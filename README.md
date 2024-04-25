@@ -1,4 +1,4 @@
-# Self-host your Azure API Center portal
+# Self-host Your Azure API Center Portal
 
 ## Overview
 
@@ -21,17 +21,17 @@
 **API Center Portal** is a website that empowers developers and stakeholders to seamlessly discover and engage with APIs. Our reference implementation of the API Center portal enables API platform teams to provide a web-based API discovery and consumption experience to API consumers. 
 
 The API Center portal reference implementation provides:
-- A framework for publishing and maintaining a customer-managed API portal using GitHub Actions
-- A portal platform that customers can modify or extend to meet their needs
-- Flexibility to host on different infrastructures, including deployment to Azure Static Web Apps or Azure App Service
+- A framework for publishing and maintaining a customer-managed API portal.
+- A portal platform that customers can modify or extend to meet their needs.
+- Flexibility to host on different infrastructures, including deployment to Azure Static Web Apps or Azure App Service.
 
 ## Prerequisites
 
 Before you begin, ensure you have met the following requirements:
-- You have installed the latest version of [Node.js and npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm).
-- [Vite package](https://www.npmjs.com/package/vite).
-- [Configured app registration in your Microsoft Entra ID tenant](https://learn.microsoft.com/azure/api-center/enable-api-center-portal#create-microsoft-entra-app-registration) with the right API permission scope and Redirect URI.
-- Portal sign-in enabled with the [right role assignment](https://learn.microsoft.com/azure/api-center/enable-api-center-portal#enable-sign-in-to-portal-by-microsoft-entra-users-and-groups)
+1. :white_check_mark: You have installed the latest version of [Node.js and npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm).
+2. :white_check_mark: [Vite package](https://www.npmjs.com/package/vite).
+3. :white_check_mark: [Configured app registration in your Microsoft Entra ID tenant](https://learn.microsoft.com/azure/api-center/enable-api-center-portal#create-microsoft-entra-app-registration) with the right API permission scope and Redirect URI.
+4. :white_check_mark: Portal sign-in enabled with the [right role assignment](https://learn.microsoft.com/azure/api-center/enable-api-center-portal#enable-sign-in-to-portal-by-microsoft-entra-users-and-groups)
 
 
 ## Configure & Run your API Center locally
@@ -46,7 +46,7 @@ git clone https://github.com/Azure/APICenter-Portal-Starter.git
 ```
 
 
-2. Switch to the initial setup branch (This step is temporary until the changes are merged into the main branch)
+2. Switch to main branch:
 
 ```shell
 git checkout main
@@ -75,10 +75,6 @@ npm start
 ```shell
 npm start
 ```
-
-This template provides you with the default OAS (OpenAPI Specification) ruleset from Spectral. To see the exact rules within the ruleset, see [OpenAPI Rules](https://docs.stoplight.io/docs/spectral/4dec24461f3af-open-api-rules).
-
-If you want to customize your Ruleset for analysis, simply swap out the default ruleset file oas.yaml located in `{workSpaceFolder}/resources/rulesets` with any valid Spectral ruleset file. We accept all valid Spectral formats (YAML, JSON, and JavaScript). Afterward, head over to the `{workSpaceFolder}/src/constants.ts` file and update the `RulesetFileName` constant with your chosen ruleset file name.
 
 ## Contributing
 
