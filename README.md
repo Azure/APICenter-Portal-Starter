@@ -1,3 +1,6 @@
+[![Open Source Love](https://firstcontributions.github.io/open-source-badges/badges/open-source-v1/open-source.svg)](https://github.com/firstcontributions/open-source-badges)
+
+
 # Self-host Your Azure API Center Portal
 
 ## Overview
@@ -5,8 +8,9 @@
 - [What is Azure API Center?](./#-what-is-azure-api-center)
 - [What is the Azure API Center Portal?](./#-what-is-azure-api-center)
 - [Prerequisites](./#-what-is-azure-api-center)
-- [Configure & Run your API Center locally]()
+- [Quick Start]()
 - [Contributing]()
+- [Feedback]()
 - [Code of Conduct]()
 - [Trademark Notice]()
 - [Telemetry]()
@@ -34,21 +38,21 @@ Before you begin, ensure you have met the following requirements:
 4. :white_check_mark: Portal sign-in enabled with the [right role assignment](https://learn.microsoft.com/azure/api-center/enable-api-center-portal#enable-sign-in-to-portal-by-microsoft-entra-users-and-groups)
 
 
-## Configure & Run your API Center locally
+## Quick Start
 
 ### Getting Started
 Follow these steps to get your development environment set up:
 
 1. Clone the repository
 
-```shell
+```bash
 git clone https://github.com/Azure/APICenter-Portal-Starter.git
 ```
 
 
 2. Switch to main branch:
 
-```shell
+```bash
 git checkout main
 ```
 
@@ -67,18 +71,24 @@ git checkout main
 }
 ```
 4. Start the development server - This command will start the portal in development mode running locally:
-```shell
+```bash
 npm start
 ```
 
 5. Build for production - When you’re ready to build for production, run the following command:
-```shell
+```bash
 npm start
 ```
 
 ## Contributing
 
 See [the contribution guidelines](CONTRIBUTING.md) for ideas and guidance on how to improve the template. Thank you!
+
+## Feedback
+
+:sunny: We Love Hearing From You! :sunny:
+
+Your feedback is invaluable to us, and we encourage you to share your thoughts and suggestions through the **Issues** tab. Rest assured, we’ll be keeping a close eye on your input to continuously improve. While we’re dedicated to monitoring these issues, please note that this channel is not a part of our Azure service support. We’re here to collaborate and grow together, so let’s make something amazing!
 
 ## Code of Conduct
 
