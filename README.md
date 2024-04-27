@@ -82,7 +82,7 @@ npm start
 
 ## Contributing
 
-rocket: See [the contribution guidelines](CONTRIBUTING.md) for ideas and guidance on how to improve the template. Thank you! rocket:
+:rocket: See [the contribution guidelines](CONTRIBUTING.md) for ideas and guidance on how to improve the template. Thank you! :rocket:
 
 
 ## Bugs & Issues & Feedback
