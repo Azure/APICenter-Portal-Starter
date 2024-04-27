@@ -5,16 +5,16 @@
 
 ## Overview
 
-- [What is Azure API Center?](./#-what-is-azure-api-center)
-- [What is the Azure API Center Portal?](./#-what-is-azure-api-center)
-- [Prerequisites](./#-what-is-azure-api-center)
-- [Quick Start]()
-- [Contributing]()
-- [Bugs & Issues & Feedback]()
-- [Code of Conduct]()
-- [Trademark Notice]()
-- [Telemetry]()
-- [License]()
+- [What is Azure API Center?](./#what-is-the-azure-api-center-portal)
+- [What is the Azure API Center Portal?](./#azure-api-center-portal)
+- [Prerequisites](./#prerequisites)
+- [Quick Start](./#quick-start)
+- [Contributing](./#contributing)
+- [Bugs & Issues & Feedback](./#bugs--issues--feedback)
+- [Code of Conduct](./#code-of-conduct)
+- [Trademark Notice](./#trademark-notice)
+- [Telemetry](./#telemetry)
+- [License](./#license)
 
 ## What is the Azure API Center Portal?
 
@@ -82,7 +82,7 @@ npm start
 
 ## Contributing
 
-See [the contribution guidelines](CONTRIBUTING.md) for ideas and guidance on how to improve the template. Thank you!
+rocket: See [the contribution guidelines](CONTRIBUTING.md) for ideas and guidance on how to improve the template. Thank you! rocket:
 
 
 ## Bugs & Issues & Feedback
