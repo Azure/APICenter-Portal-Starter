@@ -10,7 +10,7 @@
 - [Prerequisites](./#-what-is-azure-api-center)
 - [Quick Start]()
 - [Contributing]()
-- [Feedback]()
+- [Bugs & Issues & Feedback]()
 - [Code of Conduct]()
 - [Trademark Notice]()
 - [Telemetry]()
@@ -84,11 +84,19 @@ npm start
 
 See [the contribution guidelines](CONTRIBUTING.md) for ideas and guidance on how to improve the template. Thank you!
 
-## Feedback
+
+## Bugs & Issues & Feedback
 
 :sunny: We Love Hearing From You! :sunny:
 
-Your feedback is invaluable to us, and we encourage you to share your thoughts and suggestions through the **Issues** tab. Rest assured, we’ll be keeping a close eye on your input to continuously improve. While we’re dedicated to monitoring these issues, please note that this channel is not a part of our Azure service support. We’re here to collaborate and grow together, so let’s make something amazing!
+
+Your feedback is invaluable to us, and we encourage you to share your thoughts and suggestions in the repository's **Issues** section. You can also report bugs or submit feature requests there. Rest assured, we’ll be keeping a close eye on your input to continuously improve. While we’re dedicated to monitoring these issues, please note that this channel is not part of our Microsoft Azure Service Support.
+ 
+**Microsoft Azure Support** assistance is limited to the initial setup of the Azure Function app that runs the linting engine. Best effort support is provided for problems that are caused by environmental factors, such as (but not limited to): hosting platform, development environment, network configuration. 
+ 
+If you need technical assistance with extending the linting engine or improving existing rules , please leverage existing technical communities such as Stack Overflow. We don't provide support through GitHub Issues.
+ 
+We welcome and appreciate community contributions.
 
 ## Code of Conduct
 
