@@ -80,6 +80,19 @@ npm start
 npm start
 ```
 
+### Deploy to Azure Static Web Apps
+[Azure Static Web Apps](https://learn.microsoft.com/en-us/azure/static-web-apps/overview) is a service that automatically builds and deploys full stack web apps to Azure from a code repository. This tutorial uses GitHub Actions to deploy to Azure Static Web Apps.
+
+1. Create a new **Static Web App**.
+2. Select **GitHub** as the **Source**.
+3. Select the **GitHub organization, repository, and branch** containing the API Center Portal. Note: You must fork the API Center Portal repository to your own personal account or organization and select this repository.
+4. Select **React** as the **Build Presets**.
+5. Enter **/** as the **App location**.
+6. Enter **dist** as the **Output location**.
+7. Click **Create**. A GitHub workflow file will be committed to the repository selected in Step #3, and deployment to your Static Web App with GitHub Actions will begin. It may take up to five minutes to see your changes published.
+
+To view your API Center Portal running on Static Web Apps, click **View app in browser** from the **Overview** tab in the Static Web App resource you created in Azure portal.
+
 ## Contributing
 
 :rocket: See [the contribution guidelines](CONTRIBUTING.md) for ideas and guidance on how to improve the template. Thank you! :rocket:
