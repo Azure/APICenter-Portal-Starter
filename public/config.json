@@ -1,5 +1,5 @@
 {
-  "dataApiHostName": "<service name>.data.<region>.azure-apicenter.ms/workspaces/default/",
+  "dataApiHostName": "<service name>.data.<region>.azure-apicenter.ms/workspaces/default",
   "title": "API portal",
   "authentication": {
       "clientId": "<client ID>",
