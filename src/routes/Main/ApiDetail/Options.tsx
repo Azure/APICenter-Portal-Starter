@@ -7,7 +7,6 @@ import { FC, useEffect, useState } from "react";
 import { Body1, Body1Strong, Button, Caption1, Link, MessageBar, MessageBarBody } from "@fluentui/react-components";
 import { ArrowDownloadRegular, Document20Regular, Play16Filled } from "@fluentui/react-icons";
 
-import postmanInit from "../../../assets/postman.js";
 import VsCodeLogo from "../../../components/logos/VsCodeLogo";
 import { Api } from "../../../contracts/api";
 import { useApiService } from "../../../util/useApiService";
@@ -15,31 +14,7 @@ import { useApiService } from "../../../util/useApiService";
 import css from "./index.module.scss";
 
 const Options: FC<{ api: Api; version?: string; definition?: string }> = ({ api, version, definition }) => {
-    const apiService = useApiService();
-    const [schemaUrl, setSchemaUrl] = useState("");
-
-    useEffect(() => {
-        getSpecificationLink();
-        if (schemaUrl) {
-            initializePostmanScript();
-        }
-    }, [schemaUrl]);
-
-    const initializePostmanScript = () => {
-        // remove overlays if exist
-        const runInPostmanOverlay = document.getElementById("pm-oip-overlay");
-        runInPostmanOverlay && runInPostmanOverlay.remove();
-        // initialize the script
-        postmanInit();
-    };
-
-    const getSpecificationLink = async () => {
-        if (!version || !definition) return;
-
-        const downloadUrl = await apiService.getSpecificationLink(api.name, version, definition);
-
-        setSchemaUrl(downloadUrl);
-    };
+    const [schemaUrl] = useState("");
 
     return (
         <div className={css.options}>
@@ -72,16 +47,6 @@ const Options: FC<{ api: Api; version?: string; definition?: string }> = ({ api,
                             >
                                 Open in Visual Studio Code
                             </Button>
-                            {schemaUrl && (
-                                <Button
-                                    className={"runInPostman"} //class must be a string and must be the same as in the postman script
-                                    data-postman-action={"api/import"}
-                                    data-postman-api-schema-url={schemaUrl}
-                                    icon={<Play16Filled />}
-                                >
-                                    Run in Postman
-                                </Button>
-                            )}
                         </div>
                     </div>
                 </div>
