@@ -70,12 +70,14 @@ git checkout main
   }
 }
 ```
-4. Start the development server - This command will start the portal in development mode running locally:
+4. Install the required packages.
+
 ```bash
-npm start
+npm install
 ```
 
-5. Build for production - When you’re ready to build for production, run the following command:
+5. Start the development server - This command will start the portal in development mode running locally:
+
 ```bash
 npm start
 ```
