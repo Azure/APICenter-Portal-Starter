@@ -16,13 +16,13 @@
 - [Telemetry](./#telemetry)
 - [License](./#license)
 
-## What is the Azure API Center Portal?
+## What is the Azure API Center portal?
 
 [Azure API Center](https://learn.microsoft.com/azure/api-center/overview) is a service that helps you develop and maintain a structured inventory of your organization’s APIs. With API Center, you can track all of your APIs in a centralized location, regardless of their type, lifecycle stage, or deployment location. API Center enables API discovery, reuse, and governance empowering API Platform Teams.
 
 ## Azure API Center Portal
 
-**API Center Portal** is a website that empowers developers and stakeholders to seamlessly discover and engage with APIs. Our reference implementation of the API Center portal enables API platform teams to provide a web-based API discovery and consumption experience to API consumers. 
+**API Center portal** is a website that empowers developers and stakeholders to seamlessly discover and engage with APIs. Our reference implementation of the API Center portal enables API platform teams to provide a web-based API discovery and consumption experience to API consumers. 
 
 The API Center portal reference implementation provides:
 - A framework for publishing and maintaining a customer-managed API portal.
@@ -60,7 +60,7 @@ git checkout main
 
 ```JSON
 {
-  "dataApiHostName": "<service name>.data.<region>.azure-apicenter.ms",
+  "dataApiHostName": "<service name>.data.<region>.azure-apicenter.ms/workspaces/default",
   "title": "API portal",
   "authentication": {
       "clientId": "<client ID>",
@@ -87,13 +87,13 @@ npm start
 
 1. Create a new **Static Web App**.
 2. Select **GitHub** as the **Source**.
-3. Select the **GitHub organization, repository, and branch** containing the API Center Portal. Note: You must fork the API Center Portal repository to your own personal account or organization and select this repository.
+3. Select the **GitHub organization, repository, and branch** containing the API Center portal. Note: You must fork the API Center portal repository to your own personal account or organization and select this repository.
 4. Select **React** as the **Build Presets**.
 5. Enter **/** as the **App location**.
 6. Enter **dist** as the **Output location**.
 7. Click **Create**. A GitHub workflow file will be committed to the repository selected in Step #3, and deployment to your Static Web App with GitHub Actions will begin. It may take up to five minutes to see your changes published.
 
-To view your API Center Portal running on Static Web Apps, click **View app in browser** from the **Overview** tab in the Static Web App resource you created in Azure portal.
+To view your API Center portal running on Static Web Apps, click **View app in browser** from the **Overview** tab in the Static Web App resource you created in Azure portal.
 
 ## Contributing
 
