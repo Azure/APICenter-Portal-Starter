@@ -14,7 +14,20 @@ import { useApiService } from "../../../util/useApiService";
 import css from "./index.module.scss";
 
 const Options: FC<{ api: Api; version?: string; definition?: string }> = ({ api, version, definition }) => {
-    const [schemaUrl] = useState("");
+    const apiService = useApiService();
+    const [schemaUrl, setSchemaUrl] = useState("");    
+
+    useEffect(() => {
+        getSpecificationLink();
+    }, [schemaUrl]);
+    
+    const getSpecificationLink = async () => {
+        if (!version || !definition) return;
+
+        const downloadUrl = await apiService.getSpecificationLink(api.name, version, definition);
+
+        setSchemaUrl(downloadUrl);
+    };
 
     return (
         <div className={css.options}>
