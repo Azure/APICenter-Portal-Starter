@@ -1,0 +1,36 @@
+header {
+    min-height: 3.75rem;
+    max-width: 100rem;
+    width: calc(100% - 4rem);
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .logo {
+        display: flex;
+        align-items: center;
+    }
+
+    .headerRight {
+        display: flex;
+        align-items: center;
+    }
+
+    .headerLinks {
+        a {
+            margin: 0 .5rem;
+
+            &:last-of-type {
+                margin-right: 0;
+            }
+        }
+    }
+
+    .signupButtonWrapper {
+        border-left: 1px solid;
+        padding-left: 1.5rem;
+        margin-left: 1.5rem;
+    }
+}

@@ -1,0 +1,88 @@
+@import "/src/styles/index";
+
+.apisList {
+	display: flex;
+	padding: 2rem;
+	gap: 2rem;
+	max-width: 100rem;
+	margin: 0 auto;
+
+	.main {
+		width: 100%;
+
+		.firstRow {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+
+			p {
+				font-size: 0.875rem;
+				line-height: 1.25rem;
+				/* 142.857% */
+			}
+
+			.controls {
+				&>div {
+					display: inline-block;
+				}
+
+				.sortBy {
+					&>* {
+						display: inline-block;
+						vertical-align: middle;
+					}
+
+					label {
+						margin-right: .5rem;
+						font-weight: 600;
+					}
+				}
+			}
+		}
+	}
+}
+
+.filtersActive {
+	display: flex;
+	gap: 1rem;
+	margin: 1rem 0 1.75rem;
+	flex-wrap: wrap;
+
+	.filterTag {
+		padding: 0.3rem 0.75rem;
+		border: solid 1px $grayLight;
+		border-radius: 0.25rem;
+		font-size: 0.875rem;
+		line-height: 1.25rem;
+		/* 142.857% */
+
+		b {
+			font-weight: 600;
+		}
+
+		button {
+			margin-left: 0.25rem;
+		}
+	}
+}
+
+.filtersClearAll {
+	font-size: 0.875rem;
+	font-weight: 600;
+	line-height: 1.25rem;
+	/* 142.857% */
+	text-decoration-line: underline;
+}
+
+.emptyState {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	max-width: 30rem;
+	margin: 3rem auto;
+	text-align: center;
+
+	svg {
+		padding-bottom: 2rem;
+	}
+}

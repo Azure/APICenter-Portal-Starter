@@ -1,0 +1,13 @@
+$blue: #115EA3;
+$blueLight: #0F6CBD;
+$blueButton: #6387E3;
+$gray: #616161;
+$grayDark: #242424;
+$grayLight: #D1D1D1;
+$grayXLight: #F3F2F1;
+
+:export {
+	// add color here, that you need to use in JSX
+	blueLight: $blueLight;
+	blueButton: $blueButton;
+}
