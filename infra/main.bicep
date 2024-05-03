@@ -20,6 +20,52 @@ param location string
 // }
 param resourceGroupName string = ''
 
+@description('Value indicating whether to use existing API Center instance or not.')
+param apiCenterExisted bool
+param apiCenterName string
+// Limited to the following locations due to the availability of API Center
+@minLength(1)
+@description('Location for API Center')
+@allowed([
+  'australiaeast'
+  'centralindia'
+  'eastus'
+  'uksouth'
+  'westeurope'
+])
+@metadata({
+  azd: {
+    type: 'location'
+  }
+})
+param apiCenterRegion string
+
+@description('Use monitoring and performance tracing')
+param useMonitoring bool // Set in main.parameters.json
+
+param logAnalyticsName string = ''
+param applicationInsightsName string = ''
+param applicationInsightsDashboardName string = ''
+
+// Limited to the following locations due to the availability of Static Web Apps
+@minLength(1)
+@description('Location for Static Web Apps')
+@allowed([
+  'centralus'
+  'eastasia'
+  'eastus2'
+  'westeurope'
+  'westus2'
+])
+@metadata({
+  azd: {
+    type: 'location'
+  }
+})
+param staticAppLocation string
+param staticAppSkuName string = 'Free'
+param staticAppName string = ''
+
 var abbrs = loadJsonContent('./abbreviations.json')
 
 // tags that should be applied to all resources.
@@ -39,7 +85,7 @@ var resourceToken = toLower(uniqueString(subscription().id, environmentName, loc
 // Example usage:
 //   tags: union(tags, { 'azd-service-name': apiServiceName })
 #disable-next-line no-unused-vars
-var apiServiceName = 'python-api'
+var azdServiceName = 'staticapp-portal'
 
 // Organize resources in a resource group
 resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
@@ -48,19 +94,51 @@ resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   tags: tags
 }
 
-// Add resources to be provisioned below.
-// A full example that leverages azd bicep modules can be seen in the todo-python-mongo template:
-// https://github.com/Azure-Samples/todo-python-mongo/tree/main/infra
+// Provision API Center
+module apiCenter './core/gateway/apicenter.bicep' = if (apiCenterExisted != true) {
+  name: 'apicenter'
+  scope: rg
+  params: {
+    name: !empty(apiCenterName) ? apiCenterName : 'apic-${resourceToken}'
+    location: apiCenterRegion
+    tags: tags
+  }
+}
 
+// Provision monitoring resource with Azure Monitor
+module monitoring './core/monitor/monitoring.bicep' = if (useMonitoring == true) {
+  name: 'monitoring'
+  scope: rg
+  params: {
+    location: location
+    tags: tags
+    logAnalyticsName: !empty(logAnalyticsName) ? logAnalyticsName : '${abbrs.operationalInsightsWorkspaces}${resourceToken}'
+    applicationInsightsName: !empty(applicationInsightsName) ? applicationInsightsName : '${abbrs.insightsComponents}${resourceToken}'
+    applicationInsightsDashboardName: !empty(applicationInsightsDashboardName) ? applicationInsightsDashboardName : '${abbrs.portalDashboards}${resourceToken}'
+  }
+}
 
+// Provision Static Web Apps for each application
+module staticApp './core/host/staticwebapp.bicep' = {
+  name: 'staticapp'
+  scope: rg
+  params: {
+    name: !empty(staticAppName) ? staticAppName : '${abbrs.webStaticSites}${resourceToken}'
+    location: staticAppLocation
+    tags: union(tags, { 'azd-service-name': azdServiceName })
+    sku: {
+      name: staticAppSkuName
+      tier: staticAppSkuName
+    }
+  }
+}
 
-// Add outputs from the deployment here, if needed.
-//
-// This allows the outputs to be referenced by other bicep deployments in the deployment pipeline,
-// or by the local machine as a way to reference created resources in Azure for local development.
-// Secrets should not be added here.
-//
-// Outputs are automatically saved in the local azd environment .env file.
-// To see these outputs, run `azd env get-values`,  or `azd env get-values --output json` for json output.
 output AZURE_LOCATION string = location
 output AZURE_TENANT_ID string = tenant().tenantId
+
+output USE_EXISTING_API_CENTER bool = apiCenterExisted
+output AZURE_API_CENTER string = apiCenterExisted ? apiCenterName : apiCenter.outputs.name
+output AZURE_API_CENTER_LOCATION string = apiCenterExisted ? apiCenterRegion : apiCenter.outputs.location
+
+output AZURE_STATIC_APP string = staticApp.outputs.name
+output AZURE_STATIC_APP_URL string = staticApp.outputs.uri

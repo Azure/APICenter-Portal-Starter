@@ -1,3 +1,5 @@
+name: AZD Deploy
+
 on:
   workflow_dispatch:
   push:
@@ -5,7 +7,6 @@ on:
     # Set this to the mainline branch you are using
     branches:
       - main
-      - master
 
 # GitHub Actions workflow to deploy to Azure using azd
 # To configure required secrets for connecting to Azure, simply run `azd pipeline config`
@@ -25,6 +26,11 @@ jobs:
       AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
       AZURE_ENV_NAME: ${{ vars.AZURE_ENV_NAME }}
       AZURE_LOCATION: ${{ vars.AZURE_LOCATION }}
+      AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+      USE_EXISTING_API_CENTER: ${{ vars.USE_EXISTING_API_CENTER }}
+      AZURE_API_CENTER: ${{ vars.AZURE_API_CENTER }}
+      AZURE_API_CENTER_LOCATION: ${{ vars.AZURE_API_CENTER_LOCATION }}
+      USE_MONITORING: ${{ vars.USE_MONITORING }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -53,10 +59,28 @@ jobs:
             --tenant-id "$($info.tenantId)"
         shell: pwsh
         env:
-          AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+          AZURE_CREDENTIALS: ${{ env.AZURE_CREDENTIALS }}
 
       - name: Provision Infrastructure
+        if: ${{ env.AZURE_CLIENT_ID != '' || env.AZURE_CREDENTIALS != '' }}
         run: azd provision --no-prompt
+        env:
+          AZURE_ENV_NAME: ${{ env.AZURE_ENV_NAME }}
+          AZURE_LOCATION: ${{ env.AZURE_LOCATION }}
+          AZURE_SUBSCRIPTION_ID: ${{ env.AZURE_SUBSCRIPTION_ID }}
+          USE_EXISTING_API_CENTER: ${{ env.USE_EXISTING_API_CENTER }}
+          AZURE_API_CENTER: ${{ env.AZURE_API_CENTER }}
+          AZURE_API_CENTER_LOCATION: ${{ env.AZURE_API_CENTER_LOCATION }}
+          USE_MONITORING: ${{ env.USE_MONITORING }}
 
       - name: Deploy Application
+        if: ${{ env.AZURE_CLIENT_ID != '' || env.AZURE_CREDENTIALS != '' }}
         run: azd deploy --no-prompt
+        env:
+          AZURE_ENV_NAME: ${{ env.AZURE_ENV_NAME }}
+          AZURE_LOCATION: ${{ env.AZURE_LOCATION }}
+          AZURE_SUBSCRIPTION_ID: ${{ env.AZURE_SUBSCRIPTION_ID }}
+          USE_EXISTING_API_CENTER: ${{ env.USE_EXISTING_API_CENTER }}
+          AZURE_API_CENTER: ${{ env.AZURE_API_CENTER }}
+          AZURE_API_CENTER_LOCATION: ${{ env.AZURE_API_CENTER_LOCATION }}
+          USE_MONITORING: ${{ env.USE_MONITORING }}
