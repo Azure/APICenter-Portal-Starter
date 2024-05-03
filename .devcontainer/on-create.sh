@@ -15,7 +15,3 @@ npm i -g azure-functions-core-tools@4 --unsafe-perm true
 
 ## AZURE STATIC WEB APPS CLI ##
 npm install -g @azure/static-web-apps-cli
-
-## OH-MY-POSH ##
-sudo wget https://github.com/JanDeDobbeleer/oh-my-posh/releases/latest/download/posh-linux-amd64 -O /usr/local/bin/oh-my-posh
-sudo chmod +x /usr/local/bin/oh-my-posh
