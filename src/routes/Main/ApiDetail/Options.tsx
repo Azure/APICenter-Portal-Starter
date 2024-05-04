@@ -5,7 +5,6 @@
 
 import { FC, useEffect, useState } from "react";
 import { Body1, Body1Strong, Button, Caption1, Link, MessageBar, MessageBarBody } from "@fluentui/react-components";
-// import { ArrowDownloadRegular, Document20Regular, Play16Filled } from "@fluentui/react-icons";
 import { ArrowDownloadRegular, Document20Regular } from "@fluentui/react-icons";
 
 import VsCodeLogo from "../../../components/logos/VsCodeLogo";
