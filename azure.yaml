@@ -13,3 +13,60 @@ services:
     project: ./
     host: staticwebapp
     dist: dist
+
+hooks:
+  preup:
+    posix:
+      shell: sh
+      run: infra/hooks/preup.sh
+      continueOnError: false
+      interactive: true
+    windows:
+      shell: pwsh
+      run: infra/hooks/preup.ps1
+      continueOnError: false
+      interactive: true
+  preprovision:
+    posix:
+      shell: sh
+      run: infra/hooks/preprovision.sh
+      continueOnError: false
+      interactive: true
+    windows:
+      shell: pwsh
+      run: infra/hooks/preprovision.ps1
+      continueOnError: false
+      interactive: true
+  postprovision:
+    posix:
+      shell: sh
+      run: infra/hooks/postprovision.sh
+      continueOnError: false
+      interactive: true
+    windows:
+      shell: pwsh
+      run: infra/hooks/postprovision.ps1
+      continueOnError: false
+      interactive: true
+  predeploy:
+    posix:
+      shell: sh
+      run: infra/hooks/predeploy.sh
+      continueOnError: false
+      interactive: true
+    windows:
+      shell: pwsh
+      run: infra/hooks/predeploy.ps1
+      continueOnError: false
+      interactive: true
+  predown:
+    posix:
+      shell: sh
+      continueOnError: false
+      interactive: true
+      run: infra/hooks/predown.sh
+    windows:
+      shell: pwsh
+      continueOnError: false
+      interactive: true
+      run: infra/hooks/predown.ps1
