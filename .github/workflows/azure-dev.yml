@@ -78,19 +78,19 @@ jobs:
         with:
           creds: ${{ env.AZURE_CREDENTIALS }}
 
-      - name: Provision Infrastructure
-        if: ${{ env.AZURE_CLIENT_ID != '' || env.AZURE_CREDENTIALS != '' }}
-        run: azd provision --no-prompt
-        env:
-          AZURE_ENV_NAME: ${{ env.AZURE_ENV_NAME }}
-          AZURE_LOCATION: ${{ env.AZURE_LOCATION }}
-          AZURE_SUBSCRIPTION_ID: ${{ env.AZURE_SUBSCRIPTION_ID }}
-          USE_EXISTING_API_CENTER: ${{ env.USE_EXISTING_API_CENTER }}
-          AZURE_API_CENTER: ${{ env.AZURE_API_CENTER }}
-          AZURE_API_CENTER_LOCATION: ${{ env.AZURE_API_CENTER_LOCATION }}
-          AZURE_API_CENTER_RESOURCE_GROUP: ${{ env.AZURE_API_CENTER_RESOURCE_GROUP }}
-          USE_MONITORING: ${{ env.USE_MONITORING }}
-          AZURE_STATIC_APP_LOCATION: ${{ env.AZURE_STATIC_APP_LOCATION }}
+#      - name: Provision Infrastructure
+#        if: ${{ env.AZURE_CLIENT_ID != '' || env.AZURE_CREDENTIALS != '' }}
+#        run: azd provision --no-prompt
+#        env:
+#          AZURE_ENV_NAME: ${{ env.AZURE_ENV_NAME }}
+#          AZURE_LOCATION: ${{ env.AZURE_LOCATION }}
+#          AZURE_SUBSCRIPTION_ID: ${{ env.AZURE_SUBSCRIPTION_ID }}
+#          USE_EXISTING_API_CENTER: ${{ env.USE_EXISTING_API_CENTER }}
+#          AZURE_API_CENTER: ${{ env.AZURE_API_CENTER }}
+#          AZURE_API_CENTER_LOCATION: ${{ env.AZURE_API_CENTER_LOCATION }}
+#          AZURE_API_CENTER_RESOURCE_GROUP: ${{ env.AZURE_API_CENTER_RESOURCE_GROUP }}
+#          USE_MONITORING: ${{ env.USE_MONITORING }}
+#          AZURE_STATIC_APP_LOCATION: ${{ env.AZURE_STATIC_APP_LOCATION }}
 
       - name: Deploy Application
         if: ${{ env.AZURE_CLIENT_ID != '' || env.AZURE_CREDENTIALS != '' }}

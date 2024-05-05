@@ -50,14 +50,10 @@ payload=$(jq -n \
   --argjson requiredResourceAccess "$requiredResourceAccess" \
   "{\"spa\": $spa, \"requiredResourceAccess\": $requiredResourceAccess}")
 
-echo "PATCHING..."
-
 az rest -m PATCH \
     --uri "https://graph.microsoft.com/v1.0/applications/$objectId" \
     --headers Content-Type=application/json \
     --body "$payload"
-
-echo "PATCHED"
 
 # Assign the required role to the current user and service principal
 userId=$(az ad signed-in-user show --query "id" -o tsv)
