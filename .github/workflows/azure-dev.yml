@@ -38,6 +38,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'lts'
+
       - name: Install azd
         uses: Azure/setup-azd@v1.0.0
 
@@ -91,6 +96,12 @@ jobs:
 #          AZURE_API_CENTER_RESOURCE_GROUP: ${{ env.AZURE_API_CENTER_RESOURCE_GROUP }}
 #          USE_MONITORING: ${{ env.USE_MONITORING }}
 #          AZURE_STATIC_APP_LOCATION: ${{ env.AZURE_STATIC_APP_LOCATION }}
+
+      - name: Build artifact
+        shell: bash
+        run: |
+          npm install
+          npm run build
 
       - name: Deploy Application
         if: ${{ env.AZURE_CLIENT_ID != '' || env.AZURE_CREDENTIALS != '' }}
