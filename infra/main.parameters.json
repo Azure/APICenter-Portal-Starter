@@ -17,6 +17,9 @@
         "apiCenterRegion": {
             "value": "${AZURE_API_CENTER_LOCATION}"
         },
+        "apiCenterResourceGroupName": {
+            "value": "${AZURE_API_CENTER_RESOURCE_GROUP}"
+        },
         "useMonitoring": {
             "value": "${USE_MONITORING=false}"
         }

@@ -8,7 +8,7 @@ Write-Host "Running pre-up script..."
 $REPOSITORY_ROOT = git rev-parse --show-toplevel
 
 # Load the azd environment variables
-& "$REPOSITORY_ROOT/infra/hooks/load_azd_env.ps1"
+& "$REPOSITORY_ROOT/infra/hooks/load_azd_env.ps1" -ShowMessage
 
 if ([string]::IsNullOrEmpty($env:GITHUB_WORKSPACE)) {
     # The GITHUB_WORKSPACE is not set, meaning this is not running in a GitHub Action

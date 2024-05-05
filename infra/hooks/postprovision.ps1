@@ -12,8 +12,9 @@ $REPOSITORY_ROOT = git rev-parse --show-toplevel
 # Load the azd environment variables
 & "$REPOSITORY_ROOT/infra/hooks/load_azd_env.ps1"
 
+$USE_EXISTING_API_CENTER = $env:USE_EXISTING_API_CENTER
 $AZURE_ENV_NAME = $env:AZURE_ENV_NAME
-$RESOURCE_GROUP = "rg-$AZURE_ENV_NAME"
+$RESOURCE_GROUP = $USE_EXISTING_API_CENTER ? $env:AZURE_API_CENTER_RESOURCE_GROUP : "rg-$AZURE_ENV_NAME"
 
 # Create a service principal and assign the required permissions
 $appId = $env:AZURE_CLIENT_ID

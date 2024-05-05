@@ -39,6 +39,7 @@ param apiCenterName string
   }
 })
 param apiCenterRegion string
+param apiCenterResourceGroupName string
 
 @description('Use monitoring and performance tracing')
 param useMonitoring bool // Set in main.parameters.json
@@ -94,6 +95,10 @@ resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   tags: tags
 }
 
+resource rgApiCenter 'Microsoft.Resources/resourceGroups@2021-04-01' existing = if (apiCenterExisted == true) {
+  name: apiCenterResourceGroupName
+}
+
 // Provision API Center
 module apiCenter './core/gateway/apicenter.bicep' = if (apiCenterExisted != true) {
   name: 'apicenter'
@@ -103,6 +108,11 @@ module apiCenter './core/gateway/apicenter.bicep' = if (apiCenterExisted != true
     location: apiCenterRegion
     tags: tags
   }
+}
+
+resource apiCenterExisting 'Microsoft.ApiCenter/services@2024-03-15-preview' existing = if (apiCenterExisted == true) {
+  name: apiCenterName
+  scope: rgApiCenter
 }
 
 // Provision monitoring resource with Azure Monitor
@@ -137,8 +147,9 @@ output AZURE_LOCATION string = location
 output AZURE_TENANT_ID string = tenant().tenantId
 
 output USE_EXISTING_API_CENTER bool = apiCenterExisted
-output AZURE_API_CENTER string = apiCenterExisted ? apiCenterName : apiCenter.outputs.name
-output AZURE_API_CENTER_LOCATION string = apiCenterExisted ? apiCenterRegion : apiCenter.outputs.location
+output AZURE_API_CENTER string = apiCenterExisted ? apiCenterExisting.name : apiCenter.outputs.name
+output AZURE_API_CENTER_LOCATION string = apiCenterExisted ? apiCenterExisting.location : apiCenter.outputs.location
+output AZURE_API_CENTER_RESOURCE_GROUP string = apiCenterExisted ? rgApiCenter.name : rg.name
 
 output AZURE_STATIC_APP string = staticApp.outputs.name
 output AZURE_STATIC_APP_URL string = staticApp.outputs.uri
