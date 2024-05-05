@@ -86,10 +86,12 @@ You have two options to deploy this self-hosted API Center Portal:
     ```bash
     # Bash
     AZURE_CLIENT_ID=$(./infra/scripts/get-azdvariable.sh -k AZURE_CLIENT_ID)
+    azd pipeline config --principal-id $AZURE_CLIENT_ID
     ./infra/scripts/set-githubvariables.sh
     
     # PowerShell
     $AZURE_CLIENT_ID = $(./infra/scripts/Get-AzdVariable.ps1 -Key AZURE_CLIENT_ID)
+    azd pipeline config --principal-id $AZURE_CLIENT_ID
     ./infra/scripts/Set-GitHubVariables.ps1
     ```
 
