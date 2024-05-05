@@ -43,7 +43,7 @@ az rest -m PATCH `
     --body $payload
 
 # Assign the required role to the current user and service principal
-$userId = az ad signed-in-user show --query 'id' -o tsv
+$userId = az ad signed-in-user show --query "id" -o tsv
 $roleDefinitionId = "c7244dfb-f447-457d-b2ba-3999044d1706"
 $resourceId = az resource list --namespace "Microsoft.ApiCenter" --resource-type "services" -g $RESOURCE_GROUP --query "[].id" -o tsv
 
