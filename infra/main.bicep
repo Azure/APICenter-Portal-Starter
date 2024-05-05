@@ -153,3 +153,4 @@ output AZURE_API_CENTER_RESOURCE_GROUP string = apiCenterExisted ? rgApiCenter.n
 
 output AZURE_STATIC_APP string = staticApp.outputs.name
 output AZURE_STATIC_APP_URL string = staticApp.outputs.uri
+output AZURE_STATIC_APP_LOCATION string = staticApp.outputs.location

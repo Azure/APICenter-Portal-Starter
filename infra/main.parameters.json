@@ -22,6 +22,9 @@
         },
         "useMonitoring": {
             "value": "${USE_MONITORING=false}"
+        },
+        "staticAppLocation": {
+            "value": "${AZURE_STATIC_APP_LOCATION}"
         }
     }
 }
