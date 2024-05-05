@@ -50,10 +50,10 @@ pwsh -Command {
     )
 
     # Load the azd environment variables
-    & "$RepositoryRoot/infra/hooks/load_azd_env.ps1" -ShowMessage
+    & "$RepositoryRoot/infra/hooks/load_azd_env.ps1"
 
     $envs = Get-ChildItem -Path env:
     $value = $($envs | Where-Object { $_.Name -eq $Key }).Value
 
-    Write-Host $value
+    Write-Output $value
 } -args $REPOSITORY_ROOT, $Key

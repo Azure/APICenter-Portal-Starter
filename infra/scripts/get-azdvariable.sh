@@ -57,7 +57,7 @@ fi
 REPOSITORY_ROOT=$(git rev-parse --show-toplevel)
 
 # Load the azd environment variables
-. "$REPOSITORY_ROOT/infra/hooks/load_azd_env.sh" --show-message
+. "$REPOSITORY_ROOT/infra/hooks/load_azd_env.sh"
 
 value=${!KEY}
 

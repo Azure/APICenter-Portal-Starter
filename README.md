@@ -1,6 +1,5 @@
 [![Open Source Love](https://firstcontributions.github.io/open-source-badges/badges/open-source-v1/open-source.svg)](https://github.com/firstcontributions/open-source-badges)
 
-
 # Self-host Your Azure API Center Portal
 
 ## Overview
@@ -25,6 +24,7 @@
 **API Center portal** is a website that empowers developers and stakeholders to seamlessly discover and engage with APIs. Our reference implementation of the API Center portal enables API platform teams to provide a web-based API discovery and consumption experience to API consumers. 
 
 The API Center portal reference implementation provides:
+
 - A framework for publishing and maintaining a customer-managed API portal.
 - A portal platform that customers can modify or extend to meet their needs.
 - Flexibility to host on different infrastructures, including deployment to Azure Static Web Apps or Azure App Service.
@@ -32,66 +32,128 @@ The API Center portal reference implementation provides:
 ## Prerequisites
 
 Before you begin, ensure you have met the following requirements:
-1. :white_check_mark: You have installed the latest version of [Node.js and npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm).
-2. :white_check_mark: [Vite package](https://www.npmjs.com/package/vite).
-3. :white_check_mark: [Configured app registration in your Microsoft Entra ID tenant](https://learn.microsoft.com/azure/api-center/enable-api-center-portal#create-microsoft-entra-app-registration) with the right API permission scope and Redirect URI.
-4. :white_check_mark: Portal sign-in enabled with the [right role assignment](https://learn.microsoft.com/azure/api-center/enable-api-center-portal#enable-sign-in-to-portal-by-microsoft-entra-users-and-groups)
 
+1. :white_check_mark: You have installed the latest version of [Node.js and npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm).
+1. :white_check_mark: [Vite package](https://www.npmjs.com/package/vite).
 
 ## Quick Start
 
-### Getting Started
+You have two options to deploy this self-hosted API Center Portal:
+
+- **Automated deployment** &ndash; Use the Azure developer CLI (`azd`) for one-step deployment of the portal app. This option is recommended for a streamlined deployment process.
+- **Manual deployment** &ndash; Follow step-by-step guidance to deploy the Azure Functions app and configure the event subscription. This option is recommended if you prefer to deploy and manage the resources manually.
+
+### Automated deployment using `azd`
+
+> **NOTE**: You will need the additional prerequisites for this option
+> 
+> - :white_check_mark: Azure Developer CLI (`azd`)
+> - :white_check_mark: Azure CLI
+> - :white_check_mark: GitHub CLI
+
+1. Log in with the following command. Then, you will be able to use the `azd` cli to quickly provision and deploy the application.
+
+    ```bash
+    # Authenticate with Azure Developer CLI
+    azd auth login
+    
+    # Authenticate with Azure CLI
+    az login
+    ```
+
+1. Run azd up to provision all the resources to Azure and deploy the code to those resources.
+
+    ```bash
+    azd up
+    ```
+
+   Enter an environment name and select your desired `subscription` and `location`. Then choose whether to use an existing API Center instance or not (`apiCenterExisted`). If you choose to use the existing API center resource (`apiCenterExisted` value to `true`), pass the values for `apiCenterName`, `apiCenterRegion` and `apiCenterResourceGroupName`. Otherwise leave them blank to create a new one. Pass `staticAppLocation` value for the Azure Static Web Apps instance. Wait a moment for the resource deployment to complete.
+
+   > There are two scenarios:
+   > 
+   > 1. Portal with new API Center &ndash; You need to give `False` to `apiCenterExisted` and leave `apiCenterName`, `apiCenterRegion` and `apiCenterResourceGroupName` blank.
+   > 1. Portal with existing API Center &ndash; You need to give `True` to `apiCenterExisted` and pass values to `apiCenterName`, `apiCenterRegion` and `apiCenterResourceGroupName`.
+
+1. If you want to integrate the CI/CD pipeline with GitHub Actions, you can use the following command to create a GitHub repository and push the code to the repository. First of all, log in to GitHub.
+
+    ```bash
+    # Authenticate with GitHub CLI
+    gh auth login
+    ```
+
+1. Run the following commands to update your GitHub repository variables.
+
+    ```bash
+    # Bash
+    AZURE_CLIENT_ID=$(./infra/scripts/get-azdvariable.sh -k AZURE_CLIENT_ID)
+    ./infra/scripts/set-githubvariables.sh
+    
+    # PowerShell
+    $AZURE_CLIENT_ID = $(./infra/scripts/Get-AzdVariable.ps1 -Key AZURE_CLIENT_ID)
+    ./infra/scripts/Set-GitHubVariables.ps1
+    ```
+
+1. Now, you're good to go! Push the code to the GitHub repository or manually run the GitHub Actions workflow to get your portal deployed.
+
+### Running the portal locally
+
+> **NOTE**: You will need the additional prerequisites for this option
+> 
+> - :white_check_mark: [Configured app registration in your Microsoft Entra ID tenant](https://learn.microsoft.com/azure/api-center/enable-api-center-portal#create-microsoft-entra-app-registration) with the right API permission scope and Redirect URI.
+> - :white_check_mark: Portal sign-in enabled with the [right role assignment](https://learn.microsoft.com/azure/api-center/enable-api-center-portal#enable-sign-in-to-portal-by-microsoft-entra-users-and-groups)
+
 Follow these steps to get your development environment set up:
 
 1. Clone the repository
 
-```bash
-git clone https://github.com/Azure/APICenter-Portal-Starter.git
-```
+    ```bash
+    git clone https://github.com/Azure/APICenter-Portal-Starter.git
+    ```
 
+1. Switch to main branch:
 
-2. Switch to main branch:
+    ```bash
+    git checkout main
+    ```
 
-```bash
-git checkout main
-```
+1. Configure the `public/config.json` file to point to your Azure API Center service. Here’s an example configuration:
 
-3. Configure the `public/config.json` file to point to your Azure API Center service. Here’s an example configuration:
+    ```JSON
+    {
+      "dataApiHostName": "<service name>.data.<region>.azure-apicenter.ms/workspaces/default",
+      "title": "API portal",
+      "authentication": {
+          "clientId": "<client ID>",
+          "tenantId": "<tenant ID>",
+          "scopes": ["https://azure-apicenter.net/user_impersonation"],
+          "authority": "https://login.microsoftonline.com/"
+      }
+    }
+    ```
 
-```JSON
-{
-  "dataApiHostName": "<service name>.data.<region>.azure-apicenter.ms/workspaces/default",
-  "title": "API portal",
-  "authentication": {
-      "clientId": "<client ID>",
-      "tenantId": "<tenant ID>",
-      "scopes": ["https://azure-apicenter.net/user_impersonation"],
-      "authority": "https://login.microsoftonline.com/"
-  }
-}
-```
-4. Install the required packages.
+1. Install the required packages.
 
-```bash
-npm install
-```
+    ```bash
+    npm install
+    ```
 
-5. Start the development server - This command will start the portal in development mode running locally:
+1. Start the development server - This command will start the portal in development mode running locally:
 
-```bash
-npm start
-```
+   ```bash
+   npm start
+   ```
 
-### Deploy to Azure Static Web Apps
-[Azure Static Web Apps](https://learn.microsoft.com/en-us/azure/static-web-apps/overview) is a service that automatically builds and deploys full stack web apps to Azure from a code repository. This tutorial uses GitHub Actions to deploy to Azure Static Web Apps.
+### Manual deployment to Azure Static Web Apps
+
+[Azure Static Web Apps](https://learn.microsoft.com/azure/static-web-apps/overview) is a service that automatically builds and deploys full stack web apps to Azure from a code repository. This tutorial uses GitHub Actions to deploy to Azure Static Web Apps.
 
 1. Create a new **Static Web App**.
-2. Select **GitHub** as the **Source**.
-3. Select the **GitHub organization, repository, and branch** containing the API Center portal. Note: You must fork the API Center portal repository to your own personal account or organization and select this repository.
-4. Select **React** as the **Build Presets**.
-5. Enter **/** as the **App location**.
-6. Enter **dist** as the **Output location**.
-7. Click **Create**. A GitHub workflow file will be committed to the repository selected in Step #3, and deployment to your Static Web App with GitHub Actions will begin. It may take up to five minutes to see your changes published.
+1. Select **GitHub** as the **Source**.
+1. Select the **GitHub organization, repository, and branch** containing the API Center portal. Note: You must fork the API Center portal repository to your own personal account or organization and select this repository.
+1. Select **React** as the **Build Presets**.
+1. Enter **/** as the **App location**.
+1. Enter **dist** as the **Output location**.
+1. Click **Create**. A GitHub workflow file will be committed to the repository selected in Step #3, and deployment to your Static Web App with GitHub Actions will begin. It may take up to five minutes to see your changes published.
 
 To view your API Center portal running on Static Web Apps, click **View app in browser** from the **Overview** tab in the Static Web App resource you created in Azure portal.
 
