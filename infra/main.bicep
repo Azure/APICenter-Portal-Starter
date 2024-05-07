@@ -22,10 +22,11 @@ param resourceGroupName string = ''
 
 @description('Value indicating whether to use existing API Center instance or not.')
 param apiCenterExisted bool
+@description('Name of the API Center. You can omit this value if `apiCenterExisted` value is set to `False`.')
 param apiCenterName string
 // Limited to the following locations due to the availability of API Center
 @minLength(1)
-@description('Location for API Center')
+@description('Location for API Center. Provide the exact location of the existing API Center instance if `apiCenterExisted` value is set to `True`.')
 @allowed([
   'australiaeast'
   'centralindia'
@@ -39,6 +40,7 @@ param apiCenterName string
   }
 })
 param apiCenterRegion string
+@description('Name of the API Center resource group. You can omit this value if `apiCenterExisted` value is set to `False`.')
 param apiCenterResourceGroupName string
 
 @description('Use monitoring and performance tracing')

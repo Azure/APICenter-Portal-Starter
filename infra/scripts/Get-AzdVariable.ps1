@@ -53,6 +53,7 @@ pwsh -Command {
     & "$RepositoryRoot/infra/hooks/load_azd_env.ps1"
 
     $envs = Get-ChildItem -Path env:
+
     $value = $($envs | Where-Object { $_.Name -eq $Key }).Value
 
     Write-Output $value

@@ -7,6 +7,13 @@
 # Name of the application.
 name: apicenter-portal-starter
 
+workflows:
+  up: 
+    steps:
+      - azd: provision
+      - azd: package --all
+      - azd: deploy --all
+
 services:
   staticapp-portal:
     language: ts
