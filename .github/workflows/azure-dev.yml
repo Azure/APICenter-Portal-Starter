@@ -99,11 +99,11 @@ jobs:
          #  USE_MONITORING: ${{ env.USE_MONITORING }}
          #  AZURE_STATIC_APP_LOCATION: ${{ env.AZURE_STATIC_APP_LOCATION }}
 
-      # - name: Build artifact
-      #   shell: bash
-      #   run: |
-      #     npm install
-      #     npm run build
+      - name: Build artifact
+        shell: bash
+        run: |
+          npm install
+          npm run build
 
       - name: Deploy Application
         if: ${{ env.AZURE_CLIENT_ID != '' || env.AZURE_CREDENTIALS != '' }}
