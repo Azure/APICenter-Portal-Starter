@@ -8,6 +8,9 @@
 - [What is the Azure API Center Portal?](./#azure-api-center-portal)
 - [Prerequisites](./#prerequisites)
 - [Quick Start](./#quick-start)
+  - [Automated deployment using `azd`](./#automated-deployment-using-azd)
+  - [Running the portal locally](./#running-the-portal-locally)
+  - [Manual deployment to Azure Static Web Apps](./#manual-deployment-to-azure-static-web-apps)
 - [Contributing](./#contributing)
 - [Bugs & Issues & Feedback](./#bugs--issues--feedback)
 - [Code of Conduct](./#code-of-conduct)
@@ -67,7 +70,12 @@ You have two options to deploy this self-hosted API Center Portal:
     azd up
     ```
 
-   Enter an environment name and select your desired `subscription` and `location`. Then choose whether to use an existing API Center instance or not (`apiCenterExisted`). If you choose to use the existing API center resource (`apiCenterExisted` value to `true`), pass the values for `apiCenterName`, `apiCenterRegion` and `apiCenterResourceGroupName`. Otherwise leave them blank to create a new one. Pass `staticAppLocation` value for the Azure Static Web Apps instance. Wait a moment for the resource deployment to complete.
+   Enter an environment name and select your desired `subscription` and `location`. Then, you will be asked to enter a few more values:
+
+   1. Choose whether to use an existing API Center instance or not (`apiCenterExisted`).
+   1. Pass the values for `apiCenterName`, `apiCenterRegion` and `apiCenterResourceGroupName`, if you choose to use the existing API center resource (`apiCenterExisted` value to `true`).
+   1. Leave them blank, if you choose to create a new API center resource (`apiCenterExisted` value to `false`).
+   1. Pass `staticAppLocation` value for the Azure Static Web Apps instance. Wait a moment for the resource deployment to complete.
 
    > There are two scenarios:
    > 
@@ -85,14 +93,12 @@ You have two options to deploy this self-hosted API Center Portal:
 
     ```bash
     # Bash
-    AZURE_CLIENT_ID=$(./infra/scripts/get-azdvariable.sh -k AZURE_CLIENT_ID)
+    AZURE_CLIENT_ID=$(./infra/scripts/get-azdvariable.sh --key AZURE_CLIENT_ID)
     azd pipeline config --principal-id $AZURE_CLIENT_ID
-    ./infra/scripts/set-githubvariables.sh
     
     # PowerShell
     $AZURE_CLIENT_ID = $(./infra/scripts/Get-AzdVariable.ps1 -Key AZURE_CLIENT_ID)
     azd pipeline config --principal-id $AZURE_CLIENT_ID
-    ./infra/scripts/Set-GitHubVariables.ps1
     ```
 
 1. Now, you're good to go! Push the code to the GitHub repository or manually run the GitHub Actions workflow to get your portal deployed.
