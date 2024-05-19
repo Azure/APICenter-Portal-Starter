@@ -11,7 +11,8 @@ set -e
 
 echo "Running post-provision script..."
 
-REPOSITORY_ROOT=$(git rev-parse --show-toplevel)
+# REPOSITORY_ROOT=$(git rev-parse --show-toplevel)
+REPOSITORY_ROOT="$(dirname "$(realpath "$0")")/../.."
 
 # Run only if GITHUB_WORKSPACE is NOT set - this is NOT running in a GitHub Action workflow
 if [ -z "$GITHUB_WORKSPACE" ];

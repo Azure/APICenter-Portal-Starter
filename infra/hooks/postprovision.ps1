@@ -7,7 +7,8 @@
 
 Write-Host "Running post-provision script..."
 
-$REPOSITORY_ROOT = git rev-parse --show-toplevel
+# $REPOSITORY_ROOT = git rev-parse --show-toplevel
+$REPOSITORY_ROOT = "$(Split-Path $MyInvocation.MyCommand.Path)/../.."
 
 # Run only if GITHUB_WORKSPACE is NOT set - this is NOT running in a GitHub Action workflow
 if ([string]::IsNullOrEmpty($env:GITHUB_WORKSPACE)) {

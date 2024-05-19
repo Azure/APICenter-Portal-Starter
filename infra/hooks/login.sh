@@ -12,7 +12,8 @@
 
 set -e
 
-REPOSITORY_ROOT=$(git rev-parse --show-toplevel)
+# REPOSITORY_ROOT=$(git rev-parse --show-toplevel)
+REPOSITORY_ROOT="$(dirname "$(realpath "$0")")/../.."
 
 # Load the azd environment variables
 "$REPOSITORY_ROOT/infra/hooks/load_azd_env.sh"

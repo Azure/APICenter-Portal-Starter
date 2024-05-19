@@ -42,12 +42,12 @@ $REPOSITORY_ROOT = git rev-parse --show-toplevel
 
 pwsh -Command {
     Param(
-        $RepositoryRoot,
+        $REPOSITORY_ROOT,
         $Repo
     )
 
     # Load the azd environment variables
-    & "$RepositoryRoot/infra/hooks/load_azd_env.ps1" -ShowMessage
+    & "$REPOSITORY_ROOT/infra/hooks/load_azd_env.ps1" -ShowMessage
 
-    gh variable set -f $RepositoryRoot/.azure/$env:AZURE_ENV_NAME/.env -R $Repo
+    gh variable set -f $REPOSITORY_ROOT/.azure/$env:AZURE_ENV_NAME/.env -R $Repo
 } -args $REPOSITORY_ROOT, $Repo

@@ -45,12 +45,12 @@ $REPOSITORY_ROOT = git rev-parse --show-toplevel
 
 pwsh -Command {
     Param(
-        $RepositoryRoot,
+        $REPOSITORY_ROOT,
         $Key
     )
 
     # Load the azd environment variables
-    & "$RepositoryRoot/infra/hooks/load_azd_env.ps1"
+    & "$REPOSITORY_ROOT/infra/hooks/load_azd_env.ps1"
 
     $envs = Get-ChildItem -Path env:
 

@@ -5,7 +5,8 @@
 
 Write-Host "Running pre-down script..."
 
-$REPOSITORY_ROOT = git rev-parse --show-toplevel
+# $REPOSITORY_ROOT = git rev-parse --show-toplevel
+$REPOSITORY_ROOT = "$(Split-Path $MyInvocation.MyCommand.Path)/../.."
 
 # Load the azd environment variables
 & "$REPOSITORY_ROOT/infra/hooks/load_azd_env.ps1"
