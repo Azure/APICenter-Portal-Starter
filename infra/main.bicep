@@ -9,24 +9,9 @@ targetScope = 'subscription'
 @description('Name of the the environment which is used to generate a short unique hash used in all resources.')
 param environmentName string
 
-@minLength(1)
-@description('Primary location for all resources')
-param location string
-
-// Optional parameters to override the default azd resource naming conventions.
-// Add the following to main.parameters.json to provide values:
-// "resourceGroupName": {
-//      "value": "myGroupName"
-// }
-param resourceGroupName string = ''
-
-@description('Value indicating whether to use existing API Center instance or not.')
-param apiCenterExisted bool
-@description('Name of the API Center. You can omit this value if `apiCenterExisted` value is set to `False`.')
-param apiCenterName string
 // Limited to the following locations due to the availability of API Center
 @minLength(1)
-@description('Location for API Center. Provide the exact location of the existing API Center instance if `apiCenterExisted` value is set to `True`.')
+@description('Primary location for all resources')
 @allowed([
   'australiaeast'
   'centralindia'
@@ -39,7 +24,16 @@ param apiCenterName string
     type: 'location'
   }
 })
-param apiCenterRegion string
+param location string
+
+param resourceGroupName string = ''
+
+@description('Value indicating whether to use existing API Center instance or not.')
+param apiCenterExisted bool
+@description('Name of the API Center. You can omit this value if `apiCenterExisted` value is set to `False`.')
+param apiCenterName string
+// Set API Center location the same location as the main location
+var apiCenterRegion = location
 @description('Name of the API Center resource group. You can omit this value if `apiCenterExisted` value is set to `False`.')
 param apiCenterResourceGroupName string
 
@@ -135,7 +129,7 @@ module staticApp './core/host/staticwebapp.bicep' = {
   name: 'staticapp'
   scope: rg
   params: {
-    name: !empty(staticAppName) ? staticAppName : '${abbrs.webStaticSites}${resourceToken}'
+    name: !empty(staticAppName) ? staticAppName : '${abbrs.webStaticSites}${resourceToken}-portal'
     location: staticAppLocation
     tags: union(tags, { 'azd-service-name': azdServiceName })
     sku: {

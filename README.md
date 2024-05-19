@@ -64,7 +64,7 @@ You have two options to deploy this self-hosted API Center Portal:
     az login
     ```
 
-1. Run azd up to provision all the resources to Azure and deploy the code to those resources.
+1. Run `azd up` to provision all the resources to Azure and deploy the code to those resources.
 
     ```bash
     azd up
@@ -124,6 +124,7 @@ Follow these steps to get your development environment set up:
     git checkout main
     ```
 
+1. Copy or rename the `public/config.example` file to the `public/config.json`.
 1. Configure the `public/config.json` file to point to your Azure API Center service. Here’s an example configuration:
 
     ```JSON
