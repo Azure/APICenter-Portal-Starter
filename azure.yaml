@@ -1,0 +1,79 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+
+# This is an example starter azure.yaml file containing several example services in comments below.
+# Make changes as needed to describe your application setup.
+# To learn more about the azure.yaml file, visit https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/azd-schema
+
+# Name of the application.
+name: apicenter-portal-starter
+
+workflows:
+  up: 
+    steps:
+      - azd: provision
+      - azd: package --all
+      - azd: deploy --all
+
+services:
+  staticapp-portal:
+    language: ts
+    project: ./
+    host: staticwebapp
+    dist: dist
+
+hooks:
+  preup:
+    posix:
+      shell: sh
+      run: infra/hooks/preup.sh
+      continueOnError: false
+      interactive: true
+    windows:
+      shell: pwsh
+      run: infra/hooks/preup.ps1
+      continueOnError: false
+      interactive: true
+  preprovision:
+    posix:
+      shell: sh
+      run: infra/hooks/preprovision.sh
+      continueOnError: false
+      interactive: true
+    windows:
+      shell: pwsh
+      run: infra/hooks/preprovision.ps1
+      continueOnError: false
+      interactive: true
+  postprovision:
+    posix:
+      shell: sh
+      run: infra/hooks/postprovision.sh
+      continueOnError: false
+      interactive: true
+    windows:
+      shell: pwsh
+      run: infra/hooks/postprovision.ps1
+      continueOnError: false
+      interactive: true
+  predeploy:
+    posix:
+      shell: sh
+      run: infra/hooks/predeploy.sh
+      continueOnError: false
+      interactive: true
+    windows:
+      shell: pwsh
+      run: infra/hooks/predeploy.ps1
+      continueOnError: false
+      interactive: true
+  predown:
+    posix:
+      shell: sh
+      continueOnError: false
+      interactive: true
+      run: infra/hooks/predown.sh
+    windows:
+      shell: pwsh
+      continueOnError: false
+      interactive: true
+      run: infra/hooks/predown.ps1

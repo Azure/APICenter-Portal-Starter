@@ -350,3 +350,4 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+.azure
