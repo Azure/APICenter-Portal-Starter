@@ -54,6 +54,12 @@ You have two options to deploy this self-hosted API Center Portal:
 > - :white_check_mark: Azure CLI
 > - :white_check_mark: GitHub CLI
 
+1. Fork this repository to your GitHub account and clone it.
+
+    ```bash
+    git clone https://github.com/<YOUR_GITHUB_ALIAS>/APICenter-Portal-Starter.git
+    ```
+
 1. Log in with the following command. Then, you will be able to use the `azd` cli to quickly provision and deploy the application.
 
     ```bash
@@ -90,6 +96,8 @@ You have two options to deploy this self-hosted API Center Portal:
     ```
 
 1. Run the following commands to update your GitHub repository variables.
+
+   > **NOTE**: Make sure that you've forked this repository to your GitHub account before running the following commands.
 
     ```bash
     # Bash
