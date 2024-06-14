@@ -1,3 +1,22 @@
+---
+page_type: sample
+languages:
+- azdeveloper
+- typescript
+- powershell
+- bash
+- html
+- bicep
+products:
+- azure
+- azure-api-center
+- static-web-apps
+urlFragment: APICenter-Portal-Starter
+name: Self-host Your Azure API Center Portal
+description: Reference implementation of API Center portal for a web-based API discovery and consumption experience
+---
+<!-- YAML front-matter schema: https://review.learn.microsoft.com/en-us/help/contribute/samples/process/onboarding?branch=main#supported-metadata-fields-for-readmemd -->
+
 [![Open Source Love](https://firstcontributions.github.io/open-source-badges/badges/open-source-v1/open-source.svg)](https://github.com/firstcontributions/open-source-badges)
 
 # Self-host Your Azure API Center Portal
