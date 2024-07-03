@@ -1,0 +1,10 @@
+{
+  "dataApiHostName": "austin-lee-apicenter.data.eastus.azure-apicenter.ms/workspaces/default",
+  "title": "API portal",
+  "authentication": {
+      "clientId": "539fea43-d1de-4f27-b80b-a3fec7680de6",
+      "tenantId": "f5420c5a-b4ac-41b6-b7f8-c9f9f41854ce",
+      "scopes": ["https://azure-apicenter.net/user_impersonation"],
+      "authority": "https://login.microsoftonline.com/"
+  }
+}
