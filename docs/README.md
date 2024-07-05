@@ -9,7 +9,6 @@ languages:
 - bicep
 products:
 - azure
-- azure-api-center
 - static-web-apps
 urlFragment: APICenter-Portal-Starter
 name: Self-host Your Azure API Center Portal
