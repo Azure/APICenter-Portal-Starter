@@ -14,21 +14,24 @@ footer {
         margin: 0 auto;
         padding: 0 2rem;
         display: flex;
-        justify-content: space-between;
         align-items: center;
     }
     
     .footerTop {
         height: 4.75rem;
+        justify-content: space-between;
     }
 
     .footerBottom {
         height: 3.5rem;
-        display: flex;
         justify-content: center;
 
+        .copyright,
         .link {
             color: #707070;
+        }
+        
+        .link {
             padding-left: 2.75rem;
         }
     }

@@ -15,7 +15,7 @@ import "/src/styles/index.scss";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
     <React.StrictMode>
-        <FluentProvider theme={webLightTheme} className={"content-wrapper"} style={{ height: "100%" }}>
+        <FluentProvider theme={webLightTheme} className={"contentWrapper"} style={{ height: "100%" }}>
             <SessionProvider>
                 <LocalStorageProvider>
                     <Router />

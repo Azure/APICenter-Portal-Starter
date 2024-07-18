@@ -4,11 +4,16 @@
  *--------------------------------------------------------------------------------------------*/
 
 /**
- * The deployment server contract.
+ * The environment onboarding contract.
  */
-export interface DeploymentServer {
+export interface EnvironmentOnboarding {
     /**
-     * The URIs of the deployment server, e.g., ["https://contoso.azure-api.net"].
+     * The instructions how to onboard to the environment.
      */
-    runtimeUri: string[];
+    instructions?: string;
+
+    /**
+     * The developer portal URIs of the environment.
+     */
+    developerPortalUri?: string[];
 }

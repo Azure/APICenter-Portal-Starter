@@ -69,7 +69,7 @@ const ApiCard: FC<{ api: Api }> = ({ api }) => {
             relationship={"description"}
             visible={isCopied}
             positioning={"after-bottom"}
-            onVisibleChange={() => setTimeout(() => setIsCopied(false), 5000)}
+            onVisibleChange={() => setTimeout(() => setIsCopied(false), 2000)}
         >
             <div className={css.apiCard} onClick={() => navigate("detail/" + api.name + window.location.search)}>
                 <div className={css.content}>

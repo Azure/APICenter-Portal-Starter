@@ -12,6 +12,7 @@ import { Api } from "../../../contracts/api";
 import { ApiDefinition } from "../../../contracts/apiDefinition";
 import { ApiDeployment } from "../../../contracts/apiDeployment";
 import { ApiVersion } from "../../../contracts/apiVersion";
+import { Environment } from "../../../contracts/environment";
 import { useApiService } from "../../../util/useApiService";
 import { useAuthService } from "../../../util/useAuthService";
 import About from "./About";
@@ -38,6 +39,7 @@ const ApiDetail = () => {
     const [versions, setVersions] = useState<[ApiVersion]>();
     const [definitions, setDefinitions] = useState<[ApiDefinition]>();
     const [deployments, setDeployments] = useState<[ApiDeployment]>();
+    const [environment, setEnvironment] = useState<Environment>();
     const [selectedTab, setSelectedTab] = useState(TTab.options);
     const [selectedVersion, setSelectedVersion] = useState<string[]>([]);
     const [selectedVersionLabel, setSelectedVersionLabel] = useState<string>(`Version isn't available`);
@@ -59,6 +61,13 @@ const ApiDetail = () => {
             fetchDefinitions();
         }
     }, [selectedVersion, isAuthenticated]);
+
+    useEffect(() => {
+        setIsLoading(true);
+        if (selectedDeployment.length > 0) {
+            fetchEnvironment();
+        }
+    }, [selectedDeployment, isAuthenticated]);
 
     const Selected = tabs[selectedTab];
 
@@ -96,6 +105,16 @@ const ApiDetail = () => {
         setIsLoading(false);
     };
 
+    const fetchEnvironment = async () => {
+        const environmentId = deployments?.find(d => d.name === selectedDeployment[0])?.environmentId;
+
+        if (environmentId) {
+            const environment = await apiService.getEnvironment(environmentId);
+            setEnvironment(environment);
+        }
+        setIsLoading(false);
+    };
+
     return (
         <aside className={css.apiDetail}>
             <div className={css.container}>
@@ -110,12 +129,11 @@ const ApiDetail = () => {
                             </Link>
                         </div>
 
-                        <div className={css.metadataRow}>
-                            {/* TODO: add CREATOR */}
-                            {/* <p>Creator {api.contacts?.name}</p>
-                            <CircleFilled /> */}
-                            <p>Last update {new Date(api.lastUpdated).toLocaleDateString()}</p>
-                        </div>
+                        {api.lastUpdated && (
+                            <div className={css.metadataRow}>
+                                <p>Last update {new Date(api.lastUpdated).toLocaleDateString()}</p>
+                            </div>
+                        )}
 
                         <Subtitle2>Select the API version</Subtitle2>
                         <Divider className={css.divider} />
@@ -140,7 +158,7 @@ const ApiDetail = () => {
                                 {!!versions?.length &&
                                     versions.map(o => (
                                         <Option key={o.name} value={o.name}>
-                                            {o.title}
+                                            {o.title ?? o.name}
                                         </Option>
                                     ))}
                             </Dropdown>
@@ -206,6 +224,7 @@ const ApiDetail = () => {
                                 api={api}
                                 version={selectedVersion.length > 0 ? selectedVersion[0] : ""}
                                 definition={selectedDefinition.length > 0 ? selectedDefinition[0] : ""}
+                                environment={environment}
                             />
                         )}
                     </>

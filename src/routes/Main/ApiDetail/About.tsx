@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { FC } from "react";
+import React, { FC } from "react";
 import { Body1, Body1Strong, Link } from "@fluentui/react-components";
 import { Open16Regular } from "@fluentui/react-icons";
 
@@ -14,23 +14,34 @@ import css from "./index.module.scss";
 const About: FC<{ api: Api }> = ({ api }) => (
     <div className={css.about}>
         <Body1>{api.description}</Body1>
-        <Body1Strong className={css.caption}>External documentation</Body1Strong>
         {!!api.externalDocumentation?.length && (
             <>
-                {api.externalDocumentation.map(externalDoc => (
+                <Body1Strong className={css.caption}>External documentation</Body1Strong>
+                {api.externalDocumentation.map(externalDoc => externalDoc.title && externalDoc.url && (
                     <Link href={externalDoc.url} target={"_blank"} className={css.link} key={externalDoc.title}>
                         {externalDoc.title} <Open16Regular />
                     </Link>
                 ))}
             </>
         )}
-        <Body1Strong className={css.caption}>Contact information</Body1Strong>
         {!!api.contacts?.length && (
             <>
+                <Body1Strong className={css.caption}>Contact information</Body1Strong>
                 {api.contacts?.map(contact => (
-                    <Link href={`mailto:${contact.email}`} target={"_blank"} className={css.link} key={contact.name}>
-                        {contact.name} <Open16Regular />
-                    </Link>
+                    <React.Fragment key={contact.name}>
+                        {contact.email ? (
+                            <Link href={`mailto:${contact.email}`} target={"_blank"} className={css.link}>
+                                {contact.name} <Open16Regular />
+                            </Link>
+                        ) : (
+                            <Body1>{contact.name}</Body1>
+                        )}
+                        {contact.url && (
+                            <Link href={contact.url} target={"_blank"} className={css.link}>
+                                {contact.url} <Open16Regular />
+                            </Link>
+                        )}
+                    </React.Fragment>
                 ))}
             </>
         )}

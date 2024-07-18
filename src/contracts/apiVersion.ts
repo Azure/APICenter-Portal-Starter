@@ -15,10 +15,10 @@ export interface ApiVersion {
     /**
      * The title of the API version, e.g., "Version 1".
      */
-    title: string;
+    title?: string;
 
     /**
      * The API lifecycle stage, e.g., "design".
      */
-    lifecycleStage: string;
+    lifecycleStage?: string;
 }

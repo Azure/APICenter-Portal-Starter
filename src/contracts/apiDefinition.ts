@@ -27,5 +27,5 @@ export interface ApiDefinition {
     /**
      * The API specification information.
      */
-    specification: Specification;
+    specification?: Specification;
 }

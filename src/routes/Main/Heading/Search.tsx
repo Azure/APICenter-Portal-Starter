@@ -147,7 +147,7 @@ const Search = () => {
                                         <Cloud16Regular />
                                         <span className={css.apiName}>{api.name}</span>
                                         <span className={css.apiMeta}>
-                                            {api.kind}; {api.lifecycleStage}; {api.summary}
+                                            {api.kind}; {api.lifecycleStage && `${api.lifecycleStage};`} {api.summary}
                                         </span>
                                     </button>
                                 </div>
@@ -195,7 +195,7 @@ const Search = () => {
                                         <span className={css.apiName}>{recent.value}</span>
                                         {recent.type === "api" && recent.api && (
                                             <span className={css.apiMeta}>
-                                                {recent.api.kind}; {recent.api.lifecycleStage}; {recent.api.summary}
+                                                {recent.api.kind}; {recent.api.lifecycleStage && `${recent.api.lifecycleStage};`}; {recent.api.summary}
                                             </span>
                                         )}
                                     </button>

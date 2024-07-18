@@ -10,5 +10,5 @@ export interface TermsOfService {
     /**
      * URL pointing to the terms of service.
      */
-    url: string;
+    url?: string;
 }

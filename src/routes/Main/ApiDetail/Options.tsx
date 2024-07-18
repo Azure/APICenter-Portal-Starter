@@ -4,18 +4,20 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { FC, useEffect, useState } from "react";
-import { Body1, Body1Strong, Button, Caption1, Link, MessageBar, MessageBarBody } from "@fluentui/react-components";
-import { ArrowDownloadRegular, Document20Regular } from "@fluentui/react-icons";
+import { Body1, Body1Strong, Button, Caption1, Divider, Link, MessageBar, MessageBarBody, Tooltip } from "@fluentui/react-components";
+import { ArrowDownloadRegular, Document20Regular, CheckmarkCircle12Regular, CopyRegular, OpenRegular } from "@fluentui/react-icons";
 
-import VsCodeLogo from "../../../components/logos/VsCodeLogo";
 import { Api } from "../../../contracts/api";
+import { Environment } from "../../../contracts/environment";
 import { useApiService } from "../../../util/useApiService";
+import VsCodeLogo from "../../../components/logos/VsCodeLogo";
 
 import css from "./index.module.scss";
 
-const Options: FC<{ api: Api; version?: string; definition?: string }> = ({ api, version, definition }) => {
+const Options: FC<{ api: Api; version?: string; definition?: string, environment?: Environment }> = ({ api, version, definition, environment }) => {
     const apiService = useApiService();
-    const [schemaUrl, setSchemaUrl] = useState("");    
+    const [schemaUrl, setSchemaUrl] = useState("");
+    const [isDevPortalLinkCopied, setIsDevPortalLinkCopied] = useState(false);
 
     useEffect(() => {
         getSpecificationLink();
@@ -36,33 +38,73 @@ const Options: FC<{ api: Api; version?: string; definition?: string }> = ({ api,
                     <MessageBarBody>There are no available options for this API.</MessageBarBody>
                 </MessageBar>
             ) : (
-                <div className={css.option}>
-                    <div>
-                        <Document20Regular />
-                    </div>
-                    <div className={css.optionInfo}>
-                        <div className={css.title}>
-                            <Body1Strong>API Definition</Body1Strong>
-                            {schemaUrl && (
-                                <Link href={schemaUrl} className={css.link}>
-                                    <Caption1>Download</Caption1> <ArrowDownloadRegular />
-                                </Link>
-                            )}
+                <>
+                    <div className={css.option}>
+                        <div>
+                            <Document20Regular />
                         </div>
-                        <Body1 className={css.description}>
-                            This file defines how to use the API, including the endpoints, policies, authentication, and
-                            responses.
-                        </Body1>
-                        <div className={css.buttonsWrapper}>
-                            <Button
-                                icon={<VsCodeLogo />}
-                                onClick={() => window.open(`vscode:extension/apidev.azure-api-center`)}
-                            >
-                                Open in Visual Studio Code
-                            </Button>
+                        <div className={css.optionInfo}>
+                            <div className={css.title}>
+                                <Body1Strong>API Definition</Body1Strong>
+                                {schemaUrl && (
+                                    <Link href={schemaUrl} className={css.link}>
+                                        <Caption1>Download</Caption1> <ArrowDownloadRegular />
+                                    </Link>
+                                )}
+                            </div>
+                            <Body1 className={css.description}>
+                                This file defines how to use the API, including the endpoints, policies, authentication, and
+                                responses.
+                            </Body1>
+                            <div className={css.buttonsWrapper}>
+                                <Button
+                                    icon={<VsCodeLogo />}
+                                    onClick={() => window.open(`vscode:extension/apidev.azure-api-center`)}
+                                >
+                                    Open in Visual Studio Code
+                                </Button>
+                            </div>
                         </div>
                     </div>
-                </div>
+                    {environment?.onboarding?.developerPortalUri?.length > 0 && (
+                        <>
+                            <Divider />
+                            <div className={css.option}>
+                                <div className={css.devPortalLogo}></div>
+                                <div className={css.optionInfo}>
+                                    <div className={css.title}>
+                                        <Body1Strong>{environment.title} developer portal</Body1Strong>
+                                        <Tooltip
+                                            content={
+                                                <div className={css.copiedTooltip}>
+                                                    <CheckmarkCircle12Regular />
+                                                    Copied to clipboard
+                                                </div>
+                                            }
+                                            relationship={"description"}
+                                            visible={isDevPortalLinkCopied}
+                                            positioning={"below"}
+                                            onVisibleChange={() => setTimeout(() => setIsDevPortalLinkCopied(false), 2000)}
+                                        >
+                                            <Link className={css.link} onClick={() => {
+                                                navigator.clipboard.writeText(environment.onboarding.developerPortalUri[0]);
+                                                setIsDevPortalLinkCopied(true);
+                                            }}>
+                                                <Caption1>Copy URL</Caption1> <CopyRegular />
+                                            </Link>
+                                        </Tooltip>
+                                        <Link href={environment.onboarding.developerPortalUri[0]} target="_blank" className={css.link}>
+                                            <Caption1>Open in a new tab</Caption1> <OpenRegular />
+                                        </Link>
+                                    </div>
+                                    <Body1 className={css.description}>
+                                        Gain comprehensive insights into the API.
+                                    </Body1>
+                                </div>
+                            </div>
+                        </>
+                    )}
+                </>
             )}
         </div>
     );
