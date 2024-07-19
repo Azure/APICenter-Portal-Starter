@@ -10,6 +10,7 @@ import { ArrowDownloadRegular, Document20Regular, CheckmarkCircle12Regular, Copy
 import { Api } from "../../../contracts/api";
 import { Environment } from "../../../contracts/environment";
 import { useApiService } from "../../../util/useApiService";
+import { MarkdownProcessor } from "../../../components/MarkdownProcessor";
 import VsCodeLogo from "../../../components/logos/VsCodeLogo";
 
 import css from "./index.module.scss";
@@ -18,6 +19,7 @@ const Options: FC<{ api: Api; version?: string; definition?: string, environment
     const apiService = useApiService();
     const [schemaUrl, setSchemaUrl] = useState("");
     const [isDevPortalLinkCopied, setIsDevPortalLinkCopied] = useState(false);
+    const [showFullInstructions, setShowFullInstructions] = useState(false);
 
     useEffect(() => {
         getSpecificationLink();
@@ -66,7 +68,7 @@ const Options: FC<{ api: Api; version?: string; definition?: string, environment
                             </div>
                         </div>
                     </div>
-                    {environment?.onboarding?.developerPortalUri?.length > 0 && (
+                    {environment?.onboarding &&
                         <>
                             <Divider />
                             <div className={css.option}>
@@ -74,36 +76,49 @@ const Options: FC<{ api: Api; version?: string; definition?: string, environment
                                 <div className={css.optionInfo}>
                                     <div className={css.title}>
                                         <Body1Strong>{environment.title} developer portal</Body1Strong>
-                                        <Tooltip
-                                            content={
-                                                <div className={css.copiedTooltip}>
-                                                    <CheckmarkCircle12Regular />
-                                                    Copied to clipboard
-                                                </div>
-                                            }
-                                            relationship={"description"}
-                                            visible={isDevPortalLinkCopied}
-                                            positioning={"below"}
-                                            onVisibleChange={() => setTimeout(() => setIsDevPortalLinkCopied(false), 2000)}
-                                        >
-                                            <Link className={css.link} onClick={() => {
-                                                navigator.clipboard.writeText(environment.onboarding.developerPortalUri[0]);
-                                                setIsDevPortalLinkCopied(true);
-                                            }}>
-                                                <Caption1>Copy URL</Caption1> <CopyRegular />
-                                            </Link>
-                                        </Tooltip>
-                                        <Link href={environment.onboarding.developerPortalUri[0]} target="_blank" className={css.link}>
-                                            <Caption1>Open in a new tab</Caption1> <OpenRegular />
-                                        </Link>
+                                        {environment.onboarding.developerPortalUri?.length > 0 && (
+                                            <>
+                                                <Tooltip
+                                                    content={
+                                                        <div className={css.copiedTooltip}>
+                                                            <CheckmarkCircle12Regular />
+                                                            Copied to clipboard
+                                                        </div>
+                                                    }
+                                                    relationship={"description"}
+                                                    visible={isDevPortalLinkCopied}
+                                                    positioning={"below"}
+                                                    onVisibleChange={() => setTimeout(() => setIsDevPortalLinkCopied(false), 2000)}
+                                                >
+                                                    <Link className={css.link} onClick={() => {
+                                                        navigator.clipboard.writeText(environment.onboarding.developerPortalUri[0]);
+                                                        setIsDevPortalLinkCopied(true);
+                                                    }}>
+                                                        <Caption1>Copy URL</Caption1> <CopyRegular />
+                                                    </Link>
+                                                </Tooltip>
+                                                <Link href={environment.onboarding.developerPortalUri[0]} target="_blank" className={css.link}>
+                                                    <Caption1>Open in a new tab</Caption1> <OpenRegular />
+                                                </Link>
+                                            </>
+                                        )}
                                     </div>
-                                    <Body1 className={css.description}>
-                                        Gain comprehensive insights into the API.
-                                    </Body1>
+                                    {environment.onboarding.instructions && (
+                                        <Body1 className={css.description}>
+                                            <MarkdownProcessor
+                                                markdownToDisplay={environment.onboarding.instructions}
+                                                maxChars={showFullInstructions ? undefined : 200} />
+                                            {environment.onboarding.instructions.length > 200 && (
+                                                <Link onClick={() => setShowFullInstructions(!showFullInstructions)}>
+                                                    {showFullInstructions ? "Show less" : "Show more"}
+                                                </Link>
+                                            )}
+                                        </Body1>
+                                    )}
                                 </div>
                             </div>
                         </>
-                    )}
+                    }
                 </>
             )}
         </div>
