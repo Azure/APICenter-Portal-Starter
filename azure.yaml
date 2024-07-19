@@ -6,7 +6,9 @@
 
 # Name of the application.
 name: apicenter-portal-starter
-
+metadata:
+  template: api-center-portal
+  
 workflows:
   up: 
     steps:
