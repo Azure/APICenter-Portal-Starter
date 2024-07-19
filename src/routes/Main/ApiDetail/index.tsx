@@ -25,7 +25,7 @@ enum TTab {
     about = "about",
 }
 
-const tabs: Record<TTab, FC<{ api: Api; version?: string; definition?: string }>> = {
+const tabs: Record<TTab, FC<{ api: Api; version?: string; definition?: string, environment?: Environment }>> = {
     [TTab.options]: Options,
     [TTab.about]: About,
 };

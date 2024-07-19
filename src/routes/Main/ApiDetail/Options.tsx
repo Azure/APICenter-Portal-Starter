@@ -76,7 +76,7 @@ const Options: FC<{ api: Api; version?: string; definition?: string, environment
                                 <div className={css.optionInfo}>
                                     <div className={css.title}>
                                         <Body1Strong>{environment.title} developer portal</Body1Strong>
-                                        {environment.onboarding.developerPortalUri?.length > 0 && (
+                                        {(environment.onboarding.developerPortalUri?.length ?? 0) > 0 && (
                                             <>
                                                 <Tooltip
                                                     content={
@@ -91,19 +91,19 @@ const Options: FC<{ api: Api; version?: string; definition?: string, environment
                                                     onVisibleChange={() => setTimeout(() => setIsDevPortalLinkCopied(false), 2000)}
                                                 >
                                                     <Link className={css.link} onClick={() => {
-                                                        navigator.clipboard.writeText(environment.onboarding.developerPortalUri[0]);
+                                                        navigator.clipboard.writeText(environment.onboarding?.developerPortalUri?.[0] ?? "");
                                                         setIsDevPortalLinkCopied(true);
                                                     }}>
                                                         <Caption1>Copy URL</Caption1> <CopyRegular />
                                                     </Link>
                                                 </Tooltip>
-                                                <Link href={environment.onboarding.developerPortalUri[0]} target="_blank" className={css.link}>
+                                                <Link href={environment.onboarding?.developerPortalUri?.[0]} target="_blank" className={css.link}>
                                                     <Caption1>Open in a new tab</Caption1> <OpenRegular />
-                                                </Link>
+                                            </Link>
                                             </>
                                         )}
                                     </div>
-                                    {environment.onboarding.instructions && (
+                                    {environment.onboarding.instructions ? (
                                         <Body1 className={css.description}>
                                             <MarkdownProcessor
                                                 markdownToDisplay={environment.onboarding.instructions}
@@ -113,6 +113,10 @@ const Options: FC<{ api: Api; version?: string; definition?: string, environment
                                                     {showFullInstructions ? "Show less" : "Show more"}
                                                 </Link>
                                             )}
+                                        </Body1>
+                                    ) : (
+                                        <Body1 className={css.description}>
+                                            Gain comprehensive insights into the API.
                                         </Body1>
                                     )}
                                 </div>

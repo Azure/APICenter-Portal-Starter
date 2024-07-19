@@ -1,4 +1,3 @@
-import * as React from "react";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import rehypeTruncate from "rehype-truncate";
@@ -13,7 +12,7 @@ type TMarkdownProcessorProps = {
 export const MarkdownProcessor = ({ markdownToDisplay, maxChars, truncate = false }: TMarkdownProcessorProps) => (
     <ReactMarkdown
         remarkPlugins={[remarkGfm]}
-        rehypePlugins={[rehypeRaw, [rehypeTruncate, { maxChars, disable: typeof maxChars === "undefined"}]]}
+        rehypePlugins={[rehypeRaw as any, [rehypeTruncate, { maxChars, disable: typeof maxChars === "undefined"}]]}
         className={truncate ? "markdown-truncate" : ""}
     >
         {markdownToDisplay}
