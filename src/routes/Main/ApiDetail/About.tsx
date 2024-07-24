@@ -18,7 +18,7 @@ const About: FC<{ api: Api }> = ({ api }) => (
             <>
                 <Body1Strong className={css.caption}>External documentation</Body1Strong>
                 {api.externalDocumentation.map(externalDoc => externalDoc.title && externalDoc.url && (
-                    <Link href={externalDoc.url} target={"_blank"} className={css.link} key={externalDoc.title}>
+                    <Link href={externalDoc.url.startsWith('http://') || externalDoc.url.startsWith('https://') ? externalDoc.url : `https://${externalDoc.url}`} target={"_blank"} className={css.link} key={externalDoc.title}>
                         {externalDoc.title} <Open16Regular />
                     </Link>
                 ))}
@@ -37,7 +37,7 @@ const About: FC<{ api: Api }> = ({ api }) => (
                             <Body1>{contact.name}</Body1>
                         )}
                         {contact.url && (
-                            <Link href={contact.url} target={"_blank"} className={css.link}>
+                            <Link href={contact.url.startsWith('http://') || contact.url.startsWith('https://') ? contact.url : `https://${contact.url}`} target={"_blank"} className={css.link}>
                                 {contact.url} <Open16Regular />
                             </Link>
                         )}
