@@ -36,6 +36,10 @@ export class ApiService {
         );
         return response.value;
     }
+
+    public async getEnvironment(environmentId: string) {
+        return await this.httpClient(`environments/${environmentId}`);
+    }
 }
 
 const httpClient = useHttpClient();

@@ -25,9 +25,9 @@ export interface ApiDeployment {
     description?: string;
 
     /**
-     * Name of the environment, e.g., "public-cloud".
+     * The ID of the environment, e.g., "public-cloud".
      */
-    environment: string;
+    environmentId: string;
 
     /**
      * The deployment server information.

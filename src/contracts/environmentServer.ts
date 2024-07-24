@@ -4,11 +4,16 @@
  *--------------------------------------------------------------------------------------------*/
 
 /**
- * The deployment server contract.
+ * The environment server contract.
  */
-export interface DeploymentServer {
+export interface EnvironmentServer {
     /**
-     * The URIs of the deployment server, e.g., ["https://contoso.azure-api.net"].
+     * The type of the server that represents the environment.
      */
-    runtimeUri: string[];
+    type?: string;
+
+    /**
+     * The URIs of the server's management portal.
+     */
+    managementPortalUri?: string[];
 }
