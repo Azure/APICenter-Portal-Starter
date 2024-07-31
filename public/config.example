@@ -1,9 +1,9 @@
 {
-  "dataApiHostName": "<service name>.data.<region>.azure-apicenter.ms/workspaces/default",
-  "title": "API portal",
+  "dataApiHostName": "zne-eds-n-apic.data.eastus.azure-apicenter.ms/workspaces/default",
+  "title": "MPAS API DEV 31",
   "authentication": {
-      "clientId": "<client ID>",
-      "tenantId": "<tenant ID>",
+      "clientId": "56c2f53f-41a4-4f98-92e2-25319d8bcb4d",
+      "tenantId": "ea80952e-a476-42d4-aaf4-5457852b0f7e",
       "scopes": ["https://azure-apicenter.net/user_impersonation"],
       "authority": "https://login.microsoftonline.com/"
   }
