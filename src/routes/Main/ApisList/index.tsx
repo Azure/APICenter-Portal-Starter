@@ -12,6 +12,7 @@ import RestrictedAccessModal from "../../../components/RestrictedAccessModal/ind
 import { Api } from "../../../contracts/api";
 import { useApiService } from "../../../util/useApiService";
 import { useAuthService } from "../../../util/useAuthService";
+import { useConfigService } from "../../../util/useConfigService";
 import { LocalStorageKey, useLocalStorage } from "../../../util/useLocalStorage";
 import { useLogger } from "../../../util/useLogger";
 import { useSession } from "../../../util/useSession";
@@ -51,6 +52,8 @@ const sortApis = (apis: Api[], sortBy?: string) => {
 };
 
 const ApisList = () => {
+    
+    const configService = useConfigService();
     const layout = useLocalStorage(LocalStorageKey.apiListLayout).get();
     const sortBy = useLocalStorage(LocalStorageKey.apiListSortBy).get();
     const isRestricted = useLocalStorage(LocalStorageKey.isRestricted).get();
@@ -78,6 +81,7 @@ const ApisList = () => {
     }, [isAuthenticated, filters, search, sortBy]);
 
     const initialize = async () => {
+        const config = await configService.getSettings();
         setIsLoading(true);
 
         let searchQuery = "";
@@ -87,8 +91,8 @@ const ApisList = () => {
             searchQuery = "$search=" + search;
         }
 
-        if (filters.length > 0) {
-            filterQuery = "$filter=";
+
+        if (filters.length > 0 || config.scopingFilter.length > 0) {
             const groupedParams = groupByKey(filters, "filterTypeKey");
             const groupedParamsArray = Object.values(groupedParams);
 
@@ -107,6 +111,14 @@ const ApisList = () => {
                     filterQuery += " and ";
                 }
             });
+            if (filterQuery.length > 0) {
+                filterQuery = "$filter=" + filterQuery;
+                if (config.scopingFilter.length > 0) {
+                    filterQuery += " and " + config.scopingFilter;    
+                }    
+            } else if (config.scopingFilter.length > 0) {
+                filterQuery = "$filter=" + config.scopingFilter;    
+            }           
         }
 
         const result = await authService.isAuthenticated();
