@@ -114,10 +114,10 @@ const ApisList = () => {
             if (filterQuery.length > 0) {
                 filterQuery = "$filter=" + filterQuery;
                 if (config.scopingFilter.length > 0) {
-                    filterQuery += " and " + config.scopingFilter;    
+                    filterQuery += " and (" + config.scopingFilter + ")";    
                 }    
             } else if (config.scopingFilter.length > 0) {
-                filterQuery = "$filter=" + config.scopingFilter;    
+                filterQuery = "$filter=(" + config.scopingFilter + ")";    
             }           
         }
 
