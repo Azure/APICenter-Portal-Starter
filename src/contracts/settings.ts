@@ -23,4 +23,10 @@ export interface Settings {
      * The authentication settings.
      */
     authentication: MsalSettings;
+
+    /**
+     * The scoping filter. If provided, only APIs with the specified metadata properties will be shown.
+     */
+    scopingFilter: string;
+
 }
