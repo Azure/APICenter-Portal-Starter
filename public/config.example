@@ -7,5 +7,5 @@
       "scopes": ["https://azure-apicenter.net/user_impersonation"],
       "authority": "https://login.microsoftonline.com/"
   },
-  "scopingFilter": "$filter=customProperties/compliant eq true"
+  "scopingFilter": ""
 }
