@@ -5,7 +5,7 @@
       "clientId": "<client ID>",
       "tenantId": "<tenant ID>",
       "scopes": ["https://azure-apicenter.net/user_impersonation"],
-      "authority": "https://login.microsoftonline.com/",
+      "authority": "https://login.microsoftonline.com/"
   },
   "scopingFilter": ""
 }
