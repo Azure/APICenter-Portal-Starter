@@ -32,6 +32,11 @@ The API Center portal reference implementation provides:
 - A portal platform that customers can modify or extend to meet their needs.
 - Flexibility to host on different infrastructures, including deployment to Azure Static Web Apps or Azure App Service.
 
+## Limitations
+For free SKU API Center instances, a maximum of 5 APIs will be displayed in the API Center portal regardless of how many APIs are in the API Center.
+
+For standard SKU, there is no limit and all APIs will be displayed.
+
 ## Prerequisites
 
 Before you begin, ensure you have met the following requirements:
@@ -110,6 +115,26 @@ You have two options to deploy this self-hosted API Center Portal:
     ```
 
 1. Now, you're good to go! Push the code to the GitHub repository or manually run the GitHub Actions workflow to get your portal deployed.
+
+### Configure scoping filters
+
+By default, the portal displays all APIs from your API Center instance. You can configure your portal instance to filter out certain APIs by setting the `scopingFilter` property in the `public/config.example` file using [OData query syntax](https://learn.microsoft.com/en-us/graph/filter-query-parameter?tabs=http). For example:
+
+```
+{
+  "dataApiHostName": "<service name>.data.<region>.azure-apicenter.ms/workspaces/default",
+  "title": "API portal",
+  "authentication": {
+      "clientId": "<client ID>",
+      "tenantId": "<tenant ID>",
+      "scopes": ["https://azure-apicenter.net/user_impersonation"],
+      "authority": "https://login.microsoftonline.com/"
+  },
+  "scopingFilter": "customProperties/compliant eq true"
+}
+```
+
+For a full list of filterable properties, refer to the dataplane [API resource model](https://learn.microsoft.com/en-us/rest/api/dataplane/apicenter/apis/get?view=rest-dataplane-apicenter-2024-02-01-preview&tabs=HTTP#api).
 
 ### Running the portal locally
 
