@@ -102,7 +102,7 @@ const ApiCard: FC<{ api: Api }> = ({ api }) => {
                                 icon={<VsCodeLogo />}
                                 onClick={e => {
                                     e.stopPropagation();
-                                    window.open(`vscode-insiders://apidev.azure-api-center?clientId=${dataApiClientId}&tenantId=${dataApiTenantId}&runtimeUrl=${dataApiEndpoint}`);
+                                    window.open(`vscode://apidev.azure-api-center?clientId=${dataApiClientId}&tenantId=${dataApiTenantId}&runtimeUrl=${dataApiEndpoint}`);
                                 }}
                             >
                                 Open in Visual Studio Code
