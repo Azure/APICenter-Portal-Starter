@@ -18,16 +18,19 @@ import css from "./index.module.scss";
 const Header = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const dataApiEndpoint = useLocalStorage(LocalStorageKey.dataApiEndpoint);
+    const dataApiClientId = useLocalStorage(LocalStorageKey.dataApiClientId);
+    const dataApiTenantId = useLocalStorage(LocalStorageKey.dataApiTenantId);
     const [config, setConfig] = useState<Settings>();
     const configService = useConfigService();
     const authService = useAuthService();
     const session = useSession();
-
+    
     const fetchConfig = async () => {
         const config = await configService.getSettings();
         setConfig(config);
         dataApiEndpoint.set(config.dataApiHostName);
-
+        dataApiClientId.set(config.authentication.clientId);
+        dataApiTenantId.set(config.authentication.tenantId);
         const isAuthenticatedResponse = await authService.isAuthenticated();
         setIsAuthenticated(isAuthenticatedResponse);
     };

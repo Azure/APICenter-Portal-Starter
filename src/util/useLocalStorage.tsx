@@ -15,6 +15,8 @@ export enum LocalStorageKey {
     searchRecents = "searchRecents",
     dataApiEndpoint = "dataApiEndpoint",
     isRestricted = "isRestricted",
+    dataApiClientId = "dataApiClientId",
+    dataApiTenantId = "dataApiTenantId",
 }
 
 type TLocalStorageValuesMap = {
@@ -23,6 +25,8 @@ type TLocalStorageValuesMap = {
     [LocalStorageKey.searchRecents]: string;
     [LocalStorageKey.dataApiEndpoint]: string;
     [LocalStorageKey.isRestricted]: string;
+    [LocalStorageKey.dataApiClientId]: string;
+    [LocalStorageKey.dataApiTenantId]: string;
 };
 
 const LocalStorageContext = createContext<{ iterator?: number; update?: Dispatch<SetStateAction<number>> }>({

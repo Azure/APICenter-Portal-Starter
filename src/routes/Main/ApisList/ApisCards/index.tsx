@@ -13,7 +13,7 @@ import {
     MoreHorizontalRegular,
     ShareRegular,
 } from "@fluentui/react-icons";
-
+import { LocalStorageKey, useLocalStorage } from "../../../../util/useLocalStorage";
 import VsCodeLogo from "../../../../components/logos/VsCodeLogo";
 import { Api } from "../../../../contracts/api";
 
@@ -57,7 +57,9 @@ const ShareSubmenu: FC<{ shareLink: string; onLinkCopy: (isCopied: boolean) => v
 const ApiCard: FC<{ api: Api }> = ({ api }) => {
     const navigate = useNavigate();
     const [isCopied, setIsCopied] = useState<boolean>(false);
-
+    const dataApiEndpoint = useLocalStorage(LocalStorageKey.dataApiEndpoint).get()?.split('/')[0];
+    const dataApiClientId = useLocalStorage(LocalStorageKey.dataApiClientId).get();
+    const dataApiTenantId = useLocalStorage(LocalStorageKey.dataApiTenantId).get();
     return (
         <Tooltip
             content={
@@ -100,7 +102,7 @@ const ApiCard: FC<{ api: Api }> = ({ api }) => {
                                 icon={<VsCodeLogo />}
                                 onClick={e => {
                                     e.stopPropagation();
-                                    window.open(`vscode:extension/apidev.azure-api-center`);
+                                    window.open(`vscode://apidev.azure-api-center?clientId=${dataApiClientId}&tenantId=${dataApiTenantId}&runtimeUrl=${dataApiEndpoint}`);
                                 }}
                             >
                                 Open in Visual Studio Code
