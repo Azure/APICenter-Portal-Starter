@@ -37,7 +37,6 @@ const Header = () => {
     };
 
     const signOut = async () => {
-        console.log("Signing out...");
         await authService.signOut();
         session.setAuthenticated(false);
         setIsAuthenticated(false);
