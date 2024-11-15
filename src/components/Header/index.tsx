@@ -40,10 +40,6 @@ const Header = () => {
         await authService.signOut();
         session.setAuthenticated(false);
         setIsAuthenticated(false);
-        // Client-side cleanup
-        dataApiEndpoint.remove();
-        dataApiClientId.remove();
-        dataApiTenantId.remove();
         // Refresh the URL to the original state
         window.location.href = window.location.origin;
     };
