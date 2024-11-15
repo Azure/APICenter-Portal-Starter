@@ -68,7 +68,8 @@ export class MsalAuthService implements IAuthService {
         msalInstance.setActiveAccount(authResult.account);
     }
 
-    public signOut(): Promise<void> {
-        throw new Error("Method not implemented.");
+    public async signOut(): Promise<void> {
+        const msalInstance = await this.getMsalInstance();
+        await msalInstance.logoutPopup();
     }
 }

@@ -1,8 +1,3 @@
-/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
-
 import { useEffect, useState } from "react";
 import { Button, Link, Text } from "@fluentui/react-components";
 
@@ -38,11 +33,20 @@ const Header = () => {
     const signIn = async () => {
         await authService.signIn();
         session.setAuthenticated(true);
+        setIsAuthenticated(true);
+    };
+
+    const signOut = async () => {
+        await authService.signOut();
+        session.setAuthenticated(false);
+        setIsAuthenticated(false);
+        // Refresh the URL to the original state
+        window.location.href = window.location.origin;
     };
 
     useEffect(() => {
         fetchConfig();
-    });
+    }, []);
 
     return (
         <header>
@@ -68,20 +72,20 @@ const Header = () => {
                         Help
                     </Link>
                 </div>
-                {!isAuthenticated && (
-                    <div className={css.signupButtonWrapper}>
-                        <Button
-                            appearance={"primary"}
-                            style={{
-                                backgroundColor: css.blueButton,
-                                minWidth: "unset",
-                            }}
-                            onClick={() => signIn()}
-                        >
-                            Sign in
-                        </Button>
-                    </div>
-                )}
+                <div className={css.signupButtonWrapper}>
+                    <Button
+                        appearance={"primary"}
+                        style={{
+                            backgroundColor: css.blueButton,
+                            minWidth: "unset",
+                        }}
+                        onClick={() => {
+                            isAuthenticated ? signOut() : signIn();
+                        }}
+                    >
+                        {isAuthenticated ? "Sign out" : "Sign in"}
+                    </Button>
+                </div>
             </div>
         </header>
     );
