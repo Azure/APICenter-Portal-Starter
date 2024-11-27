@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { FC, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Body1, Body1Strong, Button, Caption1, Divider, Link, MessageBar, MessageBarBody, Tooltip } from "@fluentui/react-components";
 import { ArrowDownloadRegular, Document20Regular, CheckmarkCircle12Regular, CopyRegular, OpenRegular } from "@fluentui/react-icons";
 
@@ -16,7 +17,8 @@ import VsCodeLogo from "../../../components/logos/VsCodeLogo";
 import css from "./index.module.scss";
 
 const Options: FC<{ api: Api; version?: string; definition?: string, environment?: Environment }> = ({ api, version, definition, environment }) => {
-    const apiService = useApiService();
+    const apiService = useApiService();    
+    const navigate = useNavigate();
     const [schemaUrl, setSchemaUrl] = useState("");
     const [isDevPortalLinkCopied, setIsDevPortalLinkCopied] = useState(false);
     const [showFullInstructions, setShowFullInstructions] = useState(false);
@@ -49,9 +51,14 @@ const Options: FC<{ api: Api; version?: string; definition?: string, environment
                             <div className={css.title}>
                                 <Body1Strong>API Definition</Body1Strong>
                                 {schemaUrl && (
-                                    <Link href={schemaUrl} className={css.link}>
-                                        <Caption1>Download</Caption1> <ArrowDownloadRegular />
-                                    </Link>
+                                    <>
+                                        <Link href={schemaUrl} className={css.link}>
+                                            <Caption1>Download</Caption1> <ArrowDownloadRegular />
+                                        </Link>
+                                        <Link className={css.link} onClick={() => navigate(`/swagger/${api.name}/${version}/${definition}`)}>
+                                            <Caption1>View documentation</Caption1>
+                                        </Link>
+                                    </>
                                 )}
                             </div>
                             <Body1 className={css.description}>
