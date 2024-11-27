@@ -92,7 +92,7 @@ const ApisList = () => {
         }
 
 
-        if (filters.length > 0 || config.scopingFilter.length > 0) {
+        if (filters?.length > 0 || config.scopingFilter?.length > 0) {
             const groupedParams = groupByKey(filters, "filterTypeKey");
             const groupedParamsArray = Object.values(groupedParams);
 

@@ -7,6 +7,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 import Landing from "./routes/Main";
 import ApiDetail from "./routes/Main/ApiDetail";
+import Swagger from "./routes/Main/Swagger";
 import Layout from "./Layout";
 
 const router = createBrowserRouter([
@@ -23,6 +24,10 @@ const router = createBrowserRouter([
                     },
                 ],
             },
+            {
+                path: "swagger/:name/:version/:definition",
+                element: <Swagger />,
+            }
         ],
     },
 ]);
