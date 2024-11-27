@@ -39,7 +39,6 @@ const Swagger = () => {
                 ? <Spinner />
                 : specification && <SwaggerUI spec={specification} />
             }
-            {/* <SwaggerUI url={url} /> */}
         </main>
     );
 }
