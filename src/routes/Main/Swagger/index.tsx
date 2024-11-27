@@ -17,7 +17,6 @@ const Swagger = () => {
 
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [specification, setSpecification] = useState(null);
-    // const [url, setUrl] = useState<string>("");
 
     useEffect(() => {
         setIsLoading(true);
@@ -30,7 +29,6 @@ const Swagger = () => {
         const downloadUrl = await apiService.getSpecificationLink(name, version, definition);
         const apiSpecification = await fetch(downloadUrl).then((r) => r.json());
 
-        // setUrl(downloadUrl);
         setSpecification(apiSpecification);
         setIsLoading(false);
     };
