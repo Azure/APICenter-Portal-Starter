@@ -56,7 +56,7 @@ const Options: FC<{ api: Api; version?: string; definition?: string, environment
                                             <Caption1>Download</Caption1> <ArrowDownloadRegular />
                                         </Link>
                                         <Link className={css.link} onClick={() => navigate(`/swagger/${api.name}/${version}/${definition}`)}>
-                                            <Caption1>View in Swagger</Caption1>
+                                            <Caption1>View documentation</Caption1>
                                         </Link>
                                     </>
                                 )}
