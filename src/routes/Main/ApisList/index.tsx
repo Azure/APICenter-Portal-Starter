@@ -42,17 +42,16 @@ const sortApis = (apis: Api[], sortBy?: string) => {
         const order = sortingOption[1];
 
         if (order === "asc") {
-            return [...apis].sort((a, b) => (a[key] > b[key] ? 1 : -1));
+            return apis && [...apis].sort((a, b) => (a[key] > b[key] ? 1 : -1));
         } else {
-            return [...apis].sort((a, b) => (a[key] < b[key] ? 1 : -1));
+            return apis && [...apis].sort((a, b) => (a[key] < b[key] ? 1 : -1));
         }
     }
 
     return apis;
 };
 
-const ApisList = () => {
-    
+const ApisList = () => {    
     const configService = useConfigService();
     const layout = useLocalStorage(LocalStorageKey.apiListLayout).get();
     const sortBy = useLocalStorage(LocalStorageKey.apiListSortBy).get();
@@ -91,7 +90,6 @@ const ApisList = () => {
             searchQuery = "$search=" + search;
         }
 
-
         if (filters?.length > 0 || config.scopingFilter?.length > 0) {
             const groupedParams = groupByKey(filters, "filterTypeKey");
             const groupedParamsArray = Object.values(groupedParams);
@@ -114,11 +112,11 @@ const ApisList = () => {
             if (filterQuery.length > 0) {
                 filterQuery = "$filter=" + filterQuery;
                 if (config.scopingFilter.length > 0) {
-                    filterQuery += " and (" + config.scopingFilter + ")";    
-                }    
+                    filterQuery += " and (" + config.scopingFilter + ")";
+                }
             } else if (config.scopingFilter.length > 0) {
-                filterQuery = "$filter=(" + config.scopingFilter + ")";    
-            }           
+                filterQuery = "$filter=(" + config.scopingFilter + ")";
+            }
         }
 
         const result = await authService.isAuthenticated();
