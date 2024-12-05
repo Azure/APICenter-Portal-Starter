@@ -34,7 +34,7 @@ export class ApiService {
             `apis/${apiName}/versions/${versionName}/definitions/${definitionName}:exportSpecification`,
             Method.POST
         );
-        return response.value;
+        return response?.value;
     }
 
     public async getEnvironment(environmentId: string) {

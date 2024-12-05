@@ -23,16 +23,23 @@ export class HttpClient implements IHttpClient {
 
         const response = await fetch(requestUrl, { method, headers });
 
-        if (accessToken && (response.status === 401 || response.status == 403)) {
-            localStorage.setItem("MS_APIC_DEVPORTAL_isRestricted", "true");
-            return;
-        } else if (!response.ok) {
-            alert("Something went wrong");
-            return;
+        switch (response.status) {
+            case 401:
+            case 403:
+                if (accessToken) {
+                    localStorage.setItem("MS_APIC_DEVPORTAL_isRestricted", "true");
+                    return null;
+                }
+                break;
+
+            case 404:
+                return null;
+                
+            default:
+                break;
         }
 
         const dataJson = await response.json();
-
         return dataJson;
     }
 }

@@ -27,9 +27,10 @@ const Swagger = () => {
         if (!version || !definition) return;
 
         const downloadUrl = await apiService.getSpecificationLink(name, version, definition);
-        const apiSpecification = await fetch(downloadUrl).then((r) => r.json());
+        const downloadResult = await fetch(downloadUrl);
+        const content: any = await downloadResult.text();
 
-        setSpecification(apiSpecification);
+        setSpecification(content);
         setIsLoading(false);
     };
 

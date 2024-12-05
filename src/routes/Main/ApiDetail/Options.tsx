@@ -32,6 +32,10 @@ const Options: FC<{ api: Api; version?: string; definition?: string, environment
 
         const downloadUrl = await apiService.getSpecificationLink(api.name, version, definition);
 
+        if (!downloadUrl) {
+            return;
+        }
+
         setSchemaUrl(downloadUrl);
     };
 
