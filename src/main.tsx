@@ -9,16 +9,20 @@ import { FluentProvider, webLightTheme } from "@fluentui/react-components";
 
 import { LocalStorageProvider } from "./util/useLocalStorage";
 import { SessionProvider } from "./util/useSession";
+import { Provider as InversifyProvider } from "inversify-react";
 import Router from "./Router";
 
 import "/src/styles/index.scss";
+import { makeInversifyContainer } from "./util/makeInversifyContainer.ts";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
     <React.StrictMode>
         <FluentProvider theme={webLightTheme} className={"contentWrapper"} style={{ height: "100%" }}>
             <SessionProvider>
                 <LocalStorageProvider>
-                    <Router />
+                    <InversifyProvider container={makeInversifyContainer()}>
+                        <Router />
+                    </InversifyProvider>
                 </LocalStorageProvider>
             </SessionProvider>
         </FluentProvider>

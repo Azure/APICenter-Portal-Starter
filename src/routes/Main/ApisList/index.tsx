@@ -6,6 +6,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Spinner } from "@fluentui/react-components";
+import { ApiList } from "apim-developer-portal/src/common/api-list/ApiList.tsx";
 
 import NoApis from "../../../components/logos/NoApis";
 import RestrictedAccessModal from "../../../components/RestrictedAccessModal/index";
@@ -17,8 +18,6 @@ import { LocalStorageKey, useLocalStorage } from "../../../util/useLocalStorage"
 import { useLogger } from "../../../util/useLogger";
 import { useSession } from "../../../util/useSession";
 import useFilters, { TFilterTag } from "./Filters/useFilters";
-import ApisCards from "./ApisCards";
-import ApisTable from "./ApisTable";
 import Filters from "./Filters";
 import FiltersActive from "./FiltersActive";
 import FirstRow from "./FirstRow";
@@ -52,7 +51,6 @@ const sortApis = (apis: Api[], sortBy?: string) => {
 };
 
 const ApisList = () => {
-    
     const configService = useConfigService();
     const layout = useLocalStorage(LocalStorageKey.apiListLayout).get();
     const sortBy = useLocalStorage(LocalStorageKey.apiListSortBy).get();
@@ -91,7 +89,6 @@ const ApisList = () => {
             searchQuery = "$search=" + search;
         }
 
-
         if (filters?.length > 0 || config.scopingFilter?.length > 0) {
             const groupedParams = groupByKey(filters, "filterTypeKey");
             const groupedParamsArray = Object.values(groupedParams);
@@ -114,11 +111,11 @@ const ApisList = () => {
             if (filterQuery.length > 0) {
                 filterQuery = "$filter=" + filterQuery;
                 if (config.scopingFilter.length > 0) {
-                    filterQuery += " and (" + config.scopingFilter + ")";    
-                }    
+                    filterQuery += " and (" + config.scopingFilter + ")";
+                }
             } else if (config.scopingFilter.length > 0) {
-                filterQuery = "$filter=(" + config.scopingFilter + ")";    
-            }           
+                filterQuery = "$filter=(" + config.scopingFilter + ")";
+            }
         }
 
         const result = await authService.isAuthenticated();
@@ -164,10 +161,12 @@ const ApisList = () => {
                         <NoApis />
                         <div>Could not find APIs. Try a different search term.</div>
                     </div>
-                ) : layout === TLayout.table ? (
-                    <ApisTable apis={apis} />
                 ) : (
-                    <ApisCards apis={apis} />
+                    <ApiList
+                        detailsPageUrl={"#"}
+                        detailsPageTarget={"_blank"}
+                        layoutDefault={layout || TLayout.cards}
+                    />
                 )}
             </div>
         </section>

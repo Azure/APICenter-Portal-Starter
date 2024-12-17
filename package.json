@@ -17,10 +17,16 @@
         "lint": "yarn eslint:fix",
         "preview": "vite preview"
     },
+    "resolutions": {
+        "@fluentui/react-components": "latest"
+    },
     "dependencies": {
         "@azure/msal-browser": "^3.13.0",
         "@fluentui/react-components": "^9.47.5",
         "@vitejs/plugin-basic-ssl": "^1.1.0",
+        "apim-developer-portal": "https://github.com/Azure/api-management-developer-portal.git#igo/common-lib",
+        "inversify": "^6.2.0",
+        "inversify-react": "^1.1.1",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
         "react-markdown": "^8.0.7",
