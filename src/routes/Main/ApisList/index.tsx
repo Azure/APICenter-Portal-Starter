@@ -3,10 +3,10 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import React, { useEffect, useMemo, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Spinner } from "@fluentui/react-components";
-import { ApiList } from "apim-developer-portal/src/common/api-list/ApiList.tsx";
+import { ApiListTableView } from "api-docs-ui";
 
 import NoApis from "../../../components/logos/NoApis";
 import RestrictedAccessModal from "../../../components/RestrictedAccessModal/index";
@@ -21,9 +21,11 @@ import useFilters, { TFilterTag } from "./Filters/useFilters";
 import Filters from "./Filters";
 import FiltersActive from "./FiltersActive";
 import FirstRow from "./FirstRow";
-import { TLayout } from "./LayoutSwitch";
 
 import css from "./index.module.scss";
+import openApiToApiDocsApiAdapter from "../../../adapters/openApiToApiDocsApiAdapter.ts";
+import { TLayout } from "./LayoutSwitch.tsx";
+import ApisCards from "./ApisCards";
 
 const groupByKey = <T extends Record<string, any>>(list: T[], key: keyof T) =>
     list.reduce(
@@ -51,6 +53,7 @@ const sortApis = (apis: Api[], sortBy?: string) => {
 };
 
 const ApisList = () => {
+    const navigate = useNavigate();
     const configService = useConfigService();
     const layout = useLocalStorage(LocalStorageKey.apiListLayout).get();
     const sortBy = useLocalStorage(LocalStorageKey.apiListSortBy).get();
@@ -68,6 +71,8 @@ const ApisList = () => {
 
     const [searchParams] = useSearchParams();
     const search = searchParams.get("search");
+
+    const apiDocsApiList = useMemo(() => (apis || []).map(openApiToApiDocsApiAdapter), [apis]);
 
     useEffect(() => {
         setShowRestrictedModal(isRestricted === "true");
@@ -161,12 +166,24 @@ const ApisList = () => {
                         <NoApis />
                         <div>Could not find APIs. Try a different search term.</div>
                     </div>
-                ) : (
-                    <ApiList
-                        detailsPageUrl={"#"}
-                        detailsPageTarget={"_blank"}
-                        layoutDefault={layout || TLayout.cards}
+                ) : layout === TLayout.table ? (
+                    <ApiListTableView
+                        apis={apiDocsApiList}
+                        apiLinkPropsProvider={({ name }) => {
+                            const linkUrl = "detail/" + name + window.location.search;
+
+                            return {
+                                href: linkUrl,
+                                onClick: (e: React.PointerEvent<HTMLAnchorElement>) => {
+                                    e.preventDefault();
+                                    navigate(linkUrl);
+                                },
+                            };
+                        }}
+                        showApiType
                     />
+                ) : (
+                    <ApisCards apis={apis} />
                 )}
             </div>
         </section>
