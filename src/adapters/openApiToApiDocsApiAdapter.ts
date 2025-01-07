@@ -1,4 +1,4 @@
-import { Api as ApiDocsApi } from "api-docs-ui";
+import { Api as ApiDocsApi } from "@microsoft/api-docs-ui";
 
 import { Api } from "../contracts/api.ts";
 

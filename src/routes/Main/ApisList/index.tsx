@@ -6,7 +6,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Spinner } from "@fluentui/react-components";
-import { ApiListTableView } from "api-docs-ui";
+import { ApiListTableView } from "@microsoft/api-docs-ui";
 
 import NoApis from "../../../components/logos/NoApis";
 import RestrictedAccessModal from "../../../components/RestrictedAccessModal/index";

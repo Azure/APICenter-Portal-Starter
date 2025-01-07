@@ -23,8 +23,8 @@
     "dependencies": {
         "@azure/msal-browser": "^3.13.0",
         "@fluentui/react-components": "^9.47.5",
+        "@microsoft/api-docs-ui": "file:.yalc/@microsoft/api-docs-ui",
         "@vitejs/plugin-basic-ssl": "^1.1.0",
-        "api-docs-ui": "file:.yalc/api-docs-ui",
         "inversify": "^6.2.0",
         "inversify-react": "^1.1.1",
         "react": "^18.2.0",
