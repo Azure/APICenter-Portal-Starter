@@ -1,0 +1,19 @@
+.apiDetails {
+    display: flex;
+    max-width: 1800px;
+    padding: 15px;
+
+    .operations {
+        width: 385px;
+        padding: 15px;
+    }
+
+    .details {
+        flex: 1;
+    }
+    
+    .searchInput {
+        width: 100%;
+        margin-bottom: 15px;
+    }
+}
