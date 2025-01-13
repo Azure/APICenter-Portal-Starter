@@ -9,7 +9,7 @@ import css from "./index.module.scss";
 
 const Heading = () => (
     <section className={css.heading}>
-        <h1>API Center portal</h1>
+        <h1>API portal</h1>
         <Search />
     </section>
 );

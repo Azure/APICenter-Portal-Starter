@@ -12,13 +12,7 @@ const Footer = () => {
         <footer>
             <div className={css.footerBottom}>
                 <div className={css.bottomLinks}>
-                    <Body1Strong className={css.copyright}>&copy; Copyright 2024</Body1Strong>
-                    <Link appearance={"subtle"} href={"#"}>
-                        <Body1Strong className={css.link}>Terms</Body1Strong>
-                    </Link>
-                    <Link appearance={"subtle"} href={"#"}>
-                        <Body1Strong className={css.link}>Privacy</Body1Strong>
-                    </Link>
+                    <Body1Strong className={css.copyright}>&copy; Copyright 2025</Body1Strong>                    
                 </div>
             </div>
         </footer>
