@@ -10,6 +10,33 @@
 
     .details {
         flex: 1;
+        
+        h1 {
+            line-height: 1;
+            font-weight: normal;
+            font-size: 34px;
+            margin-bottom: 30px;
+        }
+        
+        h4 {
+            font-weight: normal;
+            font-size: 20px;
+            margin-top: 30px;
+            margin-bottom: 1rem;
+
+            &.operation {
+                padding: 0.5rem 0;
+                border-bottom: 1px solid #D1D1D1;
+                margin-bottom: 1.75rem;
+            }
+        }
+        
+        h5 {
+            font-weight: normal;
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+            font-size: 18px;
+        }
     }
     
     .searchInput {

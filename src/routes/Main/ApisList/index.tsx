@@ -68,6 +68,7 @@ const ApisList = () => {
                         apis={apiDocsApiList}
                         apiLinkPropsProvider={({ name }) => {
                             const linkUrl = "api-details/" + name + window.location.search;
+                            // const linkUrl = "detail/" + name + window.location.search;
 
                             return {
                                 href: linkUrl,

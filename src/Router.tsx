@@ -26,7 +26,7 @@ const router = createBrowserRouter([
                 ],
             },
             {
-                path: "api-details/:id",
+                path: "api-details/:name",
                 element: <ApiDetails />,
             },
             {

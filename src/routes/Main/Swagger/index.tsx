@@ -5,15 +5,16 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import SwaggerUI from "swagger-ui-react";
 import { Spinner } from "@fluentui/react-components";
+import SwaggerUI from "swagger-ui-react";
+
 import { useApiService } from "../../../util/useApiService";
 
 import "swagger-ui-react/swagger-ui.css";
 
 const Swagger = () => {
     const apiService = useApiService();
-    const { name, version, definition } = useParams() as { name: string, version: string, definition: string };
+    const { name, version, definition } = useParams() as { name: string; version: string; definition: string };
 
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [specification, setSpecification] = useState(null);
@@ -22,7 +23,7 @@ const Swagger = () => {
         setIsLoading(true);
         getSpecificationLink();
     }, [name, version, definition]);
-    
+
     const getSpecificationLink = async () => {
         if (!version || !definition) return;
 
@@ -34,14 +35,7 @@ const Swagger = () => {
         setIsLoading(false);
     };
 
-    return (
-        <main>
-            {isLoading
-                ? <Spinner />
-                : specification && <SwaggerUI spec={specification} />
-            }
-        </main>
-    );
-}
+    return <main>{isLoading ? <Spinner /> : specification && <SwaggerUI spec={specification} />}</main>;
+};
 
 export default Swagger;
