@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Body1Strong, Link } from "@fluentui/react-components";
+import { Body1Strong } from "@fluentui/react-components";
 
 import css from "./index.module.scss";
 
