@@ -1,0 +1,11 @@
+{
+    "dataApiHostName": "paperbits.data.centraluseuap.azure-apicenter.ms/workspaces/default",
+    "title": "API portal",
+    "authentication": {
+        "clientId": "30bdc0cc-82f1-4ca4-a9c4-2c0ec3f05096",
+        "tenantId": "8640ddc8-f6c3-46d6-b388-ec59d00839c1",
+        "scopes": ["https://azure-apicenter.net/user_impersonation"],
+        "authority": "https://login.microsoftonline.com/"
+    },
+    "scopingFilter": ""
+}
