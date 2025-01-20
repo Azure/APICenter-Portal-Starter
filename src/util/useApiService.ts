@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { ApiDefinition } from "../contracts/apiDefinition";
 import { Method } from "../services/IHttpClient";
 import { useHttpClient } from "./useHttpClient";
 
@@ -27,6 +28,10 @@ export class ApiService {
 
     public async getDefinitions(apiId: string, version: string) {
         return await this.httpClient(`apis/${apiId}/versions/${version}/definitions`);
+    }
+
+    public async getDefinition(apiName: string, versionName: string, definitionName: string): Promise<ApiDefinition> {
+        return await this.httpClient(`apis/${apiName}/versions/${versionName}/definitions/${definitionName}`);
     }
 
     public async getSpecificationLink(apiName: string, versionName: string, definitionName: string) {
