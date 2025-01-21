@@ -3,44 +3,44 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { DeploymentServer } from "./deploymentServer";
+import { DeploymentServer } from './deploymentServer';
 
 /**
  * The API deployment contract.
  */
 export interface ApiDeployment {
-    /**
-     * The name of the API deployment, e.g., "production".
-     */
-    name: string;
+  /**
+   * The name of the API deployment, e.g., "production".
+   */
+  name: string;
 
-    /**
-     * The title of the API deployment, e.g., "Production deployment".
-     */
-    title: string;
+  /**
+   * The title of the API deployment, e.g., "Production deployment".
+   */
+  title: string;
 
-    /**
-     * The API deployment description.
-     */
-    description?: string;
+  /**
+   * The API deployment description.
+   */
+  description?: string;
 
-    /**
-     * The ID of the environment, e.g., "public-cloud".
-     */
-    environmentId: string;
+  /**
+   * The ID of the environment, e.g., "public-cloud".
+   */
+  environmentId: string;
 
-    /**
-     * The deployment server information.
-     */
-    server: DeploymentServer;
+  /**
+   * The deployment server information.
+   */
+  server: DeploymentServer;
 
-    /**
-     * Indicates whether the deployment is recommended.
-     */
-    recommended?: boolean;
+  /**
+   * Indicates whether the deployment is recommended.
+   */
+  recommended?: boolean;
 
-    /**
-     * Custom properties of the deployment
-     */
-    customProperties?: unknown;
+  /**
+   * Custom properties of the deployment
+   */
+  customProperties?: unknown;
 }

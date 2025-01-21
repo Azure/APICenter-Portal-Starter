@@ -7,13 +7,13 @@
  * The environment server contract.
  */
 export interface EnvironmentServer {
-    /**
-     * The type of the server that represents the environment.
-     */
-    type?: string;
+  /**
+   * The type of the server that represents the environment.
+   */
+  type?: string;
 
-    /**
-     * The URIs of the server's management portal.
-     */
-    managementPortalUri?: string[];
+  /**
+   * The URIs of the server's management portal.
+   */
+  managementPortalUri?: string[];
 }

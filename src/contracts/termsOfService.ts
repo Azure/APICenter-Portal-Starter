@@ -7,8 +7,8 @@
  * Terms of service for the API.
  */
 export interface TermsOfService {
-    /**
-     * URL pointing to the terms of service.
-     */
-    url?: string;
+  /**
+   * URL pointing to the terms of service.
+   */
+  url?: string;
 }

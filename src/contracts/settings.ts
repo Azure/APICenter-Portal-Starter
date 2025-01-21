@@ -3,30 +3,29 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { MsalSettings } from "./msalSettings";
+import { MsalSettings } from './msalSettings';
 
 /**
  * The application settings contract.
  */
 export interface Settings {
-    /**
-     * Data API hostname, e.g. https://contoso.data.centraluseuap.azure-apicenter.ms.
-     */
-    dataApiHostName: string;
+  /**
+   * Data API hostname, e.g. https://contoso.data.centraluseuap.azure-apicenter.ms.
+   */
+  dataApiHostName: string;
 
-    /**
-     * The API portal title.
-     */
-    title: string;
+  /**
+   * The API portal title.
+   */
+  title: string;
 
-    /**
-     * The authentication settings.
-     */
-    authentication: MsalSettings;
+  /**
+   * The authentication settings.
+   */
+  authentication: MsalSettings;
 
-    /**
-     * The scoping filter. If provided, only APIs with the specified metadata properties will be shown.
-     */
-    scopingFilter: string;
-
+  /**
+   * The scoping filter. If provided, only APIs with the specified metadata properties will be shown.
+   */
+  scopingFilter: string;
 }

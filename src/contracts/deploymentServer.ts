@@ -7,8 +7,8 @@
  * The deployment server contract.
  */
 export interface DeploymentServer {
-    /**
-     * The URIs of the deployment server, e.g., ["https://contoso.azure-api.net"].
-     */
-    runtimeUri: string[];
+  /**
+   * The URIs of the deployment server, e.g., ["https://contoso.azure-api.net"].
+   */
+  runtimeUri: string[];
 }

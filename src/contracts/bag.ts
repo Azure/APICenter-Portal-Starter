@@ -7,5 +7,5 @@
  * Bag of properties contract.
  */
 export interface Bag<TProperty> {
-    [key: string]: TProperty;
+  [key: string]: TProperty;
 }

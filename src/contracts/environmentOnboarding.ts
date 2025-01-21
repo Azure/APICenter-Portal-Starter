@@ -7,13 +7,13 @@
  * The environment onboarding contract.
  */
 export interface EnvironmentOnboarding {
-    /**
-     * The instructions how to onboard to the environment.
-     */
-    instructions?: string;
+  /**
+   * The instructions how to onboard to the environment.
+   */
+  instructions?: string;
 
-    /**
-     * The developer portal URIs of the environment.
-     */
-    developerPortalUri?: string[];
+  /**
+   * The developer portal URIs of the environment.
+   */
+  developerPortalUri?: string[];
 }

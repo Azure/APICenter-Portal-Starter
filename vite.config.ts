@@ -3,14 +3,14 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import basicSsl from "@vitejs/plugin-basic-ssl";
-import react from "@vitejs/plugin-react";
-import { defineConfig } from "vite";
+import { defineConfig } from 'vite';
+import tsconfigPaths from 'vite-tsconfig-paths';
+import basicSsl from '@vitejs/plugin-basic-ssl';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-    plugins: [react(), basicSsl()],
-    define: {
-        'process.env': {}
-    }
+  plugins: [tsconfigPaths(), basicSsl()],
+  define: {
+    'process.env': {},
+  },
 });

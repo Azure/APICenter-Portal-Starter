@@ -7,18 +7,18 @@
  * External documentation contract.
  */
 export interface ExternalDocumentation {
-    /**
-     * The title of the external documentation, e.g., "Getting started".
-     */
-    title?: string;
+  /**
+   * The title of the external documentation, e.g., "Getting started".
+   */
+  title?: string;
 
-    /**
-     * The description of the external documentation.
-     */
-    description?: string;
+  /**
+   * The description of the external documentation.
+   */
+  description?: string;
 
-    /**
-     * The URL to external documentation.
-     */
-    url?: string;
+  /**
+   * The URL to external documentation.
+   */
+  url?: string;
 }

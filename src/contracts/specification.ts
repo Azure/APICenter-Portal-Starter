@@ -7,13 +7,13 @@
  * API specification details.
  */
 export interface Specification {
-    /**
-     * The name of the specification, e.g., "OpenAPI".
-     */
-    name?: string;
+  /**
+   * The name of the specification, e.g., "OpenAPI".
+   */
+  name?: string;
 
-    /**
-     * The version of the specification, e.g., "3.0.0".
-     */
-    version?: string;
+  /**
+   * The version of the specification, e.g., "3.0.0".
+   */
+  version?: string;
 }

@@ -3,14 +3,14 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Settings } from "../contracts/settings";
+import { Settings } from '../contracts/settings';
 
 /**
  * Configuration service.
  */
 export interface IConfigService {
-    /**
-     * Get the application settings.
-     */
-    getSettings(): Promise<Settings>;
+  /**
+   * Get the application settings.
+   */
+  getSettings(): Promise<Settings>;
 }

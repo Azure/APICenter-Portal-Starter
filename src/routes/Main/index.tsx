@@ -3,22 +3,23 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Outlet } from "react-router-dom";
+import React from 'react';
+import { Outlet } from 'react-router-dom';
 
-import ApisList from "./ApisList";
-import Heading from "./Heading";
+import ApisList from './ApisList';
+import Heading from './Heading';
 
 const Main = () => {
-    return (
-        <>
-            <Outlet />
+  return (
+    <>
+      <Outlet />
 
-            <main>
-                <Heading />
-                <ApisList />
-            </main>
-        </>
-    );
+      <main>
+        <Heading />
+        <ApisList />
+      </main>
+    </>
+  );
 };
 
 export default Main;
