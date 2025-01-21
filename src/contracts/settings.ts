@@ -28,5 +28,4 @@ export interface Settings {
      * The scoping filter. If provided, only APIs with the specified metadata properties will be shown.
      */
     scopingFilter: string;
-
 }
