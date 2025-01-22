@@ -26,7 +26,7 @@ const router = createBrowserRouter([
         ],
       },
       {
-        path: 'swagger/:name/:version/:definition',
+        path: 'specs/:name/:version/:definition',
         element: <Swagger />,
       },
     ],

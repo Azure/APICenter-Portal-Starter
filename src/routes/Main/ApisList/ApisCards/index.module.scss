@@ -1,5 +1,3 @@
-@import "/src/styles/index";
-
 .container {
 	display: grid;
 	grid-template-columns: 1fr 1fr 1fr;
@@ -31,7 +29,7 @@
 			margin-bottom: 0.75rem;
 
 			span {
-				color: $gray;
+				color: var(--grey-5);
 				font-size: 0.75rem;
 				font-style: normal;
 				font-weight: 700;
@@ -40,7 +38,7 @@
 
 				&:not(:last-of-type) {
 					padding-right: 0.75rem;
-					border-right: 1px solid $gray;
+					border-right: 1px solid var(--grey-5);
 				}
 			}
 		}

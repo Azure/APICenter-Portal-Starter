@@ -1,11 +1,9 @@
-@import "/src/styles";
-
 footer {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: space-between;
-    background-color: #E6E6E6;
+    background-color: var(--grey-2);
     
     .footerTop ,
     .footerBottom {

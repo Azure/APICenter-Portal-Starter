@@ -11,7 +11,7 @@ import { LocalStorageProvider } from './util/useLocalStorage';
 import { SessionProvider } from './util/useSession';
 import Router from './Router';
 
-import '/src/styles/index.scss';
+import './globals.scss';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

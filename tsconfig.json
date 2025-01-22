@@ -5,6 +5,7 @@
         "lib": ["DOM", "DOM.Iterable", "ESNext"],
         "module": "ESNext",
         "skipLibCheck": true,
+        "baseUrl": "./src",
         "paths": {
             "@/*": [
                 "./*"
@@ -26,6 +27,5 @@
         "allowJs": true,
         "allowSyntheticDefaultImports": true
     },
-    "include": ["src"],
-    "references": [{ "path": "./tsconfig.node.json" }]
+    "include": ["src"]
 }

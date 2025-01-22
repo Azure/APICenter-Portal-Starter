@@ -87,7 +87,7 @@ const Search = () => {
       <Input
         className={css.input}
         size="large"
-        contentBefore={<Search24Regular style={{ color: css.blueLight }} />}
+        contentBefore={<Search24Regular style={{ color: 'var(--blue-light)' }} />}
         contentAfter={
           inputValue ? (
             <Dismiss16Regular

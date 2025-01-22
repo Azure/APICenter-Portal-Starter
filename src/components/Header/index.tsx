@@ -76,7 +76,7 @@ const Header = () => {
           <Button
             appearance="primary"
             style={{
-              backgroundColor: css.blueButton,
+              backgroundColor: 'var(--blue-btn)',
               minWidth: 'unset',
             }}
             onClick={() => {

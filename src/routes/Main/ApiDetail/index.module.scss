@@ -1,14 +1,9 @@
-@import "/src/styles/index";
-@import "/src/styles/animations.module";
-
-
 .apiDetail {
 	position: fixed;
 	width: 100%;
 	height: 100%;
 	z-index: 1;
 	background: rgba(0, 0, 0, 0.60);
-	animation: fadeIn .5s;
 }
 
 .spinner {
@@ -84,7 +79,7 @@
 			font-size: 0.75rem;
 			font-weight: 600;
 			line-height: 1rem;
-			color: $blue;
+			color: var(--blue);
 
 			&:hover {
 				text-decoration: underline;
@@ -132,7 +127,7 @@
 
 	.description {
 		margin-top: .5rem;
-		color: $gray;
+		color: var(--grey-5);
 	}
 
 	.buttonsWrapper {
