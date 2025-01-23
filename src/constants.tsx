@@ -5,22 +5,6 @@
 
 import { FilterMetadata, FilterType } from '@/types/apiFilters';
 
-export const TableColumns = [
-  { label: 'Name', value: 'name' },
-  { label: 'Type', value: 'kind' },
-  { label: 'Description', value: 'description' },
-  { label: 'Last updated', value: 'lastUpdated' },
-  // {label: "Created by", value: "createdBy"},
-] as const;
-
-// TODO: remove
-export const SortingOptions = [
-  { label: 'A to Z, ascending', value: 'name.asc' },
-  { label: 'Z to A, descending', value: 'name.desc' },
-  { label: 'Newest to oldest', value: 'lastUpdated.desc' },
-  { label: 'Oldest to newest', value: 'lastUpdated.asc' },
-];
-
 export const ApiFilterParameters: Record<FilterType, FilterMetadata> = {
   kind: {
     label: 'API type',
@@ -46,6 +30,3 @@ export const ApiFilterParameters: Record<FilterType, FilterMetadata> = {
     ],
   },
 };
-
-// TODO: remove it
-export const ApiFilters = ApiFilterParameters;

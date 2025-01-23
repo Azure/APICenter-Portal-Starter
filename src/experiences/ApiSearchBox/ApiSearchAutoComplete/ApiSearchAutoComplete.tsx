@@ -4,6 +4,7 @@ import { Cloud16Regular, Dismiss12Regular, Search16Regular } from '@fluentui/rea
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import useRecentSearches, { RecentSearchData, RecentSearchType } from '@/hooks/useRecentSearches.ts';
 import { Api } from '@/contracts/api.ts';
+import LocationsService from '@/services/LocationsService';
 import styles from './ApiSearchAutoComplete.module.scss';
 
 interface Props {
@@ -14,7 +15,7 @@ interface Props {
 export const ApiSearchAutoComplete: React.FC<Props> = ({ searchResults, isLoading }) => {
   const navigate = useNavigate();
   const recentSearches = useRecentSearches();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
 
   const handleSearchResultClick = useCallback(
     (e: React.PointerEvent<HTMLAnchorElement>) => {
@@ -30,8 +31,7 @@ export const ApiSearchAutoComplete: React.FC<Props> = ({ searchResults, isLoadin
         api,
       });
 
-      // TODO: move out
-      navigate('details/' + api.name + window.location.search);
+      navigate(LocationsService.getApiDetailsUrl(api.name));
     },
     [navigate, recentSearches, searchResults]
   );
@@ -63,14 +63,12 @@ export const ApiSearchAutoComplete: React.FC<Props> = ({ searchResults, isLoadin
       }
 
       if (recentRecord.type === RecentSearchType.API) {
-        // TODO: move out
-        navigate('details/' + recentRecord.search + window.location.search);
+        navigate(LocationsService.getApiDetailsUrl(recentRecord.search));
       } else {
-        searchParams.append('search', recentRecord.search);
-        setSearchParams(searchParams);
+        navigate(LocationsService.getApiSearchUrl(recentRecord.search));
       }
     },
-    [navigate, recentSearches.list, searchParams, setSearchParams]
+    [navigate, recentSearches.list]
   );
 
   const handleRecentRemoveClick = useCallback(

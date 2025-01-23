@@ -7,6 +7,7 @@ import { useSession } from '@/util/useSession';
 import ApiListLayoutSwitch from '@/experiences/ApiListLayoutSwitch';
 import ApiListSortingSelect from '@/experiences/ApiListSortingSelect';
 import { ActiveFiltersBadges } from '@/experiences/ActiveFiltersBadges/ActiveFiltersBadges';
+import AccessDeniedSvg from '@/assets/accessDenied.svg';
 import styles from './Home.module.scss';
 
 export const Home: React.FC = () => {
@@ -14,8 +15,12 @@ export const Home: React.FC = () => {
 
   function renderApiList() {
     if (!isAuthenticated) {
-      // TODO: style it
-      return <div className={styles.emptyState}>Sign in or create an account to view APIs.</div>;
+      return (
+        <div className={styles.emptyState}>
+          <img src={AccessDeniedSvg} alt="Access Denied" />
+          Sign in or create an account to view APIs.
+        </div>
+      );
     }
 
     return <ApiList />;

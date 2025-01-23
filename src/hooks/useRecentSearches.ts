@@ -29,6 +29,10 @@ export default function useRecentSearches(): ReturnType {
 
   const add = useCallback(
     (data: RecentSearchData) => {
+      if (!data.search) {
+        return;
+      }
+
       const id = `${data.type}.${data.search}`;
       if (recentSearches.find((recent) => recent.id === id)) {
         return;

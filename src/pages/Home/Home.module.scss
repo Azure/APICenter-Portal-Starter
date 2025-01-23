@@ -35,6 +35,16 @@
         .mainContent {
             width: 100%;
 
+            .emptyState {
+                text-align: center;
+                color: var(--grey-4);
+
+                img {
+                    display: block;
+                    margin: 32px auto;
+                }
+            }
+
             .infoRow {
                 display: flex;
                 justify-content: flex-end;
