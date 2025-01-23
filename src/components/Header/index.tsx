@@ -32,13 +32,13 @@ const Header = () => {
 
   const signIn = async () => {
     await authService.signIn();
-    session.setAuthenticated(true);
+    session.setIsAuthenticated(true);
     setIsAuthenticated(true);
   };
 
   const signOut = async () => {
     await authService.signOut();
-    session.setAuthenticated(false);
+    session.setIsAuthenticated(false);
     setIsAuthenticated(false);
     // Refresh the URL to the original state
     window.location.href = window.location.origin;
@@ -76,7 +76,7 @@ const Header = () => {
           <Button
             appearance="primary"
             style={{
-              backgroundColor: 'var(--blue-btn)',
+              backgroundColor: 'var(--blue-2)',
               minWidth: 'unset',
             }}
             onClick={() => {

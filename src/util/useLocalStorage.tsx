@@ -5,7 +5,8 @@
 
 import React, { createContext, Dispatch, FC, ReactNode, SetStateAction, useContext, useState } from 'react';
 
-import { TLayout } from '../routes/Main/ApisList/LayoutSwitch';
+import { Layouts } from '@/types/layouts';
+import { SortBy } from '@/types/sorting';
 
 const KEY_PREFIX = 'MS_APIC_DEVPORTAL_';
 
@@ -20,7 +21,7 @@ export enum LocalStorageKey {
 }
 
 type TLocalStorageValuesMap = {
-  [LocalStorageKey.apiListLayout]: TLayout;
+  [LocalStorageKey.apiListLayout]: Layouts;
   [LocalStorageKey.apiListSortBy]?: string;
   [LocalStorageKey.searchRecents]: string;
   [LocalStorageKey.dataApiEndpoint]: string;

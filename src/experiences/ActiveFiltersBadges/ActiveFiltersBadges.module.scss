@@ -1,0 +1,29 @@
+.activeFiltersBadges {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+
+  .filterBadge {
+    padding: 5px 12px;
+    border: solid 1px var(--grey-3);
+    border-radius: var(--radius-m);
+    font-size: 14px;
+
+    strong {
+      font-weight: 600;
+    }
+
+    button {
+      position: relative;
+      top: 1px;
+      margin-left: 4px;
+    }
+  }
+
+  .clearBtn {
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration-line: underline;
+    color: var(--grey-5);
+  }
+}

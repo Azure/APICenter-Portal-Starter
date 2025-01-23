@@ -3,6 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { FilterMetadata, FilterType } from '@/types/apiFilters';
+
 export const TableColumns = [
   { label: 'Name', value: 'name' },
   { label: 'Type', value: 'kind' },
@@ -11,6 +13,7 @@ export const TableColumns = [
   // {label: "Created by", value: "createdBy"},
 ] as const;
 
+// TODO: remove
 export const SortingOptions = [
   { label: 'A to Z, ascending', value: 'name.asc' },
   { label: 'Z to A, descending', value: 'name.desc' },
@@ -18,7 +21,7 @@ export const SortingOptions = [
   { label: 'Oldest to newest', value: 'lastUpdated.asc' },
 ];
 
-export const ApiFilters = {
+export const ApiFilterParameters: Record<FilterType, FilterMetadata> = {
   kind: {
     label: 'API type',
     options: [
@@ -43,3 +46,6 @@ export const ApiFilters = {
     ],
   },
 };
+
+// TODO: remove it
+export const ApiFilters = ApiFilterParameters;

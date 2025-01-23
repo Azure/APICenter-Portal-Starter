@@ -27,8 +27,7 @@ export type TSearchRecent = { type: 'api' | 'string'; key: string; value: string
 
 const Search = () => {
   const localStorage = useLocalStorage(LocalStorageKey.searchRecents);
-  const session = useSession();
-  const isAuthenticated = session.isAuthenticated();
+  const { isAuthenticated } = useSession();
   const apiService = useApiService();
   const navigate = useNavigate();
   const ref = useRef<HTMLDivElement>(null);
@@ -87,7 +86,7 @@ const Search = () => {
       <Input
         className={css.input}
         size="large"
-        contentBefore={<Search24Regular style={{ color: 'var(--blue-light)' }} />}
+        contentBefore={<Search24Regular style={{ color: 'var(--blue-3)' }} />}
         contentAfter={
           inputValue ? (
             <Dismiss16Regular
@@ -141,7 +140,7 @@ const Search = () => {
                     onClick={() => {
                       setIsFocused(false);
                       addToRecents('api', api.name, api);
-                      navigate('detail/' + api.name + window.location.search);
+                      navigate('details/' + api.name + window.location.search);
                     }}
                   >
                     <Cloud16Regular />
@@ -183,7 +182,7 @@ const Search = () => {
                     onClick={() => {
                       setIsFocused(false);
                       if (recent.type === 'api') {
-                        navigate('detail/' + recent.value + window.location.search);
+                        navigate('details/' + recent.value + window.location.search);
                       } else {
                         setInputValue(recent.value);
                         searchParams.append('search', recent.value);

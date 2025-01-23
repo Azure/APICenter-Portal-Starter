@@ -75,7 +75,7 @@
 			}
 
 			button {
-				color: var(--blue);
+				color: var(--blue-4);
 				font-size: 0.75rem;
 				font-weight: 400;
 				line-height: 1rem;
@@ -134,14 +134,14 @@
 			}
 
 			.apiMeta {
-				color: var(--grey-5);
+				color: var(--grey-4);
 				width: 25rem;
 			}
 		}
 
 		.noResults {
 			padding: 3rem 0;
-			color: var(--grey-5);
+			color: var(--grey-4);
 		}
 	}
 }

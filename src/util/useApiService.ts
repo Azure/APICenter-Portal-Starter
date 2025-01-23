@@ -3,15 +3,34 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { groupBy } from 'lodash';
 import { ApiDefinition } from '../contracts/apiDefinition';
 import { Method } from '../services/IHttpClient';
+import { ActiveFilterData } from '@/types/apiFilters';
 import { useHttpClient } from './useHttpClient';
 
 export class ApiService {
   constructor(private httpClient: any) {}
 
-  public async getApis(queryString?: string): Promise<any> {
-    return queryString ? await this.httpClient(`apis?${queryString}`) : await this.httpClient(`apis`);
+  public async getApis(search: string, filters: ActiveFilterData[] = []): Promise<any> {
+    const searchParams = new URLSearchParams();
+    if (search.length) {
+      searchParams.set('$search', search);
+    }
+
+    if (filters.length) {
+      const filtersByType = groupBy(filters, 'type');
+      const filtersString = Object.values(filtersByType)
+        .map((filters) => {
+          const filtersSet = filters.map((filter) => `${filter.type} eq '${filter.value}'`);
+          return `(${filtersSet.join(' or ')})`;
+        })
+        .join(' and ');
+
+      searchParams.set('$filter', filtersString);
+    }
+
+    return await this.httpClient(`apis?${searchParams.toString()}`);
   }
 
   public async getApi(id: string) {

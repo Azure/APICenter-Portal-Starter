@@ -5,6 +5,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import { RecoilRoot } from 'recoil';
 import { FluentProvider, webLightTheme } from '@fluentui/react-components';
 
 import { LocalStorageProvider } from './util/useLocalStorage';
@@ -16,11 +17,13 @@ import './globals.scss';
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <FluentProvider theme={webLightTheme} className="contentWrapper" style={{ height: '100%' }}>
-      <SessionProvider>
-        <LocalStorageProvider>
-          <Router />
-        </LocalStorageProvider>
-      </SessionProvider>
+      <RecoilRoot>
+        <SessionProvider>
+          <LocalStorageProvider>
+            <Router />
+          </LocalStorageProvider>
+        </SessionProvider>
+      </RecoilRoot>
     </FluentProvider>
   </React.StrictMode>
 );

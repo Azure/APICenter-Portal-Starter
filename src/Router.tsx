@@ -6,7 +6,7 @@
 import React from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 
-import Landing from './routes/Main';
+import Home from '@/pages/Home';
 import ApiDetail from './routes/Main/ApiDetail';
 import Swagger from './routes/Main/Swagger';
 import Layout from './Layout';
@@ -17,10 +17,10 @@ const router = createBrowserRouter([
     children: [
       {
         path: '/',
-        element: <Landing />,
+        element: <Home />,
         children: [
           {
-            path: 'detail/:id',
+            path: 'details/:id',
             element: <ApiDetail />,
           },
         ],
