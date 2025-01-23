@@ -4,8 +4,7 @@ import { Api as DocsApi, ApiListCardsView, ApiListTableView } from '@microsoft/a
 import { useRecoilValue } from 'recoil';
 import useSearchFilters from '@/hooks/useSearchFilters';
 import useApis from '@/hooks/useApis';
-// TODO: check this component
-import NoApis from '@/components/logos/NoApis';
+import NoResultsSvg from '@/assets/noResults.svg';
 import useSearchQuery from '@/hooks/useSearchQuery';
 import apiAdapter from '@/experiences/ApiList/apiAdapter';
 import { Layouts } from '@/types/layouts';
@@ -35,8 +34,8 @@ export const ApiList: React.FC = () => {
     if (!apis.list.length) {
       return (
         <div className={styles.emptyState}>
-          <NoApis />
-          <div>Could not find APIs. Try a different search term.</div>
+          <img src={NoResultsSvg} alt="No results" />
+          <div>Can’t find any search results. Try a different search term.</div>
         </div>
       );
     }

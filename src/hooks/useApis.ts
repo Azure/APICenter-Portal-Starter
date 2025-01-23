@@ -9,6 +9,8 @@ import apiListSortingAtom from '@/atoms/apiListSortingAtom';
 interface Props {
   search?: string;
   filters?: ActiveFilterData[];
+  /** If true: won't fetch if search is empty */
+  isAutoCompleteMode?: boolean;
 }
 
 interface ReturnType {
@@ -39,18 +41,23 @@ function sortApis(apis: Api[], sortBy?: SortBy): Api[] {
 /**
  * Provides a list of APIs based on search and filters
  */
-export default function useApis({ search, filters }: Props = {}): ReturnType {
+export default function useApis({ search, filters, isAutoCompleteMode }: Props = {}): ReturnType {
   const [apis, setApis] = useState<Api[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const sortBy = useRecoilValue(apiListSortingAtom);
   const apiService = useApiService();
 
   const fetchApis = useCallback(async () => {
+    if (isAutoCompleteMode && !search) {
+      setApis([]);
+      return;
+    }
+
     setIsLoading(true);
     const response = await apiService.getApis(search, filters);
     setApis(response.value);
     setIsLoading(false);
-  }, [apiService, filters, search]);
+  }, [apiService, filters, isAutoCompleteMode, search]);
 
   useEffect(() => {
     void fetchApis();

@@ -30,7 +30,7 @@ export const ActiveFiltersBadges: React.FC<Props> = ({ className }) => {
     const optionMetadata = filterMetadata.options.find((option) => option.value === filter.value)!;
 
     return (
-      <div className={styles.filterBadge}>
+      <div key={`${filter.type}.${filter.value}`} className={styles.filterBadge}>
         {filterMetadata.label}: <strong>{optionMetadata.label}</strong>
         <button title="Remove" data-type={filter.type} value={filter.value} onClick={handleRemoveClick}>
           <Dismiss12Regular />

@@ -1,3 +1,10 @@
 .apiList {
+  .emptyState {
+    text-align: center;
+    color: var(--grey-4);
 
+    img {
+      margin: 32px 0;
+    }
+  }
 }

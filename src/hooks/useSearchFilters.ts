@@ -13,17 +13,27 @@ interface ReturnType {
   clear: () => void;
 }
 
+function deserializeFilters(searchParams: URLSearchParams): ActiveFilterData[] {
+  return Object.keys(ApiFilterParameters).flatMap((type: FilterType) => {
+    return searchParams.getAll(type).map((value) => ({ type, value }));
+  });
+}
+
 export default function useSearchFilters(): ReturnType {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [activeFilters, setActiveFilters] = useState<ActiveFilterData[]>([]);
+  const [prevParamsStr, setPrevParamsStr] = useState(searchParams.toString());
+  const [activeFilters, setActiveFilters] = useState<ActiveFilterData[]>(deserializeFilters(searchParams));
 
   // Deserialize active filters from url search params
   useEffect(() => {
-    setActiveFilters(
-      Object.keys(ApiFilterParameters).flatMap((type: FilterType) => {
-        return searchParams.getAll(type).map((value) => ({ type, value }));
-      })
-    );
+    // This is the trick to prevent unnecessary changes in the active filters state
+    if (prevParamsStr === searchParams.toString()) {
+      return;
+    }
+
+    setPrevParamsStr(searchParams.toString());
+    deserializeFilters(searchParams);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
   const isActive = useCallback(
