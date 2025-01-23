@@ -36,17 +36,13 @@ export const ApiSearchAutoComplete: React.FC<Props> = ({ searchResults, isLoadin
     [navigate, recentSearches, searchResults]
   );
 
-  const getRecentRecordUrl = useCallback(
-    (recentRecord: RecentSearchData) => {
-      if (recentRecord.type === RecentSearchType.API) {
-        return 'details/' + recentRecord.search + window.location.search;
-      }
+  const getRecentRecordUrl = useCallback((recentRecord: RecentSearchData) => {
+    if (recentRecord.type === RecentSearchType.API) {
+      return LocationsService.getApiDetailsUrl(recentRecord.search);
+    }
 
-      searchParams.append('search', recentRecord.search);
-      return '?' + searchParams.toString();
-    },
-    [searchParams]
-  );
+    return LocationsService.getApiSearchUrl(recentRecord.search);
+  }, []);
 
   const handleRecentClick = useCallback(
     (e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -141,7 +137,7 @@ export const ApiSearchAutoComplete: React.FC<Props> = ({ searchResults, isLoadin
     return searchResults.map((api) => (
       <Link
         key={api.name}
-        to={'details/' + api.name + window.location.search}
+        to={LocationsService.getApiDetailsUrl(api.name)}
         className={styles.option}
         data-name={api.name}
         onClick={handleSearchResultClick}
