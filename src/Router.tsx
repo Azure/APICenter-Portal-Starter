@@ -2,7 +2,7 @@ import React from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import Home from '@/pages/Home';
 import ApiInfo from '@/pages/ApiInfo';
-import Swagger from './routes/Main/Swagger';
+import Swagger from '@/pages/Swagger';
 import Layout from './Layout';
 
 const router = createBrowserRouter([

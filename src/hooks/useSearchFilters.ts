@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { isEqual } from 'lodash';
 import { useRecoilState } from 'recoil';
-import { ApiFilterParameters } from '@/constants';
+import { ApiFilterParameters } from '@/config/apiFilters';
 import { ActiveFilterData, FilterMetadata, FilterType } from '@/types/apiFilters';
 import apiSearchFiltersAtom from '@/atoms/apiSearchFiltersAtom';
 

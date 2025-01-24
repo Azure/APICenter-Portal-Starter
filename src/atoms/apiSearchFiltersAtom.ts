@@ -1,6 +1,6 @@
 import { atom } from 'recoil';
 import { ActiveFilterData, FilterType } from '@/types/apiFilters';
-import { ApiFilterParameters } from '@/constants';
+import { ApiFilterParameters } from '@/config/apiFilters';
 
 function deserializeFilters(): ActiveFilterData[] {
   const searchParams = new URLSearchParams(window.location.search);
