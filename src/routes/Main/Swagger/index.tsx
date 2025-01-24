@@ -40,7 +40,6 @@ const Swagger = () => {
         );
 
         const specName = definition.specification?.name ?? "rest";
-        console.log(specName);
         setSpecType(specName);
 
         const downloadUrl = await apiService.getSpecificationLink(

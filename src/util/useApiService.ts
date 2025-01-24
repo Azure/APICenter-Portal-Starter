@@ -7,8 +7,11 @@ import { ApiDefinition } from "../contracts/apiDefinition";
 import { Method } from "../services/IHttpClient";
 import { useHttpClient } from "./useHttpClient";
 
+
 export class ApiService {
-    constructor(private httpClient: any) {}
+    private requestCache: Map<string, Promise<any>> = new Map<string, Promise<any>>();
+
+    constructor(private httpClient: any) { }
 
     public async getApis(queryString?: string): Promise<any> {
         return queryString ? await this.httpClient(`apis?${queryString}`) : await this.httpClient(`apis`);
@@ -34,12 +37,23 @@ export class ApiService {
         return await this.httpClient(`apis/${apiName}/versions/${versionName}/definitions/${definitionName}`);
     }
 
-    public async getSpecificationLink(apiName: string, versionName: string, definitionName: string) {
-        const response = await this.httpClient(
-            `apis/${apiName}/versions/${versionName}/definitions/${definitionName}:exportSpecification`,
-            Method.POST
-        );
-        return response?.value;
+    public async getSpecificationLink(apiName: string, versionName: string, definitionName: string): Promise<string> {
+        const url = `apis/${apiName}/versions/${versionName}/definitions/${definitionName}:exportSpecification`;
+
+        if (this.requestCache.has(url)) {
+            return this.requestCache.get(url)!; // Non-null assertion (!) since we know it exists
+        }
+
+        const responsePromise =  this.httpClient(url, Method.POST)
+            .then(response => response.value)
+            .catch(error => {
+                this.requestCache.delete(url);
+                return Promise.reject(error);
+            });
+            
+        this.requestCache.set(url, responsePromise);
+
+        return responsePromise;
     }
 
     public async getEnvironment(environmentId: string) {
