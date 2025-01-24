@@ -46,7 +46,7 @@ const Swagger = () => {
   }, [name, version, definitionName, getSpecificationLink]);
 
   return (
-    <main className="doc-container">
+    <div className="doc-container">
       {isLoading ? (
         <Spinner />
       ) : specType === 'asyncapi' ? (
@@ -54,7 +54,7 @@ const Swagger = () => {
       ) : (
         specification && <SwaggerUI spec={specification} />
       )}
-    </main>
+    </div>
   );
 };
 

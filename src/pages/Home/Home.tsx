@@ -40,7 +40,7 @@ export const Home: React.FC = () => {
   }
 
   return (
-    <main className={styles.home}>
+    <div className={styles.home}>
       <Outlet />
 
       <section className={styles.searchPanel}>
@@ -68,7 +68,7 @@ export const Home: React.FC = () => {
           <div className={styles.results}>{renderApiList()}</div>
         </div>
       </section>
-    </main>
+    </div>
   );
 };
 

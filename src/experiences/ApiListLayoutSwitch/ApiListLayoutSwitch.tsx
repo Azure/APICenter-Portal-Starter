@@ -13,7 +13,7 @@ export const ApiListLayoutSwitch: React.FC = () => {
     (e: React.PointerEvent<HTMLButtonElement>) => {
       setLayout(e.currentTarget.value as Layouts);
     },
-    [layout]
+    [setLayout]
   );
 
   return (

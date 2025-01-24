@@ -12,7 +12,6 @@
     --grey-3: #D1D1D1;
     --grey-2: #E6E6E6;
     --grey-1: #F3F2F1;
-
     --radius-m: 4px;
 }
 
@@ -24,28 +23,28 @@ body,
 
 body {
     margin: 0;
+}
+
+* {
     position: relative;
+    box-sizing: content-box;
 }
 
 button {
     padding: 0;
     border: none;
-    font: inherit;
-    color: inherit;
     background-color: transparent;
+    color: inherit;
     cursor: pointer;
+    font: inherit;
 }
 
-.contentWrapper {
+.app-root {
     display: flex;
+    height: 100%;
     flex-direction: column;
-}
 
-main {
-    flex-grow: 1;
-}
-
-.aui-root {
-    max-width: 1460px;
-    margin: 0 auto;
+    > main {
+        flex-grow: 1;
+    }
 }

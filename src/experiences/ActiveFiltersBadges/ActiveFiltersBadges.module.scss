@@ -1,7 +1,7 @@
 .activeFiltersBadges {
   display: flex;
-  gap: 1rem;
   flex-wrap: wrap;
+  gap: 1rem;
 
   .filterBadge {
     padding: 5px 12px;
@@ -14,16 +14,15 @@
     }
 
     button {
-      position: relative;
       top: 1px;
       margin-left: 4px;
     }
   }
 
   .clearBtn {
+    color: var(--grey-6);
     font-size: 14px;
     font-weight: 600;
     text-decoration-line: underline;
-    color: var(--grey-6);
   }
 }
