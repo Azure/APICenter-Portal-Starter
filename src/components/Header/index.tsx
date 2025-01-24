@@ -49,7 +49,7 @@ const Header = () => {
   }, []);
 
   return (
-    <header>
+    <header className={css.header}>
       <div className={css.logo}>
         <CloverLogo />
         {!!config && (

@@ -1,0 +1,18 @@
+.apiAdditionalInfo {
+  h4 {
+    margin-top: 24px;
+  }
+
+  svg {
+    position: relative;
+    top: 3px;
+  }
+
+  .link {
+    display: block;
+
+    + .link {
+      margin-top: 8px;
+    }
+  }
+}

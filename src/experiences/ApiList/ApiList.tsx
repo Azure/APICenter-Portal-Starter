@@ -24,13 +24,13 @@ export const ApiList: React.FC = () => {
 
   const apiLinkPropsProvider = useCallback(
     (api: DocsApi) => ({
-      href: LocationsService.getApiDetailsUrl(api.name),
+      href: LocationsService.getApiInfoUrl(api.name),
       onClick: (e: React.MouseEvent) => {
         if (e.ctrlKey || e.button !== 0) {
           return;
         }
         e.preventDefault();
-        navigate(LocationsService.getApiDetailsUrl(api.name));
+        navigate(LocationsService.getApiInfoUrl(api.name));
       },
     }),
     [navigate]

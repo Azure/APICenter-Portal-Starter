@@ -5,9 +5,8 @@
 
 import React from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-
 import Home from '@/pages/Home';
-import ApiDetail from './routes/Main/ApiDetail';
+import ApiInfo from '@/pages/ApiInfo';
 import Swagger from './routes/Main/Swagger';
 import Layout from './Layout';
 
@@ -20,8 +19,8 @@ const router = createBrowserRouter([
         element: <Home />,
         children: [
           {
-            path: 'api-details/:id',
-            element: <ApiDetail />,
+            path: 'api-info/:id',
+            element: <ApiInfo />,
           },
         ],
       },

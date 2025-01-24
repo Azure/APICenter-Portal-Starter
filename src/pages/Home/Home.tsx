@@ -1,9 +1,9 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
+import { useSession } from '@/util/useSession';
 import ApiList from '@/experiences/ApiList';
 import ApiSearchBox from '@/experiences/ApiSearchBox';
 import ApiFilters from '@/experiences/ApiFilters';
-import { useSession } from '@/util/useSession';
 import ApiListLayoutSwitch from '@/experiences/ApiListLayoutSwitch';
 import ApiListSortingSelect from '@/experiences/ApiListSortingSelect';
 import { ActiveFiltersBadges } from '@/experiences/ActiveFiltersBadges/ActiveFiltersBadges';

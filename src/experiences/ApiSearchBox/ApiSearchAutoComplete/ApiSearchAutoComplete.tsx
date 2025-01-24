@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import { Spinner } from '@fluentui/react-components';
 import { Cloud16Regular, Dismiss12Regular, Search16Regular } from '@fluentui/react-icons';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import useRecentSearches, { RecentSearchData, RecentSearchType } from '@/hooks/useRecentSearches.ts';
 import { Api } from '@/contracts/api.ts';
 import LocationsService from '@/services/LocationsService';
@@ -15,7 +15,6 @@ interface Props {
 export const ApiSearchAutoComplete: React.FC<Props> = ({ searchResults, isLoading }) => {
   const navigate = useNavigate();
   const recentSearches = useRecentSearches();
-  const [searchParams] = useSearchParams();
 
   const handleSearchResultClick = useCallback(
     (e: React.PointerEvent<HTMLAnchorElement>) => {
@@ -31,14 +30,14 @@ export const ApiSearchAutoComplete: React.FC<Props> = ({ searchResults, isLoadin
         api,
       });
 
-      navigate(LocationsService.getApiDetailsUrl(api.name));
+      navigate(LocationsService.getApiInfoUrl(api.name));
     },
     [navigate, recentSearches, searchResults]
   );
 
   const getRecentRecordUrl = useCallback((recentRecord: RecentSearchData) => {
     if (recentRecord.type === RecentSearchType.API) {
-      return LocationsService.getApiDetailsUrl(recentRecord.search);
+      return LocationsService.getApiInfoUrl(recentRecord.search);
     }
 
     return LocationsService.getApiSearchUrl(recentRecord.search);
@@ -59,7 +58,7 @@ export const ApiSearchAutoComplete: React.FC<Props> = ({ searchResults, isLoadin
       }
 
       if (recentRecord.type === RecentSearchType.API) {
-        navigate(LocationsService.getApiDetailsUrl(recentRecord.search));
+        navigate(LocationsService.getApiInfoUrl(recentRecord.search));
       } else {
         navigate(LocationsService.getApiSearchUrl(recentRecord.search));
       }
@@ -137,7 +136,7 @@ export const ApiSearchAutoComplete: React.FC<Props> = ({ searchResults, isLoadin
     return searchResults.map((api) => (
       <Link
         key={api.name}
-        to={LocationsService.getApiDetailsUrl(api.name)}
+        to={LocationsService.getApiInfoUrl(api.name)}
         className={styles.option}
         data-name={api.name}
         onClick={handleSearchResultClick}

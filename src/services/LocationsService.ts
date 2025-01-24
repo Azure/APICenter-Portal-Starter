@@ -12,7 +12,10 @@ const LocationsService = {
     return `/?${searchParams.toString()}`;
   },
 
-  getApiDetailsUrl: (name: string) => `/api-details/${name}${window.location.search}`,
+  getApiInfoUrl: (name: string) => `/api-info/${name}${window.location.search}`,
+
+  getApiSchemaExplorerUrl: (api: string, version: string, definition: string) =>
+    `/swagger/${api}/${version}/${definition}`,
 };
 
 export default LocationsService;
