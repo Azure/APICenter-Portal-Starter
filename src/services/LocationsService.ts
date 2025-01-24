@@ -1,5 +1,11 @@
 const LocationsService = {
-  getHomeUrl: () => '/',
+  getHomeUrl: (preserveSearchParams = false) => {
+    if (!preserveSearchParams) {
+      return '/';
+    }
+
+    return `/${window.location.search}`;
+  },
 
   getApiSearchUrl: (search?: string) => {
     const searchParams = new URLSearchParams(window.location.search);

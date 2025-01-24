@@ -14,7 +14,7 @@ import {
   TabList,
 } from '@fluentui/react-components';
 import { Dismiss24Regular } from '@fluentui/react-icons';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import useApi from '@/hooks/useApi';
 import useApiVersions from '@/hooks/useApiVersions';
 import { ApiVersion } from '@/contracts/apiVersion';
@@ -22,8 +22,9 @@ import useApiDefinitions from '@/hooks/useApiDefinitions';
 import { ApiDefinition } from '@/contracts/apiDefinition';
 import useApiDeployments from '@/hooks/useApiDeployments';
 import { ApiDeployment } from '@/contracts/apiDeployment';
-import ApiAdditionalInfo from './ApiAdditionalInfo';
-import ApiInfoOptions from './ApiInfoOptions';
+import ApiAdditionalInfo from '../../experiences/ApiAdditionalInfo';
+import ApiInfoOptions from '../../experiences/ApiInfoOptions';
+import LocationsService from '@/services/LocationsService';
 import styles from './ApiInfo.module.scss';
 
 interface RouteParams {
@@ -46,6 +47,7 @@ export const ApiInfo: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tabs>(Tabs.OPTIONS);
 
   const { id } = useParams() as Readonly<RouteParams>;
+  const navigate = useNavigate();
   const api = useApi(id);
   const apiVersions = useApiVersions(id);
   const apiDefinitions = useApiDefinitions(id, selectedVersion?.name);
@@ -87,6 +89,10 @@ export const ApiInfo: React.FC = () => {
   const handleTabSelect = useCallback<React.ComponentProps<typeof TabList>['onTabSelect']>((_, { value }) => {
     setActiveTab(value as Tabs);
   }, []);
+
+  const handleClose = useCallback(() => {
+    navigate(LocationsService.getHomeUrl(true));
+  }, [navigate]);
 
   function renderSelectedTabContent() {
     if (activeTab === Tabs.OPTIONS) {
@@ -195,17 +201,10 @@ export const ApiInfo: React.FC = () => {
   }
 
   return (
-    <Drawer className={styles.apiInfo} size="medium" position="end" open>
+    <Drawer className={styles.apiInfo} size="medium" position="end" open onOpenChange={handleClose}>
       <DrawerHeader>
         <DrawerHeaderTitle
-          action={
-            <Button
-              appearance="subtle"
-              aria-label="Close"
-              icon={<Dismiss24Regular />}
-              onClick={() => console.log('close')}
-            />
-          }
+          action={<Button appearance="subtle" aria-label="Close" icon={<Dismiss24Regular />} onClick={handleClose} />}
         >
           {api.data?.title}
         </DrawerHeaderTitle>

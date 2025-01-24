@@ -8,7 +8,7 @@ import { ApiDefinition } from '@/contracts/apiDefinition';
 import useApiSpecUrl from '@/hooks/useApiSpecUrl';
 import useDeploymentEnvironment from '@/hooks/useDeploymentEnvironment';
 import { ApiDeployment } from '@/contracts/apiDeployment';
-import VsCodeLogo from '@/assets/VsCodeLogo.svg';
+import VsCodeLogo from '@/assets/vsCodeLogo.svg';
 import LocationsService from '@/services/LocationsService';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import CopyLink from '@/components/CopyLink';
