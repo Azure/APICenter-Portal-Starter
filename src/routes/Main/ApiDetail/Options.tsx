@@ -16,7 +16,7 @@ import VsCodeLogo from "../../../components/logos/VsCodeLogo";
 
 import css from "./index.module.scss";
 
-const Options: FC<{ api: Api; version?: string; definition?: string, environment?: Environment }> = ({ api, version, definition, environment }) => {
+const Options: FC<{ api: Api; version?: string; definition?: string, environment?: Environment }> = ({ api, version: versionName, definition: definitionName, environment }) => {
     const apiService = useApiService();    
     const navigate = useNavigate();
     const [schemaUrl, setSchemaUrl] = useState("");
@@ -28,9 +28,9 @@ const Options: FC<{ api: Api; version?: string; definition?: string, environment
     }, [schemaUrl]);
     
     const getSpecificationLink = async () => {
-        if (!version || !definition) return;
+        if (!versionName || !definitionName) return;
 
-        const downloadUrl = await apiService.getSpecificationLink(api.name, version, definition);
+        const downloadUrl = await apiService.getSpecificationLink(api.name, versionName, definitionName);
 
         if (!downloadUrl) {
             return;
@@ -41,7 +41,7 @@ const Options: FC<{ api: Api; version?: string; definition?: string, environment
 
     return (
         <div className={css.options}>
-            {!version || !definition ? (
+            {!versionName || !definitionName ? (
                 <MessageBar>
                     <MessageBarBody>There are no available options for this API.</MessageBarBody>
                 </MessageBar>
@@ -59,7 +59,7 @@ const Options: FC<{ api: Api; version?: string; definition?: string, environment
                                         <Link href={schemaUrl} className={css.link}>
                                             <Caption1>Download</Caption1> <ArrowDownloadRegular />
                                         </Link>
-                                        <Link className={css.link} onClick={() => navigate(`/swagger/${api.name}/${version}/${definition}`)}>
+                                        <Link className={css.link} onClick={() => navigate(`/swagger/${api.name}/${versionName}/${definitionName}`)}>
                                             <Caption1>View documentation</Caption1>
                                         </Link>
                                     </>

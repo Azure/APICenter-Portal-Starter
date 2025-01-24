@@ -53,7 +53,7 @@ const ApiDetail = () => {
     useEffect(() => {
         setIsLoading(true);
         fetchApi();
-    }, [id, isAuthenticated]);
+    }, [id]);
 
     useEffect(() => {
         setIsLoading(true);
@@ -64,7 +64,14 @@ const ApiDetail = () => {
 
     useEffect(() => {
         setIsLoading(true);
-        if (selectedDeployment.length > 0) {
+        if (isAuthenticated && selectedDefinition.length > 0) {
+            fetchDeployments();
+        }
+    }, [selectedDefinition, isAuthenticated]);
+
+    useEffect(() => {
+        setIsLoading(true);
+        if (isAuthenticated && selectedDeployment.length > 0) {
             fetchEnvironment();
         }
     }, [selectedDeployment, isAuthenticated]);
@@ -74,6 +81,8 @@ const ApiDetail = () => {
     const fetchApi = async () => {
         const isAuthenticatedResponse = await authService.isAuthenticated();
         setIsAuthenticated(isAuthenticatedResponse);
+
+        if (!isAuthenticatedResponse) return;
 
         const api = await apiService.getApi(id);
         setApi(api);
@@ -85,13 +94,7 @@ const ApiDetail = () => {
             setSelectedVersion([versions.value[0].name]);
             setSelectedVersionLabel(versions.value[0].title);
         }
-
-        const deployments = await apiService.getDeployments(id);
-        setDeployments(deployments.value);
-        if (deployments.value.length > 0) {
-            setSelectedDeployment([deployments.value[0].name]);
-            setSelectedDeploymentLabel(deployments.value[0].title);
-        }
+        setIsLoading(false);
     };
 
     const fetchDefinitions = async () => {
@@ -104,6 +107,17 @@ const ApiDetail = () => {
         }
         setIsLoading(false);
     };
+
+    const fetchDeployments = async () => {
+        const deployments = await apiService.getDeployments(id);
+        setDeployments(deployments.value);
+
+        if (deployments.value.length > 0) {
+            setSelectedDeployment([deployments.value[0].name]);
+            setSelectedDeploymentLabel(deployments.value[0].title);
+        }
+        setIsLoading(false);
+    }
 
     const fetchEnvironment = async () => {
         const environmentId = deployments?.find(d => d.name === selectedDeployment[0])?.environmentId;

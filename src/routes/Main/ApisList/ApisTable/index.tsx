@@ -42,13 +42,13 @@ const ApisTable: FC<{ apis: Api[] | null }> = ({ apis }) => {
                                 </Link>
                             </TableCell>
                             <TableCell>{api.kind.toUpperCase()}</TableCell>
+                            <TableCell className={css.capitalize}>{api.lifecycleStage}</TableCell>
                             <TableCell>
                                 <TableCellLayout truncate title={api.description}>
                                     {api.description}
                                 </TableCellLayout>
                             </TableCell>
-                            <TableCell>{new Date(api.lastUpdated || Date.now()).toLocaleDateString()}</TableCell>                            {/* <TableCell>TODO</TableCell> */}
-                            {/* <TableCell>TODO</TableCell> */}
+                            <TableCell>{new Date(api.lastUpdated || Date.now()).toLocaleDateString()}</TableCell>
                         </TableRow>
                     ))}
                 </TableBody>
