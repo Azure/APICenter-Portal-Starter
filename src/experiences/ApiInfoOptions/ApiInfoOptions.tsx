@@ -2,12 +2,12 @@ import React, { useCallback } from 'react';
 import { Button, Link, MessageBar, MessageBarBody, Spinner } from '@fluentui/react-components';
 import { ArrowDownloadRegular, Document20Regular, OpenRegular } from '@fluentui/react-icons';
 import DevPortalLogo from '@/assets/devPortal.png';
-import { Api } from '@/contracts/api';
-import { ApiVersion } from '@/contracts/apiVersion';
-import { ApiDefinition } from '@/contracts/apiDefinition';
+import { ApiMetadata } from '@/types/api';
+import { ApiVersion } from '@/types/apiVersion';
+import { ApiDefinition } from '@/types/apiDefinition';
 import useApiSpecUrl from '@/hooks/useApiSpecUrl';
 import useDeploymentEnvironment from '@/hooks/useDeploymentEnvironment';
-import { ApiDeployment } from '@/contracts/apiDeployment';
+import { ApiDeployment } from '@/types/apiDeployment';
 import VsCodeLogo from '@/assets/vsCodeLogo.svg';
 import LocationsService from '@/services/LocationsService';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
@@ -15,7 +15,7 @@ import CopyLink from '@/components/CopyLink';
 import styles from './ApiInfoOptions.module.scss';
 
 interface Props {
-  api: Api;
+  api: ApiMetadata;
   apiVersion?: ApiVersion;
   apiDefinition?: ApiDefinition;
   apiDeployment?: ApiDeployment;

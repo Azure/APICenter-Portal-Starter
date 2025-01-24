@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { useRecoilState } from 'recoil';
-import { Api } from '@/contracts/api.ts';
+import { ApiMetadata } from '@/types/api.ts';
 import recentSearchesAtom from '@/atoms/recentSearchesAtom';
 
 export enum RecentSearchType {
@@ -12,7 +12,7 @@ export interface RecentSearchData {
   id: string;
   type: RecentSearchType;
   search: string;
-  api?: Api;
+  api?: ApiMetadata;
 }
 
 export type RecentSearchDataDTO = Omit<RecentSearchData, 'id'>;

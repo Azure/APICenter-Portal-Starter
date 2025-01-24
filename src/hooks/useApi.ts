@@ -1,15 +1,15 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Api } from '@/contracts/api';
+import { ApiMetadata } from '@/types/api';
 import { useSession } from '@/util/useSession';
 import { useApiService } from '@/util/useApiService';
 
 interface ReturnType {
-  data?: Api;
+  data?: ApiMetadata;
   isLoading: boolean;
 }
 
 export default function useApi(id?: string): ReturnType {
-  const [api, setApi] = useState<Api | undefined>();
+  const [api, setApi] = useState<ApiMetadata | undefined>();
   const [isLoading, setIsLoading] = useState(true);
 
   const { isAuthenticated } = useSession();

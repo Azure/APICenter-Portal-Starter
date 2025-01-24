@@ -1,11 +1,11 @@
 import React from 'react';
 import { Link } from '@fluentui/react-components';
 import { Open16Regular } from '@fluentui/react-icons';
-import { Api } from '@/contracts/api';
+import { ApiMetadata } from '@/types/api';
 import styles from './ApiAdditionalInfo.module.scss';
 
 interface Props {
-  api: Api;
+  api: ApiMetadata;
 }
 
 function normalizeUrl(url: string): string {

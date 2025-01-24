@@ -1,7 +1,7 @@
 import { Api as DocsApi } from '@microsoft/api-docs-ui';
-import { Api } from '@/contracts/api';
+import { ApiMetadata } from '@/types/api';
 
-export default function apiAdapter(api: Api): DocsApi {
+export default function apiAdapter(api: ApiMetadata): DocsApi {
   return {
     name: api.name,
     displayName: api.title,

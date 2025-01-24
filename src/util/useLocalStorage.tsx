@@ -1,8 +1,3 @@
-/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
-
 import React, { createContext, Dispatch, FC, ReactNode, SetStateAction, useContext, useState } from 'react';
 
 import { Layouts } from '@/types/layouts';

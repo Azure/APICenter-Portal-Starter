@@ -1,15 +1,15 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Environment } from '@/contracts/environment';
+import { ApiEnvironment } from '@/types/apiEnvironment';
 import { useSession } from '@/util/useSession';
 import { useApiService } from '@/util/useApiService';
 
 interface ReturnType {
-  data?: Environment;
+  data?: ApiEnvironment;
   isLoading: boolean;
 }
 
 export default function useDeploymentEnvironment(envId?: string): ReturnType {
-  const [environment, setEnvironment] = useState<Environment | undefined>();
+  const [environment, setEnvironment] = useState<ApiEnvironment | undefined>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const { isAuthenticated } = useSession();

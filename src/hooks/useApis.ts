@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRecoilValue } from 'recoil';
-import { Api } from '@/contracts/api';
+import { ApiMetadata } from '@/types/api';
 import { ActiveFilterData } from '@/types/apiFilters';
 import { useApiService } from '@/util/useApiService';
 import { SortBy, SortByOrder } from '@/types/sorting';
@@ -14,11 +14,11 @@ interface Props {
 }
 
 interface ReturnType {
-  list: Api[];
+  list: ApiMetadata[];
   isLoading: boolean;
 }
 
-function sortApis(apis: Api[], sortBy?: SortBy): Api[] {
+function sortApis(apis: ApiMetadata[], sortBy?: SortBy): ApiMetadata[] {
   if (!sortBy) {
     return apis;
   }
@@ -42,7 +42,7 @@ function sortApis(apis: Api[], sortBy?: SortBy): Api[] {
  * Provides a list of APIs based on search and filters
  */
 export default function useApis({ search, filters, isAutoCompleteMode }: Props = {}): ReturnType {
-  const [apis, setApis] = useState<Api[]>([]);
+  const [apis, setApis] = useState<ApiMetadata[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const sortBy = useRecoilValue(apiListSortingAtom);
   const apiService = useApiService();

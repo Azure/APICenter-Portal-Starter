@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Link, Text } from '@fluentui/react-components';
 
-import { Settings } from '../../contracts/settings';
+import { AppConfig } from '../../types/appConfig';
 import { useAuthService } from '../../util/useAuthService';
 import { useConfigService } from '../../util/useConfigService';
 import { LocalStorageKey, useLocalStorage } from '../../util/useLocalStorage';
@@ -15,7 +15,7 @@ const Header = () => {
   const dataApiEndpoint = useLocalStorage(LocalStorageKey.dataApiEndpoint);
   const dataApiClientId = useLocalStorage(LocalStorageKey.dataApiClientId);
   const dataApiTenantId = useLocalStorage(LocalStorageKey.dataApiTenantId);
-  const [config, setConfig] = useState<Settings>();
+  const [config, setConfig] = useState<AppConfig>();
   const configService = useConfigService();
   const authService = useAuthService();
   const session = useSession();

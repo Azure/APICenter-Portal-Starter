@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { ApiDeployment } from '@/contracts/apiDeployment';
+import { ApiDeployment } from '@/types/apiDeployment';
 import { useSession } from '@/util/useSession';
 import { useApiService } from '@/util/useApiService';
 

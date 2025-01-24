@@ -3,12 +3,12 @@ import { Spinner } from '@fluentui/react-components';
 import { Cloud16Regular, Dismiss12Regular, Search16Regular } from '@fluentui/react-icons';
 import { Link, useNavigate } from 'react-router-dom';
 import useRecentSearches, { RecentSearchData, RecentSearchType } from '@/hooks/useRecentSearches.ts';
-import { Api } from '@/contracts/api.ts';
+import { ApiMetadata } from '@/types/api.ts';
 import LocationsService from '@/services/LocationsService';
 import styles from './ApiSearchAutoComplete.module.scss';
 
 interface Props {
-  searchResults?: Api[];
+  searchResults?: ApiMetadata[];
   isLoading: boolean;
 }
 
