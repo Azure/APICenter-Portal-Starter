@@ -9,17 +9,29 @@ import ApiListSortingSelect from '@/experiences/ApiListSortingSelect';
 import { ActiveFiltersBadges } from '@/experiences/ActiveFiltersBadges/ActiveFiltersBadges';
 import AccessDeniedSvg from '@/assets/accessDenied.svg';
 import isAuthenticatedAtom from '@/atoms/isAuthenticatedAtom';
+import isAccessDeniedAtom from '@/atoms/isAccessDeniedAtom';
 import styles from './Home.module.scss';
 
 export const Home: React.FC = () => {
   const isAuthenticated = useRecoilValue(isAuthenticatedAtom);
+  const isAccessDenied = useRecoilValue(isAccessDeniedAtom);
 
   function renderApiList() {
     if (!isAuthenticated) {
       return (
         <div className={styles.emptyState}>
-          <img src={AccessDeniedSvg} alt="Access Denied" />
+          <img src={AccessDeniedSvg} alt="Sign in required" />
           Sign in or create an account to view APIs.
+        </div>
+      );
+    }
+
+    if (isAccessDenied) {
+      return (
+        <div className={styles.emptyState}>
+          <img src={AccessDeniedSvg} alt="Access Denied" />
+          You don&#39;t have permission to access this developer portal. Please contact this developer portal&#39;s
+          administrator for assistance.
         </div>
       );
     }
