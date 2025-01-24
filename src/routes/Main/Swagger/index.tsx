@@ -6,7 +6,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import SwaggerUI from "swagger-ui-react";
-import AsyncApiComponent from "@asyncapi/react-component";
+import AsyncApiComponent from "@asyncapi/react-component/browser";
 import "@asyncapi/react-component/styles/default.min.css";
 import { Spinner } from "@fluentui/react-components";
 import { useApiService } from "../../../util/useApiService";
