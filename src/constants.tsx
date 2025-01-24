@@ -6,6 +6,7 @@
 export const TableColumns = [
     { label: "Name", value: "name" },
     { label: "Type", value: "kind" },
+    { label: "Lifecycle", value: "lifecycleStage" },
     { label: "Description", value: "description" },
     { label: "Last updated", value: "lastUpdated" },
     // {label: "Created by", value: "createdBy"},
