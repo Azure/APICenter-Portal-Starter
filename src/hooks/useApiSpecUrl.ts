@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useApiService } from '@/util/useApiService';
-import { useSession } from '@/util/useSession';
+import { useRecoilValue } from 'recoil';
+import isAuthenticatedAtom from '@/atoms/isAuthenticatedAtom';
+import ApiService from '@/services/ApiService';
 
 interface Props {
   apiName?: string;
@@ -17,8 +18,7 @@ export default function useApiSpecUrl({ apiName, versionName, definitionName }: 
   const [value, setValue] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState(true);
 
-  const { isAuthenticated } = useSession();
-  const apiService = useApiService();
+  const isAuthenticated = useRecoilValue(isAuthenticatedAtom);
 
   const fetch = useCallback(async () => {
     if (!apiName || !versionName || !definitionName || !isAuthenticated) {
@@ -29,12 +29,11 @@ export default function useApiSpecUrl({ apiName, versionName, definitionName }: 
 
     try {
       setIsLoading(true);
-      const downloadUrl = await apiService.getSpecificationLink(apiName, versionName, definitionName);
-      setValue(downloadUrl);
+      setValue(await ApiService.getSpecificationLink(apiName, versionName, definitionName));
     } finally {
       setIsLoading(false);
     }
-  }, [apiName, apiService, definitionName, isAuthenticated, versionName]);
+  }, [apiName, definitionName, isAuthenticated, versionName]);
 
   useEffect(() => {
     void fetch();

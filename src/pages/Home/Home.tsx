@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import { useSession } from '@/util/useSession';
+import { useRecoilValue } from 'recoil';
 import ApiList from '@/experiences/ApiList';
 import ApiSearchBox from '@/experiences/ApiSearchBox';
 import ApiFilters from '@/experiences/ApiFilters';
@@ -8,10 +8,11 @@ import ApiListLayoutSwitch from '@/experiences/ApiListLayoutSwitch';
 import ApiListSortingSelect from '@/experiences/ApiListSortingSelect';
 import { ActiveFiltersBadges } from '@/experiences/ActiveFiltersBadges/ActiveFiltersBadges';
 import AccessDeniedSvg from '@/assets/accessDenied.svg';
+import isAuthenticatedAtom from '@/atoms/isAuthenticatedAtom';
 import styles from './Home.module.scss';
 
 export const Home: React.FC = () => {
-  const { isAuthenticated } = useSession();
+  const isAuthenticated = useRecoilValue(isAuthenticatedAtom);
 
   function renderApiList() {
     if (!isAuthenticated) {

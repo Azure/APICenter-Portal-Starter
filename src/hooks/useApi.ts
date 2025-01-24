@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
+import { useRecoilValue } from 'recoil';
 import { ApiMetadata } from '@/types/api';
-import { useSession } from '@/util/useSession';
-import { useApiService } from '@/util/useApiService';
+import isAuthenticatedAtom from '@/atoms/isAuthenticatedAtom';
+import ApiService from '@/services/ApiService';
 
 interface ReturnType {
   data?: ApiMetadata;
@@ -11,9 +12,7 @@ interface ReturnType {
 export default function useApi(id?: string): ReturnType {
   const [api, setApi] = useState<ApiMetadata | undefined>();
   const [isLoading, setIsLoading] = useState(true);
-
-  const { isAuthenticated } = useSession();
-  const apiService = useApiService();
+  const isAuthenticated = useRecoilValue(isAuthenticatedAtom);
 
   const fetch = useCallback(async () => {
     if (!id || !isAuthenticated) {
@@ -24,13 +23,11 @@ export default function useApi(id?: string): ReturnType {
 
     try {
       setIsLoading(true);
-
-      const api = await apiService.getApi(id);
-      setApi(api);
+      setApi(await ApiService.getApi(id));
     } finally {
       setIsLoading(false);
     }
-  }, [apiService, id, isAuthenticated]);
+  }, [id, isAuthenticated]);
 
   useEffect(() => {
     void fetch();

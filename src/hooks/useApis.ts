@@ -2,9 +2,9 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRecoilValue } from 'recoil';
 import { ApiMetadata } from '@/types/api';
 import { ActiveFilterData } from '@/types/apiFilters';
-import { useApiService } from '@/util/useApiService';
 import { SortBy, SortByOrder } from '@/types/sorting';
 import apiListSortingAtom from '@/atoms/apiListSortingAtom';
+import ApiService from '@/services/ApiService';
 
 interface Props {
   search?: string;
@@ -45,7 +45,6 @@ export default function useApis({ search, filters, isAutoCompleteMode }: Props =
   const [apis, setApis] = useState<ApiMetadata[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const sortBy = useRecoilValue(apiListSortingAtom);
-  const apiService = useApiService();
 
   const fetchApis = useCallback(async () => {
     if (isAutoCompleteMode && !search) {
@@ -53,11 +52,13 @@ export default function useApis({ search, filters, isAutoCompleteMode }: Props =
       return;
     }
 
-    setIsLoading(true);
-    const response = await apiService.getApis(search, filters);
-    setApis(response.value);
-    setIsLoading(false);
-  }, [apiService, filters, isAutoCompleteMode, search]);
+    try {
+      setIsLoading(true);
+      setApis(await ApiService.getApis(search, filters));
+    } finally {
+      setIsLoading(false);
+    }
+  }, [filters, isAutoCompleteMode, search]);
 
   useEffect(() => {
     void fetchApis();

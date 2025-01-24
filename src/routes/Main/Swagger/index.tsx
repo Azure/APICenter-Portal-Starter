@@ -4,12 +4,11 @@ import SwaggerUI from 'swagger-ui-react';
 import AsyncApiComponent from '@asyncapi/react-component';
 import '@asyncapi/react-component/styles/default.min.css';
 import { Spinner } from '@fluentui/react-components';
-import { useApiService } from '../../../util/useApiService';
 
 import 'swagger-ui-react/swagger-ui.css';
+import ApiService from '@/services/ApiService';
 
 const Swagger = () => {
-  const apiService = useApiService();
   const {
     name,
     version,
@@ -27,13 +26,13 @@ const Swagger = () => {
   const getSpecificationLink = async () => {
     if (!version || !definitionName) return;
 
-    const definition = await apiService.getDefinition(name, version, definitionName);
+    const definition = await ApiService.getDefinition(name, version, definitionName);
 
     const specName = definition.specification?.name ?? 'rest';
     console.log(specName);
     setSpecType(specName);
 
-    const downloadUrl = await apiService.getSpecificationLink(name, version, definitionName);
+    const downloadUrl = await ApiService.getSpecificationLink(name, version, definitionName);
     const downloadResult = await fetch(downloadUrl);
     const content: any = await downloadResult.text();
 

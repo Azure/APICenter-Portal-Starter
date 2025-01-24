@@ -1,52 +1,27 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Button, Link, Text } from '@fluentui/react-components';
-
-import { AppConfig } from '../../types/appConfig';
-import { useAuthService } from '../../util/useAuthService';
-import { useConfigService } from '../../util/useConfigService';
-import { LocalStorageKey, useLocalStorage } from '../../util/useLocalStorage';
-import { useSession } from '../../util/useSession';
+import { useRecoilState } from 'recoil';
 import CloverLogo from '../logos/CloverLogo';
 
+import config from '@/config';
+import MsalAuthService from '@/services/MsalAuthService';
+import isAuthenticatedAtom from '@/atoms/isAuthenticatedAtom';
 import css from './index.module.scss';
 
 const Header = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const dataApiEndpoint = useLocalStorage(LocalStorageKey.dataApiEndpoint);
-  const dataApiClientId = useLocalStorage(LocalStorageKey.dataApiClientId);
-  const dataApiTenantId = useLocalStorage(LocalStorageKey.dataApiTenantId);
-  const [config, setConfig] = useState<AppConfig>();
-  const configService = useConfigService();
-  const authService = useAuthService();
-  const session = useSession();
-
-  const fetchConfig = async () => {
-    const config = await configService.getSettings();
-    setConfig(config);
-    dataApiEndpoint.set(config.dataApiHostName);
-    dataApiClientId.set(config.authentication.clientId);
-    dataApiTenantId.set(config.authentication.tenantId);
-    const isAuthenticatedResponse = await authService.isAuthenticated();
-    setIsAuthenticated(isAuthenticatedResponse);
-  };
+  const [isAuthenticated, setIsAuthenticated] = useRecoilState(isAuthenticatedAtom);
 
   const signIn = async () => {
-    await authService.signIn();
-    session.setIsAuthenticated(true);
+    await MsalAuthService.signIn();
     setIsAuthenticated(true);
   };
 
   const signOut = async () => {
-    await authService.signOut();
-    session.setIsAuthenticated(false);
+    await MsalAuthService.signOut();
     setIsAuthenticated(false);
     // Refresh the URL to the original state
     window.location.href = window.location.origin;
   };
-
-  useEffect(() => {
-    fetchConfig();
-  }, []);
 
   return (
     <header className={css.header}>
