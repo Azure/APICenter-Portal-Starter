@@ -1,8 +1,8 @@
 .apiSearchAutoComplete {
   position: absolute;
   z-index: 1;
-  width: 100%;
   box-sizing: border-box;
+  width: 100%;
   background: white;
   box-shadow: 0 2px 4px rgb(0 0 0 / 50%);
   color: black;
@@ -10,9 +10,9 @@
   h6 {
     display: flex;
     justify-content: space-between;
+    margin: .5rem .75rem .125rem;
     padding-bottom: .5rem;
     border-bottom: 1px solid var(--grey-3);
-    margin: .5rem .75rem .125rem;
     font-size: 0.75rem;
     font-weight: 400;
     letter-spacing: 0.02rem;
@@ -39,15 +39,15 @@
     text-decoration: none;
 
     .deleteBtn {
+      display: none;
       position: absolute;
       top: 50%;
       right: 2px;
-      display: none;
+      flex-shrink: 0;
       width: 2rem;
       height: 2rem;
-      flex-shrink: 0;
-      background: var(--grey-2);
       transform: translateY(-50%);
+      background: var(--grey-2);
 
       &:hover {
         background: var(--grey-3);

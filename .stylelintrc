@@ -1,5 +1,5 @@
 {
-  "extends": ["stylelint-config-standard-scss", "stylelint-config-idiomatic-order"],
+  "extends": ["stylelint-config-standard-scss", "stylelint-config-property-sort-order-smacss"],
   "plugins": ["stylelint-order"],
   "rules": {
     "selector-class-pattern": ".*"

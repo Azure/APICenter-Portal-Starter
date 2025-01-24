@@ -1,50 +1,49 @@
 @import '@microsoft/api-docs-ui/dist/index.css';
 
 :root {
-    --blue-4: #115EA3;
-    --blue-3: #0F6CBD;
-    --blue-2: #6387E3;
-    --blue-1: #EBF3FC;
-    --grey-7: #242424;
-    --grey-6: #424242;
-    --grey-5: #616161;
-    --grey-4: #707070;
-    --grey-3: #D1D1D1;
-    --grey-2: #E6E6E6;
-    --grey-1: #F3F2F1;
-    --radius-m: 4px;
+  --blue-4: #115EA3;
+  --blue-3: #0F6CBD;
+  --blue-2: #6387E3;
+  --blue-1: #EBF3FC;
+  --grey-7: #242424;
+  --grey-6: #424242;
+  --grey-5: #616161;
+  --grey-4: #707070;
+  --grey-3: #D1D1D1;
+  --grey-2: #E6E6E6;
+  --grey-1: #F3F2F1;
+  --radius-m: 4px;
 }
 
 html,
 body,
 #root {
-    height: 100%;
+  height: 100%;
 }
 
 body {
-    margin: 0;
+  margin: 0;
 }
 
 * {
-    position: relative;
-    box-sizing: content-box;
+  position: relative;
 }
 
 button {
-    padding: 0;
-    border: none;
-    background-color: transparent;
-    color: inherit;
-    cursor: pointer;
-    font: inherit;
+  padding: 0;
+  border: none;
+  background-color: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
 }
 
 .app-root {
-    display: flex;
-    height: 100%;
-    flex-direction: column;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 
-    > main {
-        flex-grow: 1;
-    }
+  > main {
+    flex-grow: 1;
+  }
 }
