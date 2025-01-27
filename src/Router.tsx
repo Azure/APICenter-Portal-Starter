@@ -30,7 +30,7 @@ const router = createBrowserRouter([
             }
         ],
     },
-]);
+], { basename: import.meta.env.BASE_URL });
 
 const Router = () => <RouterProvider router={router} />;
 
