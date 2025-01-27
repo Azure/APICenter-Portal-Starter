@@ -42,6 +42,7 @@ const ApisTable: FC<{ apis: Api[] | null }> = ({ apis }) => {
                                 </Link>
                             </TableCell>
                             <TableCell>{api.kind.toUpperCase()}</TableCell>
+                            <TableCell>{api.lifecycleStage}</TableCell>
                             <TableCell>
                                 <TableCellLayout truncate title={api.description}>
                                     {api.description}

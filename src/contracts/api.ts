@@ -72,4 +72,5 @@ export interface Api {
      * The time stamp of latest update, e.g., "2024-01-01T00:00:00.000000Z".
      */
     lastUpdated?: string;
+
 }
