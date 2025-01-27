@@ -6,7 +6,7 @@ import AuthBtn from '@/components/Header/AuthBtn';
 import LocationsService from '@/services/LocationsService';
 import styles from './Header.module.scss';
 
-const Header = () => {
+const Header: React.FC = () => {
   return (
     <header className={styles.header}>
       <Link href={LocationsService.getHomeUrl()} className={styles.logo}>
@@ -30,4 +30,4 @@ const Header = () => {
   );
 };
 
-export default Header;
+export default React.memo(Header);
