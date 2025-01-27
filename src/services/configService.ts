@@ -13,7 +13,7 @@ export class ConfigService implements IConfigService {
     private settingsPromise?: Promise<Settings>;
 
     private async loadFromFile(): Promise<Settings> {
-        const response = await fetch("/config.json");
+        const response = await fetch(`${import.meta.env.BASE_URL == "/" ? "" : import.meta.env.BASE_URL}/config.json`);
         const dataJson = await response.json();
 
         return dataJson;
