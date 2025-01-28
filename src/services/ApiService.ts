@@ -1,8 +1,11 @@
 import { groupBy } from 'lodash';
+import { OpenAPI } from 'openapi-types';
+import SwaggerClient from 'swagger-client';
+import memoize from 'memoizee';
 import { ActiveFilterData } from '@/types/apiFilters';
 import HttpService from '@/services/HttpService';
 import { ApiMetadata } from '@/types/api';
-import { ApiDefinition } from '@/types/apiDefinition';
+import { ApiDefinition, ApiDefinitionId } from '@/types/apiDefinition';
 import { ApiVersion } from '@/types/apiVersion';
 import { ApiDeployment } from '@/types/apiDeployment';
 import { ApiEnvironment } from '@/types/apiEnvironment';
@@ -51,18 +54,26 @@ const ApiService = {
     return response.value || [];
   },
 
-  async getDefinition(apiName: string, versionName: string, definitionName: string) {
+  async getDefinition({ apiName, versionName, definitionName }: ApiDefinitionId) {
     return await HttpService.get<ApiDefinition>(
       `/apis/${apiName}/versions/${versionName}/definitions/${definitionName}`
     );
   },
 
-  async getSpecificationLink(apiName: string, versionName: string, definitionName: string) {
+  async getSpecificationLink({ apiName, versionName, definitionName }: ApiDefinitionId) {
     const response = await HttpService.post<{ value: string }>(
       `/apis/${apiName}/versions/${versionName}/definitions/${definitionName}:exportSpecification`
     );
     return response?.value;
   },
+
+  getSpecification: memoize(async (definitionId: ApiDefinitionId): Promise<OpenAPI.Document | undefined> => {
+    const resolvedSpec = await SwaggerClient.resolve({ url: await ApiService.getSpecificationLink(definitionId) });
+    if (!resolvedSpec || resolvedSpec.errors.length) {
+      return undefined;
+    }
+    return resolvedSpec.spec;
+  }),
 
   async getEnvironment(environmentId: string) {
     return await HttpService.get<ApiEnvironment>(`/environments/${environmentId}`);

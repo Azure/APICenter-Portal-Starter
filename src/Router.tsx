@@ -3,6 +3,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import Home from '@/pages/Home';
 import ApiInfo from '@/pages/ApiInfo';
 import Swagger from '@/pages/Swagger';
+import ApiSpec from '@/pages/ApiSpec';
 import Layout from './Layout';
 
 const router = createBrowserRouter([
@@ -20,7 +21,11 @@ const router = createBrowserRouter([
         ],
       },
       {
-        path: 'specs/:name/:version/:definition',
+        path: 'apis/:apiName/versions/:versionName/definitions/:definitionName',
+        element: <ApiSpec />,
+      },
+      {
+        path: 'swagger/:name/:version/:definition',
         element: <Swagger />,
       },
     ],

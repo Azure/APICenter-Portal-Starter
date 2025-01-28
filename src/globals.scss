@@ -42,8 +42,14 @@ button {
   display: flex;
   flex-direction: column;
   height: 100%;
+  background: transparent !important;
 
   > main {
-    flex-grow: 1;
+    display: flex;
+    flex: 1;
+    
+    > * {
+      flex: 1;
+    }
   }
 }

@@ -1,17 +1,18 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useRecoilValue } from 'recoil';
-import isAuthenticatedAtom from '@/atoms/isAuthenticatedAtom';
-import ApiService from '@/services/ApiService';
+import { OpenAPI } from 'openapi-types';
 import { ApiDefinitionId } from '@/types/apiDefinition';
+import isAuthenticatedAtom from '@/atoms/isAuthenticatedAtom';
 import { isDefinitionIdValid } from '@/utils/apiDefinitions';
+import ApiService from '@/services/ApiService';
 
 interface ReturnType {
-  value?: string;
+  value?: OpenAPI.Document;
   isLoading: boolean;
 }
 
-export default function useApiSpecUrl(definitionId: ApiDefinitionId): ReturnType {
-  const [value, setValue] = useState<string | undefined>();
+export default function useApiSpec(definitionId: ApiDefinitionId): ReturnType {
+  const [value, setValue] = useState<OpenAPI.Document | undefined>();
   const [isLoading, setIsLoading] = useState(true);
 
   const isAuthenticated = useRecoilValue(isAuthenticatedAtom);
@@ -25,7 +26,7 @@ export default function useApiSpecUrl(definitionId: ApiDefinitionId): ReturnType
 
     try {
       setIsLoading(true);
-      setValue(await ApiService.getSpecificationLink(definitionId));
+      setValue(await ApiService.getSpecification(definitionId));
     } finally {
       setIsLoading(false);
     }

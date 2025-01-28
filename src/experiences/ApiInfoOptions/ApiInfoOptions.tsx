@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Button, Link, MessageBar, MessageBarBody, Spinner } from '@fluentui/react-components';
 import { ArrowDownloadRegular, Document20Regular, OpenRegular } from '@fluentui/react-icons';
 import DevPortalLogo from '@/assets/devPortal.png';
@@ -25,11 +25,16 @@ interface Props {
 const DEFAULT_INSTRUCTIONS = 'Gain comprehensive insights into the API.';
 
 export const ApiInfoOptions: React.FC<Props> = ({ api, apiVersion, apiDefinition, apiDeployment, isLoading }) => {
-  const apiSpecUrl = useApiSpecUrl({
-    apiName: api.name,
-    versionName: apiVersion?.name,
-    definitionName: apiDefinition?.name,
-  });
+  const definitionId = useMemo(
+    () => ({
+      apiName: api.name,
+      versionName: apiVersion?.name,
+      definitionName: apiDefinition?.name,
+    }),
+    [api.name, apiDefinition?.name, apiVersion?.name]
+  );
+
+  const apiSpecUrl = useApiSpecUrl(definitionId);
   const environment = useDeploymentEnvironment(apiDeployment?.environmentId);
 
   const handleOpenInVsCodeClick = useCallback(() => {
