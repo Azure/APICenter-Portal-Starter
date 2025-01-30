@@ -1,22 +1,56 @@
-import React, { useMemo } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useCallback, useMemo } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Spinner } from '@fluentui/react-components';
 import useApiSpec from '@/hooks/useApiSpec';
 import { ApiDefinitionId } from '@/types/apiDefinition';
 import ApiOperationsSelect from '@/experiences/ApiOperationsSelect';
 import useSelectedOperation from '@/hooks/useSelectedOperation';
 import { ApiOperationDetails } from '@/experiences/ApiOperationDetails/ApiOperationDetails';
+import useApi from '@/hooks/useApi';
+import ApiDefinitionSelect, { ApiDefinitionSelection } from '@/experiences/ApiDefinitionSelect';
+import LocationsService from '@/services/LocationsService';
 import styles from './ApiSpec.module.scss';
 
 export const ApiSpec: React.FC = () => {
   const { apiName, versionName, definitionName } = useParams<Readonly<ApiDefinitionId>>() as ApiDefinitionId;
-  const { name: selectedOperationName } = useSelectedOperation();
+  const selectedOperation = useSelectedOperation();
+  const navigate = useNavigate();
+
+  const api = useApi(apiName);
 
   const definitionId = useMemo<ApiDefinitionId>(
     () => ({ apiName, versionName, definitionName }),
     [apiName, definitionName, versionName]
   );
   const apiSpec = useApiSpec(definitionId);
+
+  const handleDefinitionSelectionChange = useCallback(
+    (definitionSelection: ApiDefinitionSelection) => {
+      navigate(
+        LocationsService.getApiSchemaExplorerUrl(
+          apiName,
+          definitionSelection.version.name,
+          definitionSelection.definition.name
+        )
+      );
+    },
+    [apiName, navigate]
+  );
+
+  function renderHeader() {
+    if (api.isLoading) {
+      return null;
+    }
+
+    return (
+      <div className={styles.header}>
+        <h1>{api.data.title}</h1>
+        <div className={styles.definitionRow}>
+          <ApiDefinitionSelect apiId={apiName} isInline onSelectionChange={handleDefinitionSelectionChange} />
+        </div>
+      </div>
+    );
+  }
 
   function renderContent() {
     if (apiSpec.isLoading) {
@@ -34,14 +68,20 @@ export const ApiSpec: React.FC = () => {
           <h4>Operations</h4>
           <ApiOperationsSelect apiSpec={apiSpec} />
         </aside>
+
         <div className={styles.details}>
-          <ApiOperationDetails apiSpec={apiSpec} operation={apiSpec.getOperation(selectedOperationName)} />
+          <ApiOperationDetails apiSpec={apiSpec} operation={apiSpec.getOperation(selectedOperation.name)} />
         </div>
       </div>
     );
   }
 
-  return <div className={styles.apiSpec}>{renderContent()}</div>;
+  return (
+    <div className={styles.apiSpec}>
+      {renderHeader()}
+      {renderContent()}
+    </div>
+  );
 };
 
 export default React.memo(ApiSpec);

@@ -72,7 +72,6 @@ export default async function openApiSpecReader(specStr: string): Promise<ApiSpe
       | WithRef<OpenAPIV3.SchemaObject>
       | undefined;
 
-    // TODO: check if it is correct for non body params
     const resultParams = specParams.map<OperationParameterMetadata>((specParam) => {
       const result = { ...specParam } as OperationParameterMetadata;
       if ('schema' in specParam) {

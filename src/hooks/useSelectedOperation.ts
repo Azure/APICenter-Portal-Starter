@@ -4,6 +4,7 @@ import { useSearchParams } from 'react-router-dom';
 interface ReturnType {
   name: string;
   set: (search: string) => void;
+  reset: () => void;
 }
 
 const SEARCH_PARAM = 'op';
@@ -28,8 +29,13 @@ export default function useSelectedOperation(): ReturnType {
     [setSearchParams]
   );
 
+  const reset = useCallback(() => {
+    set('');
+  }, [set]);
+
   return {
     name: searchParams.get(SEARCH_PARAM) || '',
     set,
+    reset,
   };
 }

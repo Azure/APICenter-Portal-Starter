@@ -1,6 +1,6 @@
+import React from 'react';
 import { OpenAPIV2, OpenAPIV3 } from 'openapi-types';
 import { ApiOperation, ApiOperationParameter } from '@microsoft/api-docs-ui';
-import React from 'react';
 
 export type WithRef<T> = T & { $ref?: string };
 
@@ -11,7 +11,6 @@ export interface OperationMetadata extends ApiOperation {
 
 export type OperationParameterMetadata = ApiOperationParameter;
 
-// TODO: should there also be description
 export interface SchemaMetadata {
   $ref: string;
   typeLabel: React.ReactNode;

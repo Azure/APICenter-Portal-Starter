@@ -19,6 +19,22 @@ export const ApiOperationsSelect: React.FC<Props> = ({ apiSpec }) => {
     [selectedOperation]
   );
 
+  /**
+   * Reset selected operation if it's not found in the current spec.
+   * It can happen when spec is replaced with another one.
+   */
+  useEffect(() => {
+    if (!selectedOperation.name) {
+      return;
+    }
+
+    if (apiSpec.getOperation(selectedOperation.name)) {
+      return;
+    }
+
+    selectedOperation.reset();
+  }, [apiSpec, operations, selectedOperation]);
+
   useEffect(() => {
     if (selectedOperation.name || !operations.length) {
       return;
