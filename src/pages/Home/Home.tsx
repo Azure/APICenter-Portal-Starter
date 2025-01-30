@@ -43,11 +43,11 @@ export const Home: React.FC = () => {
     <div className={styles.home}>
       <Outlet />
 
-      <section className={styles.searchPanel}>
+      <div className={styles.searchPanel}>
         <h1>API Center portal</h1>
 
         <ApiSearchBox />
-      </section>
+      </div>
 
       <section className={styles.content}>
         <div className={styles.filters}>

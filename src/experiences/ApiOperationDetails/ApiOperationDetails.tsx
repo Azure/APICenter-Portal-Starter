@@ -1,7 +1,6 @@
 import React from 'react';
 import { ApiOperationInfo, ParametersTable } from '@microsoft/api-docs-ui';
 import { ApiSpecReader, OperationMetadata } from '@/types/apiSpec';
-import { getRefLabel } from '@/utils/openApi';
 import ParamSchemaDefinition from '@/components/ParamSchemaDefinition';
 import styles from './ApiOperationDetails.module.scss';
 

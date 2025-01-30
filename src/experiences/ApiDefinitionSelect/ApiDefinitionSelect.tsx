@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Dropdown, Option } from '@fluentui/react-components';
-import { isUndefined } from 'lodash';
+import { find, isUndefined } from 'lodash';
 import classNames from 'classnames';
 import { ApiVersion } from '@/types/apiVersion';
 import { ApiDefinition } from '@/types/apiDefinition';
@@ -18,6 +18,11 @@ export interface ApiDefinitionSelection {
 
 interface Props {
   apiId: string;
+  defaultSelection?: {
+    version?: string;
+    definition?: string;
+    deployment?: string;
+  };
   isInline?: boolean;
   onSelectionChange: (selection: ApiDefinitionSelection) => void;
 }
@@ -26,7 +31,7 @@ const NO_VERSION_LABEL = "Version isn't available";
 const NO_DEFINITION_LABEL = "Definition isn't available";
 const NO_DEPLOYMENT_LABEL = "Deployment isn't available";
 
-export const ApiDefinitionSelect: React.FC<Props> = ({ apiId, isInline, onSelectionChange }) => {
+export const ApiDefinitionSelect: React.FC<Props> = ({ apiId, defaultSelection, isInline, onSelectionChange }) => {
   const [version, setVersion] = useState<ApiVersion | null | undefined>();
   const [definition, setDefinition] = useState<ApiDefinition | null | undefined>();
   const [deployment, setDeployment] = useState<ApiDeployment | null | undefined>();
@@ -39,16 +44,19 @@ export const ApiDefinitionSelect: React.FC<Props> = ({ apiId, isInline, onSelect
 
   // Set initial values
   useEffect(() => {
-    setVersion(apiVersions.list[0] || null);
-  }, [apiVersions.list]);
+    const defaultName = defaultSelection.version || apiVersions.list[0]?.name;
+    setVersion(find(apiVersions.list, { name: defaultName }) || null);
+  }, [apiVersions.list, defaultSelection.version]);
 
   useEffect(() => {
-    setDefinition(apiDefinitions.list[0] || null);
-  }, [apiDefinitions.list]);
+    const defaultName = defaultSelection.definition || apiDefinitions.list[0]?.name;
+    setDefinition(find(apiDefinitions.list, { name: defaultName }) || null);
+  }, [apiDefinitions.list, defaultSelection.definition]);
 
   useEffect(() => {
-    setDeployment(apiDeployments.list[0] || null);
-  }, [apiDeployments.list]);
+    const defaultName = defaultSelection.deployment || apiDeployments.list[0]?.name;
+    setDeployment(find(apiDeployments.list, { name: defaultName }) || null);
+  }, [apiDeployments.list, defaultSelection.deployment]);
 
   // Reset definition when version changes
   useEffect(() => {

@@ -44,10 +44,20 @@ export const ApiSpec: React.FC = () => {
 
     return (
       <div className={styles.header}>
-        <h1>{api.data.title}</h1>
-        <div className={styles.definitionRow}>
-          <ApiDefinitionSelect apiId={apiName} isInline onSelectionChange={handleDefinitionSelectionChange} />
-        </div>
+        <section>
+          <h1>{api.data.title}</h1>
+          <div className={styles.definitionRow}>
+            <ApiDefinitionSelect
+              apiId={apiName}
+              defaultSelection={{
+                version: versionName,
+                definition: definitionName,
+              }}
+              isInline
+              onSelectionChange={handleDefinitionSelectionChange}
+            />
+          </div>
+        </section>
       </div>
     );
   }
@@ -79,7 +89,7 @@ export const ApiSpec: React.FC = () => {
   return (
     <div className={styles.apiSpec}>
       {renderHeader()}
-      {renderContent()}
+      <section>{renderContent()}</section>
     </div>
   );
 };

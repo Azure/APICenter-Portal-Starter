@@ -1,6 +1,7 @@
 import React from 'react';
 import { ParametersTable } from '@microsoft/api-docs-ui';
 import { Badge } from '@fluentui/react-components';
+import { LinkRegular } from '@fluentui/react-icons';
 import { SchemaMetadata } from '@/types/apiSpec';
 import RefLink from '@/components/RefLink';
 import { getRefLabel } from '@/utils/openApi';
@@ -25,7 +26,14 @@ export const ParamSchemaDefinition: React.FC<Props> = ({
 
   function renderTitle() {
     if (isGlobalDefinition) {
-      return <h4 id={getRefLabel(schema.$ref)}>{getRefLabel(schema.$ref)}</h4>;
+      return (
+        <h4 id={getRefLabel(schema.$ref)}>
+          <RefLink className={styles.anchor} $ref={schema.$ref}>
+            #
+          </RefLink>
+          {getRefLabel(schema.$ref)}
+        </h4>
+      );
     }
 
     return (
@@ -58,10 +66,10 @@ export const ParamSchemaDefinition: React.FC<Props> = ({
   }
 
   return (
-    <>
+    <div className={styles.paramSchemaDefinition}>
       {renderTitle()}
       {renderSchema()}
-    </>
+    </div>
   );
 };
 
