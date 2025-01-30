@@ -10,7 +10,16 @@ export class HttpClient implements IHttpClient {
     public async fetchData(url: string, method: Method = Method.GET): Promise<any> {
         const accessToken = await authService.getAccessToken();
         const settings = await configService.getSettings();
-        const requestUrl = `https://${settings.dataApiHostName}/${url}`;
+
+        if (!settings.dataApiHostName.includes("/workspaces/default")) {
+            url = "workspaces/default/" + url;
+        }
+
+        if (!url.startsWith("/")) {
+            url = "/" + url;
+        }
+
+        const requestUrl = `https://${settings.dataApiHostName}${url}`;
 
         const headers: HeadersInit = {
             Accept: "application/json",
@@ -34,7 +43,7 @@ export class HttpClient implements IHttpClient {
 
             case 404:
                 return null;
-                
+
             default:
                 break;
         }
