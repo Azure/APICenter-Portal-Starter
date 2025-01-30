@@ -2,7 +2,7 @@ import React from 'react';
 import { OpenAPI, OpenAPIV2, OpenAPIV3 } from 'openapi-types';
 import { Link } from '@fluentui/react-components';
 import { get } from 'lodash';
-import { WithRef, SchemaMetadata } from '@/types/apiSpec';
+import { WithRef, SchemaMetadata, OperationParameterMetadata } from '@/types/apiSpec';
 
 export function resolveRef<T extends object>(schema: OpenAPI.Document, $ref: string): T | undefined {
   return {
@@ -77,17 +77,28 @@ export function resolveSchema(
     return undefined;
   }
 
+  const properties = Object.entries(schema.properties || {}).map<OperationParameterMetadata>(([name, propSchema]) => ({
+    name,
+    type: schemaToTypeLabel(propSchema),
+    in: placement,
+    description: propSchema.description,
+    required: schema.required?.includes(name),
+    readOnly: propSchema.readOnly,
+  }));
+
+  if (schema.additionalProperties) {
+    properties.push({
+      name: '[key]',
+      type: schemaToTypeLabel(schema.additionalProperties as OpenAPIV3.SchemaObject),
+      in: placement,
+      description: 'Additional properties',
+    });
+  }
+
   return {
     $ref: schema.$ref || '',
     typeLabel: schemaToTypeLabel(schema),
-    properties: Object.entries(schema.properties || {}).map(([name, propSchema]) => ({
-      name,
-      type: schemaToTypeLabel(propSchema),
-      in: placement,
-      description: propSchema.description,
-      required: schema.required?.includes(name),
-      readOnly: propSchema.readOnly,
-    })),
+    properties,
     isObject: schema.type === 'object',
   };
 }
