@@ -1,25 +1,16 @@
-import React, { useCallback, useEffect, useMemo } from 'react';
-import { OpenAPI } from 'openapi-types';
+import React, { useCallback, useEffect } from 'react';
 import { ApiOperationsList } from '@microsoft/api-docs-ui';
-import { useSearchParams } from 'react-router-dom';
-import { OperationMetadata } from '@/types/apiSpec';
-import OpenApiParser from '@/parsers/openApiParser';
+import { ApiSpecReader, OperationMetadata } from '@/types/apiSpec';
 import useSelectedOperation from '@/hooks/useSelectedOperation';
 
 interface Props {
-  apiSpec: OpenAPI.Document;
+  apiSpec: ApiSpecReader;
 }
 
 export const ApiOperationsSelect: React.FC<Props> = ({ apiSpec }) => {
   const selectedOperation = useSelectedOperation();
 
-  const operations = useMemo(() => {
-    if (!apiSpec) {
-      return [];
-    }
-
-    return OpenApiParser.getOperations(apiSpec);
-  }, [apiSpec]);
+  const operations = apiSpec.getOperations();
 
   const handleOperationSelect = useCallback(
     (operation: OperationMetadata) => {

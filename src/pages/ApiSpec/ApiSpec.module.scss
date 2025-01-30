@@ -18,10 +18,16 @@
       width: 335px;
       padding: 32px;
       border-right: 1px solid var(--grey-2);
+      
+      h4 {
+        margin: 0 0 14px;
+      }
     }
     
     .details {
       flex: 1;
+      max-width: 800px;
+      padding: 24px;
     }
   }
 }

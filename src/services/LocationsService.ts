@@ -22,8 +22,6 @@ const LocationsService = {
 
   getApiSchemaExplorerUrl: (api: string, version: string, definition: string) =>
     `/apis/${api}/versions/${version}/definitions/${definition}`,
-  // getApiSchemaExplorerUrl: (api: string, version: string, definition: string) =>
-  //   `/swagger/${api}/${version}/${definition}`,
 
   getHelpUrl: () => 'https://learn.microsoft.com/en-us/azure/api-center/overview',
 };

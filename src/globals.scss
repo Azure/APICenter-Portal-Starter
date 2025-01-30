@@ -29,6 +29,26 @@ body {
   position: relative;
 }
 
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+}
+
+h3 {
+  font-size: 20px;
+}
+
+h4 {
+  font-size: 16px;
+}
+
+h5 {
+  font-size: 14px;
+}
+
+strong {
+  font-weight: 600;
+}
+
 button {
   padding: 0;
   border: none;

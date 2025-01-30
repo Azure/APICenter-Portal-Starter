@@ -67,12 +67,9 @@ const ApiService = {
     return response?.value;
   },
 
-  getSpecification: memoize(async (definitionId: ApiDefinitionId): Promise<OpenAPI.Document | undefined> => {
-    const resolvedSpec = await SwaggerClient.resolve({ url: await ApiService.getSpecificationLink(definitionId) });
-    if (!resolvedSpec || resolvedSpec.errors.length) {
-      return undefined;
-    }
-    return resolvedSpec.spec;
+  getSpecification: memoize(async (definitionId: ApiDefinitionId): Promise<string | undefined> => {
+    const res = await fetch(await ApiService.getSpecificationLink(definitionId));
+    return res.text();
   }),
 
   async getEnvironment(environmentId: string) {

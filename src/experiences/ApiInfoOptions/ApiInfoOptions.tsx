@@ -57,7 +57,7 @@ export const ApiInfoOptions: React.FC<Props> = ({ api, apiVersion, apiDefinition
     return (
       <>
         <div className={styles.section}>
-          <h4>
+          <h5>
             <Document20Regular /> <strong>API Definition</strong>
             {apiSpecUrl.value && (
               <>
@@ -73,7 +73,7 @@ export const ApiInfoOptions: React.FC<Props> = ({ api, apiVersion, apiDefinition
                 </Link>
               </>
             )}
-          </h4>
+          </h5>
 
           <p>This file defines how to use the API, including the endpoints, policies, authentication, and responses.</p>
 
@@ -86,7 +86,7 @@ export const ApiInfoOptions: React.FC<Props> = ({ api, apiVersion, apiDefinition
 
         {environment.data?.onboarding && (
           <div className={styles.section}>
-            <h4>
+            <h5>
               <img src={DevPortalLogo} alt="Developer portal" />
               <strong>{environment.data.title} developer portal</strong>
               {(environment.data.onboarding.developerPortalUri?.length ?? 0) > 0 && (
@@ -107,7 +107,7 @@ export const ApiInfoOptions: React.FC<Props> = ({ api, apiVersion, apiDefinition
                   )}
                 </>
               )}
-            </h4>
+            </h5>
 
             <MarkdownRenderer markdown={environment.data.onboarding.instructions || DEFAULT_INSTRUCTIONS} />
           </div>
