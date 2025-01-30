@@ -4,16 +4,17 @@ import * as yaml from 'yaml';
 import memoize from 'memoizee';
 import { get } from 'lodash';
 import {
+  WithRef,
   ApiSpecReader,
-  DefinitionMetadata,
   OperationMetadata,
   OperationParameterMetadata,
   RequestMetadata,
   ResponseMetadata,
+  SchemaMetadata,
 } from '@/types/apiSpec';
 import { httpMethodsList } from '@/constants';
-import { getUsedRefsFromSubSchema, resolveRef, schemaToTypeLabel } from '@/utils/openApi';
-import makeOpenApiResolverProxy, { WithRef } from './openApiResolverProxy';
+import { getUsedRefsFromSubSchema, resolveRef, resolveSchema, schemaToTypeLabel } from '@/utils/openApi';
+import makeOpenApiResolverProxy from './openApiResolverProxy';
 
 /**
  * Returns an instance of ApiSpecReader that reads OpenAPI V3 spec from a string.
@@ -67,26 +68,9 @@ export default async function openApiSpecReader(specStr: string): Promise<ApiSpe
 
     const mediaContent = get(operation.spec, 'requestBody.content', {}) as OpenAPIV3.RequestBodyObject['content'];
     const schemaKey = Object.keys(mediaContent)[0];
-    const schema = get(operation.spec, `requestBody.content["${schemaKey}"].schema`) as
+    const bodySchema = get(operation.spec, `requestBody.content["${schemaKey}"].schema`) as
       | WithRef<OpenAPIV3.SchemaObject>
       | undefined;
-
-    const bodyRef = schema?.$ref;
-
-    let bodyParams: OperationParameterMetadata[] = [];
-    // TODO: what if it is not an object?
-    if (schema?.type === 'object') {
-      bodyParams = Object.entries<OpenAPIV3.SchemaObject>(
-        schema.properties as Record<string, OpenAPIV3.SchemaObject>
-      ).map<OperationParameterMetadata>(([name, param]) => {
-        return {
-          name,
-          type: schemaToTypeLabel(param),
-          in: 'body',
-          required: schema.required?.includes(name),
-        };
-      });
-    }
 
     // TODO: check if it is correct for non body params
     const resultParams = specParams.map<OperationParameterMetadata>((specParam) => {
@@ -101,8 +85,7 @@ export default async function openApiSpecReader(specStr: string): Promise<ApiSpe
       description: operation.spec.description,
       parameters: resultParams.filter((param) => REQUEST_PARAM_TYPES.includes(param.in)),
       headers: resultParams.filter((param) => HEADER_PARAM_TYPES.includes(param.in)),
-      body: bodyParams,
-      bodyRef,
+      body: resolveSchema(bodySchema),
     };
   });
 
@@ -125,49 +108,23 @@ export default async function openApiSpecReader(specStr: string): Promise<ApiSpe
         | WithRef<OpenAPIV3.SchemaObject>
         | undefined;
 
-      let body = [];
-      if (bodySchema?.type === 'object' && bodySchema.properties) {
-        body = Object.entries<OpenAPIV3.SchemaObject>(bodySchema.properties as any).map(([name, schema]) => ({
-          name,
-          type: schemaToTypeLabel(schema),
-          in: 'body',
-          description: schema.description,
-        }));
-      }
-
       return {
         code,
         description: responseData.description,
         headers: headers,
-        body,
-        bodyRef: bodySchema?.$ref,
+        body: resolveSchema(bodySchema),
       };
     });
   });
 
-  const getOperationDefinitions = memoize((operationName: string): DefinitionMetadata[] => {
+  const getOperationDefinitions = memoize((operationName: string): SchemaMetadata[] => {
     const operation = getOperation(operationName);
 
     return getUsedRefsFromSubSchema(operation.spec).map((ref) => {
       const schema = resolveRef(apiSpec, ref) as OpenAPIV3.SchemaObject;
-
-      let parameters: OperationParameterMetadata[] = [];
-      if (schema.type === 'object') {
-        parameters = Object.entries(schema.properties as Record<string, OpenAPIV3.SchemaObject>).map(
-          ([name, paramSchema]) => ({
-            name,
-            in: '',
-            type: schemaToTypeLabel(paramSchema),
-            description: paramSchema.description,
-            required: schema.required?.includes(name),
-            readOnly: paramSchema.readOnly,
-          })
-        );
-      }
-
       return {
-        ref,
-        parameters,
+        ...resolveSchema(schema),
+        $ref: ref,
       };
     });
   });

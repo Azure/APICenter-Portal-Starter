@@ -1,17 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { OpenAPIV2, OpenAPIV3 } from 'openapi-types';
+import { OpenAPIV2 } from 'openapi-types';
 import * as yaml from 'yaml';
 import memoize from 'memoizee';
 import {
   ApiSpecReader,
-  DefinitionMetadata,
   OperationMetadata,
   OperationParameterMetadata,
   RequestMetadata,
   ResponseMetadata,
+  SchemaMetadata,
 } from '@/types/apiSpec';
 import { httpMethodsList } from '@/constants';
-import { getUsedRefsFromSubSchema, resolveRef, schemaToTypeLabel } from '@/utils/openApi';
+import { getUsedRefsFromSubSchema, resolveRef, resolveSchema, schemaToTypeLabel } from '@/utils/openApi';
 import makeOpenApiResolverProxy from './openApiResolverProxy';
 
 /**
@@ -57,8 +57,8 @@ export default async function openApiSpecReader(specStr: string): Promise<ApiSpe
     return getOperations().find((operation) => operation.name === operationName);
   });
 
-  const BODY_PARAM_TYPES = ['body', 'formData'];
-  const REQUEST_PARAM_TYPES = ['query', 'path'];
+  const BODY_PARAM_TYPES = ['body'];
+  const REQUEST_PARAM_TYPES = ['query', 'path', 'formData'];
   const HEADER_PARAM_TYPES = ['header'];
 
   const getRequestMetadata = memoize((operationName: string): RequestMetadata => {
@@ -74,11 +74,15 @@ export default async function openApiSpecReader(specStr: string): Promise<ApiSpe
       return result;
     });
 
+    const bodyParam = specParams.find((param) => BODY_PARAM_TYPES.includes(param.in)) as
+      | OpenAPIV2.InBodyParameterObject
+      | undefined;
+
     return {
       description: operation.spec.description,
       parameters: resultParams.filter((param) => REQUEST_PARAM_TYPES.includes(param.in)),
       headers: resultParams.filter((param) => HEADER_PARAM_TYPES.includes(param.in)),
-      body: resultParams.filter((param) => BODY_PARAM_TYPES.includes(param.in)),
+      body: resolveSchema(bodyParam?.schema),
     };
   });
 
@@ -95,50 +99,23 @@ export default async function openApiSpecReader(specStr: string): Promise<ApiSpe
         description: headerData.description,
       }));
 
-      const bodySchema = responseData.schema as OpenAPIV2.SchemaObject;
-
-      let body = [];
-      if (bodySchema.type === 'object' && bodySchema.properties) {
-        body = Object.entries<OpenAPIV2.SchemaObject>(bodySchema.properties as any).map(([name, schema]) => ({
-          name,
-          type: schemaToTypeLabel(schema),
-          in: 'body',
-          description: schema.description,
-        }));
-      }
-
       return {
         code,
         description: responseData.description,
         headers,
-        body,
+        body: resolveSchema(responseData.schema),
       };
     });
   });
 
-  const getOperationDefinitions = memoize((operationName: string): DefinitionMetadata[] => {
+  const getOperationDefinitions = memoize((operationName: string): SchemaMetadata[] => {
     const operation = getOperation(operationName);
 
     return getUsedRefsFromSubSchema(operation.spec).map((ref) => {
       const schema = resolveRef(apiSpec, ref) as OpenAPIV2.SchemaObject;
-
-      let parameters: OperationParameterMetadata[] = [];
-      if (schema.type === 'object') {
-        parameters = Object.entries(schema.properties as Record<string, OpenAPIV2.SchemaObject>).map(
-          ([name, paramSchema]) => ({
-            name,
-            in: '',
-            type: schemaToTypeLabel(paramSchema),
-            description: paramSchema.description,
-            required: schema.required?.includes(name),
-            readOnly: paramSchema.readOnly,
-          })
-        );
-      }
-
       return {
-        ref,
-        parameters,
+        ...resolveSchema(schema),
+        $ref: ref,
       };
     });
   });

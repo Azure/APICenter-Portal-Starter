@@ -1,8 +1,8 @@
 import React from 'react';
 import { ApiOperationInfo, ParametersTable } from '@microsoft/api-docs-ui';
-import { Link } from '@fluentui/react-components';
 import { ApiSpecReader, OperationMetadata } from '@/types/apiSpec';
 import { getRefLabel } from '@/utils/openApi';
+import ParamSchemaDefinition from '@/components/ParamSchemaDefinition';
 import styles from './ApiOperationDetails.module.scss';
 
 interface Props {
@@ -15,55 +15,36 @@ export const ApiOperationDetails: React.FC<Props> = ({ apiSpec, operation }) => 
     return null;
   }
 
-  function renderRefLink(ref: string) {
-    const refLabel = getRefLabel(ref);
-    return <Link href={`#${refLabel}`}>{refLabel}</Link>;
-  }
-
   function renderRequestInfo() {
     const requestMetadata = apiSpec.getRequestMetadata(operation.name);
 
-    const blocks: React.ReactNode[] = [];
-
-    if (requestMetadata.description) {
-      blocks.push(<p key="description">{requestMetadata.description}</p>);
-    }
-
-    if (requestMetadata.parameters.length) {
-      blocks.push(
-        <React.Fragment key="parameters">
-          <h4>Request parameters</h4>
-          <ParametersTable parameters={requestMetadata.parameters} />
-        </React.Fragment>
-      );
-    }
-
-    if (requestMetadata.headers.length) {
-      blocks.push(
-        <React.Fragment key="headers">
-          <h4>Request headers</h4>
-          <ParametersTable parameters={requestMetadata.headers} />
-        </React.Fragment>
-      );
-    }
-
-    if (requestMetadata.body.length) {
-      blocks.push(
-        <React.Fragment key="body">
-          <h4>
-            Request body
-            {requestMetadata.bodyRef && <> ({renderRefLink(requestMetadata.bodyRef)})</>}:
-          </h4>
-          <ParametersTable parameters={requestMetadata.body} hiddenColumns={['readOnly', 'in']} />
-        </React.Fragment>
-      );
-    }
-
-    if (!blocks.length) {
+    if (
+      !requestMetadata.description &&
+      !requestMetadata.parameters.length &&
+      !requestMetadata.headers.length &&
+      !requestMetadata.body
+    ) {
       return <p>No requests data</p>;
     }
 
-    return blocks;
+    return (
+      <>
+        {!!requestMetadata.description && <p>{requestMetadata.description}</p>}
+        {!!requestMetadata.parameters.length && (
+          <>
+            <h4>Request parameters</h4>
+            <ParametersTable parameters={requestMetadata.parameters} />
+          </>
+        )}
+        {!!requestMetadata.headers.length && (
+          <>
+            <h4>Request headers</h4>
+            <ParametersTable parameters={requestMetadata.headers} />
+          </>
+        )}
+        <ParamSchemaDefinition title="Request body" schema={requestMetadata.body} hiddenColumns={['in', 'readOnly']} />
+      </>
+    );
   }
 
   function renderResponses() {
@@ -83,15 +64,7 @@ export const ApiOperationDetails: React.FC<Props> = ({ apiSpec, operation }) => 
           </>
         )}
 
-        {!!response.body.length && (
-          <>
-            <h4>
-              Body
-              {response.bodyRef && <> ({renderRefLink(response.bodyRef)})</>}:
-            </h4>
-            <ParametersTable parameters={response.body} hiddenColumns={['in', 'readOnly', 'required']} />
-          </>
-        )}
+        <ParamSchemaDefinition title="Body" schema={response.body} hiddenColumns={['in', 'readOnly', 'required']} />
       </React.Fragment>
     ));
   }
@@ -106,10 +79,13 @@ export const ApiOperationDetails: React.FC<Props> = ({ apiSpec, operation }) => 
       <>
         <h3>Definitions</h3>
         {definitions.map((definition) => (
-          <React.Fragment key={definition.ref}>
-            <h4 id={getRefLabel(definition.ref)}>{getRefLabel(definition.ref)}</h4>
-            <ParametersTable parameters={definition.parameters} hiddenColumns={['in']} />
-          </React.Fragment>
+          <ParamSchemaDefinition
+            key={definition.$ref}
+            title="Body"
+            schema={definition}
+            hiddenColumns={['in']}
+            isGlobalDefinition
+          />
         ))}
       </>
     );

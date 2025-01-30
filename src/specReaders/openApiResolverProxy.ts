@@ -1,7 +1,6 @@
 import { OpenAPI, OpenAPIV2, OpenAPIV3 } from 'openapi-types';
 import { resolveRef } from '@/utils/openApi';
-
-export type WithRef<T> = T & { $ref?: string };
+import { WithRef } from '@/types/apiSpec';
 
 /**
  * Creates a proxy object for an OpenAPI schema that automatically resolves $ref properties.

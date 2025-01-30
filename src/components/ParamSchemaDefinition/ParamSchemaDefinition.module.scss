@@ -1,0 +1,7 @@
+.badge {
+  margin-left: 5px;
+  
+  &::after {
+    display: none;
+  }
+}
