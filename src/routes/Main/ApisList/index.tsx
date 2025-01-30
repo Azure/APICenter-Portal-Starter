@@ -13,7 +13,10 @@ import { Api } from "../../../contracts/api";
 import { useApiService } from "../../../util/useApiService";
 import { useAuthService } from "../../../util/useAuthService";
 import { useConfigService } from "../../../util/useConfigService";
-import { LocalStorageKey, useLocalStorage } from "../../../util/useLocalStorage";
+import {
+    LocalStorageKey,
+    useLocalStorage,
+} from "../../../util/useLocalStorage";
 import { useLogger } from "../../../util/useLogger";
 import { useSession } from "../../../util/useSession";
 import useFilters, { TFilterTag } from "./Filters/useFilters";
@@ -51,7 +54,7 @@ const sortApis = (apis: Api[], sortBy?: string) => {
     return apis;
 };
 
-const ApisList = () => {    
+const ApisList = () => {
     const configService = useConfigService();
     const layout = useLocalStorage(LocalStorageKey.apiListLayout).get();
     const sortBy = useLocalStorage(LocalStorageKey.apiListSortBy).get();
@@ -65,7 +68,9 @@ const ApisList = () => {
     const [filters] = useFilters();
     const [apis, setApis] = useState<Api[] | null>(null);
     const [isLoading, setIsLoading] = useState(false);
-    const [showRestrictedModal, setShowRestrictedModal] = useState<boolean>(false);
+    const [showRestrictedModal, setShowRestrictedModal] = useState<boolean>(
+        false
+    );
 
     const [searchParams] = useSearchParams();
     const search = searchParams.get("search");
@@ -109,12 +114,13 @@ const ApisList = () => {
                     filterQuery += " and ";
                 }
             });
+
             if (filterQuery.length > 0) {
                 filterQuery = "$filter=" + filterQuery;
-                if (config.scopingFilter.length > 0) {
+                if (config.scopingFilter?.length > 0) {
                     filterQuery += " and (" + config.scopingFilter + ")";
                 }
-            } else if (config.scopingFilter.length > 0) {
+            } else if (config.scopingFilter?.length > 0) {
                 filterQuery = "$filter=(" + config.scopingFilter + ")";
             }
         }
@@ -156,11 +162,15 @@ const ApisList = () => {
                 {isLoading ? (
                     <Spinner size={"small"} />
                 ) : !isAuthenticated ? (
-                    <div className={css.emptyState}>Sign in or create an account to view APIs.</div>
+                    <div className={css.emptyState}>
+                        Sign in or create an account to view APIs.
+                    </div>
                 ) : apis?.length === 0 ? (
                     <div className={css.emptyState}>
                         <NoApis />
-                        <div>Could not find APIs. Try a different search term.</div>
+                        <div>
+                            Could not find APIs. Try a different search term.
+                        </div>
                     </div>
                 ) : layout === TLayout.table ? (
                     <ApisTable apis={apis} />

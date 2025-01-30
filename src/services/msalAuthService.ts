@@ -15,7 +15,7 @@ export class MsalAuthService implements IAuthService {
     private msalInstance?: msal.PublicClientApplication;
     private scopes?: string[];
 
-    constructor(private readonly configService: IConfigService) {}
+    constructor(private readonly configService: IConfigService) { }
 
     private async getMsalInstance(): Promise<msal.PublicClientApplication> {
         if (this.msalInstance) {
@@ -23,7 +23,7 @@ export class MsalAuthService implements IAuthService {
         }
 
         const settings = await this.configService.getSettings();
-        const authorityUrl = settings.authentication.authority + settings.authentication.tenantId;
+        const authorityUrl = (settings.authentication.authority || settings.authentication.azureAdInstance) + settings.authentication.tenantId;
 
         const msalConfig: msal.Configuration = {
             auth: {
@@ -36,7 +36,10 @@ export class MsalAuthService implements IAuthService {
         await msalInstance.initialize();
 
         this.msalInstance = msalInstance;
-        this.scopes = settings.authentication.scopes;
+
+        this.scopes = typeof settings.authentication.scopes === "string"
+            ? [settings.authentication.scopes]
+            : settings.authentication.scopes;
 
         const accounts = msalInstance.getAllAccounts();
 
