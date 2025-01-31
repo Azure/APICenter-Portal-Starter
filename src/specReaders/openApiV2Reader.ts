@@ -19,7 +19,6 @@ import makeOpenApiResolverProxy from './openApiResolverProxy';
  */
 export default async function openApiSpecReader(specStr: string): Promise<ApiSpecReader> {
   const apiSpec = makeOpenApiResolverProxy<OpenAPIV2.Document>(yaml.parse(specStr));
-  console.log(yaml.parse(specStr));
 
   const getBaseUrl = memoize((): string => {
     const protocol = apiSpec.schemes[0];
