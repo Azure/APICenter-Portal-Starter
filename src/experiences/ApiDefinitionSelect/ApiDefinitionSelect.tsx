@@ -31,7 +31,7 @@ const NO_VERSION_LABEL = "Version isn't available";
 const NO_DEFINITION_LABEL = "Definition isn't available";
 const NO_DEPLOYMENT_LABEL = "Deployment isn't available";
 
-export const ApiDefinitionSelect: React.FC<Props> = ({ apiId, defaultSelection, isInline, onSelectionChange }) => {
+export const ApiDefinitionSelect: React.FC<Props> = ({ apiId, defaultSelection = {}, isInline, onSelectionChange }) => {
   const [version, setVersion] = useState<ApiVersion | null | undefined>();
   const [definition, setDefinition] = useState<ApiDefinition | null | undefined>();
   const [deployment, setDeployment] = useState<ApiDeployment | null | undefined>();
