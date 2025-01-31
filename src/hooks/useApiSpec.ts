@@ -48,6 +48,6 @@ export default function useApiSpec(definitionId: ApiDefinitionId): ReturnType {
       spec,
       isLoading,
     }),
-    [isLoading, reader]
+    [isLoading, reader, spec]
   );
 }

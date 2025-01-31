@@ -1,6 +1,4 @@
 import { groupBy } from 'lodash';
-import { OpenAPI } from 'openapi-types';
-import SwaggerClient from 'swagger-client';
 import memoize from 'memoizee';
 import { ActiveFilterData } from '@/types/apiFilters';
 import HttpService from '@/services/HttpService';

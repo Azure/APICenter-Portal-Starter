@@ -1,7 +1,6 @@
 import React from 'react';
 import { ParametersTable } from '@microsoft/api-docs-ui';
 import { Badge } from '@fluentui/react-components';
-import { LinkRegular } from '@fluentui/react-icons';
 import { SchemaMetadata } from '@/types/apiSpec';
 import RefLink from '@/components/RefLink';
 import { getRefLabel } from '@/utils/openApi';
