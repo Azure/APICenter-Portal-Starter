@@ -3,12 +3,16 @@ import config from '@/config';
 
 let msalInstance: msal.PublicClientApplication | undefined;
 
+const scopes =
+  typeof config.authentication.scopes === 'string' ? [config.authentication.scopes] : config.authentication.scopes;
+
 async function getMsalInstance(): Promise<msal.PublicClientApplication> {
   if (msalInstance) {
     return msalInstance;
   }
 
-  const authorityUrl = config.authentication.authority + config.authentication.tenantId;
+  const authorityUrl =
+    (config.authentication.authority || config.authentication.azureAdInstance) + config.authentication.tenantId;
 
   const msalConfig: msal.Configuration = {
     auth: {
@@ -39,14 +43,14 @@ const MsalAuthService = {
 
   async getAccessToken(): Promise<string> {
     const msalInstance = await getMsalInstance();
-    const authResult = await msalInstance.acquireTokenSilent({ scopes: config.authentication.scopes });
+    const authResult = await msalInstance.acquireTokenSilent({ scopes });
 
     return authResult.accessToken;
   },
 
   async signIn(): Promise<void> {
     const msalInstance = await getMsalInstance();
-    const authResult = await msalInstance.loginPopup({ scopes: config.authentication.scopes });
+    const authResult = await msalInstance.loginPopup({ scopes });
 
     msalInstance.setActiveAccount(authResult.account);
   },
