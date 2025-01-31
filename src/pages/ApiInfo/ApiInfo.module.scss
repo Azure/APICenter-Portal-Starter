@@ -1,0 +1,29 @@
+.apiInfo {
+  .metadata {
+    margin-bottom: 32px;
+  }
+
+  .spinner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .divider {
+    margin: 8px 0 12px;
+  }
+
+  .selectionDropdown {
+    margin-top: 24px;
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+    }
+  }
+
+  .tabsContainer {
+    margin-top: 40px;
+  }
+}

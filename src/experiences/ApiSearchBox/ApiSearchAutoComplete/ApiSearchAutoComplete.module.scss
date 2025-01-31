@@ -1,0 +1,87 @@
+.apiSearchAutoComplete {
+  position: absolute;
+  z-index: 1;
+  box-sizing: border-box;
+  width: 100%;
+  background: white;
+  box-shadow: 0 2px 4px rgb(0 0 0 / 50%);
+  color: black;
+
+  h6 {
+    display: flex;
+    justify-content: space-between;
+    margin: .5rem .75rem .125rem;
+    padding-bottom: .5rem;
+    border-bottom: 1px solid var(--grey-3);
+    font-size: 0.75rem;
+    font-weight: 400;
+    letter-spacing: 0.02rem;
+
+    button {
+      color: var(--blue-4);
+      font: inherit;
+      line-height: 1rem;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
+  .option {
+    display: flex;
+    align-items: center;
+    padding: 8px 10px;
+    color: inherit;
+    font-size: 14px;
+    gap: 1rem;
+    letter-spacing: 0.01rem;
+    text-decoration: none;
+
+    .deleteBtn {
+      display: none;
+      position: absolute;
+      top: 50%;
+      right: 2px;
+      flex-shrink: 0;
+      width: 2rem;
+      height: 2rem;
+      transform: translateY(-50%);
+      background: var(--grey-2);
+
+      &:hover {
+        background: var(--grey-3);
+      }
+    }
+
+    .apiName,
+    .apiMeta {
+      overflow: hidden;
+      text-align: left;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .apiName {
+      width: 10rem;
+    }
+
+    .apiMeta {
+      width: 25rem;
+      color: var(--grey-5);
+    }
+
+    &:hover {
+      background: var(--grey-1);
+
+      .deleteBtn {
+        display: block;
+      }
+    }
+  }
+
+  .noResults {
+    padding: 3rem 0;
+    color: var(--grey-5);
+  }
+}
