@@ -5,7 +5,7 @@ import ApiInfo from '@/pages/ApiInfo';
 import ApiSpec from '@/pages/ApiSpec';
 import Layout from './Layout';
 
-const router = createBrowserRouter([
+const app = createBrowserRouter([
   {
     element: <Layout />,
     children: [
@@ -27,6 +27,6 @@ const router = createBrowserRouter([
   },
 ]);
 
-const Router = () => <RouterProvider router={router} />;
+const Router = () => <RouterProvider router={app} />;
 
-export default Router;
+export default React.memo(Router);

@@ -26,6 +26,10 @@ export const ApiSpec: React.FC = () => {
 
   const handleDefinitionSelectionChange = useCallback(
     (definitionSelection: ApiDefinitionSelection) => {
+      if (definitionSelection.version.name === versionName && definitionSelection.definition.name === definitionName) {
+        return;
+      }
+
       navigate(
         LocationsService.getApiSchemaExplorerUrl(
           apiName,
@@ -34,7 +38,7 @@ export const ApiSpec: React.FC = () => {
         )
       );
     },
-    [apiName, navigate]
+    [apiName, definitionName, navigate, versionName]
   );
 
   function renderHeader() {

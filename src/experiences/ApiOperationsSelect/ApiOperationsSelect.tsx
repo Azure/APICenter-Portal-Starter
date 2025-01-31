@@ -26,9 +26,11 @@ export const ApiOperationsSelect: React.FC<Props> = ({ apiSpec }) => {
    * It can happen when spec is replaced with another one.
    */
   useEffect(() => {
+    if (!selectedOperation.name || apiSpec.getOperation(selectedOperation.name)) {
+      return;
+    }
     selectedOperation.reset();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location.pathname]);
+  }, [apiSpec, location.pathname, selectedOperation]);
 
   useEffect(() => {
     if (selectedOperation.name || !operations.length) {

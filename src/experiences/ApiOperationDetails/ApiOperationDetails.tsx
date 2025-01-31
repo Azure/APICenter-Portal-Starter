@@ -38,7 +38,7 @@ export const ApiOperationDetails: React.FC<Props> = ({ apiSpec, operation }) => 
         {!!requestMetadata.headers.length && (
           <>
             <h4>Request headers</h4>
-            <ParametersTable parameters={requestMetadata.headers} />
+            <ParametersTable parameters={requestMetadata.headers} hiddenColumns={['in']} />
           </>
         )}
         <ParamSchemaDefinition title="Request body" schema={requestMetadata.body} hiddenColumns={['in', 'readOnly']} />
