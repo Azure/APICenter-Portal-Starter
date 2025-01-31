@@ -31,26 +31,22 @@ export default async function openApiSpecReader(specStr: string): Promise<ApiSpe
   });
 
   const getOperations = memoize((): OperationMetadata[] => {
-    return (
-      Object.entries(apiSpec.paths)
-        // .map(([pathName, pathData]) => [pathName, resolveRef(pathData)])
-        .flatMap(([pathName, pathData]) => {
-          return httpMethodsList
-            .filter((method) => pathData.hasOwnProperty(method))
-            .map((method: string) => {
-              const opData = pathData[method];
-              return {
-                displayName: opData.summary || pathName,
-                description: opData.description,
-                name: `${method}${pathName}`,
-                urlTemplate: pathName,
-                invocationUrl: `${getBaseUrl()}${pathName}`,
-                method,
-                spec: opData,
-              };
-            });
-        })
-    );
+    return Object.entries(apiSpec.paths).flatMap(([pathName, pathData]) => {
+      return httpMethodsList
+        .filter((method) => pathData.hasOwnProperty(method))
+        .map((method: string) => {
+          const opData = pathData[method];
+          return {
+            displayName: opData.summary || pathName,
+            description: opData.description,
+            name: `${method}${pathName}`,
+            urlTemplate: pathName,
+            invocationUrl: `${getBaseUrl()}${pathName}`,
+            method,
+            spec: opData,
+          };
+        });
+    });
   });
 
   const getOperation = memoize((operationName: string): OperationMetadata | undefined => {
