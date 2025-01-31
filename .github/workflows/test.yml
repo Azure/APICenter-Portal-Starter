@@ -1,7 +1,9 @@
 name: Test
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - "api-spec-page"
 
 jobs:
   build:
