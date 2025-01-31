@@ -7,6 +7,8 @@ export interface MsalSettings {
   scopes: string[];
   /** Azure AD instance, e.g., https://login.microsoftonline.com/. */
   authority: string;
+  /** @deprecated Use "authority" instead. */
+  azureAdInstance?: string;
 }
 
 export interface AppConfig {

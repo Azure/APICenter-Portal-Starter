@@ -5,7 +5,12 @@ import config from '@/config';
 import isAccessDeniedAtom from '@/atoms/isAccessDeniedAtom';
 import MsalAuthService from '@/services/MsalAuthService';
 
-const baseUrl = `https://${config.dataApiHostName}`;
+let baseUrl = `https://${config.dataApiHostName}`;
+
+// Append the default workspace to the base URL if it's not already there
+if (!config.dataApiHostName.includes('/workspaces/default')) {
+  baseUrl += '/workspaces/default';
+}
 
 const BASE_HEADERS: HeadersInit = {
   Accept: 'application/json',

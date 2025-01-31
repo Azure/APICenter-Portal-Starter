@@ -122,7 +122,7 @@ By default, the portal displays all APIs from your API Center instance. You can 
 
 ```
 {
-  "dataApiHostName": "<service name>.data.<region>.azure-apicenter.ms/workspaces/default",
+  "dataApiHostName": "<service name>.data.<region>.azure-apicenter.ms",
   "title": "API portal",
   "authentication": {
       "clientId": "<client ID>",
@@ -162,7 +162,7 @@ Follow these steps to get your development environment set up:
 
     ```JSON
     {
-      "dataApiHostName": "<service name>.data.<region>.azure-apicenter.ms/workspaces/default",
+      "dataApiHostName": "<service name>.data.<region>.azure-apicenter.ms",
       "title": "API portal",
       "authentication": {
           "clientId": "<client ID>",
