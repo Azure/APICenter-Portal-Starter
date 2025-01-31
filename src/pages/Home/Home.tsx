@@ -2,14 +2,14 @@ import React from 'react';
 import { Outlet } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
 import ApiList from '@/experiences/ApiList';
+import AccessDeniedSvg from '@/assets/accessDenied.svg';
+import isAuthenticatedAtom from '@/atoms/isAuthenticatedAtom';
+import isAccessDeniedAtom from '@/atoms/isAccessDeniedAtom';
 import ApiSearchBox from '@/experiences/ApiSearchBox';
 import ApiFilters from '@/experiences/ApiFilters';
 import ApiListLayoutSwitch from '@/experiences/ApiListLayoutSwitch';
 import ApiListSortingSelect from '@/experiences/ApiListSortingSelect';
 import { ActiveFiltersBadges } from '@/experiences/ActiveFiltersBadges/ActiveFiltersBadges';
-import AccessDeniedSvg from '@/assets/accessDenied.svg';
-import isAuthenticatedAtom from '@/atoms/isAuthenticatedAtom';
-import isAccessDeniedAtom from '@/atoms/isAccessDeniedAtom';
 import styles from './Home.module.scss';
 
 export const Home: React.FC = () => {
@@ -43,11 +43,11 @@ export const Home: React.FC = () => {
     <div className={styles.home}>
       <Outlet />
 
-      <section className={styles.searchPanel}>
+      <div className={styles.searchPanel}>
         <h1>API Center portal</h1>
 
         <ApiSearchBox />
-      </section>
+      </div>
 
       <section className={styles.content}>
         <div className={styles.filters}>

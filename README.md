@@ -173,6 +173,12 @@ Follow these steps to get your development environment set up:
     }
     ```
 
+1. Login to GitHub package registry (use PAT for password):
+  
+      ```bash
+      npm login --registry=https://npm.pkg.github.com
+      ```
+
 1. Install the required packages.
 
     ```bash

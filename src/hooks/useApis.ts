@@ -5,6 +5,7 @@ import { ActiveFilterData } from '@/types/apiFilters';
 import { SortBy, SortByOrder } from '@/types/sorting';
 import apiListSortingAtom from '@/atoms/apiListSortingAtom';
 import ApiService from '@/services/ApiService';
+import isAuthenticatedAtom from '@/atoms/isAuthenticatedAtom';
 
 interface Props {
   search?: string;
@@ -44,10 +45,12 @@ function sortApis(apis: ApiMetadata[], sortBy?: SortBy): ApiMetadata[] {
 export default function useApis({ search, filters, isAutoCompleteMode }: Props = {}): ReturnType {
   const [apis, setApis] = useState<ApiMetadata[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+
+  const isAuthenticated = useRecoilValue(isAuthenticatedAtom);
   const sortBy = useRecoilValue(apiListSortingAtom);
 
   const fetchApis = useCallback(async () => {
-    if (isAutoCompleteMode && !search) {
+    if ((isAutoCompleteMode && !search) || !isAuthenticated) {
       setApis([]);
       return;
     }
@@ -58,7 +61,7 @@ export default function useApis({ search, filters, isAutoCompleteMode }: Props =
     } finally {
       setIsLoading(false);
     }
-  }, [filters, isAutoCompleteMode, search]);
+  }, [filters, isAuthenticated, isAutoCompleteMode, search]);
 
   useEffect(() => {
     void fetchApis();

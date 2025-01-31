@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Button, Link, MessageBar, MessageBarBody, Spinner } from '@fluentui/react-components';
 import { ArrowDownloadRegular, Document20Regular, OpenRegular } from '@fluentui/react-icons';
 import DevPortalLogo from '@/assets/devPortal.png';
@@ -25,11 +25,16 @@ interface Props {
 const DEFAULT_INSTRUCTIONS = 'Gain comprehensive insights into the API.';
 
 export const ApiInfoOptions: React.FC<Props> = ({ api, apiVersion, apiDefinition, apiDeployment, isLoading }) => {
-  const apiSpecUrl = useApiSpecUrl({
-    apiName: api.name,
-    versionName: apiVersion?.name,
-    definitionName: apiDefinition?.name,
-  });
+  const definitionId = useMemo(
+    () => ({
+      apiName: api.name,
+      versionName: apiVersion?.name,
+      definitionName: apiDefinition?.name,
+    }),
+    [api.name, apiDefinition?.name, apiVersion?.name]
+  );
+
+  const apiSpecUrl = useApiSpecUrl(definitionId);
   const environment = useDeploymentEnvironment(apiDeployment?.environmentId);
 
   const handleOpenInVsCodeClick = useCallback(() => {
@@ -52,7 +57,7 @@ export const ApiInfoOptions: React.FC<Props> = ({ api, apiVersion, apiDefinition
     return (
       <>
         <div className={styles.section}>
-          <h4>
+          <h5>
             <Document20Regular /> <strong>API Definition</strong>
             {apiSpecUrl.value && (
               <>
@@ -68,7 +73,7 @@ export const ApiInfoOptions: React.FC<Props> = ({ api, apiVersion, apiDefinition
                 </Link>
               </>
             )}
-          </h4>
+          </h5>
 
           <p>This file defines how to use the API, including the endpoints, policies, authentication, and responses.</p>
 
@@ -81,7 +86,7 @@ export const ApiInfoOptions: React.FC<Props> = ({ api, apiVersion, apiDefinition
 
         {environment.data?.onboarding && (
           <div className={styles.section}>
-            <h4>
+            <h5>
               <img src={DevPortalLogo} alt="Developer portal" />
               <strong>{environment.data.title} developer portal</strong>
               {(environment.data.onboarding.developerPortalUri?.length ?? 0) > 0 && (
@@ -102,7 +107,7 @@ export const ApiInfoOptions: React.FC<Props> = ({ api, apiVersion, apiDefinition
                   )}
                 </>
               )}
-            </h4>
+            </h5>
 
             <MarkdownRenderer markdown={environment.data.onboarding.instructions || DEFAULT_INSTRUCTIONS} />
           </div>
