@@ -8,7 +8,7 @@ import { ApiDeployment } from '@/types/apiDeployment';
 import { ApiEnvironment } from '@/types/apiEnvironment';
 
 const ApiService = {
-  async getApis(search: string, filters: ActiveFilterData[] = []) {
+  async getApis(search: string, filters: ActiveFilterData[] = []): Promise<ApiMetadata[]> {
     const searchParams = new URLSearchParams();
     if (search.length) {
       searchParams.set('$search', search);
@@ -30,41 +30,41 @@ const ApiService = {
     return response.value || [];
   },
 
-  async getApi(id: string) {
+  async getApi(id: string): Promise<ApiMetadata> {
     return await HttpService.get<ApiMetadata>(`/apis/${id}`);
   },
 
-  async getVersions(apiId: string) {
+  async getVersions(apiId: string): Promise<ApiVersion[]> {
     const response = await HttpService.get<{ value: ApiVersion[] }>(`/apis/${apiId}/versions`);
     return response.value || [];
   },
 
-  async getDeployments(apiId: string) {
+  async getDeployments(apiId: string): Promise<ApiDeployment[]> {
     const response = await HttpService.get<{ value: ApiDeployment[] }>(`/apis/${apiId}/deployments`);
     return response.value || [];
   },
 
-  async getDefinitions(apiId: string, version: string) {
+  async getDefinitions(apiId: string, version: string): Promise<ApiDefinition[]> {
     const response = await HttpService.get<{ value: ApiDefinition[] }>(
       `/apis/${apiId}/versions/${version}/definitions`
     );
     return response.value || [];
   },
 
-  async getDefinition(apiName: string, versionName: string, definitionName: string) {
+  async getDefinition(apiName: string, versionName: string, definitionName: string): Promise<ApiDefinition> {
     return await HttpService.get<ApiDefinition>(
       `/apis/${apiName}/versions/${versionName}/definitions/${definitionName}`
     );
   },
 
-  async getSpecificationLink(apiName: string, versionName: string, definitionName: string) {
+  async getSpecificationLink(apiName: string, versionName: string, definitionName: string): Promise<string> {
     const response = await HttpService.post<{ value: string }>(
       `/apis/${apiName}/versions/${versionName}/definitions/${definitionName}:exportSpecification`
     );
     return response?.value;
   },
 
-  async getEnvironment(environmentId: string) {
+  async getEnvironment(environmentId: string): Promise<ApiEnvironment> {
     return await HttpService.get<ApiEnvironment>(`/environments/${environmentId}`);
   },
 };

@@ -121,6 +121,8 @@ export default [
         },
       ],
 
+      '@typescript-eslint/explicit-function-return-type': 'error',
+
       '@typescript-eslint/array-type': [
         'error',
         {
@@ -128,6 +130,12 @@ export default [
           readonly: 'array-simple',
         },
       ],
+    },
+  },
+  {
+    files: ['**/*.tsx'],
+    rules: {
+      '@typescript-eslint/explicit-function-return-type': 'off',
     },
   },
   prettierRecommended,

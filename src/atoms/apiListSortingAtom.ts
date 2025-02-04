@@ -9,7 +9,7 @@ const apiListSortingAtom = atom<SortBy>({
     /**
      * Persist sorting to the local storage on change
      */
-    ({ onSet }) => {
+    ({ onSet }): void => {
       onSet((value) => {
         LocalStorageService.set(LocalStorageService.StorageKeys.API_LIST_SORTING, value);
       });
