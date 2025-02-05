@@ -4,6 +4,7 @@ import * as yaml from 'yaml';
 import memoize from 'memoizee';
 import {
   ApiSpecReader,
+  OperationCategory,
   OperationMetadata,
   OperationParameterMetadata,
   RequestMetadata,
@@ -29,26 +30,37 @@ export default async function openApiSpecReader(specStr: string): Promise<ApiSpe
     return apiSpec.tags?.map((tag) => tag.name);
   });
 
-  const getOperations = memoize((): OperationMetadata[] => {
-    return Object.entries(apiSpec.paths).flatMap(([pathName, pathData]) => {
-      return httpMethodsList
-        .filter((method) => pathData.hasOwnProperty(method))
-        .map((method: string) => {
-          const opData = pathData[method];
-          return {
-            displayName: opData.summary || pathName,
-            description: opData.description,
-            name: `${method}${pathName}`,
-            urlTemplate: pathName,
-            invocationUrl: `${getBaseUrl()}${pathName}`,
-            method,
-            spec: opData,
-          };
-        });
-    });
+  const getOperationCategories = memoize((): Array<OperationCategory<OpenAPIV2.OperationObject>> => {
+    return [
+      {
+        name: 'default',
+        label: 'Operations',
+        operations: Object.entries(apiSpec.paths).flatMap(([pathName, pathData]) => {
+          return httpMethodsList
+            .filter((method) => pathData.hasOwnProperty(method))
+            .map((method: string) => {
+              const opData = pathData[method];
+              return {
+                category: 'default',
+                displayName: opData.summary || pathName,
+                description: opData.description,
+                name: `${method}${pathName}`,
+                urlTemplate: pathName,
+                invocationUrl: `${getBaseUrl()}${pathName}`,
+                method,
+                spec: opData,
+              };
+            });
+        }),
+      },
+    ];
   });
 
-  const getOperation = memoize((operationName: string): OperationMetadata | undefined => {
+  const getOperations = memoize((): Array<OperationMetadata<OpenAPIV2.OperationObject>> => {
+    return getOperationCategories().flatMap((category) => category.operations);
+  });
+
+  const getOperation = memoize((operationName: string): OperationMetadata<OpenAPIV2.OperationObject> | undefined => {
     return getOperations().find((operation) => operation.name === operationName);
   });
 
@@ -59,7 +71,7 @@ export default async function openApiSpecReader(specStr: string): Promise<ApiSpe
   const getRequestMetadata = memoize((operationName: string): RequestMetadata => {
     const operation = getOperation(operationName);
 
-    const specParams = (operation.spec.parameters || []) as OpenAPIV2.ParameterObject[];
+    const specParams = (operation.spec?.parameters || []) as OpenAPIV2.ParameterObject[];
 
     const resultParams = specParams.map<OperationParameterMetadata>((specParam) => {
       const result = { ...specParam } as OperationParameterMetadata;
@@ -74,7 +86,7 @@ export default async function openApiSpecReader(specStr: string): Promise<ApiSpe
       | undefined;
 
     return {
-      description: operation.spec.description,
+      description: operation.spec?.description,
       parameters: resultParams.filter((param) => REQUEST_PARAM_TYPES.includes(param.in)),
       headers: resultParams.filter((param) => HEADER_PARAM_TYPES.includes(param.in)),
       body: resolveSchema(bodyParam?.schema),
@@ -84,23 +96,25 @@ export default async function openApiSpecReader(specStr: string): Promise<ApiSpe
   const getResponsesMetadata = memoize((operationName: string): ResponseMetadata[] => {
     const operation = getOperation(operationName);
 
-    return Object.entries<OpenAPIV2.ResponseObject>(operation.spec.responses as any).map(([code, responseData]) => {
-      const headers = Object.entries<OpenAPIV2.HeaderObject>(
-        (responseData.headers || {}) as any
-      ).map<OperationParameterMetadata>(([name, headerData]) => ({
-        name,
-        type: headerData.type,
-        in: 'header',
-        description: headerData.description,
-      }));
+    return Object.entries<OpenAPIV2.ResponseObject>((operation.spec?.responses || {}) as any).map(
+      ([code, responseData]) => {
+        const headers = Object.entries<OpenAPIV2.HeaderObject>(
+          (responseData.headers || {}) as any
+        ).map<OperationParameterMetadata>(([name, headerData]) => ({
+          name,
+          type: headerData.type,
+          in: 'header',
+          description: headerData.description,
+        }));
 
-      return {
-        code,
-        description: responseData.description,
-        headers,
-        body: resolveSchema(responseData.schema),
-      };
-    });
+        return {
+          code,
+          description: responseData.description,
+          headers,
+          body: resolveSchema(responseData.schema),
+        };
+      }
+    );
   });
 
   const getOperationDefinitions = memoize((operationName: string): SchemaMetadata[] => {
@@ -118,6 +132,7 @@ export default async function openApiSpecReader(specStr: string): Promise<ApiSpe
   return {
     getBaseUrl,
     getTagLabels,
+    getOperationCategories,
     getOperations,
     getOperation,
     getRequestMetadata,

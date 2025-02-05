@@ -1,5 +1,5 @@
 import React from 'react';
-import { ApiOperationInfo, ParametersTable } from '@microsoft/api-docs-ui';
+import { ParametersTable } from '@microsoft/api-docs-ui';
 import { ApiSpecReader, OperationMetadata } from '@/types/apiSpec';
 import ParamSchemaDefinition from '@/components/ParamSchemaDefinition';
 import styles from './ApiOperationDetails.module.scss';
@@ -19,8 +19,8 @@ export const ApiOperationDetails: React.FC<Props> = ({ apiSpec, operation }) => 
 
     if (
       !requestMetadata.description &&
-      !requestMetadata.parameters.length &&
-      !requestMetadata.headers.length &&
+      !requestMetadata.parameters?.length &&
+      !requestMetadata.headers?.length &&
       !requestMetadata.body
     ) {
       return <p>No requests data</p>;
@@ -29,13 +29,13 @@ export const ApiOperationDetails: React.FC<Props> = ({ apiSpec, operation }) => 
     return (
       <>
         {!!requestMetadata.description && <p>{requestMetadata.description}</p>}
-        {!!requestMetadata.parameters.length && (
+        {!!requestMetadata.parameters?.length && (
           <>
             <h4>Request parameters</h4>
             <ParametersTable parameters={requestMetadata.parameters} />
           </>
         )}
-        {!!requestMetadata.headers.length && (
+        {!!requestMetadata.headers?.length && (
           <>
             <h4>Request headers</h4>
             <ParametersTable parameters={requestMetadata.headers} hiddenColumns={['in']} />
@@ -52,11 +52,11 @@ export const ApiOperationDetails: React.FC<Props> = ({ apiSpec, operation }) => 
       return <p>No responses data</p>;
     }
 
-    return responsesMetadata.map((response) => (
-      <React.Fragment key={response.code}>
+    return responsesMetadata.map((response, i) => (
+      <React.Fragment key={i}>
         <h3>Response: {response.code}</h3>
         <p>{response.description}</p>
-        {!!response.headers.length && (
+        {!!response.headers?.length && (
           <>
             <h4>Headers:</h4>
             <ParametersTable parameters={response.headers} hiddenColumns={['in', 'readOnly', 'required']} />
@@ -82,17 +82,19 @@ export const ApiOperationDetails: React.FC<Props> = ({ apiSpec, operation }) => 
             key={definition.$ref}
             title="Body"
             schema={definition}
-            hiddenColumns={['in']}
+            hiddenColumns={!definition.isEnum ? ['in', 'readOnly'] : ['in', 'type', 'readOnly', 'required']}
+            isEnum={definition.isEnum}
             isGlobalDefinition
           />
         ))}
       </>
     );
   }
+  // return null;
 
   return (
     <div className={styles.apiOperationDetails}>
-      <ApiOperationInfo operation={operation} requestUrl={operation.invocationUrl} tags={apiSpec.getTagLabels()} />
+      {/*<ApiOperationInfo operation={operation} requestUrl={operation.invocationUrl} tags={apiSpec.getTagLabels()} />*/}
 
       <h3>Request</h3>
       {renderRequestInfo()}

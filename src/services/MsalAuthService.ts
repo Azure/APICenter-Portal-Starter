@@ -56,7 +56,7 @@ const MsalAuthService = {
   },
 
   async signOut(): Promise<void> {
-    const msalInstance = await this.getMsalInstance();
+    const msalInstance = await getMsalInstance();
     await msalInstance.logoutPopup();
   },
 };

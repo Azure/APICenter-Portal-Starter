@@ -42,7 +42,7 @@ export const ApiSpec: React.FC = () => {
   );
 
   function renderHeader() {
-    if (api.isLoading) {
+    if (api.isLoading || !api.data) {
       return null;
     }
 
@@ -79,7 +79,6 @@ export const ApiSpec: React.FC = () => {
     return (
       <div className={styles.content}>
         <aside className={styles.operationsList}>
-          <h4>Operations</h4>
           <ApiOperationsSelect apiSpec={apiSpec} />
         </aside>
 

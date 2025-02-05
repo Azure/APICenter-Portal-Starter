@@ -1,40 +1,47 @@
 import React from 'react';
-import { OpenAPIV2, OpenAPIV3 } from 'openapi-types';
 import { ApiOperation, ApiOperationParameter } from '@microsoft/api-docs-ui';
 
 export type WithRef<T> = T & { $ref?: string };
 
-export interface OperationMetadata extends ApiOperation {
-  invocationUrl: string;
-  spec: OpenAPIV2.OperationObject | OpenAPIV3.OperationObject;
+export interface OperationMetadata<T = object> extends ApiOperation {
+  category: string;
+  invocationUrl?: string;
+  spec?: T;
+}
+
+export interface OperationCategory<T = object> {
+  name: string;
+  label: string;
+  operations: Array<OperationMetadata<T>>;
 }
 
 export type OperationParameterMetadata = ApiOperationParameter;
 
 export interface SchemaMetadata {
-  $ref: string;
+  $ref?: string;
   typeLabel: React.ReactNode;
-  properties: OperationParameterMetadata[];
-  isObject: boolean;
+  properties?: OperationParameterMetadata[];
+  isEnum?: boolean;
 }
 
 export interface RequestMetadata {
   description?: string;
-  parameters: OperationParameterMetadata[];
-  headers: OperationParameterMetadata[];
+  parameters?: OperationParameterMetadata[];
+  headers?: OperationParameterMetadata[];
   body: SchemaMetadata;
 }
 
 export interface ResponseMetadata {
-  code: string;
+  code?: string;
   description?: string;
-  headers: OperationParameterMetadata[];
+  headers?: OperationParameterMetadata[];
   body: SchemaMetadata;
 }
 
 export interface ApiSpecReader {
   getBaseUrl: () => string;
   getTagLabels: () => string[];
+  getOperationCategories: () => OperationCategory[];
   getOperations: () => OperationMetadata[];
   getOperation: (operationName: string) => OperationMetadata;
   getRequestMetadata: (operationName: string) => RequestMetadata;
