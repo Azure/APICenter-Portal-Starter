@@ -16,7 +16,7 @@ const apiSearchFiltersAtom = atom<ActiveFilterData[]>({
     /**
      * Persist the filters to the URL on change
      */
-    ({ onSet }) => {
+    ({ onSet }): void => {
       onSet((filters) => {
         const url = new URL(window.location.href);
 

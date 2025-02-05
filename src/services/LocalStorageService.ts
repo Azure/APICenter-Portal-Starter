@@ -25,7 +25,7 @@ const LocalStorageService = {
     return JSON.parse(value);
   },
 
-  set<T extends StorageKeys>(key: T, value?: StorageValuesMap[T]) {
+  set<T extends StorageKeys>(key: T, value?: StorageValuesMap[T]): void {
     if (value === undefined) {
       this.remove(key);
       return;
@@ -34,7 +34,7 @@ const LocalStorageService = {
     localStorage.setItem(key, JSON.stringify(value));
   },
 
-  remove<T extends StorageKeys>(key: T) {
+  remove<T extends StorageKeys>(key: T): void {
     localStorage.removeItem(key);
   },
 };

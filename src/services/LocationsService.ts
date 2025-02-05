@@ -1,5 +1,5 @@
 const LocationsService = {
-  getHomeUrl: (preserveSearchParams = false) => {
+  getHomeUrl(preserveSearchParams = false): string {
     if (!preserveSearchParams) {
       return '/';
     }
@@ -7,7 +7,7 @@ const LocationsService = {
     return `/${window.location.search}`;
   },
 
-  getApiSearchUrl: (search?: string) => {
+  getApiSearchUrl(search?: string): string {
     const searchParams = new URLSearchParams(window.location.search);
     if (search) {
       searchParams.set('search', search);
@@ -18,12 +18,17 @@ const LocationsService = {
     return `/?${searchParams.toString()}`;
   },
 
-  getApiInfoUrl: (name: string) => `/api-info/${name}${window.location.search}`,
+  getApiInfoUrl(name: string): string {
+    return `/api-info/${name}${window.location.search}`;
+  },
 
-  getApiSchemaExplorerUrl: (api: string, version: string, definition: string) =>
-    `/apis/${api}/versions/${version}/definitions/${definition}`,
+  getApiSchemaExplorerUrl(api: string, version: string, definition: string): string {
+    return `/apis/${api}/versions/${version}/definitions/${definition}`;
+  },
 
-  getHelpUrl: () => 'https://learn.microsoft.com/en-us/azure/api-center/overview',
+  getHelpUrl(): string {
+    return 'https://learn.microsoft.com/en-us/azure/api-center/overview';
+  },
 };
 
 export default LocationsService;

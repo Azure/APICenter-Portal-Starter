@@ -5,7 +5,7 @@ const isAuthenticatedAtom = atom<boolean>({
   key: 'isAuthenticated',
   default: false,
   effects: [
-    ({ setSelf }) => {
+    ({ setSelf }): void => {
       MsalAuthService.isAuthenticated().then(setSelf);
     },
   ],

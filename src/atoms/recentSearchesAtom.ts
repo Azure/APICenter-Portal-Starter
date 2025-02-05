@@ -9,7 +9,7 @@ const recentSearchesAtom = atom<RecentSearchData[]>({
     /**
      * Persist the recent searches to local storage on change
      */
-    ({ onSet }) => {
+    ({ onSet }): void => {
       onSet((value) => {
         LocalStorageService.set(LocalStorageService.StorageKeys.RECENT_SEARCHES, value);
       });

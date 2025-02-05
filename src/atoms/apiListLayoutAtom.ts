@@ -9,7 +9,7 @@ const apiListLayoutAtom = atom<Layouts>({
     /**
      * Persist the layout setting to local storage on change
      */
-    ({ onSet }) => {
+    ({ onSet }): void => {
       onSet((value) => {
         LocalStorageService.set(LocalStorageService.StorageKeys.API_LIST_LAYOUT, value);
       });
