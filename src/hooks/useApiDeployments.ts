@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useRecoilValue } from 'recoil';
 import { ApiDeployment } from '@/types/apiDeployment';
 import isAuthenticatedAtom from '@/atoms/isAuthenticatedAtom';
-import ApiService from '@/services/ApiService';
+import useApiService from '@/hooks/useApiService';
 
 interface ReturnType {
   list: ApiDeployment[];
@@ -12,6 +12,8 @@ interface ReturnType {
 export default function useApiDeployments(apiId?: string): ReturnType {
   const [list, setList] = useState<ApiDeployment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  const ApiService = useApiService();
   const isAuthenticated = useRecoilValue(isAuthenticatedAtom);
 
   const fetch = useCallback(async () => {
@@ -27,7 +29,7 @@ export default function useApiDeployments(apiId?: string): ReturnType {
     } finally {
       setIsLoading(false);
     }
-  }, [apiId, isAuthenticated]);
+  }, [ApiService, apiId, isAuthenticated]);
 
   useEffect(() => {
     void fetch();

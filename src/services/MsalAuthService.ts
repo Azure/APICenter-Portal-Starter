@@ -1,5 +1,6 @@
 import * as msal from '@azure/msal-browser';
 import config from '@/config';
+import { IAuthService } from '@/types/services/IAuthService';
 
 let msalInstance: msal.PublicClientApplication | undefined;
 
@@ -33,7 +34,7 @@ async function getMsalInstance(): Promise<msal.PublicClientApplication> {
   return msalInstance;
 }
 
-const MsalAuthService = {
+const MsalAuthService: IAuthService = {
   async isAuthenticated(): Promise<boolean> {
     const msalInstance = await getMsalInstance();
     const accounts = msalInstance.getAllAccounts();

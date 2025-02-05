@@ -6,8 +6,9 @@ import { ApiDefinition } from '@/types/apiDefinition';
 import { ApiVersion } from '@/types/apiVersion';
 import { ApiDeployment } from '@/types/apiDeployment';
 import { ApiEnvironment } from '@/types/apiEnvironment';
+import { IApiService } from '@/types/services/IApiService';
 
-const ApiService = {
+const ApiService: IApiService = {
   async getApis(search: string, filters: ActiveFilterData[] = []): Promise<ApiMetadata[]> {
     const searchParams = new URLSearchParams();
     if (search.length) {

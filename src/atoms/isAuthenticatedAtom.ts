@@ -1,12 +1,13 @@
 import { atom } from 'recoil';
-import MsalAuthService from '@/services/MsalAuthService';
+import appServicesAtom from '@/atoms/appServicesAtom';
 
 const isAuthenticatedAtom = atom<boolean>({
   key: 'isAuthenticated',
   default: false,
   effects: [
-    ({ setSelf }): void => {
-      MsalAuthService.isAuthenticated().then(setSelf);
+    ({ setSelf, getLoadable }): void => {
+      const { AuthService } = getLoadable(appServicesAtom).contents;
+      AuthService.isAuthenticated().then(setSelf);
     },
   ],
 });

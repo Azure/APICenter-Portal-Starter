@@ -6,7 +6,7 @@ import '@asyncapi/react-component/styles/default.min.css';
 import { Spinner } from '@fluentui/react-components';
 
 import 'swagger-ui-react/swagger-ui.css';
-import ApiService from '@/services/ApiService';
+import useApiService from '@/hooks/useApiService';
 
 const Swagger = () => {
   const {
@@ -22,6 +22,8 @@ const Swagger = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [specification, setSpecification] = useState(null);
   const [specType, setSpecType] = useState('rest');
+
+  const ApiService = useApiService();
 
   const getSpecificationLink = async () => {
     if (!version || !definitionName) return;

@@ -4,7 +4,7 @@ import { ApiMetadata } from '@/types/api';
 import { ActiveFilterData } from '@/types/apiFilters';
 import { SortBy, SortByOrder } from '@/types/sorting';
 import apiListSortingAtom from '@/atoms/apiListSortingAtom';
-import ApiService from '@/services/ApiService';
+import useApiService from '@/hooks/useApiService';
 
 interface Props {
   search?: string;
@@ -44,6 +44,8 @@ function sortApis(apis: ApiMetadata[], sortBy?: SortBy): ApiMetadata[] {
 export default function useApis({ search, filters, isAutoCompleteMode }: Props = {}): ReturnType {
   const [apis, setApis] = useState<ApiMetadata[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+
+  const ApiService = useApiService();
   const sortBy = useRecoilValue(apiListSortingAtom);
 
   const fetchApis = useCallback(async () => {
@@ -58,7 +60,7 @@ export default function useApis({ search, filters, isAutoCompleteMode }: Props =
     } finally {
       setIsLoading(false);
     }
-  }, [filters, isAutoCompleteMode, search]);
+  }, [ApiService, filters, isAutoCompleteMode, search]);
 
   useEffect(() => {
     void fetchApis();

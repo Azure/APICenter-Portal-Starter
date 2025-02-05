@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useRecoilValue } from 'recoil';
 import isAuthenticatedAtom from '@/atoms/isAuthenticatedAtom';
-import ApiService from '@/services/ApiService';
+import useApiService from '@/hooks/useApiService';
 
 interface Props {
   apiName?: string;
@@ -18,6 +18,7 @@ export default function useApiSpecUrl({ apiName, versionName, definitionName }: 
   const [value, setValue] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState(true);
 
+  const ApiService = useApiService();
   const isAuthenticated = useRecoilValue(isAuthenticatedAtom);
 
   const fetch = useCallback(async () => {
@@ -33,7 +34,7 @@ export default function useApiSpecUrl({ apiName, versionName, definitionName }: 
     } finally {
       setIsLoading(false);
     }
-  }, [apiName, definitionName, isAuthenticated, versionName]);
+  }, [ApiService, apiName, definitionName, isAuthenticated, versionName]);
 
   useEffect(() => {
     void fetch();
