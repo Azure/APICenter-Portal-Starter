@@ -12,7 +12,8 @@ export default function makeOpenApiResolverProxy<T>(
   const resolvedRoot = (root || obj) as OpenAPI.Document;
 
   return new Proxy(obj as object, {
-    get(target, prop) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    get(target, prop): any {
       if (!(prop in target)) {
         return undefined;
       }
