@@ -24,13 +24,13 @@ import { getUsedRefsForType, gqlTypeToLabel } from '@/utils/graphql';
 type FieldSpec = GraphQLField<any, any>;
 
 /**
- * Returns an instance of ApiSpecReader that reads OpenAPI V2 spec from a string.
+ * Returns an instance of ApiSpecReader that reads GraphQL spec from a string.
  */
 export default async function openApiSpecReader(specStr: string): Promise<ApiSpecReader> {
   const qlSchema = buildSchema(specStr);
 
   const getBaseUrl = memoize((): string => {
-    return '';
+    return '/';
   });
 
   const getTagLabels = memoize((): string[] => {
@@ -46,7 +46,7 @@ export default async function openApiSpecReader(specStr: string): Promise<ApiSpe
       displayName: field.name,
       description: field.description,
       name: `${category}/${field.name}`,
-      urlTemplate: field.name,
+      urlTemplate: '',
       spec: field,
     }));
   }
@@ -103,9 +103,7 @@ export default async function openApiSpecReader(specStr: string): Promise<ApiSpe
   const getOperationDefinitions = memoize((operationName: string): SchemaMetadata[] => {
     const operation = getOperation(operationName);
 
-    const requestRefs = operation.spec.args.reduce((acc, arg) => {
-      return getUsedRefsForType(arg.type, acc);
-    }, [] as string[]);
+    const requestRefs = operation.spec.args.reduce((acc, arg) => getUsedRefsForType(arg.type, acc), [] as string[]);
 
     return getUsedRefsForType(operation.spec.type, requestRefs)
       .map((ref) => qlSchema.getType(ref) as GraphQLObjectType | GraphQLInterfaceType | GraphQLEnumType)

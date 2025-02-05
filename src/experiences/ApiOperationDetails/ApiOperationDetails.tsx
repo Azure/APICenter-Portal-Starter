@@ -1,5 +1,5 @@
 import React from 'react';
-import { ParametersTable } from '@microsoft/api-docs-ui';
+import { ApiOperationInfo, ParametersTable } from '@microsoft/api-docs-ui';
 import { ApiSpecReader, OperationMetadata } from '@/types/apiSpec';
 import ParamSchemaDefinition from '@/components/ParamSchemaDefinition';
 import styles from './ApiOperationDetails.module.scss';
@@ -90,11 +90,14 @@ export const ApiOperationDetails: React.FC<Props> = ({ apiSpec, operation }) => 
       </>
     );
   }
-  // return null;
 
   return (
     <div className={styles.apiOperationDetails}>
-      {/*<ApiOperationInfo operation={operation} requestUrl={operation.invocationUrl} tags={apiSpec.getTagLabels()} />*/}
+      <ApiOperationInfo
+        operation={operation}
+        requestUrl={apiSpec.getBaseUrl() + operation.urlTemplate}
+        tags={apiSpec.getTagLabels()}
+      />
 
       <h3>Request</h3>
       {renderRequestInfo()}

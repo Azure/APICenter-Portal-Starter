@@ -5,7 +5,6 @@ export type WithRef<T> = T & { $ref?: string };
 
 export interface OperationMetadata<T = object> extends ApiOperation {
   category: string;
-  invocationUrl?: string;
   spec?: T;
 }
 
