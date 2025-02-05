@@ -38,13 +38,25 @@ export interface ResponseMetadata {
 }
 
 export interface ApiSpecReader {
+  /**
+   * Returns base url for api (should not include host as it is determined from a particular deployment).
+   *
+   * @example
+   * spec.getBaseUrl() => '/api/v1'
+   */
   getBaseUrl: () => string;
+  /** Returns api tags list (used for informational purpose only) */
   getTagLabels: () => string[];
   getOperationCategories: () => OperationCategory[];
   getOperations: () => OperationMetadata[];
   getOperation: (operationName: string) => OperationMetadata;
   getRequestMetadata: (operationName: string) => RequestMetadata;
   getResponsesMetadata: (operationName: string) => ResponseMetadata[];
+  /**
+   * Returns schema definitions for a given operation.
+   * Definitions are sub-schemas that can be referenced from other parts of the spec.
+   * For example in OpenAPI it those are components.schemas and in GraphQL it's type definitions.
+   */
   getOperationDefinitions: (operationName: string) => SchemaMetadata[];
 }
 

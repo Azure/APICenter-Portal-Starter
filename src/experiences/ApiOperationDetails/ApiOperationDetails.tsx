@@ -2,14 +2,17 @@ import React from 'react';
 import { ApiOperationInfo, ParametersTable } from '@microsoft/api-docs-ui';
 import { ApiSpecReader, OperationMetadata } from '@/types/apiSpec';
 import ParamSchemaDefinition from '@/components/ParamSchemaDefinition';
+import { ApiDeployment } from '@/types/apiDeployment';
+import { resolveOpUrlTemplate } from '@/utils/apiOperations';
 import styles from './ApiOperationDetails.module.scss';
 
 interface Props {
   apiSpec: ApiSpecReader;
   operation?: OperationMetadata;
+  deployment?: ApiDeployment;
 }
 
-export const ApiOperationDetails: React.FC<Props> = ({ apiSpec, operation }) => {
+export const ApiOperationDetails: React.FC<Props> = ({ apiSpec, operation, deployment }) => {
   if (!operation) {
     return null;
   }
@@ -95,7 +98,7 @@ export const ApiOperationDetails: React.FC<Props> = ({ apiSpec, operation }) => 
     <div className={styles.apiOperationDetails}>
       <ApiOperationInfo
         operation={operation}
-        requestUrl={apiSpec.getBaseUrl() + operation.urlTemplate}
+        requestUrl={resolveOpUrlTemplate(deployment, apiSpec, operation)}
         tags={apiSpec.getTagLabels()}
       />
 

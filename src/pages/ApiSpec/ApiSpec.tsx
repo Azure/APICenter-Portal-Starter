@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Spinner } from '@fluentui/react-components';
 import useApiSpec from '@/hooks/useApiSpec';
@@ -9,10 +9,13 @@ import { ApiOperationDetails } from '@/experiences/ApiOperationDetails/ApiOperat
 import useApi from '@/hooks/useApi';
 import ApiDefinitionSelect, { ApiDefinitionSelection } from '@/experiences/ApiDefinitionSelect';
 import LocationsService from '@/services/LocationsService';
+import { ApiDeployment } from '@/types/apiDeployment';
+import { EmptyStateMessage } from '@/components/EmptyStateMessage/EmptyStateMessage';
 import styles from './ApiSpec.module.scss';
 
 export const ApiSpec: React.FC = () => {
   const { apiName, versionName, definitionName } = useParams<Readonly<ApiDefinitionId>>() as ApiDefinitionId;
+  const [deployment, setDeployment] = useState<ApiDeployment | undefined>();
   const selectedOperation = useSelectedOperation();
   const navigate = useNavigate();
 
@@ -26,6 +29,8 @@ export const ApiSpec: React.FC = () => {
 
   const handleDefinitionSelectionChange = useCallback(
     (definitionSelection: ApiDefinitionSelection) => {
+      setDeployment(definitionSelection.deployment);
+
       if (definitionSelection.version.name === versionName && definitionSelection.definition.name === definitionName) {
         return;
       }
@@ -72,8 +77,9 @@ export const ApiSpec: React.FC = () => {
     }
 
     if (!apiSpec.spec) {
-      // TODO: make it more user-friendly
-      return <span>API specification not found.</span>;
+      return (
+        <EmptyStateMessage>The specified API does not exist or its specification can&apos;t be read</EmptyStateMessage>
+      );
     }
 
     return (
@@ -83,7 +89,11 @@ export const ApiSpec: React.FC = () => {
         </aside>
 
         <div className={styles.details}>
-          <ApiOperationDetails apiSpec={apiSpec} operation={apiSpec.getOperation(selectedOperation.name)} />
+          <ApiOperationDetails
+            deployment={deployment}
+            apiSpec={apiSpec}
+            operation={apiSpec.getOperation(selectedOperation.name)}
+          />
         </div>
       </div>
     );

@@ -18,6 +18,7 @@ import ApiAdditionalInfo from '../../experiences/ApiAdditionalInfo';
 import ApiInfoOptions from '../../experiences/ApiInfoOptions';
 import LocationsService from '@/services/LocationsService';
 import ApiDefinitionSelect, { ApiDefinitionSelection } from '@/experiences/ApiDefinitionSelect';
+import { EmptyStateMessage } from '@/components/EmptyStateMessage/EmptyStateMessage';
 import styles from './ApiInfo.module.scss';
 
 interface RouteParams {
@@ -67,8 +68,7 @@ export const ApiInfo: React.FC = () => {
     }
 
     if (!api.data) {
-      // TODO: Add error state
-      return null;
+      return <EmptyStateMessage>The specified API does not exist</EmptyStateMessage>;
     }
 
     return (

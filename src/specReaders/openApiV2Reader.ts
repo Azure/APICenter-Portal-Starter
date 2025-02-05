@@ -22,8 +22,7 @@ export default async function openApiSpecReader(specStr: string): Promise<ApiSpe
   const apiSpec = makeOpenApiResolverProxy<OpenAPIV2.Document>(yaml.parse(specStr));
 
   const getBaseUrl = memoize((): string => {
-    const protocol = apiSpec.schemes[0];
-    return `${protocol}://${apiSpec.host}${apiSpec.basePath}`;
+    return apiSpec.basePath || '/';
   });
 
   const getTagLabels = memoize((): string[] => {
