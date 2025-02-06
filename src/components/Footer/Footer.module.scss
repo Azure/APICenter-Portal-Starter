@@ -1,0 +1,14 @@
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 16px 32px;
+  gap: 36px;
+  background-color: var(--grey-2);
+  color: var(--grey-4);
+  font-weight: 600;
+  
+  a[href] {
+    color: inherit;
+    font: inherit;
+  }
+}
