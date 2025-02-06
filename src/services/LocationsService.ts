@@ -23,7 +23,7 @@ const LocationsService = {
   },
 
   getApiSchemaExplorerUrl(api: string, version: string, definition: string): string {
-    return `/swagger/${api}/${version}/${definition}`;
+    return `/apis/${api}/versions/${version}/definitions/${definition}`;
   },
 
   getHelpUrl(): string {

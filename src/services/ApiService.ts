@@ -1,8 +1,9 @@
 import { groupBy } from 'lodash';
+import memoize from 'memoizee';
 import { ActiveFilterData } from '@/types/apiFilters';
 import HttpService from '@/services/HttpService';
 import { ApiMetadata } from '@/types/api';
-import { ApiDefinition } from '@/types/apiDefinition';
+import { ApiDefinition, ApiDefinitionId } from '@/types/apiDefinition';
 import { ApiVersion } from '@/types/apiVersion';
 import { ApiDeployment } from '@/types/apiDeployment';
 import { ApiEnvironment } from '@/types/apiEnvironment';
@@ -51,18 +52,23 @@ const ApiService = {
     return response.value || [];
   },
 
-  async getDefinition(apiName: string, versionName: string, definitionName: string): Promise<ApiDefinition> {
+  async getDefinition({ apiName, versionName, definitionName }: ApiDefinitionId): Promise<ApiDefinition> {
     return await HttpService.get<ApiDefinition>(
       `/apis/${apiName}/versions/${versionName}/definitions/${definitionName}`
     );
   },
 
-  async getSpecificationLink(apiName: string, versionName: string, definitionName: string): Promise<string> {
+  async getSpecificationLink({ apiName, versionName, definitionName }: ApiDefinitionId): Promise<string> {
     const response = await HttpService.post<{ value: string }>(
       `/apis/${apiName}/versions/${versionName}/definitions/${definitionName}:exportSpecification`
     );
     return response?.value;
   },
+
+  getSpecification: memoize(async (definitionId: ApiDefinitionId): Promise<string | undefined> => {
+    const res = await fetch(await ApiService.getSpecificationLink(definitionId));
+    return res.text();
+  }),
 
   async getEnvironment(environmentId: string): Promise<ApiEnvironment> {
     return await HttpService.get<ApiEnvironment>(`/environments/${environmentId}`);

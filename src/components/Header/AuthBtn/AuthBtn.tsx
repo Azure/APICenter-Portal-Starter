@@ -9,15 +9,16 @@ export const AuthBtn: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useRecoilState(isAuthenticatedAtom);
 
   const handleClick = useCallback(async () => {
-    setIsAuthenticated((prev) => !prev);
     if (isAuthenticated) {
       await MsalAuthService.signOut();
+      setIsAuthenticated(false);
       // Refresh the URL to the original state
       window.location.href = window.location.origin;
       return;
     }
 
     await MsalAuthService.signIn();
+    setIsAuthenticated(await MsalAuthService.isAuthenticated());
   }, [isAuthenticated, setIsAuthenticated]);
 
   return (

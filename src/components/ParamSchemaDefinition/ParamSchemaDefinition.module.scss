@@ -1,0 +1,18 @@
+.paramSchemaDefinition {
+  h4 {
+    display: flex;
+    align-items: center;
+    
+    .anchor {
+      margin-right: 3px;
+    }
+  }
+
+  .badge {
+    margin-left: 5px;
+
+    &::after {
+      display: none;
+    }
+  }
+}

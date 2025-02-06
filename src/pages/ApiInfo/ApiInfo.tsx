@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   Button,
   Divider,
@@ -6,8 +6,6 @@ import {
   DrawerBody,
   DrawerHeader,
   DrawerHeaderTitle,
-  Dropdown,
-  Option,
   Spinner,
   Subtitle2,
   Tab,
@@ -16,15 +14,10 @@ import {
 import { Dismiss24Regular } from '@fluentui/react-icons';
 import { useNavigate, useParams } from 'react-router-dom';
 import useApi from '@/hooks/useApi';
-import useApiVersions from '@/hooks/useApiVersions';
-import { ApiVersion } from '@/types/apiVersion';
-import useApiDefinitions from '@/hooks/useApiDefinitions';
-import { ApiDefinition } from '@/types/apiDefinition';
-import useApiDeployments from '@/hooks/useApiDeployments';
-import { ApiDeployment } from '@/types/apiDeployment';
 import ApiAdditionalInfo from '../../experiences/ApiAdditionalInfo';
 import ApiInfoOptions from '../../experiences/ApiInfoOptions';
 import LocationsService from '@/services/LocationsService';
+import ApiDefinitionSelect, { ApiDefinitionSelection } from '@/experiences/ApiDefinitionSelect';
 import styles from './ApiInfo.module.scss';
 
 interface RouteParams {
@@ -36,55 +29,13 @@ enum Tabs {
   MORE_DETAILS = 'more-details',
 }
 
-const NO_VERSION_LABEL = "Version isn't available";
-const NO_DEFINITION_LABEL = "Definition isn't available";
-const NO_DEPLOYMENT_LABEL = "Deployment isn't available";
-
 export const ApiInfo: React.FC = () => {
-  const [selectedVersion, setSelectedVersion] = useState<ApiVersion | undefined>();
-  const [selectedDefinition, setSelectedDefinition] = useState<ApiDefinition | undefined>();
-  const [selectedDeployment, setSelectedDeployment] = useState<ApiDeployment | undefined>();
   const [activeTab, setActiveTab] = useState<Tabs>(Tabs.OPTIONS);
+  const [definitionSelection, setDefinitionSelection] = useState<ApiDefinitionSelection | undefined>(undefined);
 
   const { id } = useParams() as Readonly<RouteParams>;
   const navigate = useNavigate();
   const api = useApi(id);
-  const apiVersions = useApiVersions(id);
-  const apiDefinitions = useApiDefinitions(id, selectedVersion?.name);
-  const apiDeployments = useApiDeployments(id);
-
-  useEffect(() => {
-    setSelectedVersion(apiVersions.list[0]);
-  }, [apiVersions.list]);
-
-  useEffect(() => {
-    setSelectedDefinition(apiDefinitions.list[0]);
-  }, [apiDefinitions.list]);
-
-  useEffect(() => {
-    setSelectedDeployment(apiDeployments.list[0]);
-  }, [apiDeployments.list]);
-
-  const handleVersionSelect = useCallback<React.ComponentProps<typeof Dropdown>['onOptionSelect']>(
-    (_, data) => {
-      setSelectedVersion(apiVersions.list.find((version) => version.name === data.selectedOptions[0]));
-    },
-    [apiVersions.list]
-  );
-
-  const handleDefinitionSelect = useCallback<React.ComponentProps<typeof Dropdown>['onOptionSelect']>(
-    (_, data) => {
-      setSelectedDefinition(apiDefinitions.list.find((definition) => definition.name === data.selectedOptions[0]));
-    },
-    [apiDefinitions.list]
-  );
-
-  const handleDeploymentSelect = useCallback<React.ComponentProps<typeof Dropdown>['onOptionSelect']>(
-    (_, data) => {
-      setSelectedDeployment(apiDeployments.list.find((deployment) => deployment.name === data.selectedOptions[0]));
-    },
-    [apiDeployments.list]
-  );
 
   const handleTabSelect = useCallback<React.ComponentProps<typeof TabList>['onTabSelect']>((_, { value }) => {
     setActiveTab(value as Tabs);
@@ -99,10 +50,10 @@ export const ApiInfo: React.FC = () => {
       return (
         <ApiInfoOptions
           api={api.data}
-          apiVersion={selectedVersion}
-          apiDefinition={selectedDefinition}
-          apiDeployment={selectedDeployment}
-          isLoading={api.isLoading || apiVersions.isLoading || apiDefinitions.isLoading || apiDeployments.isLoading}
+          apiVersion={definitionSelection?.version}
+          apiDefinition={definitionSelection?.definition}
+          apiDeployment={definitionSelection?.deployment}
+          isLoading={api.isLoading || !definitionSelection}
         />
       );
     }
@@ -132,60 +83,7 @@ export const ApiInfo: React.FC = () => {
           definition, open it in Visual Studio Code, or run it in Postman.
         </p>
 
-        <div className={styles.selectionDropdown}>
-          <label htmlFor="version-select">Version</label>
-
-          <Dropdown
-            id="version-select"
-            placeholder="Select API version"
-            value={selectedVersion?.title || NO_VERSION_LABEL}
-            selectedOptions={[selectedVersion?.name]}
-            disabled={!apiVersions.list.length}
-            onOptionSelect={handleVersionSelect}
-          >
-            {apiVersions.list.map((version) => (
-              <Option key={version.name} value={version.name}>
-                {version.title || version.name}
-              </Option>
-            ))}
-          </Dropdown>
-        </div>
-
-        <div className={styles.selectionDropdown}>
-          <label htmlFor="definition-select">Definition format</label>
-          <Dropdown
-            id="definition-select"
-            placeholder="Select API definition"
-            value={selectedDefinition?.title || NO_DEFINITION_LABEL}
-            selectedOptions={[selectedDefinition?.name]}
-            disabled={!apiDefinitions.list.length}
-            onOptionSelect={handleDefinitionSelect}
-          >
-            {apiDefinitions.list.map((definition) => (
-              <Option key={definition.name} value={definition.name}>
-                {definition.title}
-              </Option>
-            ))}
-          </Dropdown>
-        </div>
-
-        <div className={styles.selectionDropdown}>
-          <label htmlFor="deployment-select">Deployment</label>
-          <Dropdown
-            id="deployment-select"
-            placeholder="Select deployment"
-            value={selectedDeployment?.title || NO_DEPLOYMENT_LABEL}
-            selectedOptions={[selectedDeployment?.name]}
-            disabled={!apiDeployments.list.length}
-            onOptionSelect={handleDeploymentSelect}
-          >
-            {apiDeployments.list.map((deployment) => (
-              <Option key={deployment.name} value={deployment.name}>
-                {deployment.title}
-              </Option>
-            ))}
-          </Dropdown>
-        </div>
+        <ApiDefinitionSelect apiId={id} onSelectionChange={setDefinitionSelection} />
 
         <div className={styles.tabsContainer}>
           <TabList selectedValue={activeTab} onTabSelect={handleTabSelect}>
