@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useRecoilValue } from 'recoil';
 import { ApiEnvironment } from '@/types/apiEnvironment';
 import isAuthenticatedAtom from '@/atoms/isAuthenticatedAtom';
-import ApiService from '@/services/ApiService';
+import useApiService from '@/hooks/useApiService';
 
 interface ReturnType {
   data?: ApiEnvironment;
@@ -13,6 +13,7 @@ export default function useDeploymentEnvironment(envId?: string): ReturnType {
   const [environment, setEnvironment] = useState<ApiEnvironment | undefined>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
+  const ApiService = useApiService();
   const isAuthenticated = useRecoilValue(isAuthenticatedAtom);
 
   const fetch = useCallback(async () => {
@@ -28,7 +29,7 @@ export default function useDeploymentEnvironment(envId?: string): ReturnType {
     } finally {
       setIsLoading(false);
     }
-  }, [envId, isAuthenticated]);
+  }, [ApiService, envId, isAuthenticated]);
 
   useEffect(() => {
     void fetch();

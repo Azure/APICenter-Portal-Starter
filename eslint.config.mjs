@@ -55,6 +55,22 @@ export default [
         },
       ],
 
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: '@/services/ApiService',
+              message: 'Import ApiService via useApiService hook or get it from appServicesAtom instead.',
+            },
+            {
+              name: '@/services/MsalAuthService',
+              message: 'Import AuthService via useAuthService hook or get it from appServicesAtom instead.',
+            },
+          ],
+        },
+      ],
+
       'react/hook-use-state': 'error',
       'react/jsx-first-prop-new-line': ['error', 'multiline-multiprop'],
       'react/jsx-indent': ['error', 2],

@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { setRecoil } from 'recoil-nexus';
+import { getRecoil, setRecoil } from 'recoil-nexus';
 import memoizee from 'memoizee';
 import config from '@/config';
 import isAccessDeniedAtom from '@/atoms/isAccessDeniedAtom';
-import MsalAuthService from '@/services/MsalAuthService';
+import appServicesAtom from '@/atoms/appServicesAtom';
 
 let baseUrl = `https://${config.dataApiHostName}`;
 
@@ -18,7 +18,8 @@ const BASE_HEADERS: HeadersInit = {
 };
 
 async function makeRequest<T>(endpoint: string, method: string, payload?: any): Promise<T> {
-  const accessToken = await MsalAuthService.getAccessToken();
+  const { AuthService } = getRecoil(appServicesAtom);
+  const accessToken = await AuthService.getAccessToken();
 
   const init: RequestInit = {
     method,

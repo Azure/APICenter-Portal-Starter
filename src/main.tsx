@@ -1,16 +1,22 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { RecoilRoot } from 'recoil';
 import { FluentProvider, webLightTheme } from '@fluentui/react-components';
+import RootProvider from '@/RootProvider';
 import App from './App';
 import './globals.scss';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <FluentProvider theme={webLightTheme} className="app-root">
-      <RecoilRoot>
+      <RootProvider
+        services={
+          {
+            // Override services here if needed
+          }
+        }
+      >
         <App />
-      </RecoilRoot>
+      </RootProvider>
     </FluentProvider>
   </React.StrictMode>
 );
