@@ -10,7 +10,6 @@ export const AuthBtn: React.FC = () => {
   const AuthService = useAuthService();
 
   const handleClick = useCallback(async () => {
-    setIsAuthenticated((prev) => !prev);
     if (isAuthenticated) {
       await AuthService.signOut();
       // Refresh the URL to the original state

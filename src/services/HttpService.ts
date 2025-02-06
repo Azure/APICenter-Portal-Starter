@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { getRecoil, setRecoil } from 'recoil-nexus';
+import memoizee from 'memoizee';
 import config from '@/config';
 import isAccessDeniedAtom from '@/atoms/isAccessDeniedAtom';
 import appServicesAtom from '@/atoms/appServicesAtom';
@@ -48,9 +49,11 @@ async function makeRequest<T>(endpoint: string, method: string, payload?: any): 
   return (await response.json()) as T;
 }
 
+const makeRequestWithCache = memoizee(makeRequest);
+
 const HttpService = {
   get<T>(endpoint: string): Promise<T | undefined> {
-    return makeRequest<T>(endpoint, 'GET');
+    return makeRequestWithCache<T>(endpoint, 'GET');
   },
 
   post<T>(endpoint: string, payload?: any): Promise<T | undefined> {

@@ -12,6 +12,7 @@
   --grey-3: #D1D1D1;
   --grey-2: #E6E6E6;
   --grey-1: #F3F2F1;
+  --grey-0: #FFF;
   --radius-m: 4px;
 }
 
@@ -29,6 +30,31 @@ body {
   position: relative;
 }
 
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  line-height: 1;
+}
+
+h1 {
+  font-size: 32px;
+}
+
+h3 {
+  font-size: 20px;
+}
+
+h4 {
+  font-size: 16px;
+}
+
+h5 {
+  font-size: 14px;
+}
+
+strong {
+  font-weight: 600;
+}
+
 button {
   padding: 0;
   border: none;
@@ -42,8 +68,20 @@ button {
   display: flex;
   flex-direction: column;
   height: 100%;
+  background: transparent !important;
 
   > main {
-    flex-grow: 1;
+    display: flex;
+    flex: 1;
+    
+    > * {
+      flex: 1;
+    }
+  }
+  
+  section {
+    width: 100%;
+    max-width: 1440px;
+    margin: 0 auto;
   }
 }

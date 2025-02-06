@@ -40,6 +40,7 @@ export const ApiListSortingSelect: React.FC = () => {
     <Dropdown
       value={optionLabelByKey[sortByToKey(sortBy)] || ''}
       selectedOptions={[sortByToKey(sortBy)]}
+      inlinePopup
       onOptionSelect={handleOptionSelect}
     >
       {options.map((key) => (

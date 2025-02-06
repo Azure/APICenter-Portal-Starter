@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { FluentProvider, webLightTheme } from '@fluentui/react-components';
 import RootProvider from '@/RootProvider';
-import Router from './Router';
+import App from './App';
 import './globals.scss';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
@@ -15,7 +15,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           }
         }
       >
-        <Router />
+        <App />
       </RootProvider>
     </FluentProvider>
   </React.StrictMode>

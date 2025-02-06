@@ -1,20 +1,19 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useRecoilValue } from 'recoil';
+import { ApiDefinition, ApiDefinitionId } from '@/types/apiDefinition';
 import isAuthenticatedAtom from '@/atoms/isAuthenticatedAtom';
-import { ApiDefinitionId } from '@/types/apiDefinition';
+import ApiService from '@/services/ApiService';
 import { isDefinitionIdValid } from '@/utils/apiDefinitions';
-import useApiService from '@/hooks/useApiService';
 
 interface ReturnType {
-  value?: string;
+  value?: ApiDefinition;
   isLoading: boolean;
 }
 
-export default function useApiSpecUrl(definitionId: ApiDefinitionId): ReturnType {
-  const [value, setValue] = useState<string | undefined>();
+export default function useApiDefinition(definitionId: ApiDefinitionId): ReturnType {
+  const [value, setValue] = useState<ApiDefinition | undefined>();
   const [isLoading, setIsLoading] = useState(true);
 
-  const ApiService = useApiService();
   const isAuthenticated = useRecoilValue(isAuthenticatedAtom);
 
   const fetch = useCallback(async () => {
@@ -26,11 +25,11 @@ export default function useApiSpecUrl(definitionId: ApiDefinitionId): ReturnType
 
     try {
       setIsLoading(true);
-      setValue(await ApiService.getSpecificationLink(definitionId));
+      setValue(await ApiService.getDefinition(definitionId));
     } finally {
       setIsLoading(false);
     }
-  }, [ApiService, definitionId, isAuthenticated]);
+  }, [definitionId, isAuthenticated]);
 
   useEffect(() => {
     void fetch();
