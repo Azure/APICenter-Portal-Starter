@@ -1,6 +1,7 @@
-import React, { useCallback, useEffect } from 'react';
-import { ApiOperationsList } from '@microsoft/api-docs-ui';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import { ApiOperationsList } from '@microsoft/api-docs-ui';
+import { Accordion, AccordionHeader, AccordionItem, AccordionPanel } from '@fluentui/react-components';
 import { ApiSpecReader, OperationMetadata } from '@/types/apiSpec';
 import useSelectedOperation from '@/hooks/useSelectedOperation';
 
@@ -9,17 +10,30 @@ interface Props {
 }
 
 export const ApiOperationsSelect: React.FC<Props> = ({ apiSpec }) => {
+  const [openCategory, setOpenCategory] = useState<string | undefined>();
   const location = useLocation();
   const selectedOperation = useSelectedOperation();
 
+  const operationCategories = apiSpec.getOperationCategories();
   const operations = apiSpec.getOperations();
 
   const handleOperationSelect = useCallback(
     (operation: OperationMetadata) => {
+      setOpenCategory(operation.category);
       selectedOperation.set(operation.name);
     },
     [selectedOperation]
   );
+
+  useEffect(() => {
+    if (!selectedOperation.name) {
+      setOpenCategory(operationCategories[0]?.name);
+      return;
+    }
+
+    setOpenCategory(apiSpec.getOperation(selectedOperation.name)?.category);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   /**
    * Reset selected operation if it's not found in the current spec.
@@ -39,12 +53,29 @@ export const ApiOperationsSelect: React.FC<Props> = ({ apiSpec }) => {
     handleOperationSelect(operations[0]);
   }, [handleOperationSelect, operations, selectedOperation]);
 
+  const handleAccordionToggle = useCallback<React.ComponentProps<typeof Accordion>['onToggle']>((_, data) => {
+    setOpenCategory(String(data.openItems[0]));
+  }, []);
+
   return (
-    <ApiOperationsList
-      selectedOperationName={selectedOperation.name}
-      operations={operations}
-      onOperationSelect={handleOperationSelect}
-    />
+    <Accordion openItems={[openCategory]} collapsible onToggle={handleAccordionToggle}>
+      {operationCategories.map((category) => (
+        <AccordionItem key={category.name} value={category.name}>
+          <AccordionHeader as="h4" size="large">
+            <strong>
+              {category.label} ({category.operations.length})
+            </strong>
+          </AccordionHeader>
+          <AccordionPanel>
+            <ApiOperationsList
+              selectedOperationName={selectedOperation.name}
+              operations={category.operations}
+              onOperationSelect={handleOperationSelect}
+            />
+          </AccordionPanel>
+        </AccordionItem>
+      ))}
+    </Accordion>
   );
 };
 

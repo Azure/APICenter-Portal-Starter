@@ -11,6 +11,7 @@ interface Props {
   schema?: SchemaMetadata;
   hiddenColumns?: React.ComponentProps<typeof ParametersTable>['hiddenColumns'];
   isGlobalDefinition?: boolean;
+  isEnum?: boolean;
 }
 
 export const ParamSchemaDefinition: React.FC<Props> = ({
@@ -18,19 +19,29 @@ export const ParamSchemaDefinition: React.FC<Props> = ({
   schema,
   hiddenColumns = ['in'],
   isGlobalDefinition = false,
+  isEnum = false,
 }) => {
   if (!schema) {
     return null;
   }
 
   function renderTitle() {
+    let typeLabel = null;
+    if (!schema.properties?.length) {
+      typeLabel = (
+        <Badge className={styles.badge} appearance="tint" color="informative" shape="rounded">
+          {schema.typeLabel}
+        </Badge>
+      );
+    }
+
     if (isGlobalDefinition) {
       return (
         <h4 id={getRefLabel(schema.$ref)}>
           <RefLink className={styles.anchor} $ref={schema.$ref}>
             #
           </RefLink>
-          {getRefLabel(schema.$ref)}
+          {getRefLabel(schema.$ref)}:{typeLabel}
         </h4>
       );
     }
@@ -44,24 +55,22 @@ export const ParamSchemaDefinition: React.FC<Props> = ({
             (<RefLink $ref={schema.$ref} />)
           </>
         )}
-        :
+        :{typeLabel}
       </h4>
     );
   }
 
   function renderSchema() {
-    if (!schema.isObject || !schema.properties.length) {
-      return (
-        <>
-          <strong>Type:</strong>
-          <Badge className={styles.badge} appearance="tint" color="informative" shape="rounded">
-            {schema.typeLabel}
-          </Badge>
-        </>
-      );
+    if (!schema.properties?.length) {
+      return;
     }
 
-    return <ParametersTable parameters={schema.properties} hiddenColumns={hiddenColumns} />;
+    return (
+      <>
+        {isEnum && <h5>Enum values:</h5>}
+        <ParametersTable parameters={schema.properties} hiddenColumns={hiddenColumns} />
+      </>
+    );
   }
 
   return (

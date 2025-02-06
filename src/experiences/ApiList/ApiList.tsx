@@ -5,13 +5,12 @@ import { useRecoilValue } from 'recoil';
 import { useNavigate } from 'react-router-dom';
 import useSearchFilters from '@/hooks/useSearchFilters';
 import useApis from '@/hooks/useApis';
-import NoResultsSvg from '@/assets/noResults.svg';
 import useSearchQuery from '@/hooks/useSearchQuery';
 import apiAdapter from '@/experiences/ApiList/apiAdapter';
 import { Layouts } from '@/types/layouts';
 import apiListLayoutAtom from '@/atoms/apiListLayoutAtom';
 import LocationsService from '@/services/LocationsService';
-import styles from './ApiList.module.scss';
+import EmptyStateMessage from '@/components/EmptyStateMessage';
 
 export const ApiList: React.FC = () => {
   const layout = useRecoilValue(apiListLayoutAtom);
@@ -36,29 +35,20 @@ export const ApiList: React.FC = () => {
     [navigate]
   );
 
-  function renderContent() {
-    if (apis.isLoading) {
-      return <Spinner size="small" />;
-    }
-
-    if (!apis.list.length) {
-      return (
-        <div className={styles.emptyState}>
-          <img src={NoResultsSvg} alt="No results" />
-          <div>Can’t find any search results. Try a different search term.</div>
-        </div>
-      );
-    }
-
-    let ListView: typeof ApiListTableView | typeof ApiListCardsView = ApiListCardsView;
-    if (layout === Layouts.TABLE) {
-      ListView = ApiListTableView;
-    }
-
-    return <ListView apis={adaptedApiList} apiLinkPropsProvider={apiLinkPropsProvider} showApiType />;
+  if (apis.isLoading) {
+    return <Spinner size="small" />;
   }
 
-  return <div className={styles.apiList}>{renderContent()}</div>;
+  if (!apis.list.length) {
+    return <EmptyStateMessage>Can’t find any search results. Try a different search term.</EmptyStateMessage>;
+  }
+
+  let ListView: typeof ApiListTableView | typeof ApiListCardsView = ApiListCardsView;
+  if (layout === Layouts.TABLE) {
+    ListView = ApiListTableView;
+  }
+
+  return <ListView apis={adaptedApiList} apiLinkPropsProvider={apiLinkPropsProvider} showApiType />;
 };
 
 export default React.memo(ApiList);

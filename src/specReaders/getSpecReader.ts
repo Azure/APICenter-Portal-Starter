@@ -1,6 +1,7 @@
 import { ApiSpecReader, ApiSpecReaderFactory } from '@/types/apiSpec';
 import openApiV2Reader from '@/specReaders/openApiV2Reader';
 import openApiV3Reader from '@/specReaders/openApiV3Reader';
+import graphqlReader from '@/specReaders/graphqlReader';
 import { ApiDefinition } from '@/types/apiDefinition';
 
 function getReaderFactory(definition: ApiDefinition): ApiSpecReaderFactory {
@@ -9,6 +10,10 @@ function getReaderFactory(definition: ApiDefinition): ApiSpecReaderFactory {
       return openApiV2Reader;
     }
     return openApiV3Reader;
+  }
+
+  if (definition.specification?.name === 'graphql') {
+    return graphqlReader;
   }
 
   throw new Error(`Unsupported API specification type ${definition.specification?.name}`);

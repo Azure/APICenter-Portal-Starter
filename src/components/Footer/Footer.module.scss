@@ -11,4 +11,13 @@
     color: inherit;
     font: inherit;
   }
+  
+  .poweredBy {
+    font-weight: 400;
+
+    a {
+      margin-left: 3px;
+      color: var(--blue-3);
+    }
+  }
 }

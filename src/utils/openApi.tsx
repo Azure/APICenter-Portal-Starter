@@ -15,7 +15,11 @@ export function getRefLabel($ref: string): string {
   return $ref.split('/').pop() || '';
 }
 
-export function getUsedRefsFromSubSchema<T extends object>(schema: T): string[] {
+export function getUsedRefsFromSubSchema<T extends object>(schema?: T): string[] {
+  if (!schema) {
+    return [];
+  }
+
   return Array.from(
     new Set(
       JSON.stringify(schema)
@@ -36,7 +40,7 @@ export function schemaToTypeLabel<T extends WithRef<OpenAPIV2.SchemaObject | Ope
   }
 
   if (schema.type === 'array') {
-    return <>{schemaToTypeLabel(schema.items as T)}[]</>;
+    return <>[{schemaToTypeLabel(schema.items as T)}]</>;
   }
 
   if (schema.$ref) {
@@ -99,6 +103,5 @@ export function resolveSchema(
     $ref: schema.$ref || '',
     typeLabel: schemaToTypeLabel(schema),
     properties,
-    isObject: schema.type === 'object',
   };
 }
