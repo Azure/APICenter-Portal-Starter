@@ -5,13 +5,12 @@ import styles from './Footer.module.scss';
 const Footer: React.FC = () => {
   return (
     <footer className={styles.footer}>
-      <span>&copy; Copyright 2024</span>
-      <Link appearance="subtle" href="#">
-        Terms
-      </Link>
-      <Link appearance="subtle" href="#">
-        Privacy
-      </Link>
+      <span className={styles.poweredBy}>
+        Powered by
+        <Link appearance="subtle" href="https://aka.ms/azure-api-center" target="_blank">
+          Azure API Management
+        </Link>
+      </span>
     </footer>
   );
 };
