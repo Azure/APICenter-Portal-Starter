@@ -64,7 +64,7 @@ export default function useApis({ search, filters, isAutoCompleteMode }: Props =
         setIsLoading(false);
       }
     },
-    [ApiService, isAuthenticated, filters, isAutoCompleteMode]
+    [ApiService, isAuthenticated, filters]
   );
 
   const fetchApisDebounced = useMemo(() => debounce(fetchApis, 500), [fetchApis]);

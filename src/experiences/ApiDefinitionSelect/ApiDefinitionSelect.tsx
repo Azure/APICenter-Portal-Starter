@@ -24,6 +24,7 @@ interface Props {
     deployment?: string;
   };
   isInline?: boolean;
+  hiddenSelects?: Array<keyof ApiDefinitionSelection>;
   onSelectionChange: (selection: ApiDefinitionSelection) => void;
 }
 
@@ -31,7 +32,13 @@ const NO_VERSION_LABEL = "Version isn't available";
 const NO_DEFINITION_LABEL = "Definition isn't available";
 const NO_DEPLOYMENT_LABEL = "Deployment isn't available";
 
-export const ApiDefinitionSelect: React.FC<Props> = ({ apiId, defaultSelection = {}, isInline, onSelectionChange }) => {
+export const ApiDefinitionSelect: React.FC<Props> = ({
+  apiId,
+  defaultSelection = {},
+  hiddenSelects = [],
+  isInline,
+  onSelectionChange,
+}) => {
   const [version, setVersion] = useState<ApiVersion | null | undefined>();
   const [definition, setDefinition] = useState<ApiDefinition | null | undefined>();
   const [deployment, setDeployment] = useState<ApiDeployment | null | undefined>();
@@ -98,69 +105,75 @@ export const ApiDefinitionSelect: React.FC<Props> = ({ apiId, defaultSelection =
 
   return (
     <div className={classNames(styles.apiDefinitionSelect, isInline && styles.isInline)}>
-      <div className={styles.selectionDropdown}>
-        <label htmlFor="version-select">Version</label>
+      {!hiddenSelects.includes('version') && (
+        <div className={styles.selectionDropdown}>
+          <label htmlFor="version-select">Version</label>
 
-        <Dropdown
-          id="version-select"
-          className={styles.dropdown}
-          placeholder="Select API version"
-          size={dropdownSize}
-          value={version?.title || NO_VERSION_LABEL}
-          selectedOptions={[version?.name]}
-          disabled={!apiVersions.list.length}
-          inlinePopup
-          onOptionSelect={handleVersionSelect}
-        >
-          {apiVersions.list.map((version) => (
-            <Option key={version.name} value={version.name}>
-              {version.title || version.name}
-            </Option>
-          ))}
-        </Dropdown>
-      </div>
+          <Dropdown
+            id="version-select"
+            className={styles.dropdown}
+            placeholder="Select API version"
+            size={dropdownSize}
+            value={version?.title || NO_VERSION_LABEL}
+            selectedOptions={[version?.name]}
+            disabled={!apiVersions.list.length}
+            inlinePopup
+            onOptionSelect={handleVersionSelect}
+          >
+            {apiVersions.list.map((version) => (
+              <Option key={version.name} value={version.name}>
+                {version.title || version.name}
+              </Option>
+            ))}
+          </Dropdown>
+        </div>
+      )}
 
-      <div className={styles.selectionDropdown}>
-        <label htmlFor="definition-select">Definition format</label>
-        <Dropdown
-          id="definition-select"
-          className={styles.dropdown}
-          placeholder="Select API definition"
-          size={dropdownSize}
-          value={definition?.title || NO_DEFINITION_LABEL}
-          selectedOptions={[definition?.name]}
-          disabled={!apiDefinitions.list.length}
-          inlinePopup
-          onOptionSelect={handleDefinitionSelect}
-        >
-          {apiDefinitions.list.map((definition) => (
-            <Option key={definition.name} value={definition.name}>
-              {definition.title}
-            </Option>
-          ))}
-        </Dropdown>
-      </div>
+      {!hiddenSelects.includes('definition') && (
+        <div className={styles.selectionDropdown}>
+          <label htmlFor="definition-select">Definition format</label>
+          <Dropdown
+            id="definition-select"
+            className={styles.dropdown}
+            placeholder="Select API definition"
+            size={dropdownSize}
+            value={definition?.title || NO_DEFINITION_LABEL}
+            selectedOptions={[definition?.name]}
+            disabled={!apiDefinitions.list.length}
+            inlinePopup
+            onOptionSelect={handleDefinitionSelect}
+          >
+            {apiDefinitions.list.map((definition) => (
+              <Option key={definition.name} value={definition.name}>
+                {definition.title}
+              </Option>
+            ))}
+          </Dropdown>
+        </div>
+      )}
 
-      <div className={styles.selectionDropdown}>
-        <label htmlFor="deployment-select">Deployment</label>
-        <Dropdown
-          id="deployment-select"
-          className={styles.dropdown}
-          placeholder="Select deployment"
-          size={dropdownSize}
-          value={deployment?.title || NO_DEPLOYMENT_LABEL}
-          selectedOptions={[deployment?.name]}
-          disabled={!apiDeployments.list.length}
-          inlinePopup
-          onOptionSelect={handleDeploymentSelect}
-        >
-          {apiDeployments.list.map((deployment) => (
-            <Option key={deployment.name} value={deployment.name}>
-              {deployment.title}
-            </Option>
-          ))}
-        </Dropdown>
-      </div>
+      {!hiddenSelects.includes('deployment') && (
+        <div className={styles.selectionDropdown}>
+          <label htmlFor="deployment-select">Deployment</label>
+          <Dropdown
+            id="deployment-select"
+            className={styles.dropdown}
+            placeholder="Select deployment"
+            size={dropdownSize}
+            value={deployment?.title || NO_DEPLOYMENT_LABEL}
+            selectedOptions={[deployment?.name]}
+            disabled={!apiDeployments.list.length}
+            inlinePopup
+            onOptionSelect={handleDeploymentSelect}
+          >
+            {apiDeployments.list.map((deployment) => (
+              <Option key={deployment.name} value={deployment.name}>
+                {deployment.title}
+              </Option>
+            ))}
+          </Dropdown>
+        </div>
+      )}
     </div>
   );
 };

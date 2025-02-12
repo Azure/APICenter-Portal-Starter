@@ -62,6 +62,7 @@ export const ApiSpec: React.FC = () => {
                 version: versionName,
                 definition: definitionName,
               }}
+              hiddenSelects={['definition', 'deployment']}
               isInline
               onSelectionChange={handleDefinitionSelectionChange}
             />
