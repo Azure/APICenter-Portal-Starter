@@ -5,7 +5,7 @@ export default function apiAdapter(api: ApiMetadata): DocsApi {
   return {
     name: api.name,
     displayName: api.title,
-    description: api.description,
+    description: api.summary,
     type: api.kind,
   };
 }

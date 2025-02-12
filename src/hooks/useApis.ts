@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRecoilValue } from 'recoil';
+import { debounce } from 'lodash';
 import { ApiMetadata } from '@/types/api';
 import { ActiveFilterData } from '@/types/apiFilters';
 import { SortBy, SortByOrder } from '@/types/sorting';
@@ -50,23 +51,39 @@ export default function useApis({ search, filters, isAutoCompleteMode }: Props =
   const ApiService = useApiService();
   const sortBy = useRecoilValue(apiListSortingAtom);
 
-  const fetchApis = useCallback(async () => {
-    if ((isAutoCompleteMode && !search) || !isAuthenticated) {
-      setApis([]);
+  const fetchApis = useCallback(
+    async (search: string) => {
+      if (!isAuthenticated) {
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+        setApis(await ApiService.getApis(search, filters));
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [ApiService, isAuthenticated, filters, isAutoCompleteMode]
+  );
+
+  const fetchApisDebounced = useMemo(() => debounce(fetchApis, 500), [fetchApis]);
+
+  useEffect(() => {
+    if (isAutoCompleteMode) {
+      if (!search) {
+        setApis([]);
+        setIsLoading(false);
+        return;
+      }
+
+      setIsLoading(true);
+      void fetchApisDebounced(search);
       return;
     }
 
-    try {
-      setIsLoading(true);
-      setApis(await ApiService.getApis(search, filters));
-    } finally {
-      setIsLoading(false);
-    }
-  }, [ApiService, isAuthenticated, filters, isAutoCompleteMode, search]);
-
-  useEffect(() => {
-    void fetchApis();
-  }, [fetchApis]);
+    void fetchApis(search);
+  }, [search, fetchApis, fetchApisDebounced, isAutoCompleteMode]);
 
   const sortedList = useMemo(() => sortApis(apis, sortBy), [apis, sortBy]);
 

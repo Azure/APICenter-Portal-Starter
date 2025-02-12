@@ -44,7 +44,7 @@ export default async function openApiSpecReader(specStr: string): Promise<ApiSpe
               return {
                 category: 'default',
                 displayName: opData.summary || pathName,
-                description: opData.description,
+                description: opData.summary,
                 name: `${method}${pathName}`,
                 urlTemplate: pathName,
                 method,

@@ -12,12 +12,14 @@ export const AuthBtn: React.FC = () => {
   const handleClick = useCallback(async () => {
     if (isAuthenticated) {
       await AuthService.signOut();
+      setIsAuthenticated(false);
       // Refresh the URL to the original state
       window.location.href = window.location.origin;
       return;
     }
 
     await AuthService.signIn();
+    setIsAuthenticated(true);
   }, [AuthService, isAuthenticated, setIsAuthenticated]);
 
   return (

@@ -7,7 +7,7 @@
         "start": "vite",
         "build": "tsc && vite build",
         "eslint": "eslint .",
-        "stylelint": "stylelint \"**/*.{css,scss}\"",
+        "stylelint": "stylelint \"./src/**/*.{css,scss}\"",
         "lint": "npm run eslint && npm run stylelint"
     },
     "dependencies": {

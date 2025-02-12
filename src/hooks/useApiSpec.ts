@@ -3,9 +3,9 @@ import { useRecoilValue } from 'recoil';
 import { ApiDefinitionId } from '@/types/apiDefinition';
 import isAuthenticatedAtom from '@/atoms/isAuthenticatedAtom';
 import { isDefinitionIdValid } from '@/utils/apiDefinitions';
-import ApiService from '@/services/ApiService';
 import { ApiSpecReader } from '@/types/apiSpec';
 import getSpecReader from '@/specReaders/getSpecReader';
+import useApiService from '@/hooks/useApiService';
 
 interface ReturnType extends ApiSpecReader {
   spec?: string;
@@ -16,6 +16,8 @@ export default function useApiSpec(definitionId: ApiDefinitionId): ReturnType {
   const [spec, setSpec] = useState<string | undefined>();
   const [reader, setReader] = useState<ApiSpecReader | undefined>();
   const [isLoading, setIsLoading] = useState(true);
+
+  const ApiService = useApiService();
 
   const isAuthenticated = useRecoilValue(isAuthenticatedAtom);
 
@@ -33,10 +35,13 @@ export default function useApiSpec(definitionId: ApiDefinitionId): ReturnType {
       const spec = await ApiService.getSpecification(definitionId);
       setSpec(spec);
       setReader(await getSpecReader(spec, definition));
+    } catch {
+      setSpec(undefined);
+      setReader(undefined);
     } finally {
       setIsLoading(false);
     }
-  }, [definitionId, isAuthenticated]);
+  }, [ApiService, definitionId, isAuthenticated]);
 
   useEffect(() => {
     void fetch();
