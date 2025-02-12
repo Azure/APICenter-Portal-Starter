@@ -43,6 +43,7 @@ export default async function openApiSpecReader(specStr: string): Promise<ApiSpe
   ): Array<OperationMetadata<FieldSpec>> {
     return Object.values(fields).map((field) => ({
       category,
+      method: '',
       displayName: field.name,
       description: field.description,
       name: `${category}/${field.name}`,
