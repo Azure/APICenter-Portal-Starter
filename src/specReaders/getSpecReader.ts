@@ -6,10 +6,17 @@ import { ApiDefinition } from '@/types/apiDefinition';
 
 function getReaderFactory(definition: ApiDefinition): ApiSpecReaderFactory {
   if (definition.specification?.name === 'openapi') {
-    if (definition.specification?.version === '2.0') {
+    const version = definition.specification?.version;
+
+    if (version === '2.0') {
       return openApiV2Reader;
     }
-    return openApiV3Reader;
+
+    if (version.startsWith('3.')) {
+      return openApiV3Reader;
+    }
+
+    throw new Error(`Unknown OpenAPI version [${version}]`);
   }
 
   if (definition.specification?.name === 'graphql') {
