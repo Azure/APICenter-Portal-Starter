@@ -4,6 +4,7 @@ import { ApiOperationsList } from '@microsoft/api-docs-ui';
 import { Accordion, AccordionHeader, AccordionItem, AccordionPanel } from '@fluentui/react-components';
 import { ApiSpecReader, OperationMetadata } from '@/types/apiSpec';
 import useSelectedOperation from '@/hooks/useSelectedOperation';
+import { sortOperationsAlphabetically } from '@/experiences/ApiOperationsSelect/utils';
 
 interface Props {
   apiSpec: ApiSpecReader;
@@ -69,7 +70,7 @@ export const ApiOperationsSelect: React.FC<Props> = ({ apiSpec }) => {
           <AccordionPanel>
             <ApiOperationsList
               selectedOperationName={selectedOperation.name}
-              operations={category.operations}
+              operations={sortOperationsAlphabetically(category.operations)}
               onOperationSelect={handleOperationSelect}
             />
           </AccordionPanel>
