@@ -15,7 +15,7 @@ import styles from './ApiSpec.module.scss';
 
 export const ApiSpec: React.FC = () => {
   const { apiName, versionName, definitionName } = useParams<Readonly<ApiDefinitionId>>() as ApiDefinitionId;
-  const [deployment, setDeployment] = useState<ApiDeployment | undefined>();
+  const [deployment, setDeployment] = useState<ApiDeployment | null | undefined>();
   const selectedOperation = useSelectedOperation();
   const navigate = useNavigate();
 
@@ -73,7 +73,7 @@ export const ApiSpec: React.FC = () => {
   }
 
   function renderContent() {
-    if (apiSpec.isLoading || !deployment) {
+    if (apiSpec.isLoading || deployment === undefined) {
       return <Spinner className={styles.spinner} />;
     }
 
