@@ -4,7 +4,7 @@ import { ApiOperationsList } from '@microsoft/api-docs-ui';
 import { Accordion, AccordionHeader, AccordionItem, AccordionPanel } from '@fluentui/react-components';
 import { ApiSpecReader, OperationMetadata } from '@/types/apiSpec';
 import useSelectedOperation from '@/hooks/useSelectedOperation';
-import { sortOperationsAlphabetically } from '@/experiences/ApiOperationsSelect/utils';
+import { sortOperationsAlphabetically } from './utils';
 
 interface Props {
   apiSpec: ApiSpecReader;
