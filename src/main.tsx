@@ -7,7 +7,7 @@ import './globals.scss';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <FluentProvider theme={webLightTheme} className="app-root">
+    <FluentProvider theme={webLightTheme}>
       <RootProvider
         services={
           {
@@ -15,7 +15,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           }
         }
       >
-        <App />
+        <div className="app-root">
+          <App />
+        </div>
       </RootProvider>
     </FluentProvider>
   </React.StrictMode>

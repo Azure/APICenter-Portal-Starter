@@ -2,7 +2,7 @@
 import { OpenAPIV3 } from 'openapi-types';
 import * as yaml from 'yaml';
 import memoize from 'memoizee';
-import { get } from 'lodash';
+import { get, uniqBy } from 'lodash';
 import {
   WithRef,
   ApiSpecReader,
@@ -12,6 +12,7 @@ import {
   ResponseMetadata,
   SchemaMetadata,
   OperationCategory,
+  ApiSpecTypes,
 } from '@/types/apiSpec';
 import { httpMethodsList } from '@/constants';
 import { getUsedRefsFromSubSchema, resolveRef, resolveSchema, schemaToTypeLabel } from '@/utils/openApi';
@@ -64,7 +65,7 @@ export default async function openApiSpecReader(specStr: string): Promise<ApiSpe
     return getOperations().find((operation) => operation.name === operationName);
   });
 
-  const REQUEST_PARAM_TYPES = ['query', 'cookie'];
+  const REQUEST_PARAM_TYPES = ['path', 'query', 'cookie'];
   const HEADER_PARAM_TYPES = ['header'];
 
   const getRequestMetadata = memoize((operationName: string): RequestMetadata => {
@@ -86,10 +87,30 @@ export default async function openApiSpecReader(specStr: string): Promise<ApiSpe
       return result;
     });
 
+    Object.values(apiSpec.components.securitySchemes || {}).forEach(
+      (securityScheme: OpenAPIV3.SecuritySchemeObject) => {
+        if (securityScheme.type !== 'apiKey') {
+          return;
+        }
+
+        resultParams.unshift({
+          name: securityScheme.name,
+          type: 'string',
+          in: securityScheme.in,
+          description: securityScheme.description,
+          required: false,
+          isSecret: true,
+        });
+      }
+    );
+
     return {
       description: operation.spec?.description,
       parameters: resultParams.filter((param) => REQUEST_PARAM_TYPES.includes(param.in)),
-      headers: resultParams.filter((param) => HEADER_PARAM_TYPES.includes(param.in)),
+      headers: uniqBy(
+        resultParams.filter((param) => HEADER_PARAM_TYPES.includes(param.in)),
+        'name'
+      ),
       body: resolveSchema(bodySchema),
     };
   });
@@ -137,6 +158,7 @@ export default async function openApiSpecReader(specStr: string): Promise<ApiSpe
   });
 
   return {
+    type: ApiSpecTypes.OpenApiV3,
     getBaseUrl,
     getTagLabels,
     getOperationCategories,

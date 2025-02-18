@@ -4,6 +4,7 @@ import * as yaml from 'yaml';
 import memoize from 'memoizee';
 import {
   ApiSpecReader,
+  ApiSpecTypes,
   OperationCategory,
   OperationMetadata,
   OperationParameterMetadata,
@@ -83,6 +84,21 @@ export default async function openApiSpecReader(specStr: string): Promise<ApiSpe
       | OpenAPIV2.InBodyParameterObject
       | undefined;
 
+    Object.values(apiSpec.securityDefinitions || {}).forEach((securityScheme: OpenAPIV2.SecuritySchemeObject) => {
+      if (securityScheme.type !== 'apiKey') {
+        return;
+      }
+
+      resultParams.unshift({
+        name: securityScheme.name,
+        type: 'string',
+        in: securityScheme.in,
+        description: securityScheme.description,
+        required: false,
+        isSecret: true,
+      });
+    });
+
     return {
       description: operation.spec?.description,
       parameters: resultParams.filter((param) => REQUEST_PARAM_TYPES.includes(param.in)),
@@ -128,6 +144,7 @@ export default async function openApiSpecReader(specStr: string): Promise<ApiSpe
   });
 
   return {
+    type: ApiSpecTypes.OpenApiV2,
     getBaseUrl,
     getTagLabels,
     getOperationCategories,

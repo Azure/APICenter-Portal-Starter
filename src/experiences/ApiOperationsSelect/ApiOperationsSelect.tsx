@@ -61,7 +61,7 @@ export const ApiOperationsSelect: React.FC<Props> = ({ apiSpec }) => {
     <Accordion openItems={[openCategory]} collapsible onToggle={handleAccordionToggle}>
       {operationCategories.map((category) => (
         <AccordionItem key={category.name} value={category.name}>
-          <AccordionHeader as="h4" size="large">
+          <AccordionHeader as="h4" size="large" className="test-class">
             <strong>
               {category.label} ({category.operations.length})
             </strong>

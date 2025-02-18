@@ -37,7 +37,14 @@ export interface ResponseMetadata {
   body: SchemaMetadata;
 }
 
+export enum ApiSpecTypes {
+  OpenApiV2 = 'OpenApiV2',
+  OpenApiV3 = 'OpenApiV3',
+  GraphQL = 'GraphQL',
+}
+
 export interface ApiSpecReader {
+  type: ApiSpecTypes;
   /**
    * Returns base url for api (should not include host as it is determined from a particular deployment).
    *

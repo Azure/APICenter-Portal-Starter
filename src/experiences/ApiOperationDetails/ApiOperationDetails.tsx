@@ -1,9 +1,11 @@
-import React from 'react';
-import { ApiOperationInfo, ParametersTable } from '@microsoft/api-docs-ui';
-import { ApiSpecReader, OperationMetadata } from '@/types/apiSpec';
+import React, { useCallback, useState } from 'react';
+import { ApiOperationMethod, InfoPanel, ParametersTable, CopyToClipboard } from '@microsoft/api-docs-ui';
+import { Button } from '@fluentui/react-components';
+import { ApiSpecReader, ApiSpecTypes, OperationMetadata } from '@/types/apiSpec';
 import ParamSchemaDefinition from '@/components/ParamSchemaDefinition';
 import { ApiDeployment } from '@/types/apiDeployment';
 import { resolveOpUrlTemplate } from '@/utils/apiOperations';
+import HttpTestConsole from '@/experiences/HttpTestConsole';
 import styles from './ApiOperationDetails.module.scss';
 
 interface Props {
@@ -12,10 +14,25 @@ interface Props {
   deployment?: ApiDeployment;
 }
 
+const SPEC_TYPES_WITH_CONSOLE = [ApiSpecTypes.OpenApiV2, ApiSpecTypes.OpenApiV3];
+
 export const ApiOperationDetails: React.FC<Props> = ({ apiSpec, operation, deployment }) => {
+  const [isTestConsoleOpen, setIsTestConsoleOpen] = useState(false);
+
+  const handleTryApiClick = useCallback(() => {
+    setIsTestConsoleOpen(true);
+  }, []);
+
+  const handleTestConsoleClose = useCallback(() => {
+    setIsTestConsoleOpen(false);
+  }, []);
+
   if (!operation) {
     return null;
   }
+
+  const isTestConsoleAvailable = SPEC_TYPES_WITH_CONSOLE.includes(apiSpec.type);
+  const urlTemplate = resolveOpUrlTemplate(apiSpec, operation, deployment);
 
   function renderRequestInfo() {
     const requestMetadata = apiSpec.getRequestMetadata(operation.name);
@@ -96,11 +113,32 @@ export const ApiOperationDetails: React.FC<Props> = ({ apiSpec, operation, deplo
 
   return (
     <div className={styles.apiOperationDetails}>
-      <ApiOperationInfo
-        operation={operation}
-        requestUrl={resolveOpUrlTemplate(deployment, apiSpec, operation)}
-        tags={apiSpec.getTagLabels()}
-      />
+      <h1>{operation.displayName}</h1>
+
+      {!!operation.description && <p className={styles.description}>{operation.description}</p>}
+
+      <InfoPanel className={styles.infoPanel} title="Endpoint">
+        <div className={styles.infoPanelContent}>
+          <span className={styles.url}>
+            <ApiOperationMethod method={operation.method} /> {urlTemplate}
+          </span>
+
+          <CopyToClipboard content={urlTemplate} />
+        </div>
+      </InfoPanel>
+
+      {isTestConsoleAvailable && (
+        <>
+          <Button onClick={handleTryApiClick}>Try this API</Button>
+          <HttpTestConsole
+            apiSpec={apiSpec}
+            operation={operation}
+            deployment={deployment}
+            isOpen={isTestConsoleOpen}
+            onClose={handleTestConsoleClose}
+          />
+        </>
+      )}
 
       <h3>Request</h3>
       {renderRequestInfo()}

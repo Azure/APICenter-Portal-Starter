@@ -11,6 +11,7 @@ import {
 } from 'graphql';
 import {
   ApiSpecReader,
+  ApiSpecTypes,
   OperationCategory,
   OperationMetadata,
   OperationParameterMetadata,
@@ -138,6 +139,7 @@ export default async function openApiSpecReader(specStr: string): Promise<ApiSpe
   });
 
   return {
+    type: ApiSpecTypes.GraphQL,
     getBaseUrl,
     getTagLabels,
     getOperationCategories,
