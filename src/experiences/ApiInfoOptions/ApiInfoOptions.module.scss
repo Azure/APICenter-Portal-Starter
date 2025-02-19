@@ -1,3 +1,5 @@
+@use '@/styles/screen';
+
 .apiInfoOptions {
   padding: 20px 0;
 
@@ -7,9 +9,21 @@
       align-items: center;
       margin-top: 0;
       gap: 16px;
+      
+      @include screen.small {
+        flex-direction: column;
+        align-items: flex-start;
+      }
 
       img {
         max-height: 20px;
+      }
+      
+      .panelLabel,
+      .linkGroup {
+        display: inline-flex;
+        align-items: center;
+        gap: 16px;
       }
 
       .link {
