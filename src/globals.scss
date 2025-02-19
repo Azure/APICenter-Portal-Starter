@@ -1,20 +1,5 @@
+@use './styles/variables';
 @import '@microsoft/api-docs-ui/dist/index.css';
-
-:root {
-  --blue-4: #115EA3;
-  --blue-3: #0F6CBD;
-  --blue-2: #6387E3;
-  --blue-1: #EBF3FC;
-  --grey-7: #242424;
-  --grey-6: #424242;
-  --grey-5: #616161;
-  --grey-4: #707070;
-  --grey-3: #D1D1D1;
-  --grey-2: #E6E6E6;
-  --grey-1: #F3F2F1;
-  --grey-0: #FFF;
-  --radius-m: 4px;
-}
 
 html,
 body,
@@ -80,6 +65,7 @@ button {
   }
   
   section {
+    box-sizing: border-box;
     width: 100%;
     max-width: 1440px;
     margin: 0 auto;
