@@ -11,8 +11,8 @@ export function resolveRef<T extends object>(schema: OpenAPI.Document, $ref: str
   };
 }
 
-export function getRefLabel($ref: string): string {
-  return $ref.split('/').pop() || '';
+export function getRefLabel($ref?: string): string {
+  return $ref?.split('/').pop() || '';
 }
 
 export function getUsedRefsFromSubSchema<T extends object>(schema?: T): string[] {
@@ -101,7 +101,10 @@ export function resolveSchema(
 
   return {
     $ref: schema.$ref || '',
+    refLabel: getRefLabel(schema.$ref),
     typeLabel: schemaToTypeLabel(schema),
     properties,
+    rawSchema: JSON.stringify(schema, null, 2),
+    rawSchemaLanguage: 'json',
   };
 }

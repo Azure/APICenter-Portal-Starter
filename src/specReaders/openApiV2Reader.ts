@@ -4,6 +4,7 @@ import * as yaml from 'yaml';
 import memoize from 'memoizee';
 import {
   ApiSpecReader,
+  ApiSpecTypes,
   OperationCategory,
   OperationMetadata,
   OperationParameterMetadata,
@@ -118,16 +119,13 @@ export default async function openApiSpecReader(specStr: string): Promise<ApiSpe
   const getOperationDefinitions = memoize((operationName: string): SchemaMetadata[] => {
     const operation = getOperation(operationName);
 
-    return getUsedRefsFromSubSchema(operation.spec).map((ref) => {
-      const schema = resolveRef(apiSpec, ref) as OpenAPIV2.SchemaObject;
-      return {
-        ...resolveSchema(schema),
-        $ref: ref,
-      };
-    });
+    return getUsedRefsFromSubSchema(operation.spec).map((ref) =>
+      resolveSchema(resolveRef(apiSpec, ref) as OpenAPIV2.SchemaObject)
+    );
   });
 
   return {
+    type: ApiSpecTypes.OpenApiV2,
     getBaseUrl,
     getTagLabels,
     getOperationCategories,

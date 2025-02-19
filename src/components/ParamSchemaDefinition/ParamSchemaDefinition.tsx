@@ -1,9 +1,8 @@
-import React from 'react';
-import { ParametersTable } from '@microsoft/api-docs-ui';
-import { Badge } from '@fluentui/react-components';
+import React, { useCallback, useState } from 'react';
+import { ParametersTable, RawSchema } from '@microsoft/api-docs-ui';
+import { Badge, Tab, TabList } from '@fluentui/react-components';
 import { SchemaMetadata } from '@/types/apiSpec';
 import RefLink from '@/components/RefLink';
-import { getRefLabel } from '@/utils/openApi';
 import styles from './ParamSchemaDefinition.module.scss';
 
 interface Props {
@@ -14,6 +13,11 @@ interface Props {
   isEnum?: boolean;
 }
 
+enum DefinitionTabs {
+  TABLE = 'table',
+  SCHEMA = 'schema',
+}
+
 export const ParamSchemaDefinition: React.FC<Props> = ({
   title,
   schema,
@@ -21,27 +25,24 @@ export const ParamSchemaDefinition: React.FC<Props> = ({
   isGlobalDefinition = false,
   isEnum = false,
 }) => {
+  const [selectedTab, setSelectedTab] = useState<DefinitionTabs>(DefinitionTabs.TABLE);
+
+  const handleTabSelect = useCallback<React.ComponentProps<typeof TabList>['onTabSelect']>((_, { value }) => {
+    setSelectedTab(value as DefinitionTabs);
+  }, []);
+
   if (!schema) {
     return null;
   }
 
   function renderTitle() {
-    let typeLabel = null;
-    if (!schema.properties?.length) {
-      typeLabel = (
-        <Badge className={styles.badge} appearance="tint" color="informative" shape="rounded">
-          {schema.typeLabel}
-        </Badge>
-      );
-    }
-
     if (isGlobalDefinition) {
       return (
-        <h4 id={getRefLabel(schema.$ref)}>
+        <h4 id={schema.refLabel}>
           <RefLink className={styles.anchor} $ref={schema.$ref}>
             #
           </RefLink>
-          {getRefLabel(schema.$ref)}:{typeLabel}
+          {schema.refLabel}:
         </h4>
       );
     }
@@ -55,14 +56,33 @@ export const ParamSchemaDefinition: React.FC<Props> = ({
             (<RefLink $ref={schema.$ref} />)
           </>
         )}
-        :{typeLabel}
+        :
       </h4>
     );
   }
 
-  function renderSchema() {
+  function renderDefinition() {
+    if (selectedTab === DefinitionTabs.SCHEMA) {
+      const title = schema.refLabel || 'Schema';
+
+      return (
+        <RawSchema
+          title={`${title} (${schema.rawSchemaLanguage})`}
+          schema={schema.rawSchema}
+          language={schema.rawSchemaLanguage}
+        />
+      );
+    }
+
     if (!schema.properties?.length) {
-      return;
+      return (
+        <>
+          Type:
+          <Badge className={styles.badge} appearance="tint" color="informative" shape="rounded">
+            {schema.typeLabel}
+          </Badge>
+        </>
+      );
     }
 
     return (
@@ -76,7 +96,15 @@ export const ParamSchemaDefinition: React.FC<Props> = ({
   return (
     <div className={styles.paramSchemaDefinition}>
       {renderTitle()}
-      {renderSchema()}
+
+      {!!schema.rawSchema && (
+        <TabList className={styles.tabList} selectedValue={selectedTab} onTabSelect={handleTabSelect}>
+          <Tab value={DefinitionTabs.TABLE}>{schema.properties?.length ? 'Table' : 'Definition'}</Tab>
+          <Tab value={DefinitionTabs.SCHEMA}>Schema</Tab>
+        </TabList>
+      )}
+
+      {renderDefinition()}
     </div>
   );
 };

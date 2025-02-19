@@ -11,6 +11,7 @@ import {
 } from 'graphql';
 import {
   ApiSpecReader,
+  ApiSpecTypes,
   OperationCategory,
   OperationMetadata,
   OperationParameterMetadata,
@@ -77,14 +78,19 @@ export default async function openApiSpecReader(specStr: string): Promise<ApiSpe
 
     return {
       description: operation.description,
-      body: null,
-      parameters: operation.spec.args.map((arg) => ({
-        name: arg.name,
-        in: 'arguments',
-        type: gqlTypeToLabel(arg.type),
-        description: arg.description,
-        required: isNonNullType(arg.type),
-      })),
+      body: {
+        refLabel: operation.spec.name,
+        typeLabel: gqlTypeToLabel(operation.spec.type),
+        properties: operation.spec.args.map((arg) => ({
+          name: arg.name,
+          in: 'arguments',
+          type: gqlTypeToLabel(arg.type),
+          description: arg.description,
+          required: isNonNullType(arg.type),
+        })),
+        rawSchema: specStr.substring(operation.spec.astNode.loc.start, operation.spec.astNode.loc.end),
+        rawSchemaLanguage: 'graphql',
+      },
     };
   });
 
@@ -130,14 +136,18 @@ export default async function openApiSpecReader(specStr: string): Promise<ApiSpe
 
         return {
           $ref: type.name,
+          refLabel: type.name,
           typeLabel: gqlTypeToLabel(type),
           properties,
+          rawSchema: specStr.substring(type.astNode.loc.start, type.astNode.loc.end),
+          rawSchemaLanguage: 'graphql',
           isEnum: isEnumType(type),
         };
       });
   });
 
   return {
+    type: ApiSpecTypes.GraphQL,
     getBaseUrl,
     getTagLabels,
     getOperationCategories,

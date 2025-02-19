@@ -1,6 +1,6 @@
 import React from 'react';
-import { ApiOperationInfo, ParametersTable } from '@microsoft/api-docs-ui';
-import { ApiSpecReader, OperationMetadata } from '@/types/apiSpec';
+import { ApiOperationMethod, CopyToClipboard, InfoPanel, ParametersTable } from '@microsoft/api-docs-ui';
+import { ApiSpecReader, ApiSpecTypes, OperationMetadata } from '@/types/apiSpec';
 import ParamSchemaDefinition from '@/components/ParamSchemaDefinition';
 import { ApiDeployment } from '@/types/apiDeployment';
 import { resolveOpUrlTemplate } from '@/utils/apiOperations';
@@ -16,6 +16,8 @@ export const ApiOperationDetails: React.FC<Props> = ({ apiSpec, operation, deplo
   if (!operation) {
     return null;
   }
+
+  const urlTemplate = resolveOpUrlTemplate(deployment, apiSpec, operation);
 
   function renderRequestInfo() {
     const requestMetadata = apiSpec.getRequestMetadata(operation.name);
@@ -44,7 +46,12 @@ export const ApiOperationDetails: React.FC<Props> = ({ apiSpec, operation, deplo
             <ParametersTable parameters={requestMetadata.headers} hiddenColumns={['in']} />
           </>
         )}
-        <ParamSchemaDefinition title="Request body" schema={requestMetadata.body} hiddenColumns={['in', 'readOnly']} />
+
+        <ParamSchemaDefinition
+          title={apiSpec.type === ApiSpecTypes.GraphQL ? 'Arguments' : 'Request body'}
+          schema={requestMetadata.body}
+          hiddenColumns={['in', 'readOnly']}
+        />
       </>
     );
   }
@@ -96,11 +103,19 @@ export const ApiOperationDetails: React.FC<Props> = ({ apiSpec, operation, deplo
 
   return (
     <div className={styles.apiOperationDetails}>
-      <ApiOperationInfo
-        operation={operation}
-        requestUrl={resolveOpUrlTemplate(deployment, apiSpec, operation)}
-        tags={apiSpec.getTagLabels()}
-      />
+      <h1>{operation.displayName}</h1>
+
+      {!!operation.description && <p className={styles.description}>{operation.description}</p>}
+
+      <InfoPanel className={styles.infoPanel} title="Endpoint">
+        <div className={styles.infoPanelContent}>
+          <span className={styles.url}>
+            <ApiOperationMethod method={operation.method} /> {urlTemplate}
+          </span>
+
+          <CopyToClipboard content={urlTemplate} />
+        </div>
+      </InfoPanel>
 
       <h3>Request</h3>
       {renderRequestInfo()}
