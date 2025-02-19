@@ -5,7 +5,7 @@ import useApiSpec from '@/hooks/useApiSpec';
 import { ApiDefinitionId } from '@/types/apiDefinition';
 import ApiOperationsSelect from '@/experiences/ApiOperationsSelect';
 import useSelectedOperation from '@/hooks/useSelectedOperation';
-import { ApiOperationDetails } from '@/experiences/ApiOperationDetails/ApiOperationDetails';
+import ApiOperationDetails from '@/experiences/ApiOperationDetails';
 import useApi from '@/hooks/useApi';
 import ApiDefinitionSelect, { ApiDefinitionSelection } from '@/experiences/ApiDefinitionSelect';
 import LocationsService from '@/services/LocationsService';
