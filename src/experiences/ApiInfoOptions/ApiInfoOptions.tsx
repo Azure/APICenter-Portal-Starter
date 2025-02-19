@@ -37,6 +37,8 @@ export const ApiInfoOptions: React.FC<Props> = ({ api, apiVersion, apiDefinition
   const apiSpecUrl = useApiSpecUrl(definitionId);
   const environment = useDeploymentEnvironment(apiDeployment?.environmentId);
 
+  const devPortalUri = environment.data?.onboarding?.developerPortalUri?.[0];
+
   const handleOpenInVsCodeClick = useCallback(() => {
     window.open(`vscode:extension/apidev.azure-api-center`);
   }, []);
@@ -84,29 +86,18 @@ export const ApiInfoOptions: React.FC<Props> = ({ api, apiVersion, apiDefinition
           </p>
         </div>
 
-        {environment.data?.onboarding && (
+        {!!devPortalUri && (
           <div className={styles.section}>
             <h5>
               <img src={DevPortalLogo} alt="Developer portal" />
               <strong>{environment.data.title} developer portal</strong>
-              {(environment.data.onboarding.developerPortalUri?.length ?? 0) > 0 && (
-                <>
-                  {environment.data.onboarding?.developerPortalUri?.length && (
-                    <>
-                      <CopyLink className={styles.link} url={environment.data.onboarding.developerPortalUri[0]}>
-                        Copy URL
-                      </CopyLink>
-                      <Link
-                        href={environment.data.onboarding.developerPortalUri[0]}
-                        target="_blank"
-                        className={styles.link}
-                      >
-                        Open in a new tab <OpenRegular />
-                      </Link>
-                    </>
-                  )}
-                </>
-              )}
+              <CopyLink className={styles.link} url={devPortalUri}>
+                Copy URL
+              </CopyLink>
+
+              <Link href={devPortalUri} target="_blank" className={styles.link}>
+                Open in a new tab <OpenRegular />
+              </Link>
             </h5>
 
             <MarkdownRenderer markdown={environment.data.onboarding.instructions || DEFAULT_INSTRUCTIONS} />
