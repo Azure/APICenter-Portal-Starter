@@ -1,7 +1,7 @@
 import memoizee from 'memoizee';
-import { groupBy } from 'lodash';
+import { groupBy, uniqBy } from 'lodash';
 import { HttpParamSchemasByLocation, HttpBodyFormats, HttpReqData } from '@microsoft/api-docs-ui';
-import { ApiSpecReader, OperationMetadata } from '@/types/apiSpec';
+import { ApiSpecReader, OperationMetadata, OperationParameterMetadata } from '@/types/apiSpec';
 import { resolveOpUrlTemplate } from '@/utils/apiOperations';
 import { ApiDeployment } from '@/types/apiDeployment';
 
@@ -55,6 +55,17 @@ export const getReqDataDefaults = memoizee(
   }
 );
 
+const DEFAULT_HEADER_PARAMS: OperationParameterMetadata[] = [
+  {
+    name: 'Authorization',
+    type: 'string',
+    in: 'header',
+    required: false,
+    description: 'Bearer token',
+    isSecret: true,
+  },
+];
+
 /**
  * Returns schema parameters grouped by location for a given operation normalized for http test console.
  * It is useful to map apply schema settings to particular params like required state, data type etc.
@@ -66,7 +77,7 @@ export const getSchemaParamsByLocation = memoizee(
 
     return {
       query: groupedParams.query || [],
-      headers: groupedParams.header || [],
+      headers: uniqBy((groupedParams.header || []).concat(DEFAULT_HEADER_PARAMS), 'name'),
       urlParams: groupedParams.path || [],
     };
   }
