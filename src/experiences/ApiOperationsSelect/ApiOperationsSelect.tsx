@@ -16,7 +16,7 @@ export const ApiOperationsSelect: React.FC<Props> = ({ apiSpec }) => {
   const selectedOperation = useSelectedOperation();
 
   const operationCategories = apiSpec.getOperationCategories();
-  const operations = apiSpec.getOperations();
+  const operations = sortOperationsAlphabetically(apiSpec.getOperations());
 
   const handleOperationSelect = useCallback(
     (operation: OperationMetadata) => {

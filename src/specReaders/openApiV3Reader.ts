@@ -15,7 +15,7 @@ import {
   ApiSpecTypes,
 } from '@/types/apiSpec';
 import { httpMethodsList } from '@/constants';
-import { getUsedRefsFromSubSchema, resolveRef, resolveSchema, schemaToTypeLabel } from '@/utils/openApi';
+import { getRefLabel, getUsedRefsFromSubSchema, resolveRef, resolveSchema, schemaToTypeLabel } from '@/utils/openApi';
 import makeOpenApiResolverProxy from './openApiResolverProxy';
 
 /**
@@ -148,13 +148,9 @@ export default async function openApiSpecReader(specStr: string): Promise<ApiSpe
   const getOperationDefinitions = memoize((operationName: string): SchemaMetadata[] => {
     const operation = getOperation(operationName);
 
-    return getUsedRefsFromSubSchema(operation.spec).map((ref) => {
-      const schema = resolveRef(apiSpec, ref) as OpenAPIV3.SchemaObject;
-      return {
-        ...resolveSchema(schema),
-        $ref: ref,
-      };
-    });
+    return getUsedRefsFromSubSchema(operation.spec).map((ref) =>
+      resolveSchema(resolveRef(apiSpec, ref) as OpenAPIV3.SchemaObject)
+    );
   });
 
   return {

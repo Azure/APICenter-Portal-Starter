@@ -18,8 +18,11 @@ export type OperationParameterMetadata = ApiOperationParameter;
 
 export interface SchemaMetadata {
   $ref?: string;
+  refLabel?: string;
   typeLabel: React.ReactNode;
   properties?: OperationParameterMetadata[];
+  rawSchema?: string;
+  rawSchemaLanguage?: string;
   isEnum?: boolean;
 }
 

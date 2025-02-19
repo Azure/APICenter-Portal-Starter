@@ -60,9 +60,12 @@ export const ApiInfoOptions: React.FC<Props> = ({ api, apiVersion, apiDefinition
       <>
         <div className={styles.section}>
           <h5>
-            <Document20Regular /> <strong>API Definition</strong>
+            <span className={styles.panelLabel}>
+              <Document20Regular /> <strong>API Definition</strong>
+            </span>
+
             {apiSpecUrl.value && (
-              <>
+              <span className={styles.linkGroup}>
                 <Link href={apiSpecUrl.value} className={styles.link}>
                   Download <ArrowDownloadRegular />
                 </Link>
@@ -73,7 +76,7 @@ export const ApiInfoOptions: React.FC<Props> = ({ api, apiVersion, apiDefinition
                 >
                   View documentation
                 </Link>
-              </>
+              </span>
             )}
           </h5>
 
@@ -89,8 +92,11 @@ export const ApiInfoOptions: React.FC<Props> = ({ api, apiVersion, apiDefinition
         {!!devPortalUri && (
           <div className={styles.section}>
             <h5>
-              <img src={DevPortalLogo} alt="Developer portal" />
-              <strong>{environment.data.title} developer portal</strong>
+              <span className={styles.panelLabel}>
+                <img src={DevPortalLogo} alt="Developer portal" />
+                <strong>{environment.data.title} developer portal</strong>
+              </span>
+
               <CopyLink className={styles.link} url={devPortalUri}>
                 Copy URL
               </CopyLink>

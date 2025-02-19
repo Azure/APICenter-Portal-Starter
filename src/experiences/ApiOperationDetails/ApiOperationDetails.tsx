@@ -61,7 +61,12 @@ export const ApiOperationDetails: React.FC<Props> = ({ apiSpec, operation, deplo
             <ParametersTable parameters={requestMetadata.headers} hiddenColumns={['in']} />
           </>
         )}
-        <ParamSchemaDefinition title="Request body" schema={requestMetadata.body} hiddenColumns={['in', 'readOnly']} />
+
+        <ParamSchemaDefinition
+          title={apiSpec.type === ApiSpecTypes.GraphQL ? 'Arguments' : 'Request body'}
+          schema={requestMetadata.body}
+          hiddenColumns={['in', 'readOnly']}
+        />
       </>
     );
   }

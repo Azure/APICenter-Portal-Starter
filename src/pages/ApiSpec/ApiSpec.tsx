@@ -5,12 +5,13 @@ import useApiSpec from '@/hooks/useApiSpec';
 import { ApiDefinitionId } from '@/types/apiDefinition';
 import ApiOperationsSelect from '@/experiences/ApiOperationsSelect';
 import useSelectedOperation from '@/hooks/useSelectedOperation';
-import { ApiOperationDetails } from '@/experiences/ApiOperationDetails/ApiOperationDetails';
+import ApiOperationDetails from '@/experiences/ApiOperationDetails';
 import useApi from '@/hooks/useApi';
 import ApiDefinitionSelect, { ApiDefinitionSelection } from '@/experiences/ApiDefinitionSelect';
 import LocationsService from '@/services/LocationsService';
 import { ApiDeployment } from '@/types/apiDeployment';
 import { EmptyStateMessage } from '@/components/EmptyStateMessage/EmptyStateMessage';
+import MarkdownRenderer from '@/components/MarkdownRenderer';
 import styles from './ApiSpec.module.scss';
 
 export const ApiSpec: React.FC = () => {
@@ -55,6 +56,8 @@ export const ApiSpec: React.FC = () => {
       <div className={styles.header}>
         <section>
           <h1>{api.data.title}</h1>
+          <MarkdownRenderer markdown={api.data.summary} />
+
           <div className={styles.definitionRow}>
             <ApiDefinitionSelect
               apiId={apiName}
