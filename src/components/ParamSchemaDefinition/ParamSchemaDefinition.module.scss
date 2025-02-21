@@ -8,9 +8,22 @@
     }
   }
   
-  .tabList {
+  .tabListWrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     margin: 24px 0;
     border-bottom: 1px solid var(--grey-3);
+
+    .contentTypeSelect {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      
+      .dropdown {
+        min-width: 240px;
+      }
+    }
   }
 
   .badge {
@@ -20,4 +33,8 @@
       display: none;
     }
   }
+}
+
+.contentTypeSelectOption {
+  font-size: 12px !important;
 }

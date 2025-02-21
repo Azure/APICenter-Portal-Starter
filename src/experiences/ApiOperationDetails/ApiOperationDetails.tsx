@@ -64,7 +64,7 @@ export const ApiOperationDetails: React.FC<Props> = ({ apiSpec, operation, deplo
 
         <ParamSchemaDefinition
           title={apiSpec.type === ApiSpecTypes.GraphQL ? 'Arguments' : 'Request body'}
-          schema={requestMetadata.body}
+          mediaContentList={requestMetadata.body}
           hiddenColumns={['in', 'readOnly']}
         />
       </>
@@ -88,7 +88,11 @@ export const ApiOperationDetails: React.FC<Props> = ({ apiSpec, operation, deplo
           </>
         )}
 
-        <ParamSchemaDefinition title="Body" schema={response.body} hiddenColumns={['in', 'readOnly', 'required']} />
+        <ParamSchemaDefinition
+          title="Body"
+          mediaContentList={response.body}
+          hiddenColumns={['in', 'readOnly', 'required']}
+        />
       </React.Fragment>
     ));
   }

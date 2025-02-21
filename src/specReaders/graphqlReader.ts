@@ -78,19 +78,26 @@ export default async function openApiSpecReader(specStr: string): Promise<ApiSpe
 
     return {
       description: operation.description,
-      body: {
-        refLabel: operation.spec.name,
-        typeLabel: gqlTypeToLabel(operation.spec.type),
-        properties: operation.spec.args.map((arg) => ({
-          name: arg.name,
-          in: 'arguments',
-          type: gqlTypeToLabel(arg.type),
-          description: arg.description,
-          required: isNonNullType(arg.type),
-        })),
-        rawSchema: specStr.substring(operation.spec.astNode.loc.start, operation.spec.astNode.loc.end),
-        rawSchemaLanguage: 'graphql',
-      },
+      body: [
+        {
+          type: 'default',
+          schema: {
+            refLabel: operation.spec.name,
+            typeLabel: gqlTypeToLabel(operation.spec.type),
+            properties: operation.spec.args.map((arg) => ({
+              name: arg.name,
+              in: 'arguments',
+              type: gqlTypeToLabel(arg.type),
+              description: arg.description,
+              required: isNonNullType(arg.type),
+            })),
+            rawSchema: {
+              schema: specStr.substring(operation.spec.astNode.loc.start, operation.spec.astNode.loc.end),
+              language: 'graphql',
+            },
+          },
+        },
+      ],
     };
   });
 
@@ -100,9 +107,14 @@ export default async function openApiSpecReader(specStr: string): Promise<ApiSpe
     return [
       {
         description: operation.spec.description,
-        body: {
-          typeLabel: gqlTypeToLabel(operation.spec.type),
-        },
+        body: [
+          {
+            type: 'default',
+            schema: {
+              typeLabel: gqlTypeToLabel(operation.spec.type),
+            },
+          },
+        ],
       },
     ];
   });
@@ -139,8 +151,10 @@ export default async function openApiSpecReader(specStr: string): Promise<ApiSpe
           refLabel: type.name,
           typeLabel: gqlTypeToLabel(type),
           properties,
-          rawSchema: specStr.substring(type.astNode.loc.start, type.astNode.loc.end),
-          rawSchemaLanguage: 'graphql',
+          rawSchema: {
+            schema: specStr.substring(type.astNode.loc.start, type.astNode.loc.end),
+            language: 'graphql',
+          },
           isEnum: isEnumType(type),
         };
       });
