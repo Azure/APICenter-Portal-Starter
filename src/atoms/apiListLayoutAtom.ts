@@ -4,7 +4,7 @@ import LocalStorageService from '@/services/LocalStorageService';
 
 const apiListLayoutAtom = atom<Layouts>({
   key: 'apiListLayout',
-  default: LocalStorageService.get(LocalStorageService.StorageKeys.API_LIST_LAYOUT) || Layouts.CARDS,
+  default: LocalStorageService.get(LocalStorageService.StorageKeys.API_LIST_LAYOUT) || Layouts.TABLE,
   effects: [
     /**
      * Persist the layout setting to local storage on change
