@@ -33,7 +33,7 @@ export const getReqDataDefaults = memoizee(
       .forEach((param) => {
         const paramValue = {
           name: param.name,
-          value: '',
+          value: param.defaultValue || '',
         };
 
         switch (param.in) {

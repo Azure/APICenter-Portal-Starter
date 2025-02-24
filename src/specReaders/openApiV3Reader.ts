@@ -101,12 +101,14 @@ export default async function openApiSpecReader(specStr: string): Promise<ApiSpe
   const getRequestMetadata = memoize((operationName: string): RequestMetadata => {
     const operation = getOperation(operationName);
 
-    const specParams = (operation.spec?.parameters || []) as OperationParameterMetadata[];
+    const specParams = (operation.spec?.parameters || []) as OpenAPIV3.ParameterObject[];
 
     const resultParams = specParams.map<OperationParameterMetadata>((specParam) => {
-      const result = { ...specParam } as OperationParameterMetadata;
+      const result = { ...specParam } as unknown as OperationParameterMetadata;
       if ('schema' in specParam) {
         result.type = schemaToTypeLabel(specParam.schema);
+        result.enum = (specParam.schema as OpenAPIV3.NonArraySchemaObject).enum;
+        result.defaultValue = (specParam.schema as OpenAPIV3.NonArraySchemaObject).default;
       }
       return result;
     });
