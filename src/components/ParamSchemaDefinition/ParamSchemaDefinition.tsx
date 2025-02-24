@@ -1,6 +1,6 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { ParametersTable, RawSchema } from '@microsoft/api-docs-ui';
-import { Badge, Dropdown, Label, Option, Select, Tab, TabList } from '@fluentui/react-components';
+import { Badge, Dropdown, Label, Option, Tab, TabList } from '@fluentui/react-components';
 import { MediaContentMetadata, SchemaMetadata } from '@/types/apiSpec';
 import RefLink from '@/components/RefLink';
 import styles from './ParamSchemaDefinition.module.scss';
@@ -39,6 +39,10 @@ export const ParamSchemaDefinition: React.FC<Props> = ({
   const [selectedMediaContent, setSelectedMediaContent] = useState<MediaContentMetadata | undefined>(
     mediaContentList?.[0]
   );
+
+  useEffect(() => {
+    setSelectedMediaContent(mediaContentList?.[0]);
+  }, [mediaContentList]);
 
   const schema = useMemo(() => {
     if (selectedMediaContent) {

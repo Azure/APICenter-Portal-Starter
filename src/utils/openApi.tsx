@@ -153,6 +153,7 @@ export function resolveSchema(
     description: propSchema.description,
     required: schema.required?.includes(name),
     readOnly: propSchema.readOnly,
+    examples: propSchema.example ? [{ value: JSON.stringify(propSchema.example) }] : undefined,
   }));
 
   if (schema.additionalProperties) {

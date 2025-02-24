@@ -13,7 +13,7 @@
     "dependencies": {
         "@azure/msal-browser": "3.13.0",
         "@fluentui/react-components": "9.56.8",
-        "@microsoft/api-docs-ui": "1.0.18",
+        "@microsoft/api-docs-ui": "1.0.19",
         "@vitejs/plugin-basic-ssl": "1.2.0",
         "buffer": "6.0.3",
         "classnames": "2.5.1",

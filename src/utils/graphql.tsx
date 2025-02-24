@@ -56,7 +56,5 @@ export function gqlTypeToLabel(type: GraphQLType): React.ReactNode {
     return <Link href={`#${type.name}`}>{type.name}</Link>;
   }
 
-  console.log(type);
-
   return 'unknown';
 }
