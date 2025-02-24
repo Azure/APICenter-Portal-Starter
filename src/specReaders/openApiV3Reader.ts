@@ -105,10 +105,12 @@ export default async function openApiSpecReader(specStr: string): Promise<ApiSpe
 
     const resultParams = specParams.map<OperationParameterMetadata>((specParam) => {
       const result = { ...specParam } as unknown as OperationParameterMetadata;
+
       if ('schema' in specParam) {
-        result.type = schemaToTypeLabel(specParam.schema);
-        result.enum = (specParam.schema as OpenAPIV3.NonArraySchemaObject).enum;
-        result.defaultValue = (specParam.schema as OpenAPIV3.NonArraySchemaObject).default;
+        const schema = specParam.schema as OpenAPIV3.NonArraySchemaObject;
+        result.type = schemaToTypeLabel(schema);
+        result.enum = schema.enum;
+        result.defaultValue = schema.default;
       }
       return result;
     });

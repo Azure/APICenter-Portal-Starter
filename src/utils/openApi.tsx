@@ -163,10 +163,9 @@ export function resolveSchema(
   );
 
   if (schema.additionalProperties) {
-    const additionalProperties = schema.additionalProperties as OpenAPIV3.SchemaObject;
     properties.push({
       name: '[key]',
-      type: schemaToTypeLabel(additionalProperties),
+      type: schemaToTypeLabel(schema.additionalProperties as OpenAPIV3.SchemaObject),
       in: placement,
       description: 'Additional properties',
     });
