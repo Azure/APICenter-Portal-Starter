@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo } from 'react';
-import { Spinner } from '@fluentui/react-components';
-import { Api as DocsApi, ApiListCardsView, ApiListTableView } from '@microsoft/api-docs-ui';
+import { Badge, Link, Spinner } from '@fluentui/react-components';
+import { Api as DocsApi, InfoTable, ApiCard, MarkdownRenderer } from '@microsoft/api-docs-ui';
 import { useRecoilValue } from 'recoil';
 import { useNavigate } from 'react-router-dom';
 import useSearchFilters from '@/hooks/useSearchFilters';
@@ -11,6 +11,7 @@ import { Layouts } from '@/types/layouts';
 import apiListLayoutAtom from '@/atoms/apiListLayoutAtom';
 import LocationsService from '@/services/LocationsService';
 import EmptyStateMessage from '@/components/EmptyStateMessage';
+import styles from './ApiList.module.scss';
 
 export const ApiList: React.FC = () => {
   const layout = useRecoilValue(apiListLayoutAtom);
@@ -43,12 +44,40 @@ export const ApiList: React.FC = () => {
     return <EmptyStateMessage>Can’t find any search results. Try a different search term.</EmptyStateMessage>;
   }
 
-  let ListView: typeof ApiListTableView | typeof ApiListCardsView = ApiListCardsView;
-  if (layout === Layouts.TABLE) {
-    ListView = ApiListTableView;
+  if (layout === Layouts.CARDS) {
+    return (
+      <div className={styles.cards}>
+        {adaptedApiList.map((api) => (
+          <ApiCard key={api.name} api={api} linkProps={apiLinkPropsProvider(api)} showType />
+        ))}
+      </div>
+    );
   }
 
-  return <ListView apis={adaptedApiList} apiLinkPropsProvider={apiLinkPropsProvider} showApiType />;
+  return (
+    <InfoTable columnLabels={['Name', 'Description', 'Lifecycle stage', 'Type']}>
+      {adaptedApiList.map((api) => (
+        <InfoTable.Row key={api.name}>
+          <InfoTable.Cell>
+            <Link {...apiLinkPropsProvider(api)}>{api.name}</Link>
+          </InfoTable.Cell>
+          <InfoTable.Cell>
+            <MarkdownRenderer markdown={api.description} maxLength={120} />
+          </InfoTable.Cell>
+          <InfoTable.Cell>
+            <Badge appearance="tint" color="informative" shape="rounded">
+              {api.lifecycleStage}
+            </Badge>
+          </InfoTable.Cell>
+          <InfoTable.Cell>
+            <Badge appearance="tint" color="informative" shape="rounded">
+              {api.type}
+            </Badge>
+          </InfoTable.Cell>
+        </InfoTable.Row>
+      ))}
+    </InfoTable>
+  );
 };
 
 export default React.memo(ApiList);
