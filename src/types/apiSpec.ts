@@ -14,7 +14,9 @@ export interface OperationCategory<T = object> {
   operations: Array<OperationMetadata<T>>;
 }
 
-export type OperationParameterMetadata = ApiOperationParameter;
+export interface OperationParameterMetadata extends ApiOperationParameter {
+  defaultValue?: string;
+}
 
 export interface RawSchemaEntry {
   schema: string;

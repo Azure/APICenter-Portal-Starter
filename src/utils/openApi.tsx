@@ -35,7 +35,7 @@ export function getUsedRefsFromSubSchema<T extends object>(schema?: T): string[]
 export function schemaToTypeLabel<T extends WithRef<OpenAPIV2.SchemaObject | OpenAPIV3.SchemaObject>>(
   schema?: T
 ): React.ReactNode {
-  if (!schema) {
+  if (!schema?.type) {
     return null;
   }
 
@@ -146,15 +146,21 @@ export function resolveSchema(
     return undefined;
   }
 
-  const properties = Object.entries(schema.properties || {}).map<OperationParameterMetadata>(([name, propSchema]) => ({
-    name,
-    type: schemaToTypeLabel(propSchema),
-    in: placement,
-    description: propSchema.description,
-    required: schema.required?.includes(name),
-    readOnly: propSchema.readOnly,
-    examples: propSchema.example ? [{ value: JSON.stringify(propSchema.example) }] : undefined,
-  }));
+  const properties = Object.entries<WithRef<OpenAPIV2.SchemaObject | OpenAPIV3.SchemaObject>>(
+    schema.properties || {}
+  ).map(
+    ([name, propSchema]): OperationParameterMetadata => ({
+      name,
+      type: schemaToTypeLabel(propSchema),
+      in: placement,
+      description: propSchema.description,
+      required: schema.required?.includes(name),
+      readOnly: propSchema.readOnly,
+      examples: propSchema.example ? [{ value: JSON.stringify(propSchema.example) }] : undefined,
+      enum: propSchema.enum,
+      defaultValue: propSchema.default,
+    })
+  );
 
   if (schema.additionalProperties) {
     properties.push({
