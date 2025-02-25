@@ -16,28 +16,43 @@ export interface OperationCategory<T = object> {
 
 export type OperationParameterMetadata = ApiOperationParameter;
 
+export interface RawSchemaEntry {
+  schema: string;
+  language: string;
+}
+
 export interface SchemaMetadata {
   $ref?: string;
   refLabel?: string;
   typeLabel: React.ReactNode;
   properties?: OperationParameterMetadata[];
-  rawSchema?: string;
-  rawSchemaLanguage?: string;
+  rawSchema?: RawSchemaEntry;
   isEnum?: boolean;
+}
+
+export interface SampleDataEntry {
+  data: string;
+  language: string;
+}
+
+export interface MediaContentMetadata {
+  type: string;
+  schema: SchemaMetadata;
+  sampleData?: SampleDataEntry;
 }
 
 export interface RequestMetadata {
   description?: string;
   parameters?: OperationParameterMetadata[];
   headers?: OperationParameterMetadata[];
-  body: SchemaMetadata;
+  body: MediaContentMetadata[];
 }
 
 export interface ResponseMetadata {
   code?: string;
   description?: string;
   headers?: OperationParameterMetadata[];
-  body: SchemaMetadata;
+  body: MediaContentMetadata[];
 }
 
 export enum ApiSpecTypes {
@@ -46,6 +61,10 @@ export enum ApiSpecTypes {
   GraphQL = 'GraphQL',
 }
 
+/**
+ * Api spec reader is an abstraction that allows to read spec metadata in a standardized way no matter what spec type is used.
+ * It abstracts away from specific spec's schema in favor of a common interfaces defined by ourselves.
+ */
 export interface ApiSpecReader {
   type: ApiSpecTypes;
   /**

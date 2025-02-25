@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   HttpTestConsole as HttpApiTestConsole,
   HttpReqData,
@@ -28,6 +28,17 @@ export const HttpTestConsole: React.FC<Props> = ({ apiSpec, operation, deploymen
 
   const schemaParamsData = getSchemaParamsByLocation(apiSpec, operation);
   const canHaveBody = !methodsWithoutBody.includes(operation?.method);
+
+  const rawBodyDataSamples = useMemo(() => {
+    const requestMetadata = apiSpec.getRequestMetadata(operation.name);
+
+    return requestMetadata.body
+      .filter(({ sampleData }) => !!sampleData)
+      .map(({ type, sampleData }) => ({
+        name: type,
+        value: sampleData.data,
+      }));
+  }, [apiSpec, operation]);
 
   const handleFormParamsListChange = useCallback((name: keyof Omit<HttpReqData, 'body'>, value: HttpReqParam[]) => {
     setReqData((prev) => ({ ...prev, [name]: value }));
@@ -73,7 +84,14 @@ export const HttpTestConsole: React.FC<Props> = ({ apiSpec, operation, deploymen
             onChange={handleFormParamsListChange}
           />
 
-          {canHaveBody && <HttpApiTestConsole.RawBody name="body" value={reqData.body} onChange={handleBodyChange} />}
+          {canHaveBody && (
+            <HttpApiTestConsole.RawBody
+              name="body"
+              dataSamples={rawBodyDataSamples}
+              value={reqData.body}
+              onChange={handleBodyChange}
+            />
+          )}
 
           <HttpApiTestConsole.RequestPreview name="request" reqData={reqData} schemas={schemaParamsData} />
         </HttpApiTestConsole>

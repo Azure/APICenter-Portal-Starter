@@ -52,19 +52,19 @@ export const ApiOperationDetails: React.FC<Props> = ({ apiSpec, operation, deplo
         {!!requestMetadata.parameters?.length && (
           <>
             <h4>Request parameters</h4>
-            <ParametersTable parameters={requestMetadata.parameters} />
+            <ParametersTable parameters={requestMetadata.parameters} hiddenColumns={['readOnly']} />
           </>
         )}
         {!!requestMetadata.headers?.length && (
           <>
             <h4>Request headers</h4>
-            <ParametersTable parameters={requestMetadata.headers} hiddenColumns={['in']} />
+            <ParametersTable parameters={requestMetadata.headers} hiddenColumns={['in', 'readOnly']} />
           </>
         )}
 
         <ParamSchemaDefinition
           title={apiSpec.type === ApiSpecTypes.GraphQL ? 'Arguments' : 'Request body'}
-          schema={requestMetadata.body}
+          mediaContentList={requestMetadata.body}
           hiddenColumns={['in', 'readOnly']}
         />
       </>
@@ -88,7 +88,7 @@ export const ApiOperationDetails: React.FC<Props> = ({ apiSpec, operation, deplo
           </>
         )}
 
-        <ParamSchemaDefinition title="Body" schema={response.body} hiddenColumns={['in', 'readOnly', 'required']} />
+        <ParamSchemaDefinition title="Body" mediaContentList={response.body} hiddenColumns={['in', 'readOnly']} />
       </React.Fragment>
     ));
   }

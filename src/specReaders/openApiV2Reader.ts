@@ -2,19 +2,55 @@
 import { OpenAPIV2 } from 'openapi-types';
 import * as yaml from 'yaml';
 import memoize from 'memoizee';
+import { sortBy } from 'lodash';
 import {
   ApiSpecReader,
   ApiSpecTypes,
+  MediaContentMetadata,
   OperationCategory,
   OperationMetadata,
   OperationParameterMetadata,
   RequestMetadata,
   ResponseMetadata,
+  SampleDataEntry,
   SchemaMetadata,
+  WithRef,
 } from '@/types/apiSpec';
 import { httpMethodsList } from '@/constants';
-import { getUsedRefsFromSubSchema, resolveRef, resolveSchema, schemaToTypeLabel } from '@/utils/openApi';
+import {
+  gatherSampleJsonData,
+  getUsedRefsFromSubSchema,
+  resolveRef,
+  resolveSchema,
+  schemaToTypeLabel,
+} from '@/utils/openApi';
 import makeOpenApiResolverProxy from './openApiResolverProxy';
+
+function getMediaContentSampleData(type: string, schema: WithRef<OpenAPIV2.SchemaObject>): SampleDataEntry | undefined {
+  if (type === 'application/json') {
+    return {
+      data: JSON.stringify(gatherSampleJsonData(schema), null, 2),
+      language: 'json',
+    };
+  }
+
+  return undefined;
+}
+
+function resolveMediaContent(mediaTypes: string[], schema?: WithRef<OpenAPIV2.SchemaObject>): MediaContentMetadata[] {
+  if (!mediaTypes.length || !schema) {
+    return [];
+  }
+
+  return sortBy(
+    mediaTypes.map((type) => ({
+      type,
+      schema: resolveSchema(schema),
+      sampleData: getMediaContentSampleData(type, schema),
+    })),
+    'type'
+  );
+}
 
 /**
  * Returns an instance of ApiSpecReader that reads OpenAPI V2 spec from a string.
@@ -103,7 +139,7 @@ export default async function openApiSpecReader(specStr: string): Promise<ApiSpe
       description: operation.spec?.description,
       parameters: resultParams.filter((param) => REQUEST_PARAM_TYPES.includes(param.in)),
       headers: resultParams.filter((param) => HEADER_PARAM_TYPES.includes(param.in)),
-      body: resolveSchema(bodyParam?.schema),
+      body: resolveMediaContent(operation.spec?.consumes || apiSpec.consumes, bodyParam?.schema),
     };
   });
 
@@ -125,7 +161,7 @@ export default async function openApiSpecReader(specStr: string): Promise<ApiSpe
           code,
           description: responseData.description,
           headers,
-          body: resolveSchema(responseData.schema),
+          body: resolveMediaContent(operation.spec?.consumes || apiSpec.consumes, responseData.schema),
         };
       }
     );
