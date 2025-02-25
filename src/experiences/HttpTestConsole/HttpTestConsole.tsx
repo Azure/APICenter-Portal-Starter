@@ -1,15 +1,22 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  HttpTestConsole as HttpApiTestConsole,
+  ApiOperationMethod,
+  HttpBodyFormats,
+  HttpReqBodyData,
   HttpReqData,
   HttpReqParam,
-  ApiOperationMethod,
+  HttpTestConsole as HttpApiTestConsole,
 } from '@microsoft/api-docs-ui';
 import { Button, Drawer, DrawerBody, DrawerHeader, DrawerHeaderTitle } from '@fluentui/react-components';
 import { Dismiss24Regular } from '@fluentui/react-icons';
 import { ApiSpecReader, OperationMetadata } from '@/types/apiSpec';
 import { ApiDeployment } from '@/types/apiDeployment';
-import { getReqDataDefaults, getSchemaParamsByLocation } from './utils';
+import {
+  getFormDataFieldsMetadata,
+  getReqBodySupportedFormats,
+  getReqDataDefaults,
+  getSchemaParamsByLocation,
+} from './utils';
 
 interface Props {
   apiSpec: ApiSpecReader;
@@ -26,6 +33,11 @@ export const HttpTestConsole: React.FC<Props> = ({ apiSpec, operation, deploymen
 
   const [reqData, setReqData] = useState<HttpReqData>(defaults);
 
+  useEffect(() => {
+    setReqData(defaults);
+  }, [defaults]);
+
+  const supportedBodyFormats = getReqBodySupportedFormats(apiSpec, operation);
   const schemaParamsData = getSchemaParamsByLocation(apiSpec, operation);
   const canHaveBody = !methodsWithoutBody.includes(operation?.method);
 
@@ -44,7 +56,7 @@ export const HttpTestConsole: React.FC<Props> = ({ apiSpec, operation, deploymen
     setReqData((prev) => ({ ...prev, [name]: value }));
   }, []);
 
-  const handleBodyChange = useCallback((value: string) => {
+  const handleBodyChange = useCallback((value: HttpReqBodyData) => {
     setReqData((prev) => ({ ...prev, body: value }));
   }, []);
 
@@ -85,12 +97,15 @@ export const HttpTestConsole: React.FC<Props> = ({ apiSpec, operation, deploymen
           />
 
           {canHaveBody && (
-            <HttpApiTestConsole.RawBody
-              name="body"
-              dataSamples={rawBodyDataSamples}
-              value={reqData.body}
-              onChange={handleBodyChange}
-            />
+            <HttpApiTestConsole.BodyForm name="body" value={reqData.body} onChange={handleBodyChange}>
+              {supportedBodyFormats.includes(HttpBodyFormats.Raw) && (
+                <HttpApiTestConsole.BodyForm.Raw dataSamples={rawBodyDataSamples} />
+              )}
+              {supportedBodyFormats.includes(HttpBodyFormats.Binary) && <HttpApiTestConsole.BodyForm.Binary />}
+              {supportedBodyFormats.includes(HttpBodyFormats.FormData) && (
+                <HttpApiTestConsole.BodyForm.FormData fields={getFormDataFieldsMetadata(apiSpec, operation)} />
+              )}
+            </HttpApiTestConsole.BodyForm>
           )}
 
           <HttpApiTestConsole.RequestPreview name="request" reqData={reqData} schemas={schemaParamsData} />

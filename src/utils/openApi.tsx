@@ -29,6 +29,53 @@ export function getUsedRefsFromSubSchema<T extends object>(schema?: T): string[]
   );
 }
 
+export function v2ParamMetadataToFieldType(param: OpenAPIV2.ParameterObject): OperationParameterMetadata['fieldType'] {
+  switch (param.type) {
+    case 'file':
+      return 'file';
+
+    case 'string': {
+      if (param.enum) {
+        return 'select';
+      }
+
+      return 'text';
+    }
+
+    case 'integer':
+    case 'number':
+      return 'number';
+
+    default:
+      return undefined;
+  }
+}
+
+export function schemaToFieldType<T extends WithRef<OpenAPIV2.SchemaObject | OpenAPIV3.SchemaObject>>(
+  schema?: T
+): OperationParameterMetadata['fieldType'] {
+  switch (schema.type) {
+    case 'string': {
+      if (schema.format === 'binary') {
+        return 'file';
+      }
+
+      if (schema.enum) {
+        return 'select';
+      }
+
+      return 'text';
+    }
+
+    case 'integer':
+    case 'number':
+      return 'number';
+
+    default:
+      return undefined;
+  }
+}
+
 /**
  * Returns type label based on schema object.
  */
@@ -152,6 +199,7 @@ export function resolveSchema(
     ([name, propSchema]): OperationParameterMetadata => ({
       name,
       type: schemaToTypeLabel(propSchema),
+      fieldType: schemaToFieldType(propSchema),
       in: placement,
       description: propSchema.description,
       required: schema.required?.includes(name),
@@ -166,6 +214,7 @@ export function resolveSchema(
     properties.push({
       name: '[key]',
       type: schemaToTypeLabel(schema.additionalProperties as OpenAPIV3.SchemaObject),
+      fieldType: schemaToFieldType(schema.additionalProperties as OpenAPIV3.SchemaObject),
       in: placement,
       description: 'Additional properties',
     });
