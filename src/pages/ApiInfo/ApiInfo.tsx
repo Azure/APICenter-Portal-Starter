@@ -14,6 +14,7 @@ import {
 import { Dismiss24Regular } from '@fluentui/react-icons';
 import { useNavigate, useParams } from 'react-router-dom';
 import useApi from '@/hooks/useApi';
+import useDocumentTitle from '@/hooks/useDocumentTitle';
 import ApiAdditionalInfo from '../../experiences/ApiAdditionalInfo';
 import ApiInfoOptions from '../../experiences/ApiInfoOptions';
 import LocationsService from '@/services/LocationsService';
@@ -37,6 +38,8 @@ export const ApiInfo: React.FC = () => {
   const { id } = useParams() as Readonly<RouteParams>;
   const navigate = useNavigate();
   const api = useApi(id);
+
+  useDocumentTitle(`API Info${api.data?.title ? ` - ${api.data.title}` : ''}`);
 
   const handleTabSelect = useCallback<React.ComponentProps<typeof TabList>['onTabSelect']>((_, { value }) => {
     setActiveTab(value as Tabs);
@@ -102,7 +105,17 @@ export const ApiInfo: React.FC = () => {
     <Drawer className={styles.apiInfo} size="medium" position="end" open onOpenChange={handleClose}>
       <DrawerHeader>
         <DrawerHeaderTitle
-          action={<Button appearance="subtle" aria-label="Close" icon={<Dismiss24Regular />} onClick={handleClose} />}
+          action={
+            <Button
+              appearance="subtle"
+              aria-label="Close"
+              icon={<Dismiss24Regular />}
+              onClick={() => {
+                document.title = 'API Center portal'; // Reset title to default
+                handleClose();
+              }}
+            />
+          }
         >
           {api.data?.title}
         </DrawerHeaderTitle>
