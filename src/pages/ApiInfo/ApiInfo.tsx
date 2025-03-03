@@ -19,6 +19,7 @@ import ApiInfoOptions from '../../experiences/ApiInfoOptions';
 import LocationsService from '@/services/LocationsService';
 import ApiDefinitionSelect, { ApiDefinitionSelection } from '@/experiences/ApiDefinitionSelect';
 import { EmptyStateMessage } from '@/components/EmptyStateMessage/EmptyStateMessage';
+import { setDocumentTitle } from '@/utils/dom';
 import styles from './ApiInfo.module.scss';
 
 interface RouteParams {
@@ -37,6 +38,8 @@ export const ApiInfo: React.FC = () => {
   const { id } = useParams() as Readonly<RouteParams>;
   const navigate = useNavigate();
   const api = useApi(id);
+
+  setDocumentTitle(`API Info${api.data?.title ? ` - ${api.data.title}` : ''}`);
 
   const handleTabSelect = useCallback<React.ComponentProps<typeof TabList>['onTabSelect']>((_, { value }) => {
     setActiveTab(value as Tabs);

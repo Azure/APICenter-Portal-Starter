@@ -12,6 +12,7 @@ import LocationsService from '@/services/LocationsService';
 import { ApiDeployment } from '@/types/apiDeployment';
 import { EmptyStateMessage } from '@/components/EmptyStateMessage/EmptyStateMessage';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
+import { setDocumentTitle } from '@/utils/dom';
 import styles from './ApiSpec.module.scss';
 
 export const ApiSpec: React.FC = () => {
@@ -21,6 +22,8 @@ export const ApiSpec: React.FC = () => {
   const navigate = useNavigate();
 
   const api = useApi(apiName);
+
+  setDocumentTitle(`API Specification${api.data?.title ? ` - ${api.data.title}` : ''}`);
 
   const definitionId = useMemo<ApiDefinitionId>(
     () => ({ apiName, versionName, definitionName }),
