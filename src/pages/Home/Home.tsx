@@ -17,8 +17,8 @@ export const Home: React.FC = () => {
   const isAuthenticated = useRecoilValue(isAuthenticatedAtom);
   const isAccessDenied = useRecoilValue(isAccessDeniedAtom);
 
-  const isNestedRoute = useOutlet();
-  if (!isNestedRoute) setDocumentTitle('API Center portal');
+  const nestedRoute = useOutlet();
+  if (!nestedRoute) setDocumentTitle('API Center portal');
 
   function renderApiList() {
     if (!isAuthenticated) {
