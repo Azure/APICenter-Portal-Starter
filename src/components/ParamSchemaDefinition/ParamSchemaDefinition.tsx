@@ -71,7 +71,7 @@ export const ParamSchemaDefinition: React.FC<Props> = ({
     [mediaContentList, selectedTab]
   );
 
-  const shouldShowContentTypeSelect = !!mediaContentList && mediaContentList?.length > 1;
+  const shouldShowContentTypeSelect = mediaContentList?.length;
   const shouldShowTabsRow = !!schema?.rawSchema || selectedMediaContent?.sampleData || shouldShowContentTypeSelect;
 
   if (inputSchema && mediaContentList) {

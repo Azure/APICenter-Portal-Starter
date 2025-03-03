@@ -1,9 +1,38 @@
 import memoizee from 'memoizee';
-import { groupBy, uniqBy } from 'lodash';
-import { HttpParamSchemasByLocation, HttpBodyFormats, HttpReqData } from '@microsoft/api-docs-ui';
+import { groupBy, uniq, uniqBy } from 'lodash';
+import { HttpBodyFormats, HttpParamSchemasByLocation, HttpReqData } from '@microsoft/api-docs-ui';
 import { ApiSpecReader, OperationMetadata, OperationParameterMetadata } from '@/types/apiSpec';
 import { resolveOpUrlTemplate } from '@/utils/apiOperations';
 import { ApiDeployment } from '@/types/apiDeployment';
+
+export const getFormDataFieldsMetadata = memoizee(
+  (apiSpec: ApiSpecReader, operation: OperationMetadata): OperationParameterMetadata[] => {
+    const requestMetadata = apiSpec.getRequestMetadata(operation.name);
+    const body = requestMetadata.body.find((b) => b.type === 'multipart/form-data');
+
+    return body?.schema.properties || [];
+  }
+);
+
+export const getReqBodySupportedFormats = memoizee(
+  (apiSpec: ApiSpecReader, operation: OperationMetadata): HttpBodyFormats[] => {
+    const metadata = apiSpec.getRequestMetadata(operation.name);
+    return uniq(
+      metadata.body.map((b) => {
+        switch (b.type) {
+          case 'application/octet-stream':
+            return HttpBodyFormats.Binary;
+
+          case 'multipart/form-data':
+            return HttpBodyFormats.FormData;
+
+          default:
+            return HttpBodyFormats.Raw;
+        }
+      })
+    );
+  }
+);
 
 const METHODS_WITH_FORCED_BODY = ['post', 'put', 'patch'];
 /**
@@ -19,12 +48,15 @@ export const getReqDataDefaults = memoizee(
       urlParams: [],
       query: [],
       headers: [],
-      bodyFormat: HttpBodyFormats.RAW,
       body: undefined,
     };
 
     if (METHODS_WITH_FORCED_BODY.includes(operation.method)) {
-      result.body = '';
+      const format = getReqBodySupportedFormats(apiSpec, operation)[0];
+      result.body = {
+        format,
+        value: format === HttpBodyFormats.FormData ? {} : '',
+      };
     }
 
     metadata.parameters

@@ -55,7 +55,7 @@ export default async function openApiSpecReader(specStr: string): Promise<ApiSpe
   const apiSpec = makeOpenApiResolverProxy<OpenAPIV3.Document>(yaml.parse(specStr));
 
   const getBaseUrl = memoize((): string => {
-    return apiSpec.servers[0].url;
+    return apiSpec.servers?.[0].url;
   });
 
   const getTagLabels = memoize((): string[] => {
@@ -115,7 +115,7 @@ export default async function openApiSpecReader(specStr: string): Promise<ApiSpe
       return result;
     });
 
-    Object.values(apiSpec.components.securitySchemes || {}).forEach(
+    Object.values(apiSpec.components?.securitySchemes || {}).forEach(
       (securityScheme: OpenAPIV3.SecuritySchemeObject) => {
         if (securityScheme.type !== 'apiKey') {
           return;
