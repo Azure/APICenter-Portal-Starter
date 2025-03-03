@@ -1,8 +1,7 @@
 import React from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useOutlet } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
 import ApiList from '@/experiences/ApiList';
-import useDocumentTitle from '@/hooks/useDocumentTitle';
 import AccessDeniedSvg from '@/assets/accessDenied.svg';
 import isAuthenticatedAtom from '@/atoms/isAuthenticatedAtom';
 import isAccessDeniedAtom from '@/atoms/isAccessDeniedAtom';
@@ -11,13 +10,15 @@ import ApiFilters from '@/experiences/ApiFilters';
 import ApiListLayoutSwitch from '@/experiences/ApiListLayoutSwitch';
 import ApiListSortingSelect from '@/experiences/ApiListSortingSelect';
 import { ActiveFiltersBadges } from '@/experiences/ActiveFiltersBadges/ActiveFiltersBadges';
+import { setDocumentTitle } from '@/utils/dom';
 import styles from './Home.module.scss';
 
 export const Home: React.FC = () => {
   const isAuthenticated = useRecoilValue(isAuthenticatedAtom);
   const isAccessDenied = useRecoilValue(isAccessDeniedAtom);
 
-  useDocumentTitle('API Center portal');
+  const isNestedRoute = useOutlet();
+  if (!isNestedRoute) setDocumentTitle('API Center portal');
 
   function renderApiList() {
     if (!isAuthenticated) {

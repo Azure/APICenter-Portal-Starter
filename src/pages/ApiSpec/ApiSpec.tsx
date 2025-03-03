@@ -7,12 +7,12 @@ import ApiOperationsSelect from '@/experiences/ApiOperationsSelect';
 import useSelectedOperation from '@/hooks/useSelectedOperation';
 import ApiOperationDetails from '@/experiences/ApiOperationDetails';
 import useApi from '@/hooks/useApi';
-import useDocumentTitle from '@/hooks/useDocumentTitle';
 import ApiDefinitionSelect, { ApiDefinitionSelection } from '@/experiences/ApiDefinitionSelect';
 import LocationsService from '@/services/LocationsService';
 import { ApiDeployment } from '@/types/apiDeployment';
 import { EmptyStateMessage } from '@/components/EmptyStateMessage/EmptyStateMessage';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
+import { setDocumentTitle } from '@/utils/dom';
 import styles from './ApiSpec.module.scss';
 
 export const ApiSpec: React.FC = () => {
@@ -23,7 +23,7 @@ export const ApiSpec: React.FC = () => {
 
   const api = useApi(apiName);
 
-  useDocumentTitle(`API Specification${api.data?.title ? ` - ${api.data.title}` : ''}`);
+  setDocumentTitle(`API Specification${api.data?.title ? ` - ${api.data.title}` : ''}`);
 
   const definitionId = useMemo<ApiDefinitionId>(
     () => ({ apiName, versionName, definitionName }),
