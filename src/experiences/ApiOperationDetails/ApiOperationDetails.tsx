@@ -1,9 +1,11 @@
-import React from 'react';
-import { ApiOperationMethod, CopyToClipboard, InfoPanel, ParametersTable } from '@microsoft/api-docs-ui';
+import React, { useCallback, useState } from 'react';
+import { ApiOperationMethod, InfoPanel, ParametersTable, CopyToClipboard } from '@microsoft/api-docs-ui';
+import { Button } from '@fluentui/react-components';
 import { ApiSpecReader, ApiSpecTypes, OperationMetadata } from '@/types/apiSpec';
 import ParamSchemaDefinition from '@/components/ParamSchemaDefinition';
 import { ApiDeployment } from '@/types/apiDeployment';
 import { resolveOpUrlTemplate } from '@/utils/apiOperations';
+import HttpTestConsole from '@/experiences/HttpTestConsole';
 import styles from './ApiOperationDetails.module.scss';
 
 interface Props {
@@ -12,12 +14,25 @@ interface Props {
   deployment?: ApiDeployment;
 }
 
+const SPEC_TYPES_WITH_CONSOLE = [ApiSpecTypes.OpenApiV2, ApiSpecTypes.OpenApiV3];
+
 export const ApiOperationDetails: React.FC<Props> = ({ apiSpec, operation, deployment }) => {
+  const [isTestConsoleOpen, setIsTestConsoleOpen] = useState(false);
+
+  const handleTryApiClick = useCallback(() => {
+    setIsTestConsoleOpen(true);
+  }, []);
+
+  const handleTestConsoleClose = useCallback(() => {
+    setIsTestConsoleOpen(false);
+  }, []);
+
   if (!operation) {
     return null;
   }
 
-  const urlTemplate = resolveOpUrlTemplate(deployment, apiSpec, operation);
+  const isTestConsoleAvailable = SPEC_TYPES_WITH_CONSOLE.includes(apiSpec.type);
+  const urlTemplate = resolveOpUrlTemplate(apiSpec, operation, deployment);
 
   function renderRequestInfo() {
     const requestMetadata = apiSpec.getRequestMetadata(operation.name);
@@ -37,19 +52,19 @@ export const ApiOperationDetails: React.FC<Props> = ({ apiSpec, operation, deplo
         {!!requestMetadata.parameters?.length && (
           <>
             <h4>Request parameters</h4>
-            <ParametersTable parameters={requestMetadata.parameters} />
+            <ParametersTable parameters={requestMetadata.parameters} hiddenColumns={['readOnly']} />
           </>
         )}
         {!!requestMetadata.headers?.length && (
           <>
             <h4>Request headers</h4>
-            <ParametersTable parameters={requestMetadata.headers} hiddenColumns={['in']} />
+            <ParametersTable parameters={requestMetadata.headers} hiddenColumns={['in', 'readOnly']} />
           </>
         )}
 
         <ParamSchemaDefinition
           title={apiSpec.type === ApiSpecTypes.GraphQL ? 'Arguments' : 'Request body'}
-          schema={requestMetadata.body}
+          mediaContentList={requestMetadata.body}
           hiddenColumns={['in', 'readOnly']}
         />
       </>
@@ -73,7 +88,7 @@ export const ApiOperationDetails: React.FC<Props> = ({ apiSpec, operation, deplo
           </>
         )}
 
-        <ParamSchemaDefinition title="Body" schema={response.body} hiddenColumns={['in', 'readOnly', 'required']} />
+        <ParamSchemaDefinition title="Body" mediaContentList={response.body} hiddenColumns={['in', 'readOnly']} />
       </React.Fragment>
     ));
   }
@@ -116,6 +131,19 @@ export const ApiOperationDetails: React.FC<Props> = ({ apiSpec, operation, deplo
           <CopyToClipboard content={urlTemplate} />
         </div>
       </InfoPanel>
+
+      {isTestConsoleAvailable && (
+        <>
+          <Button onClick={handleTryApiClick}>Try this API</Button>
+          <HttpTestConsole
+            apiSpec={apiSpec}
+            operation={operation}
+            deployment={deployment}
+            isOpen={isTestConsoleOpen}
+            onClose={handleTestConsoleClose}
+          />
+        </>
+      )}
 
       <h3>Request</h3>
       {renderRequestInfo()}

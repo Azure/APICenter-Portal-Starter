@@ -1,13 +1,14 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { ParametersTable, RawSchema } from '@microsoft/api-docs-ui';
-import { Badge, Tab, TabList } from '@fluentui/react-components';
-import { SchemaMetadata } from '@/types/apiSpec';
+import { Badge, Dropdown, Label, Option, Tab, TabList } from '@fluentui/react-components';
+import { MediaContentMetadata, SchemaMetadata } from '@/types/apiSpec';
 import RefLink from '@/components/RefLink';
 import styles from './ParamSchemaDefinition.module.scss';
 
 interface Props {
   title: string;
   schema?: SchemaMetadata;
+  mediaContentList?: MediaContentMetadata[];
   hiddenColumns?: React.ComponentProps<typeof ParametersTable>['hiddenColumns'];
   isGlobalDefinition?: boolean;
   isEnum?: boolean;
@@ -16,20 +17,66 @@ interface Props {
 enum DefinitionTabs {
   TABLE = 'table',
   SCHEMA = 'schema',
+  SAMPLE = 'sample',
 }
 
+/**
+ * A component that renders a parameter schema definition.
+ * It can render a table with parameter properties or a raw schema based on user selection.
+ * It supports two modes:
+ *   1. Single schema mode that can be used for singular schemas (for example in definitions)
+ *   2. Multiple media content mode that can be used for request/response bodies with multiple content types.
+ */
 export const ParamSchemaDefinition: React.FC<Props> = ({
   title,
-  schema,
+  schema: inputSchema,
+  mediaContentList,
   hiddenColumns = ['in'],
   isGlobalDefinition = false,
   isEnum = false,
 }) => {
   const [selectedTab, setSelectedTab] = useState<DefinitionTabs>(DefinitionTabs.TABLE);
+  const [selectedMediaContent, setSelectedMediaContent] = useState<MediaContentMetadata | undefined>(
+    mediaContentList?.[0]
+  );
+
+  useEffect(() => {
+    setSelectedMediaContent(mediaContentList?.[0]);
+  }, [mediaContentList]);
+
+  const schema = useMemo(() => {
+    if (selectedMediaContent) {
+      return selectedMediaContent.schema;
+    }
+    return inputSchema;
+  }, [inputSchema, selectedMediaContent]);
 
   const handleTabSelect = useCallback<React.ComponentProps<typeof TabList>['onTabSelect']>((_, { value }) => {
     setSelectedTab(value as DefinitionTabs);
   }, []);
+
+  const handleMediaTypeChange = useCallback<React.ComponentProps<typeof Dropdown>['onOptionSelect']>(
+    (_, { optionValue }) => {
+      const mediaContent = mediaContentList!.find((mediaContent) => mediaContent.type === optionValue);
+      setSelectedMediaContent(mediaContent);
+
+      if (selectedTab === DefinitionTabs.SCHEMA && !mediaContent.schema.rawSchema) {
+        setSelectedTab(DefinitionTabs.TABLE);
+      }
+
+      if (selectedTab === DefinitionTabs.SAMPLE && !mediaContent.sampleData) {
+        setSelectedTab(DefinitionTabs.TABLE);
+      }
+    },
+    [mediaContentList, selectedTab]
+  );
+
+  const shouldShowContentTypeSelect = mediaContentList?.length;
+  const shouldShowTabsRow = !!schema?.rawSchema || selectedMediaContent?.sampleData || shouldShowContentTypeSelect;
+
+  if (inputSchema && mediaContentList) {
+    console.warn('Both schema and mediaContentList are provided. mediaContentList will be used by default.');
+  }
 
   if (!schema) {
     return null;
@@ -67,9 +114,19 @@ export const ParamSchemaDefinition: React.FC<Props> = ({
 
       return (
         <RawSchema
-          title={`${title} (${schema.rawSchemaLanguage})`}
-          schema={schema.rawSchema}
-          language={schema.rawSchemaLanguage}
+          title={`${title} (${schema.rawSchema.language})`}
+          schema={schema.rawSchema.schema}
+          language={schema.rawSchema.language}
+        />
+      );
+    }
+
+    if (selectedTab === DefinitionTabs.SAMPLE && selectedMediaContent?.sampleData) {
+      return (
+        <RawSchema
+          title={`Sample data (${selectedMediaContent.sampleData.language})`}
+          schema={selectedMediaContent.sampleData.data}
+          language={selectedMediaContent.sampleData.language}
         />
       );
     }
@@ -97,11 +154,33 @@ export const ParamSchemaDefinition: React.FC<Props> = ({
     <div className={styles.paramSchemaDefinition}>
       {renderTitle()}
 
-      {!!schema.rawSchema && (
-        <TabList className={styles.tabList} selectedValue={selectedTab} onTabSelect={handleTabSelect}>
-          <Tab value={DefinitionTabs.TABLE}>{schema.properties?.length ? 'Table' : 'Definition'}</Tab>
-          <Tab value={DefinitionTabs.SCHEMA}>Schema</Tab>
-        </TabList>
+      {shouldShowTabsRow && (
+        <div className={styles.tabListWrapper}>
+          <TabList selectedValue={selectedTab} onTabSelect={handleTabSelect}>
+            <Tab value={DefinitionTabs.TABLE}>{schema.properties?.length ? 'Table' : 'Definition'}</Tab>
+            {schema.rawSchema && <Tab value={DefinitionTabs.SCHEMA}>Schema</Tab>}
+            {selectedMediaContent?.sampleData && <Tab value={DefinitionTabs.SAMPLE}>Sample data</Tab>}
+          </TabList>
+
+          {shouldShowContentTypeSelect && (
+            <Label className={styles.contentTypeSelect}>
+              <span>Content type</span>
+              <Dropdown
+                className={styles.dropdown}
+                value={selectedMediaContent?.type}
+                selectedOptions={[selectedMediaContent?.type]}
+                size="small"
+                onOptionSelect={handleMediaTypeChange}
+              >
+                {mediaContentList.map((mediaContent) => (
+                  <Option key={mediaContent.type} className={styles.contentTypeSelectOption}>
+                    {mediaContent.type}
+                  </Option>
+                ))}
+              </Dropdown>
+            </Label>
+          )}
+        </div>
       )}
 
       {renderDefinition()}

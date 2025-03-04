@@ -2,19 +2,74 @@
 import { OpenAPIV2 } from 'openapi-types';
 import * as yaml from 'yaml';
 import memoize from 'memoizee';
+import { sortBy, uniqBy } from 'lodash';
 import {
   ApiSpecReader,
   ApiSpecTypes,
+  MediaContentMetadata,
   OperationCategory,
   OperationMetadata,
   OperationParameterMetadata,
   RequestMetadata,
   ResponseMetadata,
+  SampleDataEntry,
   SchemaMetadata,
+  WithRef,
 } from '@/types/apiSpec';
 import { httpMethodsList } from '@/constants';
-import { getUsedRefsFromSubSchema, resolveRef, resolveSchema, schemaToTypeLabel } from '@/utils/openApi';
+import {
+  gatherSampleJsonData,
+  getUsedRefsFromSubSchema,
+  resolveRef,
+  resolveSchema,
+  schemaToFieldType,
+  schemaToTypeLabel,
+  v2ParamMetadataToFieldType,
+} from '@/utils/openApi';
 import makeOpenApiResolverProxy from './openApiResolverProxy';
+
+function getMediaContentSampleData(type: string, schema: WithRef<OpenAPIV2.SchemaObject>): SampleDataEntry | undefined {
+  if (type === 'application/json') {
+    return {
+      data: JSON.stringify(gatherSampleJsonData(schema), null, 2),
+      language: 'json',
+    };
+  }
+
+  return undefined;
+}
+
+function resolveMediaContent(
+  mediaTypes: string[] = [],
+  schema?: WithRef<OpenAPIV2.SchemaObject>,
+  parameters?: OperationParameterMetadata[]
+): MediaContentMetadata[] {
+  if (!mediaTypes.length) {
+    return [];
+  }
+
+  return sortBy(
+    mediaTypes.map((type) => {
+      if (type === 'multipart/form-data') {
+        return {
+          type,
+          schema: {
+            typeLabel: 'object',
+            properties: parameters?.filter((param) => param.in === 'formData'),
+          },
+          sampleData: getMediaContentSampleData(type, schema),
+        };
+      }
+
+      return {
+        type,
+        schema: resolveSchema(schema),
+        sampleData: getMediaContentSampleData(type, schema),
+      };
+    }),
+    'type'
+  );
+}
 
 /**
  * Returns an instance of ApiSpecReader that reads OpenAPI V2 spec from a string.
@@ -74,8 +129,11 @@ export default async function openApiSpecReader(specStr: string): Promise<ApiSpe
 
     const resultParams = specParams.map<OperationParameterMetadata>((specParam) => {
       const result = { ...specParam } as OperationParameterMetadata;
+      result.fieldType = v2ParamMetadataToFieldType(specParam);
+
       if (specParam.schema) {
         result.type = schemaToTypeLabel(specParam.schema);
+        result.fieldType = schemaToFieldType(specParam.schema);
       }
       return result;
     });
@@ -84,11 +142,31 @@ export default async function openApiSpecReader(specStr: string): Promise<ApiSpe
       | OpenAPIV2.InBodyParameterObject
       | undefined;
 
+    Object.values(apiSpec.securityDefinitions || {}).forEach((securityScheme: OpenAPIV2.SecuritySchemeObject) => {
+      if (securityScheme.type !== 'apiKey') {
+        return;
+      }
+
+      resultParams.unshift({
+        name: securityScheme.name,
+        type: 'string',
+        in: securityScheme.in,
+        description: securityScheme.description,
+        required: false,
+        isSecret: true,
+      });
+    });
+
+    const parameters = resultParams.filter((param) => REQUEST_PARAM_TYPES.includes(param.in));
+
     return {
       description: operation.spec?.description,
-      parameters: resultParams.filter((param) => REQUEST_PARAM_TYPES.includes(param.in)),
-      headers: resultParams.filter((param) => HEADER_PARAM_TYPES.includes(param.in)),
-      body: resolveSchema(bodyParam?.schema),
+      parameters,
+      headers: uniqBy(
+        resultParams.filter((param) => HEADER_PARAM_TYPES.includes(param.in)),
+        'name'
+      ),
+      body: resolveMediaContent(operation.spec?.consumes || apiSpec.consumes, bodyParam?.schema, parameters),
     };
   });
 
@@ -110,7 +188,7 @@ export default async function openApiSpecReader(specStr: string): Promise<ApiSpe
           code,
           description: responseData.description,
           headers,
-          body: resolveSchema(responseData.schema),
+          body: resolveMediaContent(operation.spec?.consumes || apiSpec.consumes, responseData.schema),
         };
       }
     );

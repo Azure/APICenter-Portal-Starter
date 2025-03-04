@@ -29,13 +29,60 @@ export function getUsedRefsFromSubSchema<T extends object>(schema?: T): string[]
   );
 }
 
+export function v2ParamMetadataToFieldType(param: OpenAPIV2.ParameterObject): OperationParameterMetadata['fieldType'] {
+  switch (param.type) {
+    case 'file':
+      return 'file';
+
+    case 'string': {
+      if (param.enum) {
+        return 'select';
+      }
+
+      return 'text';
+    }
+
+    case 'integer':
+    case 'number':
+      return 'number';
+
+    default:
+      return undefined;
+  }
+}
+
+export function schemaToFieldType<T extends WithRef<OpenAPIV2.SchemaObject | OpenAPIV3.SchemaObject>>(
+  schema?: T
+): OperationParameterMetadata['fieldType'] {
+  switch (schema.type) {
+    case 'string': {
+      if (schema.format === 'binary') {
+        return 'file';
+      }
+
+      if (schema.enum) {
+        return 'select';
+      }
+
+      return 'text';
+    }
+
+    case 'integer':
+    case 'number':
+      return 'number';
+
+    default:
+      return undefined;
+  }
+}
+
 /**
  * Returns type label based on schema object.
  */
 export function schemaToTypeLabel<T extends WithRef<OpenAPIV2.SchemaObject | OpenAPIV3.SchemaObject>>(
   schema?: T
 ): React.ReactNode {
-  if (!schema) {
+  if (!schema?.type) {
     return null;
   }
 
@@ -71,6 +118,75 @@ export function schemaToTypeLabel<T extends WithRef<OpenAPIV2.SchemaObject | Ope
 }
 
 /**
+ * Recursively constructs sample data for given schema from example values.
+ */
+export function gatherSampleJsonData(
+  schema?: WithRef<OpenAPIV2.SchemaObject | OpenAPIV3.SchemaObject>,
+  isRequired = false
+): unknown {
+  if (!schema) {
+    return undefined;
+  }
+
+  if (schema.type === 'object') {
+    const entries = Object.entries(schema.properties || {})
+      .map<[string, unknown]>(([key, propSchema]) => [
+        key,
+        gatherSampleJsonData(propSchema, schema.required?.includes(key)),
+      ])
+      // Filter out empty values if they are not required
+      .filter(([key, value]) => {
+        if (schema.required?.includes(key)) {
+          return true;
+        }
+
+        const property = schema.properties[key] as OpenAPIV2.SchemaObject | OpenAPIV3.SchemaObject;
+        if (property.type === 'array' && value) {
+          return !!(value as unknown[]).length;
+        }
+
+        if (property.type === 'object' && value) {
+          return !!Object.keys(value as object).length;
+        }
+
+        return value !== undefined;
+      });
+
+    if (!entries.length) {
+      return undefined;
+    }
+    return Object.fromEntries(entries);
+  }
+
+  if (schema.type === 'array') {
+    return [gatherSampleJsonData(schema.items)].filter((v) => v !== undefined);
+  }
+
+  if (schema.example) {
+    return schema.example;
+  }
+
+  if (!isRequired) {
+    return undefined;
+  }
+
+  switch (schema.type) {
+    case 'string':
+      return '';
+
+    case 'number':
+    case 'integer':
+      return 0;
+
+    case 'boolean':
+      return false;
+
+    default:
+      return undefined;
+  }
+}
+
+/**
  * Resolves OpenAPI schema object to a schema metadata object that we can use to easily render schema details.
  */
 export function resolveSchema(
@@ -81,19 +197,28 @@ export function resolveSchema(
     return undefined;
   }
 
-  const properties = Object.entries(schema.properties || {}).map<OperationParameterMetadata>(([name, propSchema]) => ({
-    name,
-    type: schemaToTypeLabel(propSchema),
-    in: placement,
-    description: propSchema.description,
-    required: schema.required?.includes(name),
-    readOnly: propSchema.readOnly,
-  }));
+  const properties = Object.entries<WithRef<OpenAPIV2.SchemaObject | OpenAPIV3.SchemaObject>>(
+    schema.properties || {}
+  ).map(
+    ([name, propSchema]): OperationParameterMetadata => ({
+      name,
+      type: schemaToTypeLabel(propSchema),
+      fieldType: schemaToFieldType(propSchema),
+      in: placement,
+      description: propSchema.description,
+      required: schema.required?.includes(name),
+      readOnly: propSchema.readOnly,
+      examples: propSchema.example ? [{ value: JSON.stringify(propSchema.example) }] : undefined,
+      enum: propSchema.enum,
+      defaultValue: propSchema.default,
+    })
+  );
 
   if (schema.additionalProperties) {
     properties.push({
       name: '[key]',
       type: schemaToTypeLabel(schema.additionalProperties as OpenAPIV3.SchemaObject),
+      fieldType: schemaToFieldType(schema.additionalProperties as OpenAPIV3.SchemaObject),
       in: placement,
       description: 'Additional properties',
     });
@@ -104,7 +229,9 @@ export function resolveSchema(
     refLabel: getRefLabel(schema.$ref),
     typeLabel: schemaToTypeLabel(schema),
     properties,
-    rawSchema: JSON.stringify(schema, null, 2),
-    rawSchemaLanguage: 'json',
+    rawSchema: {
+      schema: JSON.stringify(schema, null, 2),
+      language: 'json',
+    },
   };
 }

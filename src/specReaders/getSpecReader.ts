@@ -8,7 +8,7 @@ function getReaderFactory(definition: ApiDefinition): ApiSpecReaderFactory {
   if (definition.specification?.name === 'openapi') {
     const version = definition.specification?.version;
 
-    if (version === '2.0') {
+    if (version.startsWith('2.')) {
       return openApiV2Reader;
     }
 

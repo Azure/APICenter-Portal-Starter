@@ -2,7 +2,7 @@
 import { OpenAPIV3 } from 'openapi-types';
 import * as yaml from 'yaml';
 import memoize from 'memoizee';
-import { get } from 'lodash';
+import { get, sortBy, uniqBy } from 'lodash';
 import {
   WithRef,
   ApiSpecReader,
@@ -13,10 +13,40 @@ import {
   SchemaMetadata,
   OperationCategory,
   ApiSpecTypes,
+  MediaContentMetadata,
+  SampleDataEntry,
 } from '@/types/apiSpec';
 import { httpMethodsList } from '@/constants';
-import { getRefLabel, getUsedRefsFromSubSchema, resolveRef, resolveSchema, schemaToTypeLabel } from '@/utils/openApi';
+import {
+  gatherSampleJsonData,
+  getUsedRefsFromSubSchema,
+  resolveRef,
+  resolveSchema,
+  schemaToTypeLabel,
+} from '@/utils/openApi';
 import makeOpenApiResolverProxy from './openApiResolverProxy';
+
+function getMediaContentSampleData(type: string, schema: WithRef<OpenAPIV3.SchemaObject>): SampleDataEntry | undefined {
+  if (type === 'application/json') {
+    return {
+      data: JSON.stringify(gatherSampleJsonData(schema), null, 2),
+      language: 'json',
+    };
+  }
+
+  return undefined;
+}
+
+function resolveMediaContent(content: { [media: string]: OpenAPIV3.MediaTypeObject } = {}): MediaContentMetadata[] {
+  return sortBy(
+    Object.entries(content).map(([type, mediaData]) => ({
+      type,
+      schema: resolveSchema(mediaData.schema as WithRef<OpenAPIV3.SchemaObject>),
+      sampleData: getMediaContentSampleData(type, mediaData.schema as WithRef<OpenAPIV3.SchemaObject>),
+    })),
+    'type'
+  );
+}
 
 /**
  * Returns an instance of ApiSpecReader that reads OpenAPI V3 spec from a string.
@@ -25,7 +55,7 @@ export default async function openApiSpecReader(specStr: string): Promise<ApiSpe
   const apiSpec = makeOpenApiResolverProxy<OpenAPIV3.Document>(yaml.parse(specStr));
 
   const getBaseUrl = memoize((): string => {
-    return apiSpec.servers[0].url;
+    return apiSpec.servers?.[0].url;
   });
 
   const getTagLabels = memoize((): string[] => {
@@ -65,33 +95,51 @@ export default async function openApiSpecReader(specStr: string): Promise<ApiSpe
     return getOperations().find((operation) => operation.name === operationName);
   });
 
-  const REQUEST_PARAM_TYPES = ['query', 'cookie'];
+  const REQUEST_PARAM_TYPES = ['path', 'query', 'cookie'];
   const HEADER_PARAM_TYPES = ['header'];
 
   const getRequestMetadata = memoize((operationName: string): RequestMetadata => {
     const operation = getOperation(operationName);
 
-    const specParams = (operation.spec?.parameters || []) as OperationParameterMetadata[];
-
-    const mediaContent = get(operation.spec, 'requestBody.content', {}) as OpenAPIV3.RequestBodyObject['content'];
-    const schemaKey = Object.keys(mediaContent)[0];
-    const bodySchema = get(operation.spec, `requestBody.content["${schemaKey}"].schema`) as
-      | WithRef<OpenAPIV3.SchemaObject>
-      | undefined;
+    const specParams = (operation.spec?.parameters || []) as OpenAPIV3.ParameterObject[];
 
     const resultParams = specParams.map<OperationParameterMetadata>((specParam) => {
-      const result = { ...specParam } as OperationParameterMetadata;
+      const result = { ...specParam } as unknown as OperationParameterMetadata;
+
       if ('schema' in specParam) {
-        result.type = schemaToTypeLabel(specParam.schema);
+        const schema = specParam.schema as OpenAPIV3.NonArraySchemaObject;
+        result.type = schemaToTypeLabel(schema);
+        result.enum = schema.enum;
+        result.defaultValue = schema.default;
       }
       return result;
     });
 
+    Object.values(apiSpec.components?.securitySchemes || {}).forEach(
+      (securityScheme: OpenAPIV3.SecuritySchemeObject) => {
+        if (securityScheme.type !== 'apiKey') {
+          return;
+        }
+
+        resultParams.unshift({
+          name: securityScheme.name,
+          type: 'string',
+          in: securityScheme.in,
+          description: securityScheme.description,
+          required: false,
+          isSecret: true,
+        });
+      }
+    );
+
     return {
       description: operation.spec?.description,
       parameters: resultParams.filter((param) => REQUEST_PARAM_TYPES.includes(param.in)),
-      headers: resultParams.filter((param) => HEADER_PARAM_TYPES.includes(param.in)),
-      body: resolveSchema(bodySchema),
+      headers: uniqBy(
+        resultParams.filter((param) => HEADER_PARAM_TYPES.includes(param.in)),
+        'name'
+      ),
+      body: resolveMediaContent(get(operation.spec, 'requestBody.content') as OpenAPIV3.RequestBodyObject['content']),
     };
   });
 
@@ -109,17 +157,11 @@ export default async function openApiSpecReader(specStr: string): Promise<ApiSpe
           description: headerData.description,
         }));
 
-        const mediaContent = responseData.content || {};
-        const schemaKey = Object.keys(mediaContent)[0];
-        const bodySchema = get(responseData, `content["${schemaKey}"].schema`) as
-          | WithRef<OpenAPIV3.SchemaObject>
-          | undefined;
-
         return {
           code,
           description: responseData.description,
           headers: headers,
-          body: resolveSchema(bodySchema),
+          body: resolveMediaContent(responseData.content),
         };
       }
     );

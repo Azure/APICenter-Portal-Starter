@@ -1,31 +1,35 @@
 {
-    "compilerOptions": {
-        "target": "ESNext",
-        "useDefineForClassFields": true,
-        "lib": ["DOM", "DOM.Iterable", "ESNext"],
-        "module": "ESNext",
-        "skipLibCheck": true,
-        "baseUrl": "./src",
-        "paths": {
-            "@/*": [
-                "./*"
-            ]
-        },
-
-        /* Bundler mode */
-        "moduleResolution": "bundler",
-        "allowImportingTsExtensions": true,
-        "resolveJsonModule": true,
-        "isolatedModules": true,
-        "noEmit": true,
-        "jsx": "react-jsx",
-
-        /* Linting */
-        "noUnusedParameters": true,
-        "noFallthroughCasesInSwitch": true,
-        "noImplicitAny": false,
-        "allowJs": true,
-        "allowSyntheticDefaultImports": true
+  "compilerOptions": {
+    "target": "ESNext",
+    "useDefineForClassFields": true,
+    "lib": [
+      "DOM",
+      "DOM.Iterable",
+      "ESNext"
+    ],
+    "module": "ESNext",
+    "skipLibCheck": true,
+    "baseUrl": "./src",
+    "paths": {
+      "@/*": [
+        "./*"
+      ]
     },
-    "include": ["src"]
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    /* Linting */
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitAny": false,
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true
+  },
+  "include": [
+    "src"
+  ]
 }
