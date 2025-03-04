@@ -40,7 +40,7 @@ function getMediaContentSampleData(type: string, schema: WithRef<OpenAPIV2.Schem
 }
 
 function resolveMediaContent(
-  mediaTypes: string[],
+  mediaTypes: string[] = [],
   schema?: WithRef<OpenAPIV2.SchemaObject>,
   parameters?: OperationParameterMetadata[]
 ): MediaContentMetadata[] {

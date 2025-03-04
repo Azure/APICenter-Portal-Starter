@@ -121,9 +121,13 @@ export function schemaToTypeLabel<T extends WithRef<OpenAPIV2.SchemaObject | Ope
  * Recursively constructs sample data for given schema from example values.
  */
 export function gatherSampleJsonData(
-  schema: WithRef<OpenAPIV2.SchemaObject | OpenAPIV3.SchemaObject>,
+  schema?: WithRef<OpenAPIV2.SchemaObject | OpenAPIV3.SchemaObject>,
   isRequired = false
 ): unknown {
+  if (!schema) {
+    return undefined;
+  }
+
   if (schema.type === 'object') {
     const entries = Object.entries(schema.properties || {})
       .map<[string, unknown]>(([key, propSchema]) => [
