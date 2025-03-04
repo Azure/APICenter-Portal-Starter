@@ -6,17 +6,21 @@ import {
   HttpReqData,
   HttpReqParam,
   HttpTestConsole as HttpApiTestConsole,
+  SyntaxHighlighter,
 } from '@microsoft/api-docs-ui';
 import { Button, Drawer, DrawerBody, DrawerHeader, DrawerHeaderTitle } from '@fluentui/react-components';
 import { Dismiss24Regular } from '@fluentui/react-icons';
 import { ApiSpecReader, OperationMetadata } from '@/types/apiSpec';
 import { ApiDeployment } from '@/types/apiDeployment';
+import useHttpTestRequestController from '@/hooks/useHttpTestRequestController';
 import {
   getFormDataFieldsMetadata,
   getReqBodySupportedFormats,
   getReqDataDefaults,
   getSchemaParamsByLocation,
+  stringifyResponse,
 } from './utils';
+import styles from './HttpTestConsole.module.scss';
 
 interface Props {
   apiSpec: ApiSpecReader;
@@ -30,8 +34,9 @@ const methodsWithoutBody = ['get', 'head'];
 
 export const HttpTestConsole: React.FC<Props> = ({ apiSpec, operation, deployment, isOpen, onClose }) => {
   const defaults = getReqDataDefaults(apiSpec, operation, deployment);
-
   const [reqData, setReqData] = useState<HttpReqData>(defaults);
+
+  const requestController = useHttpTestRequestController();
 
   useEffect(() => {
     setReqData(defaults);
@@ -60,8 +65,29 @@ export const HttpTestConsole: React.FC<Props> = ({ apiSpec, operation, deploymen
     setReqData((prev) => ({ ...prev, body: value }));
   }, []);
 
+  const handleSendClick = useCallback(() => {
+    void requestController.send(HttpApiTestConsole.resolveHttpReqData(reqData, schemaParamsData));
+  }, [reqData, requestController, schemaParamsData]);
+
+  function renderResponse() {
+    if (!requestController.response && !requestController.error) {
+      return null;
+    }
+
+    let content: React.ReactNode = <div className={styles.responseError}>{requestController.error}</div>;
+    if (requestController.response) {
+      content = <SyntaxHighlighter language="http">{stringifyResponse(requestController.response)}</SyntaxHighlighter>;
+    }
+
+    return (
+      <HttpApiTestConsole.Panel name="response" header="HTTP response" isOpenByDefault>
+        {content}
+      </HttpApiTestConsole.Panel>
+    );
+  }
+
   return (
-    <Drawer size="medium" position="end" open={isOpen} onOpenChange={onClose}>
+    <Drawer className={styles.httpTestConsole} size="medium" position="end" open={isOpen} onOpenChange={onClose}>
       <DrawerHeader>
         <DrawerHeaderTitle
           action={<Button appearance="subtle" aria-label="Close" icon={<Dismiss24Regular />} onClick={onClose} />}
@@ -109,7 +135,15 @@ export const HttpTestConsole: React.FC<Props> = ({ apiSpec, operation, deploymen
           )}
 
           <HttpApiTestConsole.RequestPreview name="request" reqData={reqData} schemas={schemaParamsData} />
+
+          {renderResponse()}
         </HttpApiTestConsole>
+
+        <div className={styles.sendBtnWrapper}>
+          <Button appearance="primary" disabledFocusable={requestController.isLoading} onClick={handleSendClick}>
+            {requestController.isLoading ? 'Sending' : 'Send'}
+          </Button>
+        </div>
       </DrawerBody>
     </Drawer>
   );

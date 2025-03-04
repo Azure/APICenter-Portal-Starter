@@ -1,9 +1,11 @@
 import memoizee from 'memoizee';
 import { groupBy, uniq, uniqBy } from 'lodash';
+import xmlFormat from 'xml-formatter';
 import { HttpBodyFormats, HttpParamSchemasByLocation, HttpReqData } from '@microsoft/api-docs-ui';
 import { ApiSpecReader, OperationMetadata, OperationParameterMetadata } from '@/types/apiSpec';
 import { resolveOpUrlTemplate } from '@/utils/apiOperations';
 import { ApiDeployment } from '@/types/apiDeployment';
+import useHttpTestRequestController from '@/hooks/useHttpTestRequestController';
 
 export const getFormDataFieldsMetadata = memoizee(
   (apiSpec: ApiSpecReader, operation: OperationMetadata): OperationParameterMetadata[] => {
@@ -112,5 +114,30 @@ export const getSchemaParamsByLocation = memoizee(
       headers: uniqBy((groupedParams.header || []).concat(DEFAULT_HEADER_PARAMS), 'name'),
       urlParams: groupedParams.path || [],
     };
+  }
+);
+
+export const stringifyResponse = memoizee(
+  (response: ReturnType<typeof useHttpTestRequestController>['response']): string | null => {
+    if (!response) {
+      return null;
+    }
+
+    const headersString = Object.entries(response.headers)
+      .map(([name, value]) => `${name}: ${value}`)
+      .join('\n');
+
+    const contentType = response.headers['Content-Type'];
+    let formatedBody = response.body.toString();
+
+    if (contentType?.includes('json')) {
+      try {
+        formatedBody = JSON.stringify(JSON.parse(response.body.toString()), null, 2);
+      } catch {}
+    } else if (contentType?.includes('xml')) {
+      formatedBody = xmlFormat(response.body.toString());
+    }
+
+    return [`HTTP/1.1 ${response.statusCode} ${response.statusText}`, headersString, formatedBody].join('\n\n');
   }
 );

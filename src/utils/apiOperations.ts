@@ -12,5 +12,5 @@ export function resolveOpUrlTemplate(
 ): string {
   const components = [deployment?.server.runtimeUri[0] || '', apiSpec.getBaseUrl(), operation?.urlTemplate || ''];
 
-  return components.join('/').replace(/\/+/g, '/');
+  return components.join('/').replace(/\/+/g, '/').replace(':\/', '://');
 }

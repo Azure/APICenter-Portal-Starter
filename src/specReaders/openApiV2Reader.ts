@@ -2,7 +2,7 @@
 import { OpenAPIV2 } from 'openapi-types';
 import * as yaml from 'yaml';
 import memoize from 'memoizee';
-import { sortBy } from 'lodash';
+import { sortBy, uniqBy } from 'lodash';
 import {
   ApiSpecReader,
   ApiSpecTypes,
@@ -162,7 +162,10 @@ export default async function openApiSpecReader(specStr: string): Promise<ApiSpe
     return {
       description: operation.spec?.description,
       parameters,
-      headers: resultParams.filter((param) => HEADER_PARAM_TYPES.includes(param.in)),
+      headers: uniqBy(
+        resultParams.filter((param) => HEADER_PARAM_TYPES.includes(param.in)),
+        'name'
+      ),
       body: resolveMediaContent(operation.spec?.consumes || apiSpec.consumes, bodyParam?.schema, parameters),
     };
   });
