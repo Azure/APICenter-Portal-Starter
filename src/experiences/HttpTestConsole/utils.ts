@@ -19,7 +19,7 @@ export const getFormDataFieldsMetadata = memoizee(
 export const getReqBodySupportedFormats = memoizee(
   (apiSpec: ApiSpecReader, operation: OperationMetadata): HttpBodyFormats[] => {
     const metadata = apiSpec.getRequestMetadata(operation.name);
-    return uniq(
+    const result = uniq(
       metadata.body.map((b) => {
         switch (b.type) {
           case 'application/octet-stream':
@@ -33,6 +33,11 @@ export const getReqBodySupportedFormats = memoizee(
         }
       })
     );
+
+    if (!result.length) {
+      return [HttpBodyFormats.Raw];
+    }
+    return result;
   }
 );
 

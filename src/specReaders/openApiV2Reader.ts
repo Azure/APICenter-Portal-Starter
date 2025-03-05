@@ -130,6 +130,8 @@ export default async function openApiSpecReader(specStr: string): Promise<ApiSpe
     const resultParams = specParams.map<OperationParameterMetadata>((specParam) => {
       const result = { ...specParam } as OperationParameterMetadata;
       result.fieldType = v2ParamMetadataToFieldType(specParam);
+      result.enum = specParam.enum;
+      result.defaultValue = specParam.default;
 
       if (specParam.schema) {
         result.type = schemaToTypeLabel(specParam.schema);

@@ -1,7 +1,8 @@
 import { Buffer } from 'buffer';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { ResolvedHttpReqData } from '@microsoft/api-docs-ui';
 import { HttpStatusCodes } from '@/constants/HttpStatusCodes';
+import { OperationMetadata } from '@/types/apiSpec';
 
 interface ResponseType {
   headers: Record<string, string>;
@@ -20,10 +21,16 @@ interface ReturnType {
 /**
  * A hook to send HTTP requests from HTTP test console and handle the response.
  */
-export default function useHttpTestRequestController(): ReturnType {
+export default function useHttpTestRequestController(operation?: OperationMetadata): ReturnType {
   const [response, setResponse] = useState<ResponseType>(undefined);
   const [error, setError] = useState<string>(undefined);
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    setResponse(undefined);
+    setError(undefined);
+    setIsLoading(false);
+  }, [operation]);
 
   const send = useCallback(
     async (reqData: ResolvedHttpReqData) => {

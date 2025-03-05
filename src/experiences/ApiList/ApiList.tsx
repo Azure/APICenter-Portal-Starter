@@ -59,7 +59,7 @@ export const ApiList: React.FC = () => {
       {adaptedApiList.map((api) => (
         <InfoTable.Row key={api.name}>
           <InfoTable.Cell>
-            <Link {...apiLinkPropsProvider(api)}>{api.name}</Link>
+            <Link {...apiLinkPropsProvider(api)}>{api.title}</Link>
           </InfoTable.Cell>
           <InfoTable.Cell>
             <MarkdownRenderer markdown={api.description} maxLength={120} />

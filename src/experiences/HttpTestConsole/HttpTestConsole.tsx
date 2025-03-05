@@ -36,7 +36,7 @@ export const HttpTestConsole: React.FC<Props> = ({ apiSpec, operation, deploymen
   const defaults = getReqDataDefaults(apiSpec, operation, deployment);
   const [reqData, setReqData] = useState<HttpReqData>(defaults);
 
-  const requestController = useHttpTestRequestController();
+  const requestController = useHttpTestRequestController(operation);
 
   useEffect(() => {
     setReqData(defaults);
@@ -100,6 +100,7 @@ export const HttpTestConsole: React.FC<Props> = ({ apiSpec, operation, deploymen
           <HttpApiTestConsole.ParamsListForm
             name="urlParams"
             title="URL parameters"
+            addBtnLabel="Add parameter"
             params={schemaParamsData.urlParams}
             value={reqData.urlParams}
             isStrictSchema
@@ -109,6 +110,7 @@ export const HttpTestConsole: React.FC<Props> = ({ apiSpec, operation, deploymen
           <HttpApiTestConsole.ParamsListForm
             name="query"
             title="Query"
+            addBtnLabel="Add parameter"
             value={reqData.query}
             params={schemaParamsData.query}
             onChange={handleFormParamsListChange}
@@ -117,6 +119,7 @@ export const HttpTestConsole: React.FC<Props> = ({ apiSpec, operation, deploymen
           <HttpApiTestConsole.ParamsListForm
             name="headers"
             title="Headers"
+            addBtnLabel="Add header"
             value={reqData.headers}
             params={schemaParamsData.headers}
             onChange={handleFormParamsListChange}
@@ -134,7 +137,12 @@ export const HttpTestConsole: React.FC<Props> = ({ apiSpec, operation, deploymen
             </HttpApiTestConsole.BodyForm>
           )}
 
-          <HttpApiTestConsole.RequestPreview name="request" reqData={reqData} schemas={schemaParamsData} />
+          <HttpApiTestConsole.RequestPreview
+            name="request"
+            title="HTTP request"
+            reqData={reqData}
+            schemas={schemaParamsData}
+          />
 
           {renderResponse()}
         </HttpApiTestConsole>

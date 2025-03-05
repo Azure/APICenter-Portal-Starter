@@ -7,7 +7,7 @@ import './globals.scss';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <FluentProvider theme={webLightTheme}>
+    <FluentProvider theme={webLightTheme} applyStylesToPortals>
       <RootProvider
         services={
           {
