@@ -18,7 +18,7 @@ export const Home: React.FC = () => {
   const isAccessDenied = useRecoilValue(isAccessDeniedAtom);
 
   const nestedRoute = useOutlet();
-  if (!nestedRoute) setDocumentTitle('API Center portal');
+  if (!nestedRoute) setDocumentTitle('API portal (preview)');
 
   function renderApiList() {
     if (!isAuthenticated) {
@@ -48,7 +48,7 @@ export const Home: React.FC = () => {
       <Outlet />
 
       <div className={styles.searchPanel}>
-        <h1>API Center portal</h1>
+        <h1>API portal (preview)</h1>
 
         <ApiSearchBox />
       </div>
