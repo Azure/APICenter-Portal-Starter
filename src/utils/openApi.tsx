@@ -233,5 +233,6 @@ export function resolveSchema(
       schema: JSON.stringify(schema, null, 2),
       language: 'json',
     },
+    isBinary: ['binary', 'file'].includes(schema.format),
   };
 }

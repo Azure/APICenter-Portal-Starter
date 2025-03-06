@@ -20,17 +20,16 @@ export const getReqBodySupportedFormats = memoizee(
   (apiSpec: ApiSpecReader, operation: OperationMetadata): HttpBodyFormats[] => {
     const metadata = apiSpec.getRequestMetadata(operation.name);
     const result = uniq(
-      metadata.body.map((b) => {
-        switch (b.type) {
-          case 'application/octet-stream':
-            return HttpBodyFormats.Binary;
-
-          case 'multipart/form-data':
-            return HttpBodyFormats.FormData;
-
-          default:
-            return HttpBodyFormats.Raw;
+      metadata.body.map((body) => {
+        if (body.type === 'multipart/form-data') {
+          return HttpBodyFormats.FormData;
         }
+
+        if (body.schema.isBinary) {
+          return HttpBodyFormats.Binary;
+        }
+
+        return HttpBodyFormats.Raw;
       })
     );
 

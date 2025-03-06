@@ -30,6 +30,7 @@ export interface SchemaMetadata {
   properties?: OperationParameterMetadata[];
   rawSchema?: RawSchemaEntry;
   isEnum?: boolean;
+  isBinary?: boolean;
 }
 
 export interface SampleDataEntry {
