@@ -1,0 +1,179 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`should render an access denied message if user does not have access to the portal 1`] = `
+<body>
+  <div>
+    <div
+      class="_home_afbc5c"
+    >
+      <div
+        class="_searchPanel_afbc5c"
+      >
+        <h1>
+          API portal (preview)
+        </h1>
+        <api-search-box />
+      </div>
+      <section
+        class="_content_afbc5c"
+      >
+        <div
+          class="_filters_afbc5c"
+        >
+          <h3>
+            Filter by
+          </h3>
+          <api-filters />
+        </div>
+        <div
+          class="_mainContent_afbc5c"
+        >
+          <div
+            class="_infoRow_afbc5c"
+          >
+            <label
+              class="_sort_afbc5c"
+            >
+              <strong>
+                Sort by
+              </strong>
+              <api-list-sorting-select />
+            </label>
+            <api-list-layout-switch />
+          </div>
+          <active-filters-badges
+            classname="_activeFilters_afbc5c"
+          />
+          <div>
+            <div
+              class="_emptyState_afbc5c"
+            >
+              <img
+                alt="Access Denied"
+                src="/src/assets/accessDenied.svg"
+              />
+              You don't have permission to access this developer portal. Please contact this developer portal's administrator for assistance.
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</body>
+`;
+
+exports[`should render correctly in default state 1`] = `
+<body>
+  <div>
+    <div
+      class="_home_afbc5c"
+    >
+      <div
+        class="_searchPanel_afbc5c"
+      >
+        <h1>
+          API portal (preview)
+        </h1>
+        <api-search-box />
+      </div>
+      <section
+        class="_content_afbc5c"
+      >
+        <div
+          class="_filters_afbc5c"
+        >
+          <h3>
+            Filter by
+          </h3>
+          <api-filters />
+        </div>
+        <div
+          class="_mainContent_afbc5c"
+        >
+          <div
+            class="_infoRow_afbc5c"
+          >
+            <label
+              class="_sort_afbc5c"
+            >
+              <strong>
+                Sort by
+              </strong>
+              <api-list-sorting-select />
+            </label>
+            <api-list-layout-switch />
+          </div>
+          <active-filters-badges
+            classname="_activeFilters_afbc5c"
+          />
+          <div>
+            <api-list />
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</body>
+`;
+
+exports[`should render sign in required message if the user is not authenticated 1`] = `
+<body>
+  <div>
+    <div
+      class="_home_afbc5c"
+    >
+      <div
+        class="_searchPanel_afbc5c"
+      >
+        <h1>
+          API portal (preview)
+        </h1>
+        <api-search-box />
+      </div>
+      <section
+        class="_content_afbc5c"
+      >
+        <div
+          class="_filters_afbc5c"
+        >
+          <h3>
+            Filter by
+          </h3>
+          <api-filters />
+        </div>
+        <div
+          class="_mainContent_afbc5c"
+        >
+          <div
+            class="_infoRow_afbc5c"
+          >
+            <label
+              class="_sort_afbc5c"
+            >
+              <strong>
+                Sort by
+              </strong>
+              <api-list-sorting-select />
+            </label>
+            <api-list-layout-switch />
+          </div>
+          <active-filters-badges
+            classname="_activeFilters_afbc5c"
+          />
+          <div>
+            <div
+              class="_emptyState_afbc5c"
+            >
+              <img
+                alt="Sign in required"
+                src="/src/assets/accessDenied.svg"
+              />
+              Sign in or create an account to view APIs.
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</body>
+`;
