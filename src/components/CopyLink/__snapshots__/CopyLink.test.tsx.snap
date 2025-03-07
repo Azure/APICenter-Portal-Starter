@@ -1,0 +1,201 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`should render correctly in default state 1`] = `
+<body>
+  <div>
+    <a
+      aria-describedby="tooltip-r0"
+      class="fui-Link ___1fq7916_1xye54t f2hkw1w f3rmtva f1ewtqcl fyind8e f1k6fduh f1w7gpdv fk6fouc fjoy568 figsok6 f1s184ao f1mk8lai fnbmjn9 f1o700av f1iuv45f f1cmlufx f9n3di6 f1ids18y f1tx3yz7 f1deo86v f1eh06m1 f1iescvh fhgqx19 f1olyrje f1p93eir f1nev41a"
+      href="#"
+      tabindex="0"
+    >
+      Copy
+       
+      <svg
+        aria-hidden="true"
+        class="___12fm75w_v8ls9a0 f1w7gpdv fez10in fg4l7m0"
+        fill="currentColor"
+        height="1em"
+        viewBox="0 0 20 20"
+        width="1em"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M8 2a2 2 0 0 0-2 2v10c0 1.1.9 2 2 2h6a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8ZM7 4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V4ZM4 6a2 2 0 0 1 1-1.73V14.5A2.5 2.5 0 0 0 7.5 17h6.23A2 2 0 0 1 12 18H7.5A3.5 3.5 0 0 1 4 14.5V6Z"
+          fill="currentColor"
+        />
+      </svg>
+    </a>
+    <span
+      hidden=""
+    />
+  </div>
+  <div
+    class="___1uxlrft_djprso0 f1euv43f f15twtuk f1vgc2s3 f1e31b4d f494woh"
+    data-portal-node="true"
+    dir="ltr"
+  >
+    <div
+      class="fui-Tooltip__content ___14jyg13_1ws1mln fjseox f1ewtqcl f132xexn f158kwzp fk6fouc fy9rknc fwrc4pm fokg9q4 ft85np5 f9ggezi f1bzqsji fxugw4r f19n0e5 fxeb0a7"
+      id="tooltip-r0"
+      role="tooltip"
+    >
+      <div
+        class="_tooltip_427554"
+      >
+        <svg
+          aria-hidden="true"
+          class="___12fm75w_v8ls9a0 f1w7gpdv fez10in fg4l7m0"
+          fill="currentColor"
+          height="12"
+          viewBox="0 0 12 12"
+          width="12"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M8.35 5.1a.5.5 0 1 0-.7-.7L5.5 6.54 4.35 5.4a.5.5 0 1 0-.7.7l1.5 1.5c.2.2.5.2.7 0l2.5-2.5ZM6 1a5 5 0 1 0 0 10A5 5 0 0 0 6 1ZM2 6a4 4 0 1 1 8 0 4 4 0 0 1-8 0Z"
+            fill="currentColor"
+          />
+        </svg>
+        Copied to clipboard
+      </div>
+    </div>
+  </div>
+</body>
+`;
+
+exports[`when user clicks on the link > should display a tooltip with copy confirmation 1`] = `
+<body>
+  <div>
+    <a
+      aria-describedby="tooltip-r2"
+      class="fui-Link ___1fq7916_1xye54t f2hkw1w f3rmtva f1ewtqcl fyind8e f1k6fduh f1w7gpdv fk6fouc fjoy568 figsok6 f1s184ao f1mk8lai fnbmjn9 f1o700av f1iuv45f f1cmlufx f9n3di6 f1ids18y f1tx3yz7 f1deo86v f1eh06m1 f1iescvh fhgqx19 f1olyrje f1p93eir f1nev41a"
+      href="#"
+      tabindex="0"
+    >
+      Copy
+       
+      <svg
+        aria-hidden="true"
+        class="___12fm75w_v8ls9a0 f1w7gpdv fez10in fg4l7m0"
+        fill="currentColor"
+        height="1em"
+        viewBox="0 0 20 20"
+        width="1em"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M8 2a2 2 0 0 0-2 2v10c0 1.1.9 2 2 2h6a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8ZM7 4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V4ZM4 6a2 2 0 0 1 1-1.73V14.5A2.5 2.5 0 0 0 7.5 17h6.23A2 2 0 0 1 12 18H7.5A3.5 3.5 0 0 1 4 14.5V6Z"
+          fill="currentColor"
+        />
+      </svg>
+    </a>
+    <span
+      hidden=""
+    />
+  </div>
+  <div
+    class="___1uxlrft_djprso0 f1euv43f f15twtuk f1vgc2s3 f1e31b4d f494woh"
+    data-portal-node="true"
+    dir="ltr"
+  >
+    <div
+      class="fui-Tooltip__content ___1iilip3_omhya70 ftgm304 f1ewtqcl f132xexn f158kwzp fk6fouc fy9rknc fwrc4pm fokg9q4 ft85np5 f9ggezi f1bzqsji fxugw4r f19n0e5 fxeb0a7"
+      data-popper-escaped=""
+      data-popper-placement="bottom"
+      data-popper-reference-hidden=""
+      id="tooltip-r2"
+      role="tooltip"
+      style="position: absolute; left: 0px; top: 0px; margin: 0px; transform: translate(0px, 4px);"
+    >
+      <div
+        class="_tooltip_427554"
+      >
+        <svg
+          aria-hidden="true"
+          class="___12fm75w_v8ls9a0 f1w7gpdv fez10in fg4l7m0"
+          fill="currentColor"
+          height="12"
+          viewBox="0 0 12 12"
+          width="12"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M8.35 5.1a.5.5 0 1 0-.7-.7L5.5 6.54 4.35 5.4a.5.5 0 1 0-.7.7l1.5 1.5c.2.2.5.2.7 0l2.5-2.5ZM6 1a5 5 0 1 0 0 10A5 5 0 0 0 6 1ZM2 6a4 4 0 1 1 8 0 4 4 0 0 1-8 0Z"
+            fill="currentColor"
+          />
+        </svg>
+        Copied to clipboard
+      </div>
+    </div>
+  </div>
+</body>
+`;
+
+exports[`when user clicks on the link > should hide the tooltip after 2 seconds 1`] = `
+<body>
+  <div>
+    <a
+      aria-describedby="tooltip-r3"
+      class="fui-Link ___1fq7916_1xye54t f2hkw1w f3rmtva f1ewtqcl fyind8e f1k6fduh f1w7gpdv fk6fouc fjoy568 figsok6 f1s184ao f1mk8lai fnbmjn9 f1o700av f1iuv45f f1cmlufx f9n3di6 f1ids18y f1tx3yz7 f1deo86v f1eh06m1 f1iescvh fhgqx19 f1olyrje f1p93eir f1nev41a"
+      href="#"
+      tabindex="0"
+    >
+      Copy
+       
+      <svg
+        aria-hidden="true"
+        class="___12fm75w_v8ls9a0 f1w7gpdv fez10in fg4l7m0"
+        fill="currentColor"
+        height="1em"
+        viewBox="0 0 20 20"
+        width="1em"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M8 2a2 2 0 0 0-2 2v10c0 1.1.9 2 2 2h6a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8ZM7 4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V4ZM4 6a2 2 0 0 1 1-1.73V14.5A2.5 2.5 0 0 0 7.5 17h6.23A2 2 0 0 1 12 18H7.5A3.5 3.5 0 0 1 4 14.5V6Z"
+          fill="currentColor"
+        />
+      </svg>
+    </a>
+    <span
+      hidden=""
+    />
+  </div>
+  <div
+    class="___1uxlrft_djprso0 f1euv43f f15twtuk f1vgc2s3 f1e31b4d f494woh"
+    data-portal-node="true"
+    dir="ltr"
+  >
+    <div
+      class="fui-Tooltip__content ___1iilip3_omhya70 ftgm304 f1ewtqcl f132xexn f158kwzp fk6fouc fy9rknc fwrc4pm fokg9q4 ft85np5 f9ggezi f1bzqsji fxugw4r f19n0e5 fxeb0a7"
+      data-popper-escaped=""
+      data-popper-placement="bottom"
+      data-popper-reference-hidden=""
+      id="tooltip-r3"
+      role="tooltip"
+      style="position: absolute; left: 0px; top: 0px; margin: 0px; transform: translate(0px, 4px);"
+    >
+      <div
+        class="_tooltip_427554"
+      >
+        <svg
+          aria-hidden="true"
+          class="___12fm75w_v8ls9a0 f1w7gpdv fez10in fg4l7m0"
+          fill="currentColor"
+          height="12"
+          viewBox="0 0 12 12"
+          width="12"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M8.35 5.1a.5.5 0 1 0-.7-.7L5.5 6.54 4.35 5.4a.5.5 0 1 0-.7.7l1.5 1.5c.2.2.5.2.7 0l2.5-2.5ZM6 1a5 5 0 1 0 0 10A5 5 0 0 0 6 1ZM2 6a4 4 0 1 1 8 0 4 4 0 0 1-8 0Z"
+            fill="currentColor"
+          />
+        </svg>
+        Copied to clipboard
+      </div>
+    </div>
+  </div>
+</body>
+`;

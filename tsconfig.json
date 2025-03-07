@@ -15,6 +15,7 @@
         "./*"
       ]
     },
+    "types": ["vitest/globals"],
     /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,

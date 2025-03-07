@@ -25,7 +25,7 @@ export const getReqBodySupportedFormats = memoizee(
           return HttpBodyFormats.FormData;
         }
 
-        if (body.schema.isBinary) {
+        if (body.schema?.isBinary) {
           return HttpBodyFormats.Binary;
         }
 
