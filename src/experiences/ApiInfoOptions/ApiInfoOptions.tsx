@@ -13,6 +13,7 @@ import LocationsService from '@/services/LocationsService';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import CopyLink from '@/components/CopyLink';
 import styles from './ApiInfoOptions.module.scss';
+import config from '@/config';
 
 interface Props {
   api: ApiMetadata;
@@ -40,7 +41,7 @@ export const ApiInfoOptions: React.FC<Props> = ({ api, apiVersion, apiDefinition
   const devPortalUri = environment.data?.onboarding?.developerPortalUri?.[0];
 
   const handleOpenInVsCodeClick = useCallback(() => {
-    window.open(`vscode:extension/apidev.azure-api-center`);
+    window.open(`vscode://apidev.azure-api-center?clientId=${config.authentication.clientId}&tenantId=${config.authentication.tenantId}&runtimeUrl=${config.dataApiHostName}`);
   }, []);
 
   function renderContent() {
