@@ -144,21 +144,6 @@ export default async function openApiSpecReader(specStr: string): Promise<ApiSpe
       | OpenAPIV2.InBodyParameterObject
       | undefined;
 
-    Object.values(apiSpec.securityDefinitions || {}).forEach((securityScheme: OpenAPIV2.SecuritySchemeObject) => {
-      if (securityScheme.type !== 'apiKey') {
-        return;
-      }
-
-      resultParams.unshift({
-        name: securityScheme.name,
-        type: 'string',
-        in: securityScheme.in,
-        description: securityScheme.description,
-        required: false,
-        isSecret: true,
-      });
-    });
-
     const parameters = resultParams.filter((param) => REQUEST_PARAM_TYPES.includes(param.in));
 
     return {

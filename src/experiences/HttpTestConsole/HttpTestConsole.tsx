@@ -10,19 +10,26 @@ import {
 } from '@microsoft/api-docs-ui';
 import { Button, Drawer, DrawerBody, DrawerHeader, DrawerHeaderTitle } from '@fluentui/react-components';
 import { Dismiss24Regular } from '@fluentui/react-icons';
+import { uniqBy } from 'lodash';
 import { ApiSpecReader, OperationMetadata } from '@/types/apiSpec';
 import { ApiDeployment } from '@/types/apiDeployment';
 import useHttpTestRequestController from '@/hooks/useHttpTestRequestController';
+import { ApiAuthCredentials } from '@/types/apiAuth';
+import useApiAuthorization from '@/hooks/useApiAuthorization';
 import {
   getFormDataFieldsMetadata,
   getReqBodySupportedFormats,
   getReqDataDefaults,
   getSchemaParamsByLocation,
+  inToParamsCollectionName,
   stringifyResponse,
 } from './utils';
+import TestConsoleAuth from './TestConsoleAuth';
 import styles from './HttpTestConsole.module.scss';
 
 interface Props {
+  apiName: string;
+  versionName: string;
   apiSpec: ApiSpecReader;
   operation?: OperationMetadata;
   deployment?: ApiDeployment;
@@ -32,9 +39,20 @@ interface Props {
 
 const methodsWithoutBody = ['get', 'head'];
 
-export const HttpTestConsole: React.FC<Props> = ({ apiSpec, operation, deployment, isOpen, onClose }) => {
+export const HttpTestConsole: React.FC<Props> = ({
+  apiName,
+  versionName,
+  apiSpec,
+  operation,
+  deployment,
+  isOpen,
+  onClose,
+}) => {
   const defaults = getReqDataDefaults(apiSpec, operation, deployment);
+  const [authCredentials, setAuthCredentials] = useState<ApiAuthCredentials | undefined>();
   const [reqData, setReqData] = useState<HttpReqData>(defaults);
+
+  const apiAuth = useApiAuthorization({ apiName, versionName });
 
   const requestController = useHttpTestRequestController(operation);
 
@@ -42,8 +60,52 @@ export const HttpTestConsole: React.FC<Props> = ({ apiSpec, operation, deploymen
     setReqData(defaults);
   }, [defaults]);
 
+  const reqDataWithAuth = useMemo(() => {
+    if (!authCredentials) {
+      return reqData;
+    }
+
+    const collection = inToParamsCollectionName(authCredentials.in);
+
+    return {
+      ...reqData,
+      [collection]: [
+        {
+          name: authCredentials.name,
+          value: authCredentials.value,
+        } as HttpReqParam,
+      ].concat(reqData[collection] || []),
+    };
+  }, [authCredentials, reqData]);
+
+  const schemaParamsData = useMemo(() => {
+    const result = getSchemaParamsByLocation(apiSpec, operation);
+    if (!authCredentials) {
+      return result;
+    }
+
+    const collection = inToParamsCollectionName(authCredentials.in);
+
+    return {
+      ...result,
+      [collection]: uniqBy(
+        [
+          {
+            name: authCredentials.name,
+            required: true,
+            isSecret: true,
+            readOnly: true,
+            schema: {
+              type: 'string',
+            },
+          },
+        ].concat(result[collection] || []),
+        'name'
+      ),
+    };
+  }, [apiSpec, authCredentials, operation]);
+
   const supportedBodyFormats = getReqBodySupportedFormats(apiSpec, operation);
-  const schemaParamsData = getSchemaParamsByLocation(apiSpec, operation);
   const canHaveBody = !methodsWithoutBody.includes(operation?.method);
 
   const rawBodyDataSamples = useMemo(() => {
@@ -57,17 +119,27 @@ export const HttpTestConsole: React.FC<Props> = ({ apiSpec, operation, deploymen
       }));
   }, [apiSpec, operation]);
 
-  const handleFormParamsListChange = useCallback((name: keyof Omit<HttpReqData, 'body'>, value: HttpReqParam[]) => {
-    setReqData((prev) => ({ ...prev, [name]: value }));
-  }, []);
+  const handleFormParamsListChange = useCallback(
+    (name: keyof Omit<HttpReqData, 'body'>, value: HttpReqParam[]) => {
+      let resolvedValue = value;
+
+      // Remove synthetic auth param on change to avoid duplication
+      if (authCredentials && inToParamsCollectionName(authCredentials.in) === name) {
+        // Based on assumption that auth param is always first
+        resolvedValue = value.slice(1);
+      }
+      setReqData((prev) => ({ ...prev, [name]: resolvedValue }));
+    },
+    [authCredentials]
+  );
 
   const handleBodyChange = useCallback((value: HttpReqBodyData) => {
     setReqData((prev) => ({ ...prev, body: value }));
   }, []);
 
   const handleSendClick = useCallback(() => {
-    void requestController.send(HttpApiTestConsole.resolveHttpReqData(reqData, schemaParamsData));
-  }, [reqData, requestController, schemaParamsData]);
+    void requestController.send(HttpApiTestConsole.resolveHttpReqData(reqDataWithAuth, schemaParamsData));
+  }, [reqDataWithAuth, requestController, schemaParamsData]);
 
   function renderResponse() {
     if (!requestController.response && !requestController.error) {
@@ -97,12 +169,17 @@ export const HttpTestConsole: React.FC<Props> = ({ apiSpec, operation, deploymen
       </DrawerHeader>
       <DrawerBody>
         <HttpApiTestConsole>
+          {!apiAuth.isLoading && !!apiAuth.schemeOptions?.length && (
+            <HttpApiTestConsole.Panel name="auth" header="Authorization" isOpenByDefault>
+              <TestConsoleAuth apiName={apiName} versionName={versionName} onChange={setAuthCredentials} />
+            </HttpApiTestConsole.Panel>
+          )}
           <HttpApiTestConsole.ParamsListForm
             name="urlParams"
             title="URL parameters"
             addBtnLabel="Add parameter"
             params={schemaParamsData.urlParams}
-            value={reqData.urlParams}
+            value={reqDataWithAuth.urlParams}
             isStrictSchema
             onChange={handleFormParamsListChange}
           />
@@ -111,7 +188,7 @@ export const HttpTestConsole: React.FC<Props> = ({ apiSpec, operation, deploymen
             name="query"
             title="Query"
             addBtnLabel="Add parameter"
-            value={reqData.query}
+            value={reqDataWithAuth.query}
             params={schemaParamsData.query}
             onChange={handleFormParamsListChange}
           />
@@ -120,13 +197,13 @@ export const HttpTestConsole: React.FC<Props> = ({ apiSpec, operation, deploymen
             name="headers"
             title="Headers"
             addBtnLabel="Add header"
-            value={reqData.headers}
+            value={reqDataWithAuth.headers}
             params={schemaParamsData.headers}
             onChange={handleFormParamsListChange}
           />
 
           {canHaveBody && (
-            <HttpApiTestConsole.BodyForm name="body" value={reqData.body} onChange={handleBodyChange}>
+            <HttpApiTestConsole.BodyForm name="body" value={reqDataWithAuth.body} onChange={handleBodyChange}>
               {supportedBodyFormats.includes(HttpBodyFormats.Raw) && (
                 <HttpApiTestConsole.BodyForm.Raw dataSamples={rawBodyDataSamples} />
               )}
@@ -140,7 +217,7 @@ export const HttpTestConsole: React.FC<Props> = ({ apiSpec, operation, deploymen
           <HttpApiTestConsole.RequestPreview
             name="request"
             title="HTTP request"
-            reqData={reqData}
+            reqData={reqDataWithAuth}
             schemas={schemaParamsData}
           />
 

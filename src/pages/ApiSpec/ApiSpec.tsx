@@ -97,6 +97,8 @@ export const ApiSpec: React.FC = () => {
 
         <div className={styles.details}>
           <ApiOperationDetails
+            apiName={apiName}
+            versionName={versionName}
             deployment={deployment}
             apiSpec={apiSpec}
             operation={apiSpec.getOperation(selectedOperation.name)}

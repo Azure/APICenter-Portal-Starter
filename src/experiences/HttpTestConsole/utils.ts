@@ -7,6 +7,13 @@ import { resolveOpUrlTemplate } from '@/utils/apiOperations';
 import { ApiDeployment } from '@/types/apiDeployment';
 import useHttpTestRequestController from '@/hooks/useHttpTestRequestController';
 
+export function inToParamsCollectionName(inValue: string): string {
+  if (inValue === 'header') {
+    return 'headers';
+  }
+  return inValue;
+}
+
 export const getFormDataFieldsMetadata = memoizee(
   (apiSpec: ApiSpecReader, operation: OperationMetadata): OperationParameterMetadata[] => {
     const requestMetadata = apiSpec.getRequestMetadata(operation.name);
