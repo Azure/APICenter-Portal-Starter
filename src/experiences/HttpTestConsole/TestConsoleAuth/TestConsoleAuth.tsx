@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Field, Input, Select, Spinner } from '@fluentui/react-components';
+import { Field, Select, Spinner } from '@fluentui/react-components';
 import { ApiAuthCredentials, ApiAuthType } from '@/types/apiAuth';
 import useApiAuthorization from '@/hooks/useApiAuthorization';
 import styles from './TestConsoleAuth.module.scss';
