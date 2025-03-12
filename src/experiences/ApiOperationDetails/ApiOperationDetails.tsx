@@ -9,6 +9,8 @@ import HttpTestConsole from '@/experiences/HttpTestConsole';
 import styles from './ApiOperationDetails.module.scss';
 
 interface Props {
+  apiName: string;
+  versionName: string;
   apiSpec: ApiSpecReader;
   operation?: OperationMetadata;
   deployment?: ApiDeployment;
@@ -16,7 +18,7 @@ interface Props {
 
 const SPEC_TYPES_WITH_CONSOLE = [ApiSpecTypes.OpenApiV2, ApiSpecTypes.OpenApiV3];
 
-export const ApiOperationDetails: React.FC<Props> = ({ apiSpec, operation, deployment }) => {
+export const ApiOperationDetails: React.FC<Props> = ({ apiName, versionName, apiSpec, operation, deployment }) => {
   const [isTestConsoleOpen, setIsTestConsoleOpen] = useState(false);
 
   const handleTryApiClick = useCallback(() => {
@@ -136,6 +138,8 @@ export const ApiOperationDetails: React.FC<Props> = ({ apiSpec, operation, deplo
         <>
           <Button onClick={handleTryApiClick}>Try this API</Button>
           <HttpTestConsole
+            apiName={apiName}
+            versionName={versionName}
             apiSpec={apiSpec}
             operation={operation}
             deployment={deployment}

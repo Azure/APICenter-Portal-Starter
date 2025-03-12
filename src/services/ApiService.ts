@@ -8,6 +8,7 @@ import { ApiVersion } from '@/types/apiVersion';
 import { ApiDeployment } from '@/types/apiDeployment';
 import { ApiEnvironment } from '@/types/apiEnvironment';
 import { IApiService } from '@/types/services/IApiService';
+import { ApiAuthScheme, ApiAuthSchemeMetadata } from '@/types/apiAuth';
 
 const ApiService: IApiService = {
   async getApis(search: string, filters: ActiveFilterData[] = []): Promise<ApiMetadata[]> {
@@ -32,23 +33,23 @@ const ApiService: IApiService = {
     return response.value || [];
   },
 
-  async getApi(id: string): Promise<ApiMetadata> {
-    return await HttpService.get<ApiMetadata>(`/apis/${id}`);
+  async getApi(name: string): Promise<ApiMetadata> {
+    return await HttpService.get<ApiMetadata>(`/apis/${name}`);
   },
 
-  async getVersions(apiId: string): Promise<ApiVersion[]> {
-    const response = await HttpService.get<{ value: ApiVersion[] }>(`/apis/${apiId}/versions`);
+  async getVersions(apiName: string): Promise<ApiVersion[]> {
+    const response = await HttpService.get<{ value: ApiVersion[] }>(`/apis/${apiName}/versions`);
     return response.value || [];
   },
 
-  async getDeployments(apiId: string): Promise<ApiDeployment[]> {
-    const response = await HttpService.get<{ value: ApiDeployment[] }>(`/apis/${apiId}/deployments`);
+  async getDeployments(apiName: string): Promise<ApiDeployment[]> {
+    const response = await HttpService.get<{ value: ApiDeployment[] }>(`/apis/${apiName}/deployments`);
     return response.value || [];
   },
 
-  async getDefinitions(apiId: string, version: string): Promise<ApiDefinition[]> {
+  async getDefinitions(apiName: string, version: string): Promise<ApiDefinition[]> {
     const response = await HttpService.get<{ value: ApiDefinition[] }>(
-      `/apis/${apiId}/versions/${version}/definitions`
+      `/apis/${apiName}/versions/${version}/definitions`
     );
     return response.value || [];
   },
@@ -73,6 +74,20 @@ const ApiService: IApiService = {
 
   async getEnvironment(environmentId: string): Promise<ApiEnvironment> {
     return await HttpService.get<ApiEnvironment>(`/environments/${environmentId}`);
+  },
+
+  async getSecurityRequirements(apiName: string, versionName: string): Promise<ApiAuthSchemeMetadata[]> {
+    const response = await HttpService.get<{ value: ApiAuthSchemeMetadata[] }>(
+      `/apis/${apiName}/versions/${versionName}/securityRequirements`
+    );
+
+    return response?.value;
+  },
+
+  async getSecurityCredentials(apiName: string, versionName: string, schemeName: string): Promise<ApiAuthScheme> {
+    return await HttpService.post<ApiAuthScheme>(
+      `/apis/${apiName}/versions/${versionName}/securityRequirements/${schemeName}:getCredentials`
+    );
   },
 };
 

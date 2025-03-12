@@ -58,11 +58,13 @@ export default async function openApiSpecReader(specStr: string): Promise<ApiSpe
     const mutation = qlSchema.getMutationType();
     const subscription = qlSchema.getSubscriptionType();
 
-    return Object.entries({ query, mutation, subscription }).map(([name, type]) => ({
-      name,
-      label: type.name,
-      operations: typeFieldsToOperationsMetadata(name, type.getFields()),
-    }));
+    return Object.entries({ query, mutation, subscription })
+      .filter(([, type]) => !!type)
+      .map(([name, type]) => ({
+        name,
+        label: type.name,
+        operations: typeFieldsToOperationsMetadata(name, type.getFields()),
+      }));
   });
 
   const getOperations = memoize((): Array<OperationMetadata<FieldSpec>> => {

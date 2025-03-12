@@ -6,6 +6,19 @@
 	<link rel="icon" type="image/svg+xml" href="/vite.svg" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<title>API portal (preview)</title>
+  <script type="text/javascript">
+    (() => {
+      const args = new URLSearchParams(window.location.search);
+      const code = args.get('code');
+
+      if (!opener || !code) {
+        return;
+      }
+
+      opener.postMessage({ code: code });
+      self.close();
+    })();
+  </script>
 </head>
 
 <body>
