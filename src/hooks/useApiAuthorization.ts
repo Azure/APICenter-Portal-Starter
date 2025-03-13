@@ -15,21 +15,23 @@ interface ReturnType {
   schemeOptions?: ApiAuthSchemeMetadata[];
   scheme?: ApiAuthScheme;
   credentials?: ApiAuthCredentials;
+  authError?: string;
   isLoading: boolean;
+  authenticateWithOauth: (oauthFlow: string) => Promise<void>;
 }
 
 interface Props {
   apiName: string;
   versionName: string;
-  oauthFlow?: string;
   schemeName?: string;
 }
 
-export default function useApiAuthorization({ apiName, versionName, oauthFlow, schemeName }: Props): ReturnType {
+export default function useApiAuthorization({ apiName, versionName, schemeName }: Props): ReturnType {
   const [schemeOptions, setSchemeOptions] = useState<ApiAuthSchemeMetadata[] | undefined>();
   const [scheme, setScheme] = useState<ApiAuthScheme | undefined>();
   const [credentials, setCredentials] = useState<ApiAuthCredentials | undefined>();
   const [isLoading, setIsLoading] = useState(false);
+  const [authError, setAuthError] = useState<string>(undefined);
 
   const ApiService = useApiService();
   const isAuthenticated = useRecoilValue(isAuthenticatedAtom);
@@ -68,14 +70,35 @@ export default function useApiAuthorization({ apiName, versionName, oauthFlow, s
     }
   }, [apiName, versionName, schemeName, ApiService]);
 
-  const authenticateWithOauth = useCallback(async () => {
-    if (scheme?.securityScheme !== ApiAuthType.oauth2 || !oauthFlow || !OAuthGrantTypes[oauthFlow]) {
-      return;
-    }
+  const authenticateWithOauth = useCallback(
+    async (oauthFlow: string) => {
+      if (isLoading) {
+        return;
+      }
 
-    const token = await OAuthService.authenticate(scheme.oauth2, OAuthGrantTypes[oauthFlow]);
-    setCredentials({ name: 'Authorization', value: token, in: 'header' });
-  }, [oauthFlow, scheme]);
+      if (scheme?.securityScheme !== ApiAuthType.oauth2) {
+        throw new Error('Currently selected scheme is not OAuth2');
+      }
+
+      if (!OAuthGrantTypes[oauthFlow]) {
+        throw new Error(`Unsupported grant type: ${oauthFlow}`);
+      }
+
+      try {
+        setCredentials(undefined);
+        setIsLoading(true);
+        const token = await OAuthService.authenticate(scheme.oauth2, OAuthGrantTypes[oauthFlow]);
+        if (token !== undefined) {
+          setCredentials({ name: 'Authorization', value: token, in: 'header', createdAt: new Date() });
+        }
+      } catch (e) {
+        setAuthError(e.message);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [isLoading, scheme]
+  );
 
   useEffect(() => {
     void fetchSchemeOptions();
@@ -86,17 +109,13 @@ export default function useApiAuthorization({ apiName, versionName, oauthFlow, s
   }, [fetchScheme]);
 
   useEffect(() => {
-    void authenticateWithOauth();
-  }, [authenticateWithOauth]);
-
-  useEffect(() => {
     if (!scheme) {
       setCredentials(undefined);
       return;
     }
 
     if (scheme.securityScheme === ApiAuthType.apiKey) {
-      setCredentials(scheme.apiKey);
+      setCredentials({ ...scheme.apiKey, createdAt: new Date() });
       return;
     }
   }, [scheme]);
@@ -105,6 +124,8 @@ export default function useApiAuthorization({ apiName, versionName, oauthFlow, s
     schemeOptions,
     scheme,
     credentials,
+    authError,
     isLoading,
+    authenticateWithOauth,
   };
 }
