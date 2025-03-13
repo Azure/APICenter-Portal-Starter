@@ -40,6 +40,7 @@ export interface ApiAuthCredentials {
   value: string;
   name: string;
   in: 'header' | 'query';
+  createdAt: Date;
 }
 
 export interface Oauth2Credentials {

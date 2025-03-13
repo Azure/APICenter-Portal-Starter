@@ -37,23 +37,28 @@ function generateRandomString(length: number): string {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function ensurePopupIsClosed(popup: Window, receiveMessage: (event: MessageEvent<any>) => any): void {
-  const checkPopup = setInterval(() => {
-    if (!popup || popup.closed) {
-      clearInterval(checkPopup);
-      window.removeEventListener('message', receiveMessage, false);
-    }
-  }, 1000);
+function ensurePopupIsClosed(popup: Window, receiveMessage: (event: MessageEvent<any>) => any): Promise<void> {
+  return new Promise((resolve) => {
+    const checkPopup = setInterval(() => {
+      if (!popup || popup.closed) {
+        clearInterval(checkPopup);
+        window.removeEventListener('message', receiveMessage, false);
+        resolve();
+      }
+    }, 500);
+  });
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function openAuthPopup(uri: string, listener: (event: MessageEvent<any>) => any): Promise<string> {
-  return new Promise<string>((resolve, reject) => {
+function openAuthPopup(uri: string, listener: (event: MessageEvent<any>) => any): Promise<string | undefined> {
+  return new Promise<string>(async (resolve, reject) => {
     try {
+      let isComplete = false;
       const popup = window.open(uri, '_blank', 'width=400,height=500');
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const receiveMessage = async (event: MessageEvent<any>): Promise<void> => {
+        isComplete = true;
         try {
           const result = await listener(event);
           resolve(result);
@@ -65,7 +70,10 @@ function openAuthPopup(uri: string, listener: (event: MessageEvent<any>) => any)
       };
 
       window.addEventListener('message', receiveMessage, false);
-      ensurePopupIsClosed(popup, receiveMessage);
+      await ensurePopupIsClosed(popup, receiveMessage);
+      if (!isComplete) {
+        resolve(undefined);
+      }
     } catch (error) {
       reject(error);
     }
@@ -74,24 +82,25 @@ function openAuthPopup(uri: string, listener: (event: MessageEvent<any>) => any)
 
 const OAuthService = {
   /** Acquires access token using specified grant flow. */
-  authenticate(credentials: Oauth2Credentials, grantType: string): Promise<string> {
+  authenticate(credentials: Oauth2Credentials, grantType: string): Promise<string | undefined> {
     const backendUrl = window.location.origin;
 
-    switch (grantType) {
-      case OAuthGrantTypes.implicit:
-        return this.authenticateImplicit(backendUrl, credentials);
+    try {
+      switch (grantType) {
+        case OAuthGrantTypes.implicit:
+          return this.authenticateImplicit(backendUrl, credentials);
 
-      case OAuthGrantTypes.authorizationCode:
-      case OAuthGrantTypes.authorizationCodeWithPkce:
-        return this.authenticateCodeWithPkce(backendUrl, credentials);
-
-      default:
-        throw new Error(`Unsupported grant type: ${grantType}`);
+        case OAuthGrantTypes.authorizationCode:
+        case OAuthGrantTypes.authorizationCodeWithPkce:
+          return this.authenticateCodeWithPkce(backendUrl, credentials);
+      }
+    } catch {
+      throw new Error('Authentication failed');
     }
   },
 
   /** Acquires access token using "implicit" grant flow. */
-  authenticateImplicit(backendUrl: string, credentials: Oauth2Credentials): Promise<string> {
+  authenticateImplicit(backendUrl: string, credentials: Oauth2Credentials): Promise<string | undefined> {
     const query = {
       state: uuid.v4(),
     };
@@ -129,7 +138,7 @@ const OAuthService = {
     return openAuthPopup(oauthClient.token.getUri(), listener);
   },
 
-  async authenticateCodeWithPkce(backendUrl: string, credentials: Oauth2Credentials): Promise<string> {
+  async authenticateCodeWithPkce(backendUrl: string, credentials: Oauth2Credentials): Promise<string | undefined> {
     const codeVerifier = generateRandomString(64);
     const challengeMethod = crypto.subtle ? 'S256' : 'plain';
 
@@ -150,8 +159,7 @@ const OAuthService = {
       const authorizationCode = event.data['code'];
 
       if (!authorizationCode) {
-        alert('Unable to authenticate due to internal error.');
-        return;
+        throw new Error('Authorization code is missing');
       }
 
       const body = new URLSearchParams({
@@ -171,8 +179,7 @@ const OAuthService = {
       });
 
       if (response.status === 400) {
-        alert(await response.text());
-        return;
+        throw new Error(await response.text());
       }
 
       const tokenResponse = (await response.json()) as OAuthTokenResponse;
