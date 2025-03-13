@@ -89,7 +89,7 @@ export const TestConsoleAuth: React.FC<Props> = ({ apiName, versionName, onChang
     return (
       <Stack tokens={{ childrenGap: 10 }} horizontalAlign="start" verticalAlign="center" horizontal>
         <Button icon={icon} onClick={handleAuthBtnClick}>
-          Authenticate
+          {apiAuth.isLoading ? 'Authenticating' : 'Authenticate'}
         </Button>
         {status}
       </Stack>
