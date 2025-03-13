@@ -72,7 +72,6 @@ function openAuthPopup(uri: string, listener: (event: MessageEvent<any>) => any)
       window.addEventListener('message', receiveMessage, false);
       await ensurePopupIsClosed(popup, receiveMessage);
       if (!isComplete) {
-        console.log(isComplete);
         resolve(undefined);
       }
     } catch (error) {
