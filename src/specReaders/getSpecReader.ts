@@ -6,6 +6,7 @@ import mcpReader from '@/specReaders/mcpReader';
 import { ApiDefinition } from '@/types/apiDefinition';
 
 function getReaderFactory(definition: ApiDefinition): ApiSpecReaderFactory {
+  // TODO: change spec name to the correct one for MCP
   if (definition.specification?.name === 'mcp') {
     return mcpReader;
   }

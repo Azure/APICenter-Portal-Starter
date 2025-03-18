@@ -5,9 +5,9 @@ const RPC_IDS = {
   getCapability: 'get-capability',
 };
 
-// TODO: make it production-ready
 export function collectMcpSpec(serverUri: string): Promise<string> {
   return new Promise((resolve) => {
+    // TODO: only SSE is supported right now. Do we need to support other protocols?
     const sse = new EventSource(`${serverUri}/sse`);
 
     const pendingMessages = new Set<string>();

@@ -28,10 +28,12 @@ export default function useApiSpec(definitionId: ApiDefinitionId): ReturnType {
     try {
       setIsLoading(true);
       const definition = await ApiService.getDefinition(definitionId);
+      // TODO: use real MCP server URL (probably need to add selected deployment as an argument for this hook)
       const spec = await collectMcpSpec(MCP_SERVER_URL);
       setSpec(spec);
       setReader(
         await getSpecReader(spec, {
+          // TODO: currently it is hardcoding mcp over whatever definition it is, remove override once we have real MCP definition
           ...definition,
           specification: {
             name: 'mcp',
