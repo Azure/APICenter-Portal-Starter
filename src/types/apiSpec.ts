@@ -62,6 +62,7 @@ export enum ApiSpecTypes {
   OpenApiV2 = 'OpenApiV2',
   OpenApiV3 = 'OpenApiV3',
   GraphQL = 'GraphQL',
+  MCP = 'MCP',
 }
 
 /**

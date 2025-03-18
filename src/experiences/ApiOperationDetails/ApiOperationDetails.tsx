@@ -106,7 +106,7 @@ export const ApiOperationDetails: React.FC<Props> = ({ apiName, versionName, api
         <h3>Definitions</h3>
         {definitions.map((definition) => (
           <ParamSchemaDefinition
-            key={definition.$ref}
+            key={definition.$ref || definition.refLabel}
             title="Body"
             schema={definition}
             hiddenColumns={!definition.isEnum ? ['in', 'readOnly'] : ['in', 'type', 'readOnly', 'required']}

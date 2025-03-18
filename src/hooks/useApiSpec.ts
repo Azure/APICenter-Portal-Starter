@@ -6,11 +6,14 @@ import { isDefinitionIdValid } from '@/utils/apiDefinitions';
 import { ApiSpecReader } from '@/types/apiSpec';
 import getSpecReader from '@/specReaders/getSpecReader';
 import useApiService from '@/hooks/useApiService';
+import { collectMcpSpec } from '@/utils/collectMcpSpec';
 
 interface ReturnType extends ApiSpecReader {
   spec?: string;
   isLoading: boolean;
 }
+
+const MCP_SERVER_URL = 'http://localhost:3001';
 
 export default function useApiSpec(definitionId: ApiDefinitionId): ReturnType {
   const [spec, setSpec] = useState<string | undefined>();
@@ -20,6 +23,28 @@ export default function useApiSpec(definitionId: ApiDefinitionId): ReturnType {
   const ApiService = useApiService();
 
   const isAuthenticated = useRecoilValue(isAuthenticatedAtom);
+
+  const fetchMcpSpec = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const definition = await ApiService.getDefinition(definitionId);
+      const spec = await collectMcpSpec(MCP_SERVER_URL);
+      setSpec(spec);
+      setReader(
+        await getSpecReader(spec, {
+          ...definition,
+          specification: {
+            name: 'mcp',
+          },
+        })
+      );
+    } catch {
+      setSpec(undefined);
+      setReader(undefined);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [ApiService, definitionId]);
 
   const fetch = useCallback(async () => {
     if (!isDefinitionIdValid(definitionId) || !isAuthenticated) {
@@ -43,9 +68,13 @@ export default function useApiSpec(definitionId: ApiDefinitionId): ReturnType {
     }
   }, [ApiService, definitionId, isAuthenticated]);
 
+  // useEffect(() => {
+  //   void fetch();
+  // }, [fetch]);
+
   useEffect(() => {
-    void fetch();
-  }, [fetch]);
+    void fetchMcpSpec();
+  }, [fetchMcpSpec]);
 
   return useMemo(
     () => ({

@@ -11,7 +11,6 @@ import { ApiDeployment } from '@/types/apiDeployment';
 import { setDocumentTitle } from '@/utils/dom';
 import LocationsService from '@/services/LocationsService';
 import ApiDefinitionSelect, { ApiDefinitionSelection } from '@/experiences/ApiDefinitionSelect';
-import McpExplorer from '@/experiences/McpExplorer';
 import EmptyStateMessage from '@/components/EmptyStateMessage';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import styles from './ApiSpec.module.scss';
@@ -79,11 +78,6 @@ export const ApiSpec: React.FC = () => {
     );
   }
 
-  // TODO: combine with renderContent
-  function renderMcpContent() {
-    return <McpExplorer />;
-  }
-
   function renderContent() {
     if (apiSpec.isLoading || deployment === undefined) {
       return <Spinner className={styles.spinner} />;
@@ -117,8 +111,7 @@ export const ApiSpec: React.FC = () => {
   return (
     <div className={styles.apiSpec}>
       {renderHeader()}
-      {/*<section>{renderContent()}</section>*/}
-      <section>{renderMcpContent()}</section>
+      <section>{renderContent()}</section>
     </div>
   );
 };

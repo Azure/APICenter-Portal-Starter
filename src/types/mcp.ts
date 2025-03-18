@@ -33,17 +33,24 @@ export interface McpResource extends Annotated {
   size?: number;
 }
 
+export interface McpToolInputProperty {
+  type: string;
+  description?: string;
+}
+
 export interface McpTool {
   name: string;
   description?: string;
   inputSchema: {
     type: 'object';
-    properties?: { [key: string]: object };
+    properties?: { [key: string]: McpToolInputProperty };
     required?: string[];
   };
 }
 
-export interface McpCapabilitiesByType {
+export type McpOperation = McpPrompt | McpResource | McpTool;
+
+export interface McpSpec {
   [McpCapabilityTypes.PROMPTS]: McpPrompt[];
   [McpCapabilityTypes.RESOURCES]: McpResource[];
   [McpCapabilityTypes.TOOLS]: McpTool[];
