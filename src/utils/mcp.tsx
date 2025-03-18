@@ -56,7 +56,7 @@ const definitions: Record<string, SchemaMetadata> = {
         name: 'resource',
         type: (
           <>
-            <Link href="#TextResourceContents">TextResourceContents</Link> |{' '}
+            <Link href="#TextResourceContents">TextResourceContents</Link>|
             <Link href="#BlobResourceContents">BlobResourceContents</Link>
           </>
         ),
@@ -173,7 +173,7 @@ export const toolResponseSchema: SchemaMetadata = {
       in: 'body',
       type: (
         <>
-          (<Link href="#TextContent">TextContent</Link> | <Link href="#ImageContent">ImageContent</Link> |{' '}
+          (<Link href="#TextContent">TextContent</Link>|<Link href="#ImageContent">ImageContent</Link>|
           <Link href="#EmbeddedResource">EmbeddedResource</Link>)[]
         </>
       ),

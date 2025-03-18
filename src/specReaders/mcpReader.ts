@@ -11,6 +11,7 @@ import {
 } from '@/types/apiSpec';
 import { McpCapabilityTypes, McpOperation, McpSpec, McpTool } from '@/types/mcp';
 import { toolDefinitions, toolResponseSchema } from '@/utils/mcp';
+import { schemaToTypeLabel } from '@/utils/openApi';
 
 export default async function mcpReader(specStr: string): Promise<ApiSpecReader> {
   const mcpSpec = JSON.parse(specStr) as McpSpec;
@@ -58,13 +59,13 @@ export default async function mcpReader(specStr: string): Promise<ApiSpecReader>
         description: metadata.description,
         body: [
           {
-            type: 'default',
+            type: 'application/json',
             schema: {
               typeLabel: 'object',
               properties: Object.entries(metadata.inputSchema.properties).map(([name, schema]) => ({
                 name,
                 in: 'arguments',
-                type: schema.type,
+                type: schemaToTypeLabel(schema),
                 description: schema.description,
                 required: metadata.inputSchema.required.includes(name),
               })),
@@ -89,7 +90,7 @@ export default async function mcpReader(specStr: string): Promise<ApiSpecReader>
         {
           body: [
             {
-              type: 'default',
+              type: 'application/json',
               schema: toolResponseSchema,
             },
           ],
