@@ -1,6 +1,7 @@
 export enum McpCapabilityTypes {
-  PROMPTS = 'prompts',
-  RESOURCES = 'resources',
+  // TODO: uncomment below when support is added (otherwise will cause errors if server has data for those)
+  // PROMPTS = 'prompts',
+  // RESOURCES = 'resources',
   TOOLS = 'tools',
 }
 
