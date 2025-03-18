@@ -6,14 +6,11 @@ import { isDefinitionIdValid } from '@/utils/apiDefinitions';
 import { ApiSpecReader } from '@/types/apiSpec';
 import getSpecReader from '@/specReaders/getSpecReader';
 import useApiService from '@/hooks/useApiService';
-import { collectMcpSpec } from '@/utils/collectMcpSpec';
 
 interface ReturnType extends ApiSpecReader {
   spec?: string;
   isLoading: boolean;
 }
-
-const MCP_SERVER_URL = 'http://localhost:3001';
 
 export default function useApiSpec(definitionId: ApiDefinitionId): ReturnType {
   const [spec, setSpec] = useState<string | undefined>();
@@ -28,12 +25,12 @@ export default function useApiSpec(definitionId: ApiDefinitionId): ReturnType {
     try {
       setIsLoading(true);
       const definition = await ApiService.getDefinition(definitionId);
+      const spec = await ApiService.getSpecification(definitionId);
       // TODO: use real MCP server URL (probably need to add selected deployment as an argument for this hook)
-      const spec = await collectMcpSpec(MCP_SERVER_URL);
+      // const spec = await collectMcpSpec(reader.getBaseUrl());
       setSpec(spec);
       setReader(
         await getSpecReader(spec, {
-          // TODO: currently it is hardcoding mcp over whatever definition it is, remove override once we have real MCP definition
           ...definition,
           specification: {
             name: 'mcp',
