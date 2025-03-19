@@ -21,29 +21,29 @@ export default function useApiSpec(definitionId: ApiDefinitionId): ReturnType {
 
   const isAuthenticated = useRecoilValue(isAuthenticatedAtom);
 
-  const fetchMcpSpec = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      const definition = await ApiService.getDefinition(definitionId);
-      const spec = await ApiService.getSpecification(definitionId);
-      // TODO: use real MCP server URL (probably need to add selected deployment as an argument for this hook)
-      // const spec = await collectMcpSpec(reader.getBaseUrl());
-      setSpec(spec);
-      setReader(
-        await getSpecReader(spec, {
-          ...definition,
-          specification: {
-            name: 'mcp',
-          },
-        })
-      );
-    } catch {
-      setSpec(undefined);
-      setReader(undefined);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [ApiService, definitionId]);
+  // const fetchMcpSpec = useCallback(async () => {
+  //   try {
+  //     setIsLoading(true);
+  //     const definition = await ApiService.getDefinition(definitionId);
+  //     const spec = await ApiService.getSpecification(definitionId);
+  //     // TODO: use real MCP server URL (probably need to add selected deployment as an argument for this hook)
+  //     // const spec = await collectMcpSpec(reader.getBaseUrl());
+  //     setSpec(spec);
+  //     setReader(
+  //       await getSpecReader(spec, {
+  //         ...definition,
+  //         specification: {
+  //           name: 'mcp',
+  //         },
+  //       })
+  //     );
+  //   } catch {
+  //     setSpec(undefined);
+  //     setReader(undefined);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // }, [ApiService, definitionId]);
 
   const fetch = useCallback(async () => {
     if (!isDefinitionIdValid(definitionId) || !isAuthenticated) {
@@ -67,13 +67,9 @@ export default function useApiSpec(definitionId: ApiDefinitionId): ReturnType {
     }
   }, [ApiService, definitionId, isAuthenticated]);
 
-  // useEffect(() => {
-  //   void fetch();
-  // }, [fetch]);
-
   useEffect(() => {
-    void fetchMcpSpec();
-  }, [fetchMcpSpec]);
+    void fetch();
+  }, [fetch]);
 
   return useMemo(
     () => ({

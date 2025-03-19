@@ -11,7 +11,7 @@ import {
 } from '@/types/apiSpec';
 import { McpCapabilityTypes, McpOperation, McpSpec, McpTool } from '@/types/mcp';
 import { toolDefinitions, toolResponseSchema } from '@/utils/mcp';
-import { schemaToTypeLabel } from '@/utils/openApi';
+import { schemaToFieldType, schemaToTypeLabel } from '@/utils/openApi';
 
 export default async function mcpReader(specStr: string): Promise<ApiSpecReader> {
   const mcpSpec = JSON.parse(specStr) as McpSpec;
@@ -66,6 +66,7 @@ export default async function mcpReader(specStr: string): Promise<ApiSpecReader>
                 name,
                 in: 'arguments',
                 type: schemaToTypeLabel(schema),
+                fieldType: schemaToFieldType(schema),
                 description: schema.description,
                 required: metadata.inputSchema.required.includes(name),
               })),
@@ -85,18 +86,18 @@ export default async function mcpReader(specStr: string): Promise<ApiSpecReader>
   const getResponsesMetadata = memoize((operationName: string): ResponseMetadata[] => {
     const operation = getOperation(operationName);
 
-    if (operation.category === McpCapabilityTypes.TOOLS) {
-      return [
-        {
-          body: [
-            {
-              type: 'application/json',
-              schema: toolResponseSchema,
-            },
-          ],
-        },
-      ];
-    }
+    // if (operation.category === McpCapabilityTypes.TOOLS) {
+    //   return [
+    //     {
+    //       body: [
+    //         {
+    //           type: 'application/json',
+    //           schema: toolResponseSchema,
+    //         },
+    //       ],
+    //     },
+    //   ];
+    // }
 
     return [];
   });
@@ -104,9 +105,9 @@ export default async function mcpReader(specStr: string): Promise<ApiSpecReader>
   const getOperationDefinitions = memoize((operationName: string): SchemaMetadata[] => {
     const operation = getOperation(operationName);
 
-    if (operation.category === McpCapabilityTypes.TOOLS) {
-      return toolDefinitions;
-    }
+    // if (operation.category === McpCapabilityTypes.TOOLS) {
+    //   return toolDefinitions;
+    // }
 
     return [];
   });

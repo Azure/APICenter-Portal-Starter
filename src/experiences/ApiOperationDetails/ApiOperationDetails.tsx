@@ -6,6 +6,8 @@ import ParamSchemaDefinition from '@/components/ParamSchemaDefinition';
 import { ApiDeployment } from '@/types/apiDeployment';
 import { resolveOpUrlTemplate } from '@/utils/apiOperations';
 import HttpTestConsole from '@/experiences/HttpTestConsole';
+import McpTestConsole from '@/experiences/McpTestConsole';
+import { McpCapabilityTypes } from '@/types/mcp';
 import styles from './ApiOperationDetails.module.scss';
 
 interface Props {
@@ -15,8 +17,6 @@ interface Props {
   operation?: OperationMetadata;
   deployment?: ApiDeployment;
 }
-
-const SPEC_TYPES_WITH_CONSOLE = [ApiSpecTypes.OpenApiV2, ApiSpecTypes.OpenApiV3];
 
 export const ApiOperationDetails: React.FC<Props> = ({ apiName, versionName, apiSpec, operation, deployment }) => {
   const [isTestConsoleOpen, setIsTestConsoleOpen] = useState(false);
@@ -33,8 +33,43 @@ export const ApiOperationDetails: React.FC<Props> = ({ apiName, versionName, api
     return null;
   }
 
-  const isTestConsoleAvailable = SPEC_TYPES_WITH_CONSOLE.includes(apiSpec.type);
   const urlTemplate = resolveOpUrlTemplate(apiSpec, operation, deployment);
+
+  function renderTestConsole() {
+    if ([ApiSpecTypes.OpenApiV2, ApiSpecTypes.OpenApiV3].includes(apiSpec.type)) {
+      return (
+        <>
+          <Button onClick={handleTryApiClick}>Try this API</Button>
+          <HttpTestConsole
+            apiName={apiName}
+            versionName={versionName}
+            apiSpec={apiSpec}
+            operation={operation}
+            deployment={deployment}
+            isOpen={isTestConsoleOpen}
+            onClose={handleTestConsoleClose}
+          />
+        </>
+      );
+    }
+
+    if (apiSpec.type === ApiSpecTypes.MCP && operation.category === McpCapabilityTypes.TOOLS) {
+      return (
+        <>
+          <Button onClick={handleTryApiClick}>Run tool</Button>
+          <McpTestConsole
+            apiSpec={apiSpec}
+            operation={operation}
+            deployment={deployment}
+            isOpen={isTestConsoleOpen}
+            onClose={handleTestConsoleClose}
+          />
+        </>
+      );
+    }
+
+    return null;
+  }
 
   function renderRequestInfo() {
     const requestMetadata = apiSpec.getRequestMetadata(operation.name);
@@ -134,20 +169,7 @@ export const ApiOperationDetails: React.FC<Props> = ({ apiName, versionName, api
         </div>
       </InfoPanel>
 
-      {isTestConsoleAvailable && (
-        <>
-          <Button onClick={handleTryApiClick}>Try this API</Button>
-          <HttpTestConsole
-            apiName={apiName}
-            versionName={versionName}
-            apiSpec={apiSpec}
-            operation={operation}
-            deployment={deployment}
-            isOpen={isTestConsoleOpen}
-            onClose={handleTestConsoleClose}
-          />
-        </>
-      )}
+      {renderTestConsole()}
 
       <h3>Request</h3>
       {renderRequestInfo()}

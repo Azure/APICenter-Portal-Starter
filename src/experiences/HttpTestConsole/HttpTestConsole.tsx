@@ -16,6 +16,7 @@ import { ApiDeployment } from '@/types/apiDeployment';
 import useHttpTestRequestController from '@/hooks/useHttpTestRequestController';
 import { ApiAuthCredentials } from '@/types/apiAuth';
 import useApiAuthorization from '@/hooks/useApiAuthorization';
+import TestConsoleError from '@/components/TestConsoleError';
 import {
   getFormDataFieldsMetadata,
   getReqBodySupportedFormats,
@@ -146,7 +147,7 @@ export const HttpTestConsole: React.FC<Props> = ({
       return null;
     }
 
-    let content: React.ReactNode = <div className={styles.responseError}>{requestController.error}</div>;
+    let content: React.ReactNode = <TestConsoleError>{requestController.error}</TestConsoleError>;
     if (requestController.response) {
       content = <SyntaxHighlighter language="http">{stringifyResponse(requestController.response)}</SyntaxHighlighter>;
     }
