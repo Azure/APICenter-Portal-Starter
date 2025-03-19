@@ -17,7 +17,7 @@ export default async function mcpReader(specStr: string): Promise<ApiSpecReader>
   const mcpSpec = JSON.parse(specStr) as McpSpec;
 
   const getBaseUrl = memoize((): string => {
-    return '/';
+    return mcpSpec.resources[0]?.uri || '/';
   });
 
   const getTagLabels = memoize((): string[] => {
