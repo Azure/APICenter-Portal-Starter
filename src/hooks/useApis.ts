@@ -27,7 +27,7 @@ function sortApis(apis: ApiMetadata[], sortBy?: SortBy): ApiMetadata[] {
 
   return apis.slice().sort((a, b) => {
     let result = 0;
-    if (a.name > b.name) {
+    if (a.title > b.title) {
       result = 1;
     } else {
       result = -1;

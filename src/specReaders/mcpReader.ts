@@ -10,14 +10,13 @@ import {
   SchemaMetadata,
 } from '@/types/apiSpec';
 import { McpCapabilityTypes, McpOperation, McpSpec, McpTool } from '@/types/mcp';
-import { toolDefinitions, toolResponseSchema } from '@/utils/mcp';
 import { schemaToFieldType, schemaToTypeLabel } from '@/utils/openApi';
 
 export default async function mcpReader(specStr: string): Promise<ApiSpecReader> {
   const mcpSpec = JSON.parse(specStr) as McpSpec;
 
   const getBaseUrl = memoize((): string => {
-    return mcpSpec.resources[0]?.uri || '/';
+    return '/';
   });
 
   const getTagLabels = memoize((): string[] => {
