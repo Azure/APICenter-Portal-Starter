@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Button, Drawer, DrawerBody, DrawerHeader, DrawerHeaderTitle } from '@fluentui/react-components';
+import { Body1Strong, Button, Drawer, DrawerBody, DrawerHeader, DrawerHeaderTitle } from '@fluentui/react-components';
 import { Dismiss24Regular } from '@fluentui/react-icons';
 import { HttpTestConsole, SyntaxHighlighter } from '@microsoft/api-docs-ui';
 import { HttpReqParam } from '@microsoft/api-docs-ui/src/types/testConsole';
@@ -50,7 +50,7 @@ export const McpTestConsole: React.FC<Props> = ({ apiSpec, operation, deployment
     }
 
     return (
-      <HttpTestConsole.Panel name="result" header="Run result" isOpenByDefault>
+      <HttpTestConsole.Panel name="result" header={<Body1Strong>Run result</Body1Strong>} isOpenByDefault>
         {content}
       </HttpTestConsole.Panel>
     );

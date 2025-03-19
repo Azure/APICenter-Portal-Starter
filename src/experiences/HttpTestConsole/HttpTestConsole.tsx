@@ -8,7 +8,7 @@ import {
   HttpTestConsole as HttpApiTestConsole,
   SyntaxHighlighter,
 } from '@microsoft/api-docs-ui';
-import { Button, Drawer, DrawerBody, DrawerHeader, DrawerHeaderTitle } from '@fluentui/react-components';
+import { Body1Strong, Button, Drawer, DrawerBody, DrawerHeader, DrawerHeaderTitle } from '@fluentui/react-components';
 import { Dismiss24Regular } from '@fluentui/react-icons';
 import { uniqBy } from 'lodash';
 import { ApiSpecReader, OperationMetadata } from '@/types/apiSpec';
@@ -153,7 +153,7 @@ export const HttpTestConsole: React.FC<Props> = ({
     }
 
     return (
-      <HttpApiTestConsole.Panel name="response" header="HTTP response" isOpenByDefault>
+      <HttpApiTestConsole.Panel name="response" header={<Body1Strong>HTTP response</Body1Strong>} isOpenByDefault>
         {content}
       </HttpApiTestConsole.Panel>
     );
