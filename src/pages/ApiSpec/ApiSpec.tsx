@@ -29,7 +29,7 @@ export const ApiSpec: React.FC = () => {
     () => ({ apiName, versionName, definitionName }),
     [apiName, definitionName, versionName]
   );
-  const apiSpec = useApiSpec(definitionId);
+  const apiSpec = useApiSpec(definitionId, deployment);
 
   const handleDefinitionSelectionChange = useCallback(
     (definitionSelection: ApiDefinitionSelection) => {
@@ -68,7 +68,7 @@ export const ApiSpec: React.FC = () => {
                 version: versionName,
                 definition: definitionName,
               }}
-              hiddenSelects={['definition', 'deployment']}
+              hiddenSelects={['definition']}
               isInline
               onSelectionChange={handleDefinitionSelectionChange}
             />

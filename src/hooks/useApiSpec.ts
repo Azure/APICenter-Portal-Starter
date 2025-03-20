@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRecoilValue } from 'recoil';
 import { ApiDefinitionId } from '@/types/apiDefinition';
@@ -6,13 +7,15 @@ import { isDefinitionIdValid } from '@/utils/apiDefinitions';
 import { ApiSpecReader } from '@/types/apiSpec';
 import getSpecReader from '@/specReaders/getSpecReader';
 import useApiService from '@/hooks/useApiService';
+import { ApiDeployment } from '@/types/apiDeployment';
+import { collectMcpSpec } from '@/utils/collectMcpSpec';
 
 interface ReturnType extends ApiSpecReader {
   spec?: string;
   isLoading: boolean;
 }
 
-export default function useApiSpec(definitionId: ApiDefinitionId): ReturnType {
+export default function useApiSpec(definitionId: ApiDefinitionId, deployment: ApiDeployment): ReturnType {
   const [spec, setSpec] = useState<string | undefined>();
   const [reader, setReader] = useState<ApiSpecReader | undefined>();
   const [isLoading, setIsLoading] = useState(true);
@@ -21,29 +24,39 @@ export default function useApiSpec(definitionId: ApiDefinitionId): ReturnType {
 
   const isAuthenticated = useRecoilValue(isAuthenticatedAtom);
 
-  // const fetchMcpSpec = useCallback(async () => {
-  //   try {
-  //     setIsLoading(true);
-  //     const definition = await ApiService.getDefinition(definitionId);
-  //     const spec = await ApiService.getSpecification(definitionId);
-  //     // TODO: use real MCP server URL (probably need to add selected deployment as an argument for this hook)
-  //     // const spec = await collectMcpSpec(reader.getBaseUrl());
-  //     setSpec(spec);
-  //     setReader(
-  //       await getSpecReader(spec, {
-  //         ...definition,
-  //         specification: {
-  //           name: 'mcp',
-  //         },
-  //       })
-  //     );
-  //   } catch {
-  //     setSpec(undefined);
-  //     setReader(undefined);
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // }, [ApiService, definitionId]);
+  const fetchMcpSpec = useCallback(
+    async () => {
+    try {
+      setIsLoading(true);
+      if (!deployment) 
+      {
+        setSpec(undefined);
+        setReader(undefined);
+        setIsLoading(false);
+        return;
+      }
+      
+      const definition = await ApiService.getDefinition(definitionId);
+      // const spec = await ApiService.getSpecification(definitionId);
+      // TODO: use real MCP server URL (probably need to add selected deployment as an argument for this hook)
+      const spec = await collectMcpSpec(deployment.server.runtimeUri[0]);
+      setSpec(spec);
+      setReader(
+        await getSpecReader(spec, {
+          ...definition,
+          specification: {
+            name: 'mcp',
+          },
+        })
+      );
+    } catch (err) {
+      console.error("fetch error 1:" + err);
+      setSpec(undefined);
+      setReader(undefined);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [ApiService, definitionId, deployment]);
 
   const fetch = useCallback(async () => {
     if (!isDefinitionIdValid(definitionId) || !isAuthenticated) {
@@ -68,8 +81,8 @@ export default function useApiSpec(definitionId: ApiDefinitionId): ReturnType {
   }, [ApiService, definitionId, isAuthenticated]);
 
   useEffect(() => {
-    void fetch();
-  }, [fetch]);
+    void fetchMcpSpec();
+  }, [fetchMcpSpec]);
 
   return useMemo(
     () => ({
