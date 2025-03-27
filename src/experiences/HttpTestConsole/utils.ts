@@ -138,7 +138,7 @@ export const stringifyResponse = memoizee(
       .map(([name, value]) => `${name}: ${value}`)
       .join('\n');
 
-    const contentType = response.headers['Content-Type'];
+    const contentType = response.headers['content-type'];
     let formatedBody = response.body.toString();
 
     if (contentType?.includes('json')) {

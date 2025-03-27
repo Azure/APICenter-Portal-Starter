@@ -7,7 +7,8 @@ import { WithRef } from '@/types/apiSpec';
  */
 export default function makeOpenApiResolverProxy<T>(
   obj: T | OpenAPIV2.ReferenceObject | OpenAPIV3.ReferenceObject,
-  root?: OpenAPI.Document
+  root?: OpenAPI.Document,
+  seenRefs: string[] = []
 ): WithRef<T> {
   const resolvedRoot = (root || obj) as OpenAPI.Document;
 
@@ -21,9 +22,16 @@ export default function makeOpenApiResolverProxy<T>(
       const value = target[prop];
       if (typeof value === 'object' && value !== null) {
         if ('$ref' in value) {
-          return makeOpenApiResolverProxy(resolveRef(resolvedRoot, value.$ref), resolvedRoot);
+          if (seenRefs.includes(value.$ref)) {
+            return value; // Circular dependency detected, return the reference as is
+          }
+          return makeOpenApiResolverProxy(
+            resolveRef(resolvedRoot, value.$ref),
+            resolvedRoot,
+            seenRefs.concat(value.$ref)
+          );
         }
-        return makeOpenApiResolverProxy(value, resolvedRoot);
+        return makeOpenApiResolverProxy(value, resolvedRoot, seenRefs);
       }
       return value;
     },
