@@ -138,6 +138,20 @@ export const HttpTestConsole: React.FC<Props> = ({
     setReqData((prev) => ({ ...prev, body: value }));
   }, []);
 
+  const handleAuthCredentialsChange = useCallback((credentials?: ApiAuthCredentials) => {
+    setAuthCredentials(credentials);
+    if (!credentials) {
+      return;
+    }
+
+    // If param with the same name already exists - remove it to avoid duplication
+    const collection = inToParamsCollectionName(credentials.in);
+    setReqData((prev) => ({
+      ...prev,
+      [collection]: prev[collection]?.filter((param) => param.name !== credentials.name),
+    }));
+  }, []);
+
   const handleSendClick = useCallback(() => {
     void requestController.send(HttpApiTestConsole.resolveHttpReqData(reqDataWithAuth, schemaParamsData));
   }, [reqDataWithAuth, requestController, schemaParamsData]);
@@ -172,7 +186,7 @@ export const HttpTestConsole: React.FC<Props> = ({
         <HttpApiTestConsole>
           {!apiAuth.isLoading && !!apiAuth.schemeOptions?.length && (
             <HttpApiTestConsole.Panel name="auth" header="Authorization" isOpenByDefault>
-              <TestConsoleAuth apiName={apiName} versionName={versionName} onChange={setAuthCredentials} />
+              <TestConsoleAuth apiName={apiName} versionName={versionName} onChange={handleAuthCredentialsChange} />
             </HttpApiTestConsole.Panel>
           )}
           <HttpApiTestConsole.ParamsListForm
