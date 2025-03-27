@@ -7,7 +7,7 @@ import { ApiDefinition } from '@/types/apiDefinition';
 
 function getReaderFactory(definition: ApiDefinition): ApiSpecReaderFactory {
   // TODO: change to more appropriate spec name
-  if (definition.specification?.name === 'other') {
+  if (definition.specification?.name === 'mcp') {
     return mcpReader;
   }
   if (definition.specification?.name === 'openapi') {
