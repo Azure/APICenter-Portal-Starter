@@ -8,7 +8,7 @@ import { ApiSpecReader } from '@/types/apiSpec';
 import getSpecReader from '@/specReaders/getSpecReader';
 import useApiService from '@/hooks/useApiService';
 import { ApiDeployment } from '@/types/apiDeployment';
-import { collectMcpSpec } from '@/utils/collectMcpSpec';
+import McpService from '@/services/McpService';
 
 interface ReturnType extends ApiSpecReader {
   spec?: string;
@@ -25,21 +25,26 @@ export default function useApiSpec(definitionId: ApiDefinitionId, deployment: Ap
   const isAuthenticated = useRecoilValue(isAuthenticatedAtom);
   
   const fetch = useCallback(async () => {
-    if (!isDefinitionIdValid(definitionId) || !isAuthenticated) {
+    if (!isDefinitionIdValid(definitionId) || !isAuthenticated || !deployment) {
       setSpec(undefined);
       setReader(undefined);
       setIsLoading(false);
       return;
     }
 
-    const definition = await ApiService.getDefinition(definitionId);
-
     try {
       setIsLoading(true);
-      
+
+      const api = await ApiService.getApi(definitionId.apiName);
+      const definition = await ApiService.getDefinition(definitionId);
+
       let spec: string | undefined;
-      if (definition.specification.name === 'mcp') {
-        spec = await collectMcpSpec(deployment.server.runtimeUri[0]);
+
+      const isMcp = api.kind === 'mcp';
+      if (isMcp) {
+        const mcpService = new McpService(deployment.server.runtimeUri[0]);
+        spec = await mcpService.collectMcpSpec();
+        mcpService.closeConnection();
       } else {
         spec = await ApiService.getSpecification(definitionId);
       }
@@ -49,7 +54,14 @@ export default function useApiSpec(definitionId: ApiDefinitionId, deployment: Ap
       }
 
       setSpec(spec);
-      setReader(await getSpecReader(spec, definition));
+      setReader(await getSpecReader(spec, {
+        ...definition,
+        specification: {
+          ...definition.specification,
+          // TODO: this probably needs to be more robust
+          name: isMcp ? 'mcp' : definition.specification?.name,
+        },
+      }));
     } catch {
       setSpec(undefined);
       setReader(undefined);

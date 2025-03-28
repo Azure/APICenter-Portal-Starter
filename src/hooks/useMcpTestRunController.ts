@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { HttpReqParam } from '@microsoft/api-docs-ui';
 import { OperationMetadata } from '@/types/apiSpec';
 import { ApiDeployment } from '@/types/apiDeployment';
+import McpService from '@/services/McpService';
 
 interface ReturnType {
   result?: string;
@@ -10,59 +11,23 @@ interface ReturnType {
   run: (args: HttpReqParam[]) => Promise<void>;
 }
 
-const TEST_RUN_ID = 'test-run';
-
 export default function useMcpTestRunController(deployment?: ApiDeployment, operation?: OperationMetadata): ReturnType {
+  const [mcpService, setMcpService] = useState<McpService>();
   const [result, setResult] = useState<string>(undefined);
   const [error, setError] = useState<string>(undefined);
   const [isRunning, setIsRunning] = useState(false);
 
-  const [sseEndpoint, setSseEndpoint] = useState<string>();
-
-  const runtimeUri = deployment?.server.runtimeUri[0];
-
-  const sse = useMemo(() => {
+  useEffect(() => {
+    const runtimeUri = deployment?.server.runtimeUri[0];
     if (!runtimeUri) {
       return;
     }
 
-    return new EventSource(`${runtimeUri}/sse`);
-  }, [runtimeUri]);
-
-  const handleEndpointReceived = useCallback((event: MessageEvent) => {
-    setSseEndpoint(event.data);
-  }, []);
-
-  const handleMessageReceived = useCallback((event: MessageEvent) => {
-    setIsRunning(false);
-    try {
-      const data = JSON.parse(event.data);
-
-      if (data.error) {
-        setError(data.error.message);
-        setResult(undefined);
-      } else {
-        setError(undefined);
-        setResult(JSON.stringify(data.result, null, 2));
-      }
-    } catch {
-      setError('Unable to parse result');
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!sse) {
-      setSseEndpoint(undefined);
-      return;
-    }
-
-    sse.addEventListener('endpoint', handleEndpointReceived);
-    sse.addEventListener('message', handleMessageReceived);
-    return (): void => {
-      sse.removeEventListener('endpoint', handleEndpointReceived);
-      sse.removeEventListener('message', handleMessageReceived);
-    };
-  }, [sse, handleEndpointReceived, handleMessageReceived]);
+    setMcpService((prev) => {
+      prev?.closeConnection();
+      return new McpService(deployment?.server.runtimeUri[0]);
+    });
+  }, [deployment?.server.runtimeUri]);
 
   useEffect(() => {
     setResult(undefined);
@@ -79,21 +44,12 @@ export default function useMcpTestRunController(deployment?: ApiDeployment, oper
       try {
         setIsRunning(true);
 
-        void fetch(`${runtimeUri}${sseEndpoint}`, {
-          method: 'POST',
-          body: JSON.stringify({
-            id: TEST_RUN_ID,
-            jsonrpc: '2.0',
-            method: `${operation.category}/call`,
-            params: {
-              name: operation.name.split('/').pop(),
-              arguments: Object.fromEntries(args.map(({ name, value }) => [name, value])),
-            },
-          }),
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
+        const toolName = operation.name.split('/').pop();
+        const toolArgs = Object.fromEntries(args.map(({ name, value }) => [name, value]));
+        const result = await mcpService.callTool(toolName, toolArgs);
+
+        setError(undefined);
+        setResult(JSON.stringify(result, null, 2));
       } catch (e) {
         if (e instanceof TypeError) {
           setError(
@@ -102,9 +58,11 @@ export default function useMcpTestRunController(deployment?: ApiDeployment, oper
         } else {
           setError('Unable to complete request');
         }
+      } finally {
+        setIsRunning(false);
       }
     },
-    [isRunning, operation, runtimeUri, sseEndpoint]
+    [isRunning, mcpService, operation.name]
   );
 
   return {

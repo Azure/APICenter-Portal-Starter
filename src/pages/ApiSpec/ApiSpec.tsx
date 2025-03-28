@@ -68,7 +68,7 @@ export const ApiSpec: React.FC = () => {
                 version: versionName,
                 definition: definitionName,
               }}
-              hiddenSelects={['definition']}
+              hiddenSelects={['definition', 'deployment']}
               isInline
               onSelectionChange={handleDefinitionSelectionChange}
             />
@@ -79,7 +79,7 @@ export const ApiSpec: React.FC = () => {
   }
 
   function renderContent() {
-    if (apiSpec.isLoading || deployment === undefined) {
+    if (apiSpec.isLoading || !deployment) {
       return <Spinner className={styles.spinner} />;
     }
 
