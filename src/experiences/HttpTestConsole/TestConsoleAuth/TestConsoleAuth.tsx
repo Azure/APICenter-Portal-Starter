@@ -97,7 +97,7 @@ export const TestConsoleAuth: React.FC<Props> = ({ apiName, versionName, onChang
   }
 
   return (
-    <div className={styles.testConsoleAuth}>
+    <div className={styles.testConsoleAuth} style={{ width: '300px' }}>
       {(!!apiAuth.schemeOptions || !apiAuth.isLoading) && (
         <Field label="Authorization type:">
           <Select value={selectedScheme} onChange={handleRequirementSelect}>
