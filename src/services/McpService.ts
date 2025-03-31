@@ -34,7 +34,7 @@ export default class McpService {
   private initData: InitData;
 
   constructor(serverUri: string, authCredentials?: ApiAuthCredentials) {
-    this.serverUri = 'http://localhost:3001'; // serverUri;
+    this.serverUri = serverUri;
     this.authCredentials = authCredentials;
     this.authHeaders = {
       Authorization: `Bearer ${authCredentials?.value}`,
