@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Spinner } from '@fluentui/react-components';
 import useApiSpec from '@/hooks/useApiSpec';
@@ -13,11 +13,15 @@ import LocationsService from '@/services/LocationsService';
 import ApiDefinitionSelect, { ApiDefinitionSelection } from '@/experiences/ApiDefinitionSelect';
 import EmptyStateMessage from '@/components/EmptyStateMessage';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
+import { ApiAuthCredentials } from '@/types/apiAuth';
+import TestConsoleAuth from '@/experiences/HttpTestConsole/TestConsoleAuth';
 import styles from './ApiSpec.module.scss';
 
 export const ApiSpec: React.FC = () => {
   const { apiName, versionName, definitionName } = useParams<Readonly<ApiDefinitionId>>() as ApiDefinitionId;
   const [deployment, setDeployment] = useState<ApiDeployment | null | undefined>();
+  const [authCredentials, setAuthCredentials] = useState<ApiAuthCredentials | undefined>();
+
   const selectedOperation = useSelectedOperation();
   const navigate = useNavigate();
 
@@ -29,7 +33,7 @@ export const ApiSpec: React.FC = () => {
     () => ({ apiName, versionName, definitionName }),
     [apiName, definitionName, versionName]
   );
-  const apiSpec = useApiSpec(definitionId, deployment);
+  const apiSpec = useApiSpec(definitionId, deployment, authCredentials);
 
   const handleDefinitionSelectionChange = useCallback(
     (definitionSelection: ApiDefinitionSelection) => {
@@ -50,6 +54,15 @@ export const ApiSpec: React.FC = () => {
     [apiName, definitionName, navigate, versionName]
   );
 
+  const handleAuthCredentialsChange = useCallback((credentials?: any) => {
+    console.log('Auth credentials changed:', credentials);
+    setAuthCredentials(credentials);
+  }, []);
+
+  useEffect(() => {
+    console.log('authCredentials changed in component:', authCredentials);
+  }, [authCredentials]);
+
   function renderHeader() {
     if (api.isLoading || !api.data) {
       return null;
@@ -68,7 +81,7 @@ export const ApiSpec: React.FC = () => {
                 version: versionName,
                 definition: definitionName,
               }}
-              hiddenSelects={['definition', 'deployment']}
+              hiddenSelects={['definition']}
               isInline
               onSelectionChange={handleDefinitionSelectionChange}
             />
@@ -79,13 +92,26 @@ export const ApiSpec: React.FC = () => {
   }
 
   function renderContent() {
-    if (apiSpec.isLoading || !deployment) {
-      return <Spinner className={styles.spinner} />;
+
+    if (api.isLoading || !api.data) {
+      return <Spinner size="large" />;
+    }
+
+    if (api.data.kind === 'mcp' && !authCredentials) {
+      return (
+        <div className={styles.mcpTestConsole}>
+          <TestConsoleAuth apiName={apiName} versionName={versionName} onChange={handleAuthCredentialsChange} />
+        </div>
+      );
     }
 
     if (!apiSpec.spec) {
       return (
-        <EmptyStateMessage>The specified API does not exist or its specification can&apos;t be read</EmptyStateMessage>
+        <EmptyStateMessage>
+          {api.data.kind === 'mcp'
+            ? 'Unable to fetch MCP specification. Please check your authentication credentials.'
+            : "The specified API does not exist or its specification can't be read"}
+        </EmptyStateMessage>
       );
     }
 
@@ -102,6 +128,7 @@ export const ApiSpec: React.FC = () => {
             deployment={deployment}
             apiSpec={apiSpec}
             operation={apiSpec.getOperation(selectedOperation.name)}
+            authCredentials={authCredentials}
           />
         </div>
       </div>

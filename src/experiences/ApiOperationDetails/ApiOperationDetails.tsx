@@ -9,6 +9,7 @@ import HttpTestConsole from '@/experiences/HttpTestConsole';
 import McpTestConsole from '@/experiences/McpTestConsole';
 import { McpCapabilityTypes } from '@/types/mcp';
 import styles from './ApiOperationDetails.module.scss';
+import { ApiAuthCredentials } from '@/types/apiAuth';
 
 interface Props {
   apiName: string;
@@ -16,9 +17,17 @@ interface Props {
   apiSpec: ApiSpecReader;
   operation?: OperationMetadata;
   deployment?: ApiDeployment;
+  authCredentials?: ApiAuthCredentials;
 }
 
-export const ApiOperationDetails: React.FC<Props> = ({ apiName, versionName, apiSpec, operation, deployment }) => {
+export const ApiOperationDetails: React.FC<Props> = ({
+  apiName,
+  versionName,
+  apiSpec,
+  operation,
+  deployment,
+  authCredentials,
+}) => {
   const [isTestConsoleOpen, setIsTestConsoleOpen] = useState(false);
 
   const handleTryApiClick = useCallback(() => {
@@ -58,6 +67,8 @@ export const ApiOperationDetails: React.FC<Props> = ({ apiName, versionName, api
         <>
           <Button onClick={handleTryApiClick}>Run tool</Button>
           <McpTestConsole
+            apiName={apiName}
+            versionName={versionName}
             apiSpec={apiSpec}
             operation={operation}
             deployment={deployment}

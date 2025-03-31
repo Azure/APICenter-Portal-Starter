@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Body1Strong, Button, Drawer, DrawerBody, DrawerHeader, DrawerHeaderTitle } from '@fluentui/react-components';
 import { Dismiss24Regular } from '@fluentui/react-icons';
@@ -7,37 +8,73 @@ import { ApiSpecReader, OperationMetadata } from '@/types/apiSpec';
 import { ApiDeployment } from '@/types/apiDeployment';
 import useMcpTestRunController from '@/hooks/useMcpTestRunController';
 import TestConsoleError from '@/components/TestConsoleError';
+import { ApiAuthCredentials } from '@/types/apiAuth';
+import useApiAuthorization from '@/hooks/useApiAuthorization';
+import TestConsoleAuth from '@/experiences/HttpTestConsole/TestConsoleAuth';
 import styles from './McpTestConsole.module.scss';
 
 interface Props {
-  apiSpec: ApiSpecReader;
+  apiName: string;
+  versionName: string;
+  
+  apiSpec?: ApiSpecReader;
   operation?: OperationMetadata;
   deployment?: ApiDeployment;
   isOpen?: boolean;
   onClose: () => void;
 }
 
-export const McpTestConsole: React.FC<Props> = ({ apiSpec, operation, deployment, isOpen, onClose }) => {
+export const McpTestConsole: React.FC<Props> = ({ 
+  apiName,
+  versionName,
+  apiSpec, 
+  operation, 
+  deployment, 
+  isOpen, 
+  onClose 
+}) => {
   const [toolArgs, setToolArgs] = useState<HttpReqParam[]>();
+  const [authCredentials, setAuthCredentials] = useState<ApiAuthCredentials | undefined>();
 
   const runController = useMcpTestRunController(deployment, operation);
+  const apiAuth = useApiAuthorization({ apiName, versionName });
 
   const argsMetadata = useMemo(
-    () => apiSpec.getRequestMetadata(operation.name)?.body?.[0]?.schema?.properties || [],
-    [apiSpec, operation.name]
+    () => apiSpec?.getRequestMetadata(operation?.name)?.body?.[0]?.schema?.properties || [],
+    [apiSpec, operation?.name]
   );
 
   useEffect(() => {
-    setToolArgs(argsMetadata.map(({ name }) => ({ name, value: '' })));
+    if (argsMetadata?.length > 0) {
+      setToolArgs(argsMetadata.map(({ name }) => ({ name, value: '' })));
+    } else {
+      setToolArgs([]);
+    }
   }, [argsMetadata]);
 
   const handleArgumentsChange = useCallback((_, nextArgs: HttpReqParam[]) => {
     setToolArgs(nextArgs);
   }, []);
 
+  const handleAuthCredentialsChange = useCallback((credentials?: ApiAuthCredentials) => {
+    setAuthCredentials(credentials);
+  }, []);
+
   const handleRunClick = useCallback(() => {
-    void runController.run(toolArgs);
-  }, [runController, toolArgs]);
+    // Include auth credentials if available
+    const argsWithAuth = toolArgs ? [...toolArgs] : [];
+    
+    if (authCredentials) {
+      // Add auth credentials to args if needed
+      // For MCP, we typically need to add the auth to the tool arguments
+      argsWithAuth.push({
+        name: 'authToken', // Or another appropriate name based on your MCP auth requirements
+        value: authCredentials.value
+      });
+    }
+    
+    void runController.run(argsWithAuth);
+  }, [runController, toolArgs, authCredentials]);
 
   function renderResult() {
     if (!runController.result && !runController.error) {
@@ -56,6 +93,20 @@ export const McpTestConsole: React.FC<Props> = ({ apiSpec, operation, deployment
     );
   }
 
+  // Helper function to map args to API parameters
+  const formatArgsToApiParameters = (args) => {
+    if (!args || !Array.isArray(args)) return [];
+    
+    return args.map(arg => ({
+      name: arg.name,
+      type: arg.schema?.type || 'string',
+      in: 'body',
+      required: arg.schema?.required || false,
+      schema: arg.schema || { type: 'string' },
+      description: arg.schema?.description || '',
+    }));
+  };
+
   return (
     <Drawer className={styles.mcpTestConsole} size="medium" position="end" open={isOpen} onOpenChange={onClose}>
       <DrawerHeader>
@@ -67,11 +118,18 @@ export const McpTestConsole: React.FC<Props> = ({ apiSpec, operation, deployment
       </DrawerHeader>
       <DrawerBody>
         <HttpTestConsole>
+          {/* Add auth panel similar to HttpTestConsole */}
+          {!apiAuth.isLoading && !!apiAuth.schemeOptions?.length && (
+            <HttpTestConsole.Panel name="auth" header="Authorization" isOpenByDefault>
+              <TestConsoleAuth apiName={apiName} versionName={versionName} onChange={handleAuthCredentialsChange} />
+            </HttpTestConsole.Panel>
+          )}
+          
           <HttpTestConsole.ParamsListForm
             name="arguments"
             title="Arguments"
             value={toolArgs}
-            params={argsMetadata}
+            params={formatArgsToApiParameters(argsMetadata)}
             isStrictSchema
             onChange={handleArgumentsChange}
           />

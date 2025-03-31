@@ -9,13 +9,20 @@ import getSpecReader from '@/specReaders/getSpecReader';
 import useApiService from '@/hooks/useApiService';
 import { ApiDeployment } from '@/types/apiDeployment';
 import McpService from '@/services/McpService';
+import { ApiAuthCredentials } from '@/types/apiAuth';
 
 interface ReturnType extends ApiSpecReader {
   spec?: string;
   isLoading: boolean;
 }
 
-export default function useApiSpec(definitionId: ApiDefinitionId, deployment: ApiDeployment): ReturnType {
+export default function useApiSpec(
+  definitionId: ApiDefinitionId, 
+  deployment?: ApiDeployment, 
+  authCredentials?: ApiAuthCredentials
+): ReturnType {
+
+  console.log('useApiSpec', authCredentials);
   const [spec, setSpec] = useState<string | undefined>();
   const [reader, setReader] = useState<ApiSpecReader | undefined>();
   const [isLoading, setIsLoading] = useState(true);
@@ -42,7 +49,7 @@ export default function useApiSpec(definitionId: ApiDefinitionId, deployment: Ap
 
       const isMcp = api.kind === 'mcp';
       if (isMcp) {
-        const mcpService = new McpService(deployment.server.runtimeUri[0]);
+        const mcpService = new McpService(deployment.server.runtimeUri[0], authCredentials);
         spec = await mcpService.collectMcpSpec();
         mcpService.closeConnection();
       } else {
@@ -68,7 +75,7 @@ export default function useApiSpec(definitionId: ApiDefinitionId, deployment: Ap
     } finally {
       setIsLoading(false);
     }
-  }, [ApiService, definitionId, deployment, isAuthenticated]);
+  }, [ApiService, definitionId, deployment, isAuthenticated, authCredentials]);
 
   useEffect(() => {
     void fetch();

@@ -1,5 +1,6 @@
 import { DeferredPromise, makeDeferredPromise } from '@/utils/promise';
 import { McpOperation, McpSpec } from '@/types/mcp';
+import { ApiAuthCredentials } from '@/types/apiAuth';
 
 interface MessagePayload {
   id?: string;
@@ -20,6 +21,7 @@ const INIT_ID = 'init';
 
 export default class McpService {
   private readonly serverUri: string;
+  private readonly authCredentials?: ApiAuthCredentials;
   private sse: EventSource;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private pendingMessages = new Map<string, DeferredPromise<any>>();
@@ -28,8 +30,10 @@ export default class McpService {
   private lastMessageId = 0;
   private initData: InitData;
 
-  constructor(serverUri: string) {
-    this.serverUri = serverUri;
+  constructor(serverUri: string, authCredentials?: ApiAuthCredentials) {
+    this.serverUri = 'http://localhost:3001'; // serverUri;
+    this.authCredentials = authCredentials;
+
     if (this.serverUri.endsWith('/sse')) {
       this.serverUri = this.serverUri.split('/').slice(0, -1).join('/');
     }
@@ -154,6 +158,12 @@ export default class McpService {
       this.pendingMessages.set(messageId, deferred);
     }
 
+    // Prepare headers with authentication if available
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      Authorization: 'Bearer ' + (this.authCredentials?.value || ''),
+    };
+
     fetch(`${this.serverUri}${this.messagingEndpoint}`, {
       method: 'POST',
       body: JSON.stringify({
@@ -162,9 +172,7 @@ export default class McpService {
         params: {},
         ...payload,
       }),
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
     }).catch((err) => {
       deferred.reject(err);
     });
