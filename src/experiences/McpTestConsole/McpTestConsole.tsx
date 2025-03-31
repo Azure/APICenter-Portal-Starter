@@ -136,7 +136,7 @@ export const McpTestConsole: React.FC<Props> = ({
             title="Headers"
             addBtnLabel="Add header"
             value={headers}
-            // params={headerParams}
+            params={headerParams}
             isStrictSchema={true}
             onChange={handleFormParamsListChange}
           />
