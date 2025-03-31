@@ -97,7 +97,8 @@ export const TestConsoleAuth: React.FC<Props> = ({ apiName, versionName, onChang
   }
 
   return (
-    <div className={styles.testConsoleAuth} style={{ width: '300px' }}>
+    <div className={styles.testConsoleAuth} style={{ width: '400px' }}>
+      <h1>Connect to MCP server</h1>
       {(!!apiAuth.schemeOptions || !apiAuth.isLoading) && (
         <Field label="Authorization type:">
           <Select value={selectedScheme} onChange={handleRequirementSelect}>
