@@ -8,8 +8,8 @@ import { resolveOpUrlTemplate } from '@/utils/apiOperations';
 import HttpTestConsole from '@/experiences/HttpTestConsole';
 import McpTestConsole from '@/experiences/McpTestConsole';
 import { McpCapabilityTypes } from '@/types/mcp';
-import styles from './ApiOperationDetails.module.scss';
 import { ApiAuthCredentials } from '@/types/apiAuth';
+import styles from './ApiOperationDetails.module.scss';
 
 interface Props {
   apiName: string;
@@ -67,12 +67,11 @@ export const ApiOperationDetails: React.FC<Props> = ({
         <>
           <Button onClick={handleTryApiClick}>Run tool</Button>
           <McpTestConsole
-            apiName={apiName}
-            versionName={versionName}
             apiSpec={apiSpec}
             operation={operation}
             deployment={deployment}
             isOpen={isTestConsoleOpen}
+            authCredentials={authCredentials}
             onClose={handleTestConsoleClose}
           />
         </>

@@ -21,6 +21,8 @@ export const ApiSpec: React.FC = () => {
   const { apiName, versionName, definitionName } = useParams<Readonly<ApiDefinitionId>>() as ApiDefinitionId;
   const [deployment, setDeployment] = useState<ApiDeployment | null | undefined>();
   const [authCredentials, setAuthCredentials] = useState<ApiAuthCredentials | undefined>();
+  const [isMcpApi, setIsMcpApi] = useState<boolean>(false);
+  const [shouldFetchSpec, setShouldFetchSpec] = useState<boolean>(false);
 
   const selectedOperation = useSelectedOperation();
   const navigate = useNavigate();
@@ -33,7 +35,35 @@ export const ApiSpec: React.FC = () => {
     () => ({ apiName, versionName, definitionName }),
     [apiName, definitionName, versionName]
   );
-  const apiSpec = useApiSpec(definitionId, deployment, authCredentials);
+
+  useEffect(() => {
+    if (api.data) {
+      const isMcp = api.data.kind === 'mcp';
+      setIsMcpApi(isMcp);
+      
+      // If it's not an MCP API, we don't need auth to fetch the spec
+      if (!isMcp) {
+        setShouldFetchSpec(true);
+      }
+    }
+  }, [api.data]);
+  
+  // For MCP APIs, only fetch the spec when we have both deployment and auth credentials
+  useEffect(() => {
+    if (isMcpApi) {
+      // Only set shouldFetchSpec to true if we have both deployment and auth credentials
+      setShouldFetchSpec(!!deployment && !!authCredentials);
+      console.log('MCP API - Should fetch spec:', !!deployment && !!authCredentials);
+    }
+  }, [isMcpApi, deployment, authCredentials]);
+
+  // Only pass the params to useApiSpec if we're ready to fetch
+  const apiSpecParams = shouldFetchSpec
+    ? { definitionId, deployment, authCredentials }
+    : { definitionId, deployment: null, authCredentials: undefined };
+
+  // Pass the controlled parameters to useApiSpec
+  const apiSpec = useApiSpec(apiSpecParams.definitionId, apiSpecParams.deployment, apiSpecParams.authCredentials);
 
   const handleDefinitionSelectionChange = useCallback(
     (definitionSelection: ApiDefinitionSelection) => {
@@ -92,7 +122,6 @@ export const ApiSpec: React.FC = () => {
   }
 
   function renderContent() {
-
     if (api.isLoading || !api.data) {
       return <Spinner size="large" />;
     }

@@ -9,35 +9,28 @@ import { ApiDeployment } from '@/types/apiDeployment';
 import useMcpTestRunController from '@/hooks/useMcpTestRunController';
 import TestConsoleError from '@/components/TestConsoleError';
 import { ApiAuthCredentials } from '@/types/apiAuth';
-import useApiAuthorization from '@/hooks/useApiAuthorization';
-import TestConsoleAuth from '@/experiences/HttpTestConsole/TestConsoleAuth';
 import styles from './McpTestConsole.module.scss';
 
 interface Props {
-  apiName: string;
-  versionName: string;
-  
   apiSpec?: ApiSpecReader;
   operation?: OperationMetadata;
   deployment?: ApiDeployment;
+  authCredentials?: ApiAuthCredentials;
   isOpen?: boolean;
   onClose: () => void;
 }
 
 export const McpTestConsole: React.FC<Props> = ({ 
-  apiName,
-  versionName,
   apiSpec, 
   operation, 
-  deployment, 
+  deployment,
+  authCredentials, 
   isOpen, 
   onClose 
 }) => {
   const [toolArgs, setToolArgs] = useState<HttpReqParam[]>();
-  const [authCredentials, setAuthCredentials] = useState<ApiAuthCredentials | undefined>();
 
   const runController = useMcpTestRunController(deployment, operation);
-  const apiAuth = useApiAuthorization({ apiName, versionName });
 
   const argsMetadata = useMemo(
     () => apiSpec?.getRequestMetadata(operation?.name)?.body?.[0]?.schema?.properties || [],
@@ -56,25 +49,45 @@ export const McpTestConsole: React.FC<Props> = ({
     setToolArgs(nextArgs);
   }, []);
 
-  const handleAuthCredentialsChange = useCallback((credentials?: ApiAuthCredentials) => {
-    setAuthCredentials(credentials);
+  const handleFormParamsListChange = useCallback((_, nextParams: HttpReqParam[]) => {
+    // Here we would typically update headers state, but for MCP we're just using them directly
+    console.log('Headers updated:', nextParams);
   }, []);
 
-  const handleRunClick = useCallback(() => {
-    // Include auth credentials if available
-    const argsWithAuth = toolArgs ? [...toolArgs] : [];
+  const headerParams = useMemo(() => {
+    const params = [];
+
+    if (authCredentials) {
+      params.push({
+        name: authCredentials.name,
+        required: true,
+        isSecret: true,
+        readonly: true,
+        schema: {
+          type: 'string',
+        },
+      });
+    }
+    
+    return params;
+  }, [authCredentials]);
+
+  const headers = useMemo(() => {
+    const headers = [];
     
     if (authCredentials) {
-      // Add auth credentials to args if needed
-      // For MCP, we typically need to add the auth to the tool arguments
-      argsWithAuth.push({
-        name: 'authToken', // Or another appropriate name based on your MCP auth requirements
+      headers.push({
+        name: authCredentials.name,
         value: authCredentials.value
       });
     }
     
-    void runController.run(argsWithAuth);
-  }, [runController, toolArgs, authCredentials]);
+    return headers;
+  }, [authCredentials]);
+
+  const handleRunClick = useCallback(() => {
+    void runController.run(toolArgs, headers);
+  }, [runController, toolArgs, headers]);
 
   function renderResult() {
     if (!runController.result && !runController.error) {
@@ -118,12 +131,15 @@ export const McpTestConsole: React.FC<Props> = ({
       </DrawerHeader>
       <DrawerBody>
         <HttpTestConsole>
-          {/* Add auth panel similar to HttpTestConsole */}
-          {!apiAuth.isLoading && !!apiAuth.schemeOptions?.length && (
-            <HttpTestConsole.Panel name="auth" header="Authorization" isOpenByDefault>
-              <TestConsoleAuth apiName={apiName} versionName={versionName} onChange={handleAuthCredentialsChange} />
-            </HttpTestConsole.Panel>
-          )}
+          <HttpTestConsole.ParamsListForm
+            name="headers"
+            title="Headers"
+            addBtnLabel="Add header"
+            value={headers}
+            // params={headerParams}
+            isStrictSchema={true}
+            onChange={handleFormParamsListChange}
+          />
           
           <HttpTestConsole.ParamsListForm
             name="arguments"

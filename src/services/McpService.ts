@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
+import { EventSource } from 'eventsource';
 import { DeferredPromise, makeDeferredPromise } from '@/utils/promise';
 import { McpOperation, McpSpec } from '@/types/mcp';
 import { ApiAuthCredentials } from '@/types/apiAuth';
@@ -22,6 +24,7 @@ const INIT_ID = 'init';
 export default class McpService {
   private readonly serverUri: string;
   private readonly authCredentials?: ApiAuthCredentials;
+  private readonly authHeaders: Record<string, string> = {};
   private sse: EventSource;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private pendingMessages = new Map<string, DeferredPromise<any>>();
@@ -33,12 +36,25 @@ export default class McpService {
   constructor(serverUri: string, authCredentials?: ApiAuthCredentials) {
     this.serverUri = 'http://localhost:3001'; // serverUri;
     this.authCredentials = authCredentials;
+    this.authHeaders = {
+      Authorization: `Bearer ${authCredentials?.value}`,
+    };
 
     if (this.serverUri.endsWith('/sse')) {
       this.serverUri = this.serverUri.split('/').slice(0, -1).join('/');
     }
 
-    this.sse = new EventSource(`${this.serverUri}/sse`);
+    // Use the polyfill instead of native EventSource
+    this.sse = new EventSource(`${this.serverUri}/sse`, {
+      fetch: (input, init) =>
+        fetch(input, {
+          ...init,
+          headers: {
+            ...init.headers,
+            Authorization: `Bearer ${authCredentials?.value}`,
+          },
+        }),
+    });
 
     this.handleEndpointReceived = this.handleEndpointReceived.bind(this);
     this.handleErrorReceived = this.handleErrorReceived.bind(this);
@@ -76,14 +92,21 @@ export default class McpService {
     return JSON.stringify(spec);
   }
 
-  public callTool<T = void>(toolName: string, args: Record<string, unknown>): Promise<T> {
-    return this.sendRequest<T>({
-      method: 'tools/call',
-      params: {
-        name: toolName,
-        arguments: args,
+  public callTool<T = void>(
+    toolName: string,
+    args: Record<string, unknown>,
+    headers: Record<string, string>
+  ): Promise<T> {
+    return this.sendRequest<T>(
+      {
+        method: 'tools/call',
+        params: {
+          name: toolName,
+          arguments: args,
+        },
       },
-    });
+      headers
+    );
   }
 
   private ensureInitialized(): Promise<void> {
@@ -91,18 +114,21 @@ export default class McpService {
   }
 
   private async initialize(): Promise<void> {
-    this.initData = await this.sendRequest<InitData>({
-      id: INIT_ID,
-      method: 'initialize',
-      params: {
-        protocolVersion: '2024-11-05',
-        capabilities: {},
-        clientInfo: {
-          name: 'apic-mcp-explorer',
-          version: '1.0.0',
+    this.initData = await this.sendRequest<InitData>(
+      {
+        id: INIT_ID,
+        method: 'initialize',
+        params: {
+          protocolVersion: '2024-11-05',
+          capabilities: {},
+          clientInfo: {
+            name: 'apic-mcp-explorer',
+            version: '1.0.0',
+          },
         },
       },
-    });
+      this.authHeaders
+    );
 
     this.initDeferredPromise.resolve();
   }
@@ -140,28 +166,33 @@ export default class McpService {
     }
   }
 
-  private sendRequest<T = void>(payload: MessagePayload): Promise<T> {
+  private sendRequest<T = void>(payload: MessagePayload, authHeaders: Record<string, string> = undefined): Promise<T> {
     if (!this.messagingEndpoint) {
-      return;
+      return Promise.reject(new Error('No messaging endpoint available'));
     }
 
-    const isInit = payload.id === INIT_ID;
-    let deferred: DeferredPromise<T> = this.pendingMessages.get(INIT_ID);
-    if (deferred && !deferred.isComplete && !isInit) {
-      // If we are already waiting for this message, don't send it again (ignore for init as it's deferred is pre-created)
-      return;
-    }
-
+    // Get the actual message ID for this request
     const messageId = payload.id || String(this.lastMessageId++);
+    const isInit = messageId === INIT_ID;
+
+    // Look up the deferred promise using the CORRECT message ID
+    let deferred: DeferredPromise<T> = this.pendingMessages.get(messageId);
+
+    // For the init message, we should use the pre-created promise
+    if (isInit && !deferred) {
+      deferred = this.pendingMessages.get(INIT_ID) as DeferredPromise<T>;
+    }
+
+    // If no promise exists or it's already complete, create a new one
     if (!deferred || deferred.isComplete) {
       deferred = makeDeferredPromise<T>();
       this.pendingMessages.set(messageId, deferred);
     }
 
     // Prepare headers with authentication if available
-    const headers: Record<string, string> = {
+    const requestHeaders: Record<string, string> = {
+      ...(authHeaders ?? this.authHeaders ?? {}),
       'Content-Type': 'application/json',
-      Authorization: 'Bearer ' + (this.authCredentials?.value || ''),
     };
 
     fetch(`${this.serverUri}${this.messagingEndpoint}`, {
@@ -172,7 +203,7 @@ export default class McpService {
         params: {},
         ...payload,
       }),
-      headers,
+      headers: requestHeaders,
     }).catch((err) => {
       deferred.reject(err);
     });

@@ -8,7 +8,7 @@ interface ReturnType {
   result?: string;
   error?: string;
   isRunning: boolean;
-  run: (args: HttpReqParam[]) => Promise<void>;
+  run: (args: HttpReqParam[], headers: HttpReqParam[]) => Promise<void>;
 }
 
 export default function useMcpTestRunController(deployment?: ApiDeployment, operation?: OperationMetadata): ReturnType {
@@ -36,7 +36,7 @@ export default function useMcpTestRunController(deployment?: ApiDeployment, oper
   }, [operation]);
 
   const run = useCallback(
-    async (args: HttpReqParam[]) => {
+    async (args: HttpReqParam[], headers: HttpReqParam[]) => {
       if (isRunning) {
         return;
       }
@@ -46,7 +46,9 @@ export default function useMcpTestRunController(deployment?: ApiDeployment, oper
 
         const toolName = operation.name.split('/').pop();
         const toolArgs = Object.fromEntries(args.map(({ name, value }) => [name, value]));
-        const result = await mcpService.callTool(toolName, toolArgs);
+        const toolHeaders = Object.fromEntries(headers.map(({ name, value }) => [name, value]));
+
+        const result = await mcpService.callTool(toolName, toolArgs, toolHeaders);
 
         setError(undefined);
         setResult(JSON.stringify(result, null, 2));
