@@ -30,7 +30,14 @@ export const McpTestConsole: React.FC<Props> = ({
 }) => {
   const [toolArgs, setToolArgs] = useState<HttpReqParam[]>();
 
-  const runController = useMcpTestRunController(deployment, operation);
+  const { result, error, isRunning, run, isReady } = useMcpTestRunController(
+    deployment,
+    operation,
+    authCredentials
+  );
+
+  // Show loading or disabled state when not ready
+const buttonDisabled = isRunning || !isReady;
 
   const argsMetadata = useMemo(
     () => apiSpec?.getRequestMetadata(operation?.name)?.body?.[0]?.schema?.properties || [],
@@ -86,17 +93,17 @@ export const McpTestConsole: React.FC<Props> = ({
   }, [authCredentials]);
 
   const handleRunClick = useCallback(() => {
-    void runController.run(toolArgs, headers);
-  }, [runController, toolArgs, headers]);
+    void run(toolArgs, headers);
+  }, [run, toolArgs, headers]);
 
   function renderResult() {
-    if (!runController.result && !runController.error) {
+    if (!result && !error) {
       return null;
     }
 
-    let content: React.ReactNode = <TestConsoleError>{runController.error}</TestConsoleError>;
-    if (runController.result) {
-      content = <SyntaxHighlighter language="json">{runController.result}</SyntaxHighlighter>;
+    let content: React.ReactNode = <TestConsoleError>{error}</TestConsoleError>;
+    if (result) {
+      content = <SyntaxHighlighter language="json">{result}</SyntaxHighlighter>;
     }
 
     return (
@@ -154,10 +161,10 @@ export const McpTestConsole: React.FC<Props> = ({
         </HttpTestConsole>
 
         <div className={styles.runBtnWrapper}>
-          <Button appearance="primary" disabledFocusable={runController.isRunning} onClick={handleRunClick}>
-            {runController.isRunning ? 'Running tool' : 'Run tool'}
+          <Button appearance="primary" disabledFocusable={isRunning} onClick={handleRunClick}>
+            {isRunning ? 'Running tool' : 'Run tool'}
           </Button>
-        </div>
+      </div>
       </DrawerBody>
     </Drawer>
   );
