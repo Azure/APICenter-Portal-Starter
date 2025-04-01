@@ -21,8 +21,6 @@ export const ApiSpec: React.FC = () => {
   const { apiName, versionName, definitionName } = useParams<Readonly<ApiDefinitionId>>() as ApiDefinitionId;
   const [deployment, setDeployment] = useState<ApiDeployment | null | undefined>();
   const [authCredentials, setAuthCredentials] = useState<ApiAuthCredentials | undefined>();
-  const [isMcpApi, setIsMcpApi] = useState<boolean>(false);
-  const [shouldFetchSpec, setShouldFetchSpec] = useState<boolean>(false);
 
   const selectedOperation = useSelectedOperation();
   const navigate = useNavigate();
@@ -36,34 +34,8 @@ export const ApiSpec: React.FC = () => {
     [apiName, definitionName, versionName]
   );
 
-  useEffect(() => {
-    if (api.data) {
-      const isMcp = api.data.kind === 'mcp';
-      setIsMcpApi(isMcp);
-      
-      // If it's not an MCP API, we don't need auth to fetch the spec
-      if (!isMcp) {
-        setShouldFetchSpec(true);
-      }
-    }
-  }, [api.data]);
-  
-  // For MCP APIs, only fetch the spec when we have both deployment and auth credentials
-  useEffect(() => {
-    if (isMcpApi) {
-      // Only set shouldFetchSpec to true if we have both deployment and auth credentials
-      setShouldFetchSpec(!!deployment && !!authCredentials);
-      console.log('MCP API - Should fetch spec:', !!deployment && !!authCredentials);
-    }
-  }, [isMcpApi, deployment, authCredentials]);
-
-  // Only pass the params to useApiSpec if we're ready to fetch
-  const apiSpecParams = shouldFetchSpec
-    ? { definitionId, deployment, authCredentials }
-    : { definitionId, deployment: null, authCredentials: undefined };
-
   // Pass the controlled parameters to useApiSpec
-  const apiSpec = useApiSpec(apiSpecParams.definitionId, apiSpecParams.deployment, apiSpecParams.authCredentials);
+  const apiSpec = useApiSpec(definitionId, deployment, authCredentials);
 
   const handleDefinitionSelectionChange = useCallback(
     (definitionSelection: ApiDefinitionSelection) => {
@@ -84,7 +56,7 @@ export const ApiSpec: React.FC = () => {
     [apiName, definitionName, navigate, versionName]
   );
 
-  const handleAuthCredentialsChange = useCallback((credentials?: any) => {
+  const handleAuthCredentialsChange = useCallback((credentials?: ApiAuthCredentials) => {
     console.log('Auth credentials changed:', credentials);
     setAuthCredentials(credentials);
   }, []);
@@ -126,19 +98,27 @@ export const ApiSpec: React.FC = () => {
       return <Spinner size="large" />;
     }
 
-    if (api.data.kind === 'mcp' && !authCredentials) {
+    // Check if this is an MCP API that requires auth
+    if (api.data.kind === 'mcp' && apiSpec.requiresAuth) {
+      console.log('Rendering auth form because requiresAuth is true');
       return (
         <div className={styles.mcpTestConsole}>
+          <h3>Authentication Required</h3>
+          <p>This MCP API requires authentication to access the specification.</p>
           <TestConsoleAuth apiName={apiName} versionName={versionName} onChange={handleAuthCredentialsChange} />
         </div>
       );
+    }
+
+    if (apiSpec.isLoading) {
+      return <Spinner size="large" label="Loading API specification..." />;
     }
 
     if (!apiSpec.spec) {
       return (
         <EmptyStateMessage>
           {api.data.kind === 'mcp'
-            ? 'Unable to fetch MCP specification. Please check your authentication credentials.'
+            ? 'Unable to fetch MCP specification. Please check your connection and try again.'
             : "The specified API does not exist or its specification can't be read"}
         </EmptyStateMessage>
       );

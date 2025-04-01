@@ -14,6 +14,7 @@ import { ApiAuthCredentials } from '@/types/apiAuth';
 interface ReturnType extends ApiSpecReader {
   spec?: string;
   isLoading: boolean;
+  requiresAuth: boolean;
 }
 
 export default function useApiSpec(
@@ -26,6 +27,7 @@ export default function useApiSpec(
   const [spec, setSpec] = useState<string | undefined>();
   const [reader, setReader] = useState<ApiSpecReader | undefined>();
   const [isLoading, setIsLoading] = useState(true);
+  const [requiresAuth, setRequiresAuth] = useState(false);
   
   const ApiService = useApiService();
 
@@ -49,14 +51,61 @@ export default function useApiSpec(
 
       const isMcp = api.kind === 'mcp';
       if (isMcp) {
-        const mcpService = new McpService(deployment.server.runtimeUri[0], authCredentials);
-        spec = await mcpService.collectMcpSpec();
-        mcpService.closeConnection();
+        let mcpService = undefined;
+        try {
+          console.log('Creating McpService with auth:', !!authCredentials);
+          mcpService = new McpService(deployment.server.runtimeUri[0], authCredentials);
+          
+          try {
+            spec = await mcpService.collectMcpSpec();
+            // If we successfully got the spec, we don't need auth
+            setRequiresAuth(false);
+          } catch (error) {
+            console.error('MCP spec collection error:', error);
+            
+            // Check if service detected an auth error
+            if (mcpService.hasAuthError?.()) {
+              console.log('Auth error detected from McpService');
+              setRequiresAuth(true);
+              // Don't re-throw, we want to handle this gracefully
+            } else {
+              // Some other error occurred
+              throw error;
+            }
+          }
+        } catch (error) {
+          console.error('McpService creation/initialization error:', error);
+          
+          // Check for auth errors in the initial connection
+          if (
+            error instanceof Error && 
+            (error.message.includes('Authentication') || 
+             error.message.includes('401') || 
+             error.message.includes('403') ||
+             error.message.includes('Unauthorized') ||
+             error.message.includes('Forbidden'))
+          ) {
+            console.log('Auth error detected from error message');
+            setRequiresAuth(true);
+          } else {
+            throw error;
+          }
+        } finally {
+          if (mcpService) {
+            mcpService.closeConnection();
+          }
+        }
       } else {
         spec = await ApiService.getSpecification(definitionId);
       }
       
       if (!spec) {
+        if (isMcp && !requiresAuth) {
+          // For MCP APIs, if we don't have a spec but it's not an auth issue,
+          // let's assume we need auth anyway as a fallback
+          console.log('No spec returned for MCP API - assuming auth required');
+          setRequiresAuth(true);
+        }
         throw new Error('Failed to fetch spec');
       }
 
@@ -69,13 +118,18 @@ export default function useApiSpec(
           name: isMcp ? 'mcp' : definition.specification?.name,
         },
       }));
-    } catch {
-      setSpec(undefined);
-      setReader(undefined);
+    } catch (error) {
+      console.error('Error in useApiSpec:', error);
+      
+      // Only clear spec if not an auth issue
+      if (!requiresAuth) {
+        setSpec(undefined);
+        setReader(undefined);
+      }
     } finally {
       setIsLoading(false);
     }
-  }, [ApiService, definitionId, deployment, isAuthenticated, authCredentials]);
+  }, [ApiService, definitionId, deployment, isAuthenticated, authCredentials, requiresAuth]);
 
   useEffect(() => {
     void fetch();
@@ -86,7 +140,8 @@ export default function useApiSpec(
       ...reader,
       spec,
       isLoading,
+      requiresAuth,
     }),
-    [isLoading, reader, spec]
+    [isLoading, reader, requiresAuth, spec]
   );
 }

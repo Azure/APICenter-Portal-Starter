@@ -30,14 +30,11 @@ export const McpTestConsole: React.FC<Props> = ({
 }) => {
   const [toolArgs, setToolArgs] = useState<HttpReqParam[]>();
 
-  const { result, error, isRunning, run, isReady } = useMcpTestRunController(
+  const { result, error, isRunning, run } = useMcpTestRunController(
     deployment,
     operation,
     authCredentials
   );
-
-  // Show loading or disabled state when not ready
-const buttonDisabled = isRunning || !isReady;
 
   const argsMetadata = useMemo(
     () => apiSpec?.getRequestMetadata(operation?.name)?.body?.[0]?.schema?.properties || [],

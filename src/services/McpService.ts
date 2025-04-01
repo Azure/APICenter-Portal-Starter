@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { fetchEventSource, EventSourceMessage } from '@sentool/fetch-event-source';
 import { DeferredPromise, makeDeferredPromise } from '@/utils/promise';
@@ -33,6 +34,7 @@ export default class McpService {
   private initData: InitData;
   private connected: boolean = false;
   private connectionPromise: Promise<any>;
+  private authError: boolean = false;
 
   constructor(serverUri: string, authCredentials?: ApiAuthCredentials) {
     // Keep server URI as is per request
@@ -79,25 +81,26 @@ export default class McpService {
         }
 
         if (message.event === 'message') {
-          try {
-            const data = message.data;
+          const data = message.data;
 
-            if (data === 'Accepted') {
-              return;
-            }
-            console.log('Message data received:', data.id);
+          if (data === 'Accepted') {
+            return;
+          }
 
-            // Find the deferred promise for this message ID
-            const deferred = this.pendingMessages.get(data.id);
-            if (deferred && !deferred.isComplete) {
-              if (data.error) {
-                deferred.reject(data.error);
-              } else {
-                deferred.resolve(data.result);
-              }
+          if (message.status === 401 || message.status === 403) {
+            throw new Error(`Authentication failed: ${message.status === 401 ? 'Unauthorized' : 'Forbidden'}`);
+          }
+
+          console.log('Message data received:', data.id);
+
+          // Find the deferred promise for this message ID
+          const deferred = this.pendingMessages.get(data.id);
+          if (deferred && !deferred.isComplete) {
+            if (data.error) {
+              deferred.reject(data.error);
+            } else {
+              deferred.resolve(data.result);
             }
-          } catch (err) {
-            console.error('Error parsing message:', err);
           }
         }
       };
@@ -117,12 +120,6 @@ export default class McpService {
       // Set up the controller for aborting the connection
       this.controller = new AbortController();
 
-      // And before using fetchEventSource
-console.log('Final headers for SSE connection:', 
-  Object.entries(headers).map(([key, value]) => 
-    `${key}: ${value ? value.substring(0, 5) + '...' : 'EMPTY'}`
-  ));
-
       // Create the event source
       fetchEventSource(`${this.serverUri}/sse`, {
         method: 'GET',
@@ -138,7 +135,14 @@ console.log('Final headers for SSE connection:',
           } else {
             const error = new Error(`Failed to connect: ${response.status}`);
             console.error(error);
-            reject(error);
+            
+            // Mark auth errors
+            if (response.status === 401 || response.status === 403) {
+              this.authError = true;
+              reject(new Error(`Authentication failed: ${response.status === 401 ? 'Unauthorized' : 'Forbidden'}`));
+            } else {
+              reject(error);
+            }
           }
         },
 
@@ -158,6 +162,10 @@ console.log('Final headers for SSE connection:',
         },
       }).catch((error) => {
         console.error('Connection failed:', error);
+        // Try to detect auth errors in the catch block too
+        if (error.message && (error.message.includes('401') || error.message.includes('403'))) {
+          this.authError = true;
+        }
         reject(error);
       });
     });
@@ -172,31 +180,58 @@ console.log('Final headers for SSE connection:',
     this.connected = false;
   }
 
+  // Add a method to check if auth error occurred
+  public hasAuthError(): boolean {
+    return this.authError;
+  }
+
   public async collectMcpSpec(): Promise<string> {
-    await this.ensureInitialized();
+    try {
+      await this.connectionPromise; // Wait for connection before initializing
+      await this.ensureInitialized();
 
-    console.log('Collecting MCP spec...');
+      console.log('Collecting MCP spec...');
 
-    const spec: McpSpec = {
-      prompts: [],
-      resources: [],
-      tools: [],
-    };
+      const spec: McpSpec = {
+        prompts: [],
+        resources: [],
+        tools: [],
+      };
 
-    if (!this.initData || !this.initData.capabilities) {
-      throw new Error('Server did not return capabilities data during initialization');
+      if (!this.initData || !this.initData.capabilities) {
+        throw new Error('Server did not return capabilities data during initialization');
+      }
+
+      const capabilities = Object.keys(this.initData.capabilities).filter((capability) => capability in spec);
+      console.log('Capabilities to fetch:', capabilities);
+
+      for (const capability of capabilities) {
+        console.log(`Listing ${capability}...`);
+        const res = await this.sendRequest<McpOperation[]>({ method: `${capability}/list` });
+        spec[capability] = res[capability];
+      }
+
+      return JSON.stringify(spec);
+    } catch (error) {
+      console.error('Error collecting MCP spec:', error);
+      
+      // Check if this is an auth error
+      if (
+        error?.status === 401 || 
+        error?.status === 403 || 
+        (error?.message && (
+          error.message.includes('auth') || 
+          error.message.includes('401') ||
+          error.message.includes('403') ||
+          error.message.includes('Unauthorized') ||
+          error.message.includes('Forbidden')
+        ))
+      ) {
+        this.authError = true;
+      }
+      
+      throw error;
     }
-
-    const capabilities = Object.keys(this.initData.capabilities).filter((capability) => capability in spec);
-    console.log('Capabilities to fetch:', capabilities);
-
-    for (const capability of capabilities) {
-      console.log(`Listing ${capability}...`);
-      const res = await this.sendRequest<McpOperation[]>({ method: `${capability}/list` });
-      spec[capability] = res[capability];
-    }
-
-    return JSON.stringify(spec);
   }
 
   public callTool<T = void>(
@@ -216,7 +251,7 @@ console.log('Final headers for SSE connection:',
     );
   }
 
-  private ensureInitialized(timeoutMs = 15000): Promise<void> {
+  public ensureInitialized(): Promise<void> {
     return this.initDeferredPromise.promise;
   }
 
@@ -303,7 +338,7 @@ console.log('Final headers for SSE connection:',
         if (data === 'Accepted') {
           return;
         }
-        
+
         // Parse the response as JSON
         let parsedData;
         try {
