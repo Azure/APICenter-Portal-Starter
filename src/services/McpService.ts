@@ -38,7 +38,7 @@ export default class McpService {
 
   constructor(serverUri: string, authCredentials?: ApiAuthCredentials) {
     // Keep server URI as is per request
-    this.serverUri = 'http://localhost:3002';
+    this.serverUri = serverUri;
     console.log('Initializing McpService with server URI:', this.serverUri);
 
     this.authCredentials = authCredentials;
