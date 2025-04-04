@@ -65,14 +65,18 @@ export const ApiList: React.FC = () => {
             <MarkdownRenderer markdown={api.description} maxLength={120} />
           </InfoTable.Cell>
           <InfoTable.Cell>
-            <Badge appearance="tint" color="informative" shape="rounded">
-              {api.lifecycleStage}
-            </Badge>
+            {!!api.lifecycleStage && (
+              <Badge appearance="tint" color="informative" shape="rounded">
+                {api.lifecycleStage}
+              </Badge>
+            )}
           </InfoTable.Cell>
           <InfoTable.Cell>
-            <Badge appearance="tint" color="informative" shape="rounded">
-              {api.type}
-            </Badge>
+            {api.type && (
+              <Badge appearance="tint" color="informative" shape="rounded">
+                {api.type}
+              </Badge>
+            )}
           </InfoTable.Cell>
         </InfoTable.Row>
       ))}
