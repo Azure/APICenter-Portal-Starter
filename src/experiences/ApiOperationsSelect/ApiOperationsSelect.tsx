@@ -51,8 +51,8 @@ export const ApiOperationsSelect: React.FC<Props> = ({ apiSpec }) => {
     if (selectedOperation.name || !operations.length) {
       return;
     }
-    handleOperationSelect(operations[0]);
-  }, [handleOperationSelect, operations, selectedOperation]);
+    handleOperationSelect(operationCategories[0].operations[0]);
+  }, [handleOperationSelect, operationCategories, operations, selectedOperation]);
 
   const handleAccordionToggle = useCallback<React.ComponentProps<typeof Accordion>['onToggle']>((_, data) => {
     setOpenCategory(String(data.openItems[0]));
