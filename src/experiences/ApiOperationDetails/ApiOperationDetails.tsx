@@ -1,156 +1,28 @@
-import React, { useCallback, useState } from 'react';
-import { ApiOperationMethod, InfoPanel, ParametersTable, CopyToClipboard } from '@microsoft/api-docs-ui';
-import { Button } from '@fluentui/react-components';
-import { ApiSpecReader, ApiSpecTypes, OperationMetadata } from '@/types/apiSpec';
-import ParamSchemaDefinition from '@/components/ParamSchemaDefinition';
-import { ApiDeployment } from '@/types/apiDeployment';
+import React from 'react';
+import { ApiOperationMethod, CopyToClipboard, InfoPanel } from '@microsoft/api-docs-ui';
 import { resolveOpUrlTemplate } from '@/utils/apiOperations';
-import HttpTestConsole from '@/experiences/HttpTestConsole';
-import McpTestConsole from '@/experiences/McpTestConsole';
-import { McpCapabilityTypes } from '@/types/mcp';
+import { OperationTypes } from '@/types/apiSpec';
+import { OperationDetailsViewProps } from './types';
+import McpResourceOperationDetails from './McpResourceOperationDetails';
+import DefaultOperationDetails from './DefaultOperationDetails';
 import styles from './ApiOperationDetails.module.scss';
 
-interface Props {
-  apiName: string;
-  versionName: string;
-  apiSpec: ApiSpecReader;
-  operation?: OperationMetadata;
-  deployment?: ApiDeployment;
-}
+type DetailsViewType = React.NamedExoticComponent<OperationDetailsViewProps>;
 
-export const ApiOperationDetails: React.FC<Props> = ({ apiName, versionName, apiSpec, operation, deployment }) => {
-  const [isTestConsoleOpen, setIsTestConsoleOpen] = useState(false);
+const detailsViewByType: Record<OperationTypes, DetailsViewType> = {
+  [OperationTypes.DEFAULT]: DefaultOperationDetails,
+  [OperationTypes.MCP_RESOURCE]: McpResourceOperationDetails,
+};
 
-  const handleTryApiClick = useCallback(() => {
-    setIsTestConsoleOpen(true);
-  }, []);
-
-  const handleTestConsoleClose = useCallback(() => {
-    setIsTestConsoleOpen(false);
-  }, []);
-
-  if (!operation) {
-    return null;
-  }
+export const ApiOperationDetails: React.FC<OperationDetailsViewProps> = (props) => {
+  const { apiSpec, operation, deployment } = props;
 
   const urlTemplate = resolveOpUrlTemplate(apiSpec, operation, deployment);
 
-  function renderTestConsole() {
-    if ([ApiSpecTypes.OpenApiV2, ApiSpecTypes.OpenApiV3].includes(apiSpec.type)) {
-      return (
-        <>
-          <Button onClick={handleTryApiClick}>Try this API</Button>
-          <HttpTestConsole
-            apiName={apiName}
-            versionName={versionName}
-            apiSpec={apiSpec}
-            operation={operation}
-            deployment={deployment}
-            isOpen={isTestConsoleOpen}
-            onClose={handleTestConsoleClose}
-          />
-        </>
-      );
-    }
+  const DetailsView = detailsViewByType[operation?.type];
 
-    if (apiSpec.type === ApiSpecTypes.MCP && operation.category === McpCapabilityTypes.TOOLS) {
-      return (
-        <>
-          <Button onClick={handleTryApiClick}>Run tool</Button>
-          <McpTestConsole
-            apiSpec={apiSpec}
-            operation={operation}
-            deployment={deployment}
-            isOpen={isTestConsoleOpen}
-            onClose={handleTestConsoleClose}
-          />
-        </>
-      );
-    }
-
+  if (!operation) {
     return null;
-  }
-
-  function renderRequestInfo() {
-    const requestMetadata = apiSpec.getRequestMetadata(operation.name);
-
-    if (
-      !requestMetadata.description &&
-      !requestMetadata.parameters?.length &&
-      !requestMetadata.headers?.length &&
-      !requestMetadata.body
-    ) {
-      return <p>No requests data</p>;
-    }
-
-    return (
-      <>
-        {!!requestMetadata.description && <p>{requestMetadata.description}</p>}
-        {!!requestMetadata.parameters?.length && (
-          <>
-            <h4>Request parameters</h4>
-            <ParametersTable parameters={requestMetadata.parameters} hiddenColumns={['readOnly']} />
-          </>
-        )}
-        {!!requestMetadata.headers?.length && (
-          <>
-            <h4>Request headers</h4>
-            <ParametersTable parameters={requestMetadata.headers} hiddenColumns={['in', 'readOnly']} />
-          </>
-        )}
-
-        <ParamSchemaDefinition
-          title={apiSpec.type === ApiSpecTypes.GraphQL ? 'Arguments' : 'Request body'}
-          mediaContentList={requestMetadata.body}
-          hiddenColumns={['in', 'readOnly']}
-        />
-      </>
-    );
-  }
-
-  function renderResponses() {
-    const responsesMetadata = apiSpec.getResponsesMetadata(operation.name);
-    if (!responsesMetadata.length) {
-      return <p>No responses data</p>;
-    }
-
-    return responsesMetadata.map((response, i) => (
-      <React.Fragment key={i}>
-        <h3>Response: {response.code}</h3>
-        <p>{response.description}</p>
-        {!!response.headers?.length && (
-          <>
-            <h4>Headers:</h4>
-            <ParametersTable parameters={response.headers} hiddenColumns={['in', 'readOnly', 'required']} />
-          </>
-        )}
-
-        <ParamSchemaDefinition title="Body" mediaContentList={response.body} hiddenColumns={['in', 'readOnly']} />
-      </React.Fragment>
-    ));
-  }
-
-  function renderDefinitions() {
-    const definitions = apiSpec.getOperationDefinitions(operation.name);
-    if (!definitions.length) {
-      return null;
-    }
-
-    return (
-      <>
-        <h3>Definitions</h3>
-        {definitions.map((definition) => (
-          <ParamSchemaDefinition
-            key={definition.$ref || definition.refLabel}
-            title="Body"
-            schema={definition}
-            hiddenColumns={!definition.isEnum ? ['in', 'readOnly'] : ['in', 'type', 'readOnly', 'required']}
-            isEnum={definition.isEnum}
-            isGlobalDefinition
-          />
-        ))}
-      </>
-    );
   }
 
   return (
@@ -169,12 +41,7 @@ export const ApiOperationDetails: React.FC<Props> = ({ apiName, versionName, api
         </div>
       </InfoPanel>
 
-      {renderTestConsole()}
-
-      <h3>Request</h3>
-      {renderRequestInfo()}
-      {renderResponses()}
-      {renderDefinitions()}
+      <DetailsView {...props} />
     </div>
   );
 };

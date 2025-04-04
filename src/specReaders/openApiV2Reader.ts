@@ -10,6 +10,7 @@ import {
   OperationCategory,
   OperationMetadata,
   OperationParameterMetadata,
+  OperationTypes,
   RequestMetadata,
   ResponseMetadata,
   SampleDataEntry,
@@ -96,6 +97,7 @@ export default async function openApiSpecReader(specStr: string): Promise<ApiSpe
             .map((method: string) => {
               const opData = pathData[method];
               return {
+                type: OperationTypes.DEFAULT,
                 category: 'default',
                 displayName: opData.summary || pathName,
                 description: opData.description,
