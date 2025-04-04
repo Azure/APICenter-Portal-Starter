@@ -54,9 +54,17 @@ export const ApiOperationsSelect: React.FC<Props> = ({ apiSpec }) => {
     handleOperationSelect(operationCategories[0].operations[0]);
   }, [handleOperationSelect, operationCategories, operations, selectedOperation]);
 
-  const handleAccordionToggle = useCallback<React.ComponentProps<typeof Accordion>['onToggle']>((_, data) => {
-    setOpenCategory(String(data.openItems[0]));
-  }, []);
+  const handleAccordionToggle = useCallback<React.ComponentProps<typeof Accordion>['onToggle']>(
+    (_, data) => {
+      const name = String(data.openItems[0]);
+      setOpenCategory(name);
+      const category = operationCategories.find((category) => category.name === name);
+      if (category?.operations.length) {
+        selectedOperation.set(category.operations[0].name);
+      }
+    },
+    [operationCategories, selectedOperation]
+  );
 
   return (
     <Accordion openItems={[openCategory]} collapsible onToggle={handleAccordionToggle}>

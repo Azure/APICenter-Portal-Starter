@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 
 interface ReturnType {
   name: string;
-  set: (search: string) => void;
+  set: (name: string) => void;
   reset: () => void;
 }
 
