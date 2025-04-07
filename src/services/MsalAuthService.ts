@@ -1,24 +1,24 @@
 import * as msal from '@azure/msal-browser';
-import config from '@/config';
-import { IAuthService } from '@/types/services/IAuthService';
+import { MsalSettings } from '@/types/msalSettings';
+import { getRecoil } from 'recoil-nexus';
+import appServicesAtom from '@/atoms/appServicesAtom';
 
 let msalInstance: msal.PublicClientApplication | undefined;
 
-const scopes =
-  typeof config.authentication.scopes === 'string' ? [config.authentication.scopes] : config.authentication.scopes;
 
-async function getMsalInstance(): Promise<msal.PublicClientApplication> {
+async function getMsalInstance(config: MsalSettings): Promise<msal.PublicClientApplication> {
   if (msalInstance) {
     return msalInstance;
   }
 
+  // Fixing authority for backward compatibility
   const authorityUrl =
-    (config.authentication.authority || config.authentication.azureAdInstance) + config.authentication.tenantId;
+    (config.authority || config.azureAdInstance) + config.tenantId;
 
   const msalConfig: msal.Configuration = {
     auth: {
-      clientId: config.authentication.clientId,
-      authority: authorityUrl,
+      clientId: config.clientId,
+      authority: authorityUrl
     },
   };
 
@@ -34,30 +34,44 @@ async function getMsalInstance(): Promise<msal.PublicClientApplication> {
   return msalInstance;
 }
 
-const MsalAuthService: IAuthService = {
+async function getAuthConfig(): Promise<MsalSettings> {
+  const { ConfigService } = getRecoil(appServicesAtom);
+  const config = await ConfigService.getSettings();
+
+  // Fixing scopes for backward compatibility
+  config.authentication.scopes = typeof config.authentication.scopes === 'string' ? [config.authentication.scopes] : config.authentication.scopes;
+
+  return config.authentication;
+}
+
+const MsalAuthService = {
   async isAuthenticated(): Promise<boolean> {
-    const msalInstance = await getMsalInstance();
+    const config = await getAuthConfig();
+    const msalInstance = await getMsalInstance(config);
     const accounts = msalInstance.getAllAccounts();
 
     return accounts.length > 0;
   },
 
   async getAccessToken(): Promise<string> {
-    const msalInstance = await getMsalInstance();
-    const authResult = await msalInstance.acquireTokenSilent({ scopes });
+    const config = await getAuthConfig();
+    const msalInstance = await getMsalInstance(config);
+    const authResult = await msalInstance.acquireTokenSilent({ scopes: config.scopes });
 
     return authResult.accessToken;
   },
 
   async signIn(): Promise<void> {
-    const msalInstance = await getMsalInstance();
-    const authResult = await msalInstance.loginPopup({ scopes });
+    const config = await getAuthConfig();
+    const msalInstance = await getMsalInstance(config);
+    const authResult = await msalInstance.loginPopup({ scopes: config.scopes });
 
     msalInstance.setActiveAccount(authResult.account);
   },
 
   async signOut(): Promise<void> {
-    const msalInstance = await getMsalInstance();
+    const config = await getAuthConfig();
+    const msalInstance = await getMsalInstance(config);
     await msalInstance.logoutPopup();
   },
 };

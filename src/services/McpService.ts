@@ -22,7 +22,6 @@ export default class McpService {
   private messagingEndpoint?: string;
   private lastMessageId = INIT_ID;
   private initData: McpInitData;
-  private accessToken: string | undefined;
 
   constructor(serverUri: string) {
     this.serverUri = serverUri;
@@ -65,7 +64,7 @@ export default class McpService {
       try {
         const res = await this.sendRequest<McpOperation[]>({ method: `${capability}/list` });
         spec[capability] = res[capability];
-      } catch {}
+      } catch { }
     }
 
     return JSON.stringify(spec);
@@ -136,18 +135,18 @@ export default class McpService {
   }
 
   private async fetchProxy(url: string, requestInit: RequestInit): ReturnType<typeof fetch> {
-    if (!this.accessToken) {
-      const { AuthService } = getRecoil(appServicesAtom);
-      this.accessToken = await AuthService.getAccessToken();
-    }
+    const { AuthService, ConfigService } = getRecoil(appServicesAtom);
+    const accessToken = await AuthService.getAccessToken();
+    const settings = await ConfigService.getSettings();
+    const serviceName = settings.dataApiHostName.split('.')[0];
 
     return fetch(CorsProxyEndpoint, {
       method: 'POST',
       ...requestInit,
       headers: {
         ...requestInit.headers,
-        Authorization: `Bearer ${this.accessToken}`,
-        'Ocp-Apim-Service-Name': 'paperbits',
+        'Ocp-Apim-Authorization': `Bearer ${accessToken}`,
+        'Ocp-Apim-Service-Name': serviceName,
         'Ocp-Apim-Method': requestInit.method,
         'Ocp-Apim-Url': url,
       },

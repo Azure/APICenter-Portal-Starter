@@ -5,6 +5,7 @@ import basicSsl from '@vitejs/plugin-basic-ssl';
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [basicSsl()],
+  publicDir: './src/public',
   define: {
     'process.env': {},
   },
