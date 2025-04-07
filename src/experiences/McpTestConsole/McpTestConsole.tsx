@@ -3,7 +3,7 @@ import { Body1Strong, Button, Drawer, DrawerBody, DrawerHeader, DrawerHeaderTitl
 import { Dismiss24Regular } from '@fluentui/react-icons';
 import { HttpTestConsole, SyntaxHighlighter } from '@microsoft/api-docs-ui';
 import { HttpReqParam } from '@microsoft/api-docs-ui/src/types/testConsole';
-import { ApiSpecReader, OperationMetadata } from '@/types/apiSpec';
+import { ApiSpecReader, OperationMetadata, OperationParameterMetadata } from '@/types/apiSpec';
 import { ApiDeployment } from '@/types/apiDeployment';
 import useMcpTestRunController from '@/hooks/useMcpTestRunController';
 import TestConsoleError from '@/components/TestConsoleError';
@@ -23,7 +23,8 @@ export const McpTestConsole: React.FC<Props> = ({ apiSpec, operation, deployment
   const runController = useMcpTestRunController(deployment, operation);
 
   const argsMetadata = useMemo(
-    () => apiSpec.getRequestMetadata(operation.name)?.body?.[0]?.schema?.properties || [],
+    () =>
+      (apiSpec.getRequestMetadata(operation.name)?.body?.[0]?.schema?.properties || []) as OperationParameterMetadata[],
     [apiSpec, operation.name]
   );
 

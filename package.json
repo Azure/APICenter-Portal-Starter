@@ -17,6 +17,7 @@
         "@vitejs/plugin-basic-ssl": "1.2.0",
         "classnames": "2.5.1",
         "client-oauth2": "4.3.3",
+        "eventsource": "3.0.6",
         "graphql": "16.10.0",
         "lodash": "4.17.21",
         "memoizee": "0.4.17",

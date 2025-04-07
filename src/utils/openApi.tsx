@@ -71,6 +71,10 @@ export function schemaToFieldType<T extends WithRef<OpenAPIV2.SchemaObject | Ope
     case 'number':
       return 'number';
 
+    case 'object':
+    case 'array':
+      return schema.type;
+
     default:
       return undefined;
   }

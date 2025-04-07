@@ -1,32 +1,28 @@
+import { EventSource } from 'eventsource';
+import { getRecoil } from 'recoil-nexus';
 import { DeferredPromise, makeDeferredPromise } from '@/utils/promise';
-import { McpOperation, McpSpec } from '@/types/mcp';
+import { McpInitData, McpOperation, McpSpec } from '@/types/mcp';
+import appServicesAtom from '@/atoms/appServicesAtom';
 
 interface MessagePayload {
-  id?: string;
+  id?: number;
   method: string;
   params?: Record<string, unknown>;
 }
 
-type InitData = {
-  protocolVersion: string;
-  capabilities: Record<string, object>;
-  serverInfo: {
-    name: string;
-    version: string;
-  };
-};
-
-const INIT_ID = 'init';
+const INIT_ID = 1;
+const CorsProxyEndpoint = 'https://apimanagement-cors-proxy-df.azure-api.net/sendrequest';
 
 export default class McpService {
   private readonly serverUri: string;
   private sse: EventSource;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private pendingMessages = new Map<string, DeferredPromise<any>>();
+  private pendingMessages = new Map<number, DeferredPromise<any>>();
   private initDeferredPromise = makeDeferredPromise<void>();
   private messagingEndpoint?: string;
-  private lastMessageId = 0;
-  private initData: InitData;
+  private lastMessageId = INIT_ID;
+  private initData: McpInitData;
+  private accessToken: string | undefined;
 
   constructor(serverUri: string) {
     this.serverUri = serverUri;
@@ -34,11 +30,12 @@ export default class McpService {
       this.serverUri = this.serverUri.split('/').slice(0, -1).join('/');
     }
 
-    this.sse = new EventSource(`${this.serverUri}/sse`);
-
+    this.fetchProxy = this.fetchProxy.bind(this);
     this.handleEndpointReceived = this.handleEndpointReceived.bind(this);
     this.handleErrorReceived = this.handleErrorReceived.bind(this);
     this.handleMessageReceived = this.handleMessageReceived.bind(this);
+
+    this.sse = new EventSource(`${this.serverUri}/sse`, { fetch: this.fetchProxy });
 
     this.sse.addEventListener('endpoint', this.handleEndpointReceived);
     this.sse.addEventListener('error', this.handleErrorReceived);
@@ -65,8 +62,10 @@ export default class McpService {
     const capabilities = Object.keys(this.initData.capabilities).filter((capability) => capability in spec);
 
     for (const capability of capabilities) {
-      const res = await this.sendRequest<McpOperation[]>({ method: `${capability}/list` });
-      spec[capability] = res[capability];
+      try {
+        const res = await this.sendRequest<McpOperation[]>({ method: `${capability}/list` });
+        spec[capability] = res[capability];
+      } catch {}
     }
 
     return JSON.stringify(spec);
@@ -86,8 +85,8 @@ export default class McpService {
     return this.initDeferredPromise.promise;
   }
 
-  private async initialize(): Promise<void> {
-    this.initData = await this.sendRequest<InitData>({
+  private async initializeConnection(): Promise<void> {
+    this.initData = await this.sendRequest<McpInitData>({
       id: INIT_ID,
       method: 'initialize',
       params: {
@@ -105,7 +104,7 @@ export default class McpService {
 
   private handleEndpointReceived(event: MessageEvent): void {
     this.messagingEndpoint = event.data;
-    void this.initialize();
+    void this.initializeConnection();
   }
 
   private handleErrorReceived(event: MessageEvent): void {
@@ -136,6 +135,25 @@ export default class McpService {
     }
   }
 
+  private async fetchProxy(url: string, requestInit: RequestInit): ReturnType<typeof fetch> {
+    if (!this.accessToken) {
+      const { AuthService } = getRecoil(appServicesAtom);
+      this.accessToken = await AuthService.getAccessToken();
+    }
+
+    return fetch(CorsProxyEndpoint, {
+      method: 'POST',
+      ...requestInit,
+      headers: {
+        ...requestInit.headers,
+        Authorization: `Bearer ${this.accessToken}`,
+        'Ocp-Apim-Service-Name': 'paperbits',
+        'Ocp-Apim-Method': requestInit.method,
+        'Ocp-Apim-Url': url,
+      },
+    });
+  }
+
   private sendRequest<T = void>(payload: MessagePayload): Promise<T> {
     if (!this.messagingEndpoint) {
       return;
@@ -148,26 +166,30 @@ export default class McpService {
       return;
     }
 
-    const messageId = payload.id || String(this.lastMessageId++);
+    const messageId = payload.id || ++this.lastMessageId;
     if (!deferred || deferred.isComplete) {
       deferred = makeDeferredPromise<T>();
       this.pendingMessages.set(messageId, deferred);
     }
 
-    fetch(`${this.serverUri}${this.messagingEndpoint}`, {
+    this.fetchProxy(`${this.serverUri}${this.messagingEndpoint}`, {
       method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         id: messageId,
         jsonrpc: '2.0',
         params: {},
         ...payload,
       }),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    }).catch((err) => {
-      deferred.reject(err);
-    });
+    })
+      .then((response) => {
+        if (response.status >= 400) {
+          deferred.reject(new Error(`Error ${response.status}: ${response.statusText}`));
+        }
+      })
+      .catch((err) => {
+        deferred.reject(err);
+      });
 
     return deferred.promise;
   }

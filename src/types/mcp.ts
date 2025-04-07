@@ -6,6 +6,20 @@ export enum McpCapabilityTypes {
 
 type Role = 'user' | 'assistant';
 
+export interface McpCapabilityInfo {
+  subscribe?: boolean;
+  listChanged?: boolean;
+}
+
+export interface McpInitData {
+  protocolVersion: string;
+  capabilities: Record<string, McpCapabilityInfo>;
+  serverInfo: {
+    name: string;
+    version: string;
+  };
+}
+
 interface Annotated {
   annotations?: {
     audience?: Role[];
