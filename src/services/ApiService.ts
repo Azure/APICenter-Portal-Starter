@@ -1,14 +1,16 @@
-import { groupBy } from 'lodash';
-import memoize from 'memoizee';
-import { ActiveFilterData } from '@/types/apiFilters';
+import appServicesAtom from '@/atoms/appServicesAtom';
 import HttpService from '@/services/HttpService';
 import { ApiMetadata } from '@/types/api';
+import { ApiAuthScheme, ApiAuthSchemeMetadata } from '@/types/apiAuth';
 import { ApiDefinition, ApiDefinitionId } from '@/types/apiDefinition';
-import { ApiVersion } from '@/types/apiVersion';
 import { ApiDeployment } from '@/types/apiDeployment';
 import { ApiEnvironment } from '@/types/apiEnvironment';
+import { ActiveFilterData } from '@/types/apiFilters';
+import { ApiVersion } from '@/types/apiVersion';
 import { IApiService } from '@/types/services/IApiService';
-import { ApiAuthScheme, ApiAuthSchemeMetadata } from '@/types/apiAuth';
+import { groupBy } from 'lodash';
+import memoize from 'memoizee';
+import { getRecoil } from 'recoil-nexus';
 
 const ApiService: IApiService = {
   async getApis(search: string, filters: ActiveFilterData[] = []): Promise<ApiMetadata[]> {
@@ -29,7 +31,19 @@ const ApiService: IApiService = {
       searchParams.set('$filter', filtersString);
     }
 
-    const response = await HttpService.get<{ value: ApiMetadata[] }>(`/apis?${searchParams.toString()}`);
+    const { ConfigService } = getRecoil(appServicesAtom);
+    const settings = await ConfigService.getSettings();
+    const isSemanticSearchAvailable = settings.capabilities?.includes("semanticSearch") || false;
+
+    let response;
+
+    if (search.length && isSemanticSearchAvailable) {
+      response = await HttpService.post<{ value: ApiMetadata[] }>(`:search?${searchParams.toString()}`, { query: search, searchType: "vector" });
+    }
+    else {
+      response = await HttpService.get<{ value: ApiMetadata[] }>(`/apis?${searchParams.toString()}`);
+    }
+
     return response.value || [];
   },
 

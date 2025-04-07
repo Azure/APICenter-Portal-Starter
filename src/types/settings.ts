@@ -28,4 +28,9 @@ export interface Settings {
      * The scoping filter. If provided, only APIs with the specified metadata properties will be shown.
      */
     scopingFilter: string;
+
+    /**
+     * The capabilities supported by the service, depending on SKU and other parameters.
+     */
+    capabilities?: string[];
 }
