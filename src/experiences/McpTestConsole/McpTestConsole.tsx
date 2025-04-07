@@ -20,7 +20,7 @@ interface Props {
 export const McpTestConsole: React.FC<Props> = ({ apiSpec, operation, deployment, isOpen, onClose }) => {
   const [toolArgs, setToolArgs] = useState<HttpReqParam[]>();
 
-  const runController = useMcpTestRunController(deployment, operation);
+  const runController = useMcpTestRunController(deployment, operation, isOpen);
 
   const argsMetadata = useMemo(
     () =>

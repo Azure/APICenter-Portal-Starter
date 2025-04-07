@@ -11,7 +11,11 @@ interface ReturnType {
   run: (args: HttpReqParam[]) => Promise<void>;
 }
 
-export default function useMcpTestRunController(deployment?: ApiDeployment, operation?: OperationMetadata): ReturnType {
+export default function useMcpTestRunController(
+  deployment?: ApiDeployment,
+  operation?: OperationMetadata,
+  shouldConnect?: boolean
+): ReturnType {
   const [mcpService, setMcpService] = useState<McpService>();
   const [result, setResult] = useState<string>(undefined);
   const [error, setError] = useState<string>(undefined);
@@ -19,7 +23,7 @@ export default function useMcpTestRunController(deployment?: ApiDeployment, oper
 
   useEffect(() => {
     const runtimeUri = deployment?.server.runtimeUri[0];
-    if (!runtimeUri) {
+    if (!runtimeUri || !shouldConnect) {
       return;
     }
 
@@ -27,7 +31,13 @@ export default function useMcpTestRunController(deployment?: ApiDeployment, oper
       prev?.closeConnection();
       return new McpService(deployment?.server.runtimeUri[0]);
     });
-  }, [deployment?.server.runtimeUri]);
+  }, [deployment?.server.runtimeUri, shouldConnect]);
+
+  useEffect(() => {
+    if (!shouldConnect && mcpService) {
+      mcpService.closeConnection();
+    }
+  }, [mcpService, shouldConnect]);
 
   useEffect(() => {
     setResult(undefined);
