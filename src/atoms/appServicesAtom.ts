@@ -1,11 +1,11 @@
 /* eslint-disable no-restricted-imports */
+import { atom } from 'recoil';
 import ApiService from '@/services/ApiService';
 import { ConfigService } from '@/services/ConfigService';
 import { IConfigService } from '@/services/IConfigService';
 import MsalAuthService from '@/services/MsalAuthService';
 import { IApiService } from '@/types/services/IApiService';
 import { IAuthService } from '@/types/services/IAuthService';
-import { atom } from 'recoil';
 
 // If adding more services here - make sure to restrict their default implementations imports in eslint config (no-restricted-imports rule)
 export interface AppServicesAtomState {
@@ -19,7 +19,7 @@ const appServicesAtom = atom<AppServicesAtomState>({
   default: {
     ApiService,
     AuthService: MsalAuthService,
-    ConfigService:  new ConfigService()
+    ConfigService: new ConfigService(),
   },
 });
 

@@ -1,6 +1,7 @@
 import { Api as DocsApi } from '@microsoft/api-docs-ui';
 import { ApiMetadata } from '@/types/api';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default function apiAdapter(api: any): DocsApi & ApiMetadata {
   const summary = api.summary;
 

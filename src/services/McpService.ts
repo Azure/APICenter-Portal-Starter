@@ -1,9 +1,8 @@
 import { EventSource } from 'eventsource';
-import { getRecoil } from 'recoil-nexus';
 import { DeferredPromise, makeDeferredPromise } from '@/utils/promise';
-import { McpInitData, McpOperation, McpSpec } from '@/types/mcp';
-import appServicesAtom from '@/atoms/appServicesAtom';
-import { ApiAuthCredentials } from '@/types/apiAuth';
+import { McpInitData, McpOperation, McpServerAuthMetadata, McpServerPartialAuthMetadata, McpSpec } from '@/types/mcp';
+import { ApiAuthCredentials, OAuthGrantTypes } from '@/types/apiAuth';
+import { apimFetchProxy } from '@/utils/apimProxy';
 
 interface MessagePayload {
   id?: number;
@@ -12,55 +11,43 @@ interface MessagePayload {
 }
 
 const INIT_ID = 1;
-const CorsProxyEndpoint = 'https://apimanagement-cors-proxy-df.azure-api.net/sendrequest';
 
-let currentInstance: McpService | undefined;
+export class McpService {
+  private readonly serverOrigin: string;
+  public readonly serverUri: string;
 
-export default class McpService {
-  static getInstance(serverUri?: string, authCredentials?: ApiAuthCredentials): McpService | undefined {
-    if (!serverUri) {
-      return undefined;
-    }
-
-    if (currentInstance?.originalUri !== serverUri) {
-      currentInstance?.closeConnection();
-      currentInstance = new McpService(serverUri, authCredentials);
-    }
-    return currentInstance;
-  }
-
-  public readonly originalUri: string;
-  private readonly authCredentials?: ApiAuthCredentials;
-  private readonly serverUri: string;
+  private authCredentials?: ApiAuthCredentials;
   private sse: EventSource;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private pendingMessages = new Map<number, DeferredPromise<any>>();
-  private initDeferredPromise = makeDeferredPromise<void>();
   private messagingEndpoint?: string;
   private lastMessageId = INIT_ID;
   private initData: McpInitData;
 
-  constructor(serverUri: string, authCredentials?: ApiAuthCredentials) {
-    this.originalUri = serverUri;
-    this.authCredentials = authCredentials;
+  private authMetadataDeferredPromise = makeDeferredPromise<McpServerAuthMetadata | undefined>();
+  private initDeferredPromise = makeDeferredPromise<void>();
 
+  constructor(serverUri: string) {
     this.serverUri = serverUri;
-    if (this.serverUri.endsWith('/sse')) {
-      this.serverUri = this.serverUri.split('/').slice(0, -1).join('/');
-    }
+    this.serverOrigin = new URL(serverUri).origin;
 
     this.fetchProxy = this.fetchProxy.bind(this);
     this.handleEndpointReceived = this.handleEndpointReceived.bind(this);
     this.handleErrorReceived = this.handleErrorReceived.bind(this);
     this.handleMessageReceived = this.handleMessageReceived.bind(this);
 
-    this.sse = new EventSource(`${this.serverUri}/sse`, { fetch: this.fetchProxy });
-
-    this.sse.addEventListener('endpoint', this.handleEndpointReceived);
-    this.sse.addEventListener('error', this.handleErrorReceived);
-    this.sse.addEventListener('message', this.handleMessageReceived);
-
     this.pendingMessages.set(INIT_ID, makeDeferredPromise());
+
+    void this.discoverAuthenticationMetadata();
+  }
+
+  public setAuthCredentials(authCredentials: ApiAuthCredentials): void {
+    this.authCredentials = authCredentials;
+    void this.startListeningToSse();
+  }
+
+  public getAuthMetadata(): Promise<McpServerAuthMetadata | undefined> {
+    return this.authMetadataDeferredPromise.promise;
   }
 
   public closeConnection(): void {
@@ -101,6 +88,18 @@ export default class McpService {
     });
   }
 
+  private startListeningToSse(): void {
+    if (this.sse) {
+      return;
+    }
+
+    this.sse = new EventSource(`${this.serverUri}/sse`, { fetch: this.fetchProxy });
+
+    this.sse.addEventListener('endpoint', this.handleEndpointReceived);
+    this.sse.addEventListener('error', this.handleErrorReceived);
+    this.sse.addEventListener('message', this.handleMessageReceived);
+  }
+
   private ensureInitialized(): Promise<void> {
     return this.initDeferredPromise.promise;
   }
@@ -122,6 +121,51 @@ export default class McpService {
     this.initDeferredPromise.resolve();
   }
 
+  private async discoverAuthenticationMetadata(): Promise<void> {
+    const metadataResponse = await this.fetchProxy(`${this.serverOrigin}/.well-known/oauth-authorization-server`, {
+      method: 'GET',
+    });
+
+    let metadata: McpServerPartialAuthMetadata | undefined;
+    if (metadataResponse.status >= 200 && metadataResponse.status < 300) {
+      metadata = await metadataResponse.json();
+    } else {
+      metadata = {
+        issuer: this.serverOrigin,
+        authorization_endpoint: `${this.serverOrigin}/authorize`,
+        token_endpoint: `${this.serverOrigin}/token`,
+        registration_endpoint: `${this.serverOrigin}/register`,
+        jwks_uri: `${this.serverOrigin}/jwks`,
+        scopes_supported: ['openid', 'profile', 'email'],
+        response_types_supported: ['code', 'token'],
+        grant_types_supported: [OAuthGrantTypes.authorizationCode],
+      };
+    }
+
+    const registrationResponse = await this.fetchProxy(metadata.registration_endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        client_name: 'APIC MCP Inspector',
+        redirect_uris: [window.location.origin],
+        response_types: ['code'],
+        grant_types: metadata.grant_types_supported,
+        token_endpoint_auth_method: 'client_secret_basic',
+      }),
+    });
+
+    if (registrationResponse.status >= 200 && registrationResponse.status < 300) {
+      const { client_id } = await registrationResponse.json();
+      this.authMetadataDeferredPromise.resolve({ ...metadata, client_id });
+      return;
+    }
+
+    this.authMetadataDeferredPromise.resolve(undefined);
+    this.startListeningToSse();
+  }
+
   private handleEndpointReceived(event: MessageEvent): void {
     this.messagingEndpoint = event.data;
     void this.initializeConnection();
@@ -131,8 +175,6 @@ export default class McpService {
     if (!this.initDeferredPromise.isComplete) {
       this.initDeferredPromise.reject(event);
     }
-    // TODO: uncomment?
-    // this.closeConnection();
   }
 
   private handleMessageReceived(event: MessageEvent): void {
@@ -156,26 +198,13 @@ export default class McpService {
     }
   }
 
-  private async fetchProxy(url: string, requestInit: RequestInit): ReturnType<typeof fetch> {
-    const { AuthService, ConfigService } = getRecoil(appServicesAtom);
-    const accessToken = await AuthService.getAccessToken();
-    const settings = await ConfigService.getSettings();
-    const serviceName = settings.dataApiHostName.split('.')[0];
-
-    const headers = {
-      ...requestInit.headers,
-      'Ocp-Apim-Authorization': `Bearer ${accessToken}`,
-      'Ocp-Apim-Service-Name': serviceName,
-      'Ocp-Apim-Method': requestInit.method,
-      'Ocp-Apim-Url': url,
-    };
-
+  private async fetchProxy(url: string, requestInit?: RequestInit): ReturnType<typeof fetch> {
+    const headers = { ...requestInit.headers };
     if (this.authCredentials && this.authCredentials.in === 'header') {
       headers[this.authCredentials.name] = this.authCredentials.value;
     }
 
-    return fetch(CorsProxyEndpoint, {
-      method: 'POST',
+    return apimFetchProxy(url, {
       ...requestInit,
       headers,
     });
@@ -220,4 +249,22 @@ export default class McpService {
 
     return deferred.promise;
   }
+}
+
+let currentInstance: McpService | undefined;
+export default function getMcpService(uri?: string): McpService | undefined {
+  let serverUri = uri;
+  if (serverUri.endsWith('/sse')) {
+    serverUri = serverUri.split('/').slice(0, -1).join('/');
+  }
+
+  if (!serverUri) {
+    return undefined;
+  }
+
+  if (currentInstance?.serverUri !== serverUri) {
+    currentInstance?.closeConnection();
+    currentInstance = new McpService(serverUri);
+  }
+  return currentInstance;
 }

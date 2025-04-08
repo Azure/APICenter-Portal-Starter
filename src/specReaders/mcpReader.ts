@@ -3,7 +3,6 @@ import { capitalize } from 'lodash';
 import {
   ApiSpecReader,
   ApiSpecTypes,
-  DynamicSchemaMetadata,
   OperationCategory,
   OperationMetadata,
   OperationParameterMetadata,

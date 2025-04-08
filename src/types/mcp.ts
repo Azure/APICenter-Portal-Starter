@@ -1,3 +1,5 @@
+import { OAuthGrantTypes } from '@/types/apiAuth';
+
 export enum McpCapabilityTypes {
   PROMPTS = 'prompts',
   RESOURCES = 'resources',
@@ -5,6 +7,21 @@ export enum McpCapabilityTypes {
 }
 
 type Role = 'user' | 'assistant';
+
+export interface McpServerPartialAuthMetadata {
+  issuer: string;
+  authorization_endpoint: string;
+  token_endpoint: string;
+  registration_endpoint: string;
+  jwks_uri: string;
+  scopes_supported: string[];
+  response_types_supported: string[];
+  grant_types_supported: OAuthGrantTypes[];
+}
+
+export interface McpServerAuthMetadata extends McpServerPartialAuthMetadata {
+  client_id: string;
+}
 
 export interface McpCapabilityInfo {
   subscribe?: boolean;

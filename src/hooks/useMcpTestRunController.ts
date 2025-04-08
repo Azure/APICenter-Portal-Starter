@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { HttpReqParam } from '@microsoft/api-docs-ui';
 import { OperationMetadata } from '@/types/apiSpec';
 import { ApiDeployment } from '@/types/apiDeployment';
-import McpService from '@/services/McpService';
+import getMcpService, { McpService } from '@/services/McpService';
 
 interface ReturnType {
   result?: string;
@@ -29,7 +29,7 @@ export default function useMcpTestRunController(
 
     setMcpService((prev) => {
       prev?.closeConnection();
-      return new McpService(deployment?.server.runtimeUri[0]);
+      return getMcpService(deployment?.server.runtimeUri[0]);
     });
   }, [deployment?.server.runtimeUri, shouldConnect]);
 

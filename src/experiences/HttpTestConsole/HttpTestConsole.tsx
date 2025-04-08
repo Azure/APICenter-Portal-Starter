@@ -18,6 +18,7 @@ import { ApiAuthCredentials } from '@/types/apiAuth';
 import useApiAuthorization from '@/hooks/useApiAuthorization';
 import TestConsoleError from '@/components/TestConsoleError';
 import { ApiDefinitionId } from '@/types/apiDefinition';
+import ApiAccessAuthForm from '@/experiences/ApiAccessAuthForm';
 import {
   getFormDataFieldsMetadata,
   getReqBodySupportedFormats,
@@ -26,7 +27,6 @@ import {
   inToParamsCollectionName,
   stringifyResponse,
 } from './utils';
-import TestConsoleAuth from './TestConsoleAuth';
 import styles from './HttpTestConsole.module.scss';
 
 interface Props {
@@ -178,7 +178,7 @@ export const HttpTestConsole: React.FC<Props> = ({ definitionId, apiSpec, operat
         <HttpApiTestConsole>
           {!apiAuth.isLoading && !!apiAuth.schemeOptions?.length && (
             <HttpApiTestConsole.Panel name="auth" header="Authorization" isOpenByDefault>
-              <TestConsoleAuth definitionId={definitionId} onChange={handleAuthCredentialsChange} />
+              <ApiAccessAuthForm definitionId={definitionId} onChange={handleAuthCredentialsChange} />
             </HttpApiTestConsole.Panel>
           )}
           <HttpApiTestConsole.ParamsListForm

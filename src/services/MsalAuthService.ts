@@ -1,10 +1,9 @@
 import * as msal from '@azure/msal-browser';
-import { MsalSettings } from '@/types/msalSettings';
 import { getRecoil } from 'recoil-nexus';
+import { MsalSettings } from '@/types/msalSettings';
 import appServicesAtom from '@/atoms/appServicesAtom';
 
 let msalInstance: msal.PublicClientApplication | undefined;
-
 
 async function getMsalInstance(config: MsalSettings): Promise<msal.PublicClientApplication> {
   if (msalInstance) {
@@ -12,13 +11,12 @@ async function getMsalInstance(config: MsalSettings): Promise<msal.PublicClientA
   }
 
   // Fixing authority for backward compatibility
-  const authorityUrl =
-    (config.authority || config.azureAdInstance) + config.tenantId;
+  const authorityUrl = (config.authority || config.azureAdInstance) + config.tenantId;
 
   const msalConfig: msal.Configuration = {
     auth: {
       clientId: config.clientId,
-      authority: authorityUrl
+      authority: authorityUrl,
     },
   };
 
@@ -39,7 +37,8 @@ async function getAuthConfig(): Promise<MsalSettings> {
   const config = await ConfigService.getSettings();
 
   // Fixing scopes for backward compatibility
-  config.authentication.scopes = typeof config.authentication.scopes === 'string' ? [config.authentication.scopes] : config.authentication.scopes;
+  config.authentication.scopes =
+    typeof config.authentication.scopes === 'string' ? [config.authentication.scopes] : config.authentication.scopes;
 
   return config.authentication;
 }
