@@ -44,15 +44,11 @@ export const McpSpecPage: React.FC<Props> = ({ definitionId, deployment }) => {
     return getMcpService(deployment.server.runtimeUri[0]);
   }, [apiAuth, apiAccessAuthRequired, authCredentials, deployment]);
 
-  const makeSpec = useCallback(async () => {
-    if (!authCredentials) {
-      if (apiAccessAuthRequired) {
-        return;
-      }
+  const isAuthFlowComplete = !!authCredentials || (!apiAccessAuthRequired && isMcpAuthReady && !mcpAuthMetadata);
 
-      if (isMcpAuthReady && mcpAuthMetadata) {
-        return;
-      }
+  const makeSpec = useCallback(async () => {
+    if (!isAuthFlowComplete) {
+      return;
     }
 
     if (!mcpService || !definition.value) {
@@ -74,7 +70,7 @@ export const McpSpecPage: React.FC<Props> = ({ definitionId, deployment }) => {
     } finally {
       setIsSpecLoading(false);
     }
-  }, [apiAccessAuthRequired, authCredentials, definition.value, isMcpAuthReady, mcpAuthMetadata, mcpService]);
+  }, [definition.value, isAuthFlowComplete, mcpService]);
 
   useEffect(() => {
     if (!mcpService || authCredentials) {
@@ -92,11 +88,12 @@ export const McpSpecPage: React.FC<Props> = ({ definitionId, deployment }) => {
   }, [makeSpec]);
 
   useEffect(() => {
-    if (!mcpService) {
+    if (!mcpService || !isAuthFlowComplete) {
       return;
     }
+
     mcpService.setAuthCredentials(authCredentials);
-  }, [authCredentials, mcpService]);
+  }, [authCredentials, isAuthFlowComplete, mcpService]);
 
   if (definition.isLoading || apiAuth.isLoading || isSpecLoading) {
     return <Spinner className={pageStyles.spinner} />;
@@ -108,6 +105,10 @@ export const McpSpecPage: React.FC<Props> = ({ definitionId, deployment }) => {
         <ApiAccessAuthForm definitionId={definitionId} onChange={setAuthCredentials} />
       </div>
     );
+  }
+
+  if (!isMcpAuthReady && !authCredentials) {
+    return <Spinner className={pageStyles.spinner} />;
   }
 
   if (mcpAuthMetadata && !authCredentials) {

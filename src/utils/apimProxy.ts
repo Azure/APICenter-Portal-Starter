@@ -16,7 +16,7 @@ export async function apimFetchProxy(url: string, requestInit?: RequestInit): Re
       ...requestInit?.headers,
       'Ocp-Apim-Authorization': `Bearer ${accessToken}`,
       'Ocp-Apim-Service-Name': serviceName,
-      'Ocp-Apim-Method': requestInit?.method,
+      'Ocp-Apim-Method': requestInit?.method || 'GET',
       'Ocp-Apim-Url': url,
     },
   });
