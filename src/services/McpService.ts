@@ -3,6 +3,7 @@ import { getRecoil } from 'recoil-nexus';
 import { DeferredPromise, makeDeferredPromise } from '@/utils/promise';
 import { McpInitData, McpOperation, McpSpec } from '@/types/mcp';
 import appServicesAtom from '@/atoms/appServicesAtom';
+import { ApiAuthCredentials } from '@/types/apiAuth';
 
 interface MessagePayload {
   id?: number;
@@ -16,19 +17,20 @@ const CorsProxyEndpoint = 'https://apimanagement-cors-proxy-df.azure-api.net/sen
 let currentInstance: McpService | undefined;
 
 export default class McpService {
-  static getInstance(serverUri?: string): McpService | undefined {
+  static getInstance(serverUri?: string, authCredentials?: ApiAuthCredentials): McpService | undefined {
     if (!serverUri) {
       return undefined;
     }
 
     if (currentInstance?.originalUri !== serverUri) {
       currentInstance?.closeConnection();
-      currentInstance = new McpService(serverUri);
+      currentInstance = new McpService(serverUri, authCredentials);
     }
     return currentInstance;
   }
 
   public readonly originalUri: string;
+  private readonly authCredentials?: ApiAuthCredentials;
   private readonly serverUri: string;
   private sse: EventSource;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -38,8 +40,10 @@ export default class McpService {
   private lastMessageId = INIT_ID;
   private initData: McpInitData;
 
-  constructor(serverUri: string) {
+  constructor(serverUri: string, authCredentials?: ApiAuthCredentials) {
     this.originalUri = serverUri;
+    this.authCredentials = authCredentials;
+
     this.serverUri = serverUri;
     if (this.serverUri.endsWith('/sse')) {
       this.serverUri = this.serverUri.split('/').slice(0, -1).join('/');
@@ -158,16 +162,22 @@ export default class McpService {
     const settings = await ConfigService.getSettings();
     const serviceName = settings.dataApiHostName.split('.')[0];
 
+    const headers = {
+      ...requestInit.headers,
+      'Ocp-Apim-Authorization': `Bearer ${accessToken}`,
+      'Ocp-Apim-Service-Name': serviceName,
+      'Ocp-Apim-Method': requestInit.method,
+      'Ocp-Apim-Url': url,
+    };
+
+    if (this.authCredentials && this.authCredentials.in === 'header') {
+      headers[this.authCredentials.name] = this.authCredentials.value;
+    }
+
     return fetch(CorsProxyEndpoint, {
       method: 'POST',
       ...requestInit,
-      headers: {
-        ...requestInit.headers,
-        'Ocp-Apim-Authorization': `Bearer ${accessToken}`,
-        'Ocp-Apim-Service-Name': serviceName,
-        'Ocp-Apim-Method': requestInit.method,
-        'Ocp-Apim-Url': url,
-      },
+      headers,
     });
   }
 

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Spinner } from '@fluentui/react-components';
 import { ApiDefinitionId } from '@/types/apiDefinition';
 import { ApiDeployment } from '@/types/apiDeployment';
@@ -6,8 +6,12 @@ import McpService from '@/services/McpService';
 import { ApiSpecReader } from '@/types/apiSpec';
 import getSpecReader from '@/specReaders/getSpecReader';
 import useApiDefinition from '@/hooks/useApiDefinition';
+import useApiAuthorization from '@/hooks/useApiAuthorization';
+import TestConsoleAuth from '@/experiences/HttpTestConsole/TestConsoleAuth';
+import { ApiAuthCredentials } from '@/types/apiAuth';
 import ApiSpecPageLayout from '../ApiSpecPageLayout';
 import pageStyles from '../ApiSpec.module.scss';
+import styles from './McpSpecPage.module.scss';
 
 interface Props {
   definitionId: ApiDefinitionId;
@@ -15,10 +19,26 @@ interface Props {
 }
 
 export const McpSpecPage: React.FC<Props> = ({ definitionId, deployment }) => {
+  const [authCredentials, setAuthCredentials] = useState<ApiAuthCredentials | undefined>();
   const [isSpecLoading, setIsSpecLoading] = useState(false);
   const [apiSpec, setApiSpec] = useState<ApiSpecReader>();
-  const mcpService = McpService.getInstance(deployment.server.runtimeUri[0]);
+
+  const apiAuth = useApiAuthorization({ definitionId });
   const definition = useApiDefinition(definitionId);
+
+  const apiAuthRequired = !apiAuth.isLoading && !!apiAuth.schemeOptions?.length;
+
+  const mcpService = useMemo(() => {
+    if (apiAuth.isLoading) {
+      return undefined;
+    }
+
+    if (apiAuthRequired && !authCredentials) {
+      return undefined;
+    }
+
+    return McpService.getInstance(deployment.server.runtimeUri[0], authCredentials);
+  }, [apiAuth, apiAuthRequired, authCredentials, deployment]);
 
   const makeSpec = useCallback(async () => {
     if (!mcpService || !definition.value) {
@@ -46,8 +66,16 @@ export const McpSpecPage: React.FC<Props> = ({ definitionId, deployment }) => {
     void makeSpec();
   }, [makeSpec]);
 
-  if (definition.isLoading || isSpecLoading) {
+  if (definition.isLoading || apiAuth.isLoading || isSpecLoading) {
     return <Spinner className={pageStyles.spinner} />;
+  }
+
+  if (apiAuthRequired && !authCredentials) {
+    return (
+      <div className={styles.authPanel}>
+        <TestConsoleAuth definitionId={definitionId} onChange={setAuthCredentials} />
+      </div>
+    );
   }
 
   return <ApiSpecPageLayout definitionId={definitionId} deployment={deployment} apiSpec={apiSpec} />;

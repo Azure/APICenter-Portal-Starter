@@ -30,7 +30,7 @@ export default function useApiAuthorization({ definitionId, schemeName }: Props)
   const [schemeOptions, setSchemeOptions] = useState<ApiAuthSchemeMetadata[] | undefined>();
   const [scheme, setScheme] = useState<ApiAuthScheme | undefined>();
   const [credentials, setCredentials] = useState<ApiAuthCredentials | undefined>();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [authError, setAuthError] = useState<string>(undefined);
 
   const ApiService = useApiService();
@@ -56,7 +56,6 @@ export default function useApiAuthorization({ definitionId, schemeName }: Props)
   const fetchScheme = useCallback(async () => {
     if (!definitionId.apiName || !definitionId.versionName || !schemeName) {
       setScheme(undefined);
-      setIsLoading(false);
       return;
     }
 
