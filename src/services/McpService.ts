@@ -13,7 +13,22 @@ interface MessagePayload {
 const INIT_ID = 1;
 const CorsProxyEndpoint = 'https://apimanagement-cors-proxy-df.azure-api.net/sendrequest';
 
+let currentInstance: McpService | undefined;
+
 export default class McpService {
+  static getInstance(serverUri?: string): McpService | undefined {
+    if (!serverUri) {
+      return undefined;
+    }
+
+    if (currentInstance?.originalUri !== serverUri) {
+      currentInstance?.closeConnection();
+      currentInstance = new McpService(serverUri);
+    }
+    return currentInstance;
+  }
+
+  public readonly originalUri: string;
   private readonly serverUri: string;
   private sse: EventSource;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -24,6 +39,7 @@ export default class McpService {
   private initData: McpInitData;
 
   constructor(serverUri: string) {
+    this.originalUri = serverUri;
     this.serverUri = serverUri;
     if (this.serverUri.endsWith('/sse')) {
       this.serverUri = this.serverUri.split('/').slice(0, -1).join('/');
@@ -47,6 +63,7 @@ export default class McpService {
     this.sse.removeEventListener('endpoint', this.handleEndpointReceived);
     this.sse.removeEventListener('error', this.handleErrorReceived);
     this.sse.removeEventListener('message', this.handleMessageReceived);
+    currentInstance = undefined;
   }
 
   public async collectMcpSpec(): Promise<string> {
@@ -64,7 +81,7 @@ export default class McpService {
       try {
         const res = await this.sendRequest<McpOperation[]>({ method: `${capability}/list` });
         spec[capability] = res[capability];
-      } catch { }
+      } catch {}
     }
 
     return JSON.stringify(spec);
@@ -110,7 +127,8 @@ export default class McpService {
     if (!this.initDeferredPromise.isComplete) {
       this.initDeferredPromise.reject(event);
     }
-    this.closeConnection();
+    // TODO: uncomment?
+    // this.closeConnection();
   }
 
   private handleMessageReceived(event: MessageEvent): void {

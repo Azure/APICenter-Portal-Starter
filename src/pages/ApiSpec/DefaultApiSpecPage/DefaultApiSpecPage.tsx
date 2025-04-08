@@ -1,10 +1,10 @@
 import React from 'react';
 import { Spinner } from '@fluentui/react-components';
 import useApiSpec from '@/hooks/useApiSpec';
-import ApiSpecPageLayout from '../ApiSpecPageLayout';
-import pageStyles from '../ApiSpec.module.scss';
 import { ApiDefinitionId } from '@/types/apiDefinition';
 import { ApiDeployment } from '@/types/apiDeployment';
+import ApiSpecPageLayout from '../ApiSpecPageLayout';
+import pageStyles from '../ApiSpec.module.scss';
 
 interface Props {
   definitionId: ApiDefinitionId;
@@ -12,7 +12,7 @@ interface Props {
 }
 
 export const DefaultApiSpecPage: React.FC<Props> = ({ definitionId, deployment }) => {
-  const apiSpec = useApiSpec(definitionId, deployment);
+  const apiSpec = useApiSpec(definitionId);
 
   if (apiSpec.isLoading) {
     return <Spinner className={pageStyles.spinner} />;

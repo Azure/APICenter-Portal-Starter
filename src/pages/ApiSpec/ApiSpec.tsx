@@ -84,7 +84,7 @@ export const ApiSpec: React.FC = () => {
     }
 
     if (api.data.kind === 'mcp') {
-      return <McpSpecPage />;
+      return <McpSpecPage definitionId={definitionId} deployment={deployment} />;
     }
 
     return <DefaultApiSpecPage definitionId={definitionId} deployment={deployment} />;
