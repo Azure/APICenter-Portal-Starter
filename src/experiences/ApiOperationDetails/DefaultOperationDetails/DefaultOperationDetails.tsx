@@ -17,8 +17,7 @@ function getRequestBodyTitle(apiSpec: ApiSpecReader): string {
 }
 
 export const DefaultOperationDetails: React.FC<OperationDetailsViewProps> = ({
-  apiName,
-  versionName,
+  definitionId,
   apiSpec,
   operation,
   deployment,
@@ -43,8 +42,7 @@ export const DefaultOperationDetails: React.FC<OperationDetailsViewProps> = ({
         <>
           <Button onClick={handleTryApiClick}>Try this API</Button>
           <HttpTestConsole
-            apiName={apiName}
-            versionName={versionName}
+            definitionId={definitionId}
             apiSpec={apiSpec}
             operation={operation}
             deployment={deployment}

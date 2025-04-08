@@ -5,11 +5,11 @@ import { Button, Field, Select, Spinner } from '@fluentui/react-components';
 import { CheckmarkFilled } from '@fluentui/react-icons';
 import { ApiAuthCredentials, ApiAuthType } from '@/types/apiAuth';
 import useApiAuthorization from '@/hooks/useApiAuthorization';
+import { ApiDefinitionId } from '@/types/apiDefinition';
 import styles from './TestConsoleAuth.module.scss';
 
 interface Props {
-  apiName: string;
-  versionName: string;
+  definitionId: ApiDefinitionId;
   onChange: (credentials?: ApiAuthCredentials) => void;
 }
 
@@ -24,12 +24,11 @@ const timeAgoFormatter: React.ComponentProps<typeof TimeAgo>['formatter'] = (
   return `${value} ${unit}${value !== 1 ? 's' : ''} ${suffix}`;
 };
 
-export const TestConsoleAuth: React.FC<Props> = ({ apiName, versionName, onChange }) => {
+export const TestConsoleAuth: React.FC<Props> = ({ definitionId, onChange }) => {
   const [selectedScheme, setSelectedScheme] = useState<string>();
   const [selectedOauthFlow, setSelectedOauthFlow] = useState<string>();
   const apiAuth = useApiAuthorization({
-    apiName,
-    versionName,
+    definitionId,
     schemeName: selectedScheme,
   });
 

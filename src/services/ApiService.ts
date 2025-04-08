@@ -1,3 +1,6 @@
+import { groupBy } from 'lodash';
+import memoize from 'memoizee';
+import { getRecoil } from 'recoil-nexus';
 import appServicesAtom from '@/atoms/appServicesAtom';
 import HttpService from '@/services/HttpService';
 import { ApiMetadata } from '@/types/api';
@@ -8,9 +11,6 @@ import { ApiEnvironment } from '@/types/apiEnvironment';
 import { ActiveFilterData } from '@/types/apiFilters';
 import { ApiVersion } from '@/types/apiVersion';
 import { IApiService } from '@/types/services/IApiService';
-import { groupBy } from 'lodash';
-import memoize from 'memoizee';
-import { getRecoil } from 'recoil-nexus';
 
 const ApiService: IApiService = {
   async getApis(search: string, filters: ActiveFilterData[] = []): Promise<ApiMetadata[]> {
@@ -33,14 +33,16 @@ const ApiService: IApiService = {
 
     const { ConfigService } = getRecoil(appServicesAtom);
     const settings = await ConfigService.getSettings();
-    const isSemanticSearchAvailable = settings.capabilities?.includes("semanticSearch") || false;
+    const isSemanticSearchAvailable = settings.capabilities?.includes('semanticSearch') || false;
 
     let response;
 
     if (search.length && isSemanticSearchAvailable) {
-      response = await HttpService.post<{ value: ApiMetadata[] }>(`:search?${searchParams.toString()}`, { query: search, searchType: "vector" });
-    }
-    else {
+      response = await HttpService.post<{ value: ApiMetadata[] }>(`:search?${searchParams.toString()}`, {
+        query: search,
+        searchType: 'vector',
+      });
+    } else {
       response = await HttpService.get<{ value: ApiMetadata[] }>(`/apis?${searchParams.toString()}`);
     }
 
@@ -90,17 +92,17 @@ const ApiService: IApiService = {
     return await HttpService.get<ApiEnvironment>(`/environments/${environmentId}`);
   },
 
-  async getSecurityRequirements(apiName: string, versionName: string): Promise<ApiAuthSchemeMetadata[]> {
+  async getSecurityRequirements(definitionId: ApiDefinitionId): Promise<ApiAuthSchemeMetadata[]> {
     const response = await HttpService.get<{ value: ApiAuthSchemeMetadata[] }>(
-      `/apis/${apiName}/versions/${versionName}/securityRequirements`
+      `/apis/${definitionId.apiName}/versions/${definitionId.versionName}/securityRequirements`
     );
 
     return response?.value;
   },
 
-  async getSecurityCredentials(apiName: string, versionName: string, schemeName: string): Promise<ApiAuthScheme> {
+  async getSecurityCredentials(definitionId: ApiDefinitionId, schemeName: string): Promise<ApiAuthScheme> {
     return await HttpService.post<ApiAuthScheme>(
-      `/apis/${apiName}/versions/${versionName}/securityRequirements/${schemeName}:getCredentials`
+      `/apis/${definitionId.apiName}/versions/${definitionId.versionName}/securityRequirements/${schemeName}:getCredentials`
     );
   },
 };

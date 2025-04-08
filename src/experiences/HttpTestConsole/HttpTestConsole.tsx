@@ -17,6 +17,7 @@ import useHttpTestRequestController from '@/hooks/useHttpTestRequestController';
 import { ApiAuthCredentials } from '@/types/apiAuth';
 import useApiAuthorization from '@/hooks/useApiAuthorization';
 import TestConsoleError from '@/components/TestConsoleError';
+import { ApiDefinitionId } from '@/types/apiDefinition';
 import {
   getFormDataFieldsMetadata,
   getReqBodySupportedFormats,
@@ -29,8 +30,7 @@ import TestConsoleAuth from './TestConsoleAuth';
 import styles from './HttpTestConsole.module.scss';
 
 interface Props {
-  apiName: string;
-  versionName: string;
+  definitionId: ApiDefinitionId;
   apiSpec: ApiSpecReader;
   operation?: OperationMetadata;
   deployment?: ApiDeployment;
@@ -40,20 +40,12 @@ interface Props {
 
 const methodsWithoutBody = ['get', 'head'];
 
-export const HttpTestConsole: React.FC<Props> = ({
-  apiName,
-  versionName,
-  apiSpec,
-  operation,
-  deployment,
-  isOpen,
-  onClose,
-}) => {
+export const HttpTestConsole: React.FC<Props> = ({ definitionId, apiSpec, operation, deployment, isOpen, onClose }) => {
   const defaults = getReqDataDefaults(apiSpec, operation, deployment);
   const [authCredentials, setAuthCredentials] = useState<ApiAuthCredentials | undefined>();
   const [reqData, setReqData] = useState<HttpReqData>(defaults);
 
-  const apiAuth = useApiAuthorization({ apiName, versionName });
+  const apiAuth = useApiAuthorization({ definitionId });
 
   const requestController = useHttpTestRequestController(operation);
 
@@ -186,7 +178,7 @@ export const HttpTestConsole: React.FC<Props> = ({
         <HttpApiTestConsole>
           {!apiAuth.isLoading && !!apiAuth.schemeOptions?.length && (
             <HttpApiTestConsole.Panel name="auth" header="Authorization" isOpenByDefault>
-              <TestConsoleAuth apiName={apiName} versionName={versionName} onChange={handleAuthCredentialsChange} />
+              <TestConsoleAuth definitionId={definitionId} onChange={handleAuthCredentialsChange} />
             </HttpApiTestConsole.Panel>
           )}
           <HttpApiTestConsole.ParamsListForm

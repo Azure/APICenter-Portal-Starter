@@ -10,6 +10,7 @@ import {
 import isAuthenticatedAtom from '@/atoms/isAuthenticatedAtom';
 import useApiService from '@/hooks/useApiService';
 import OAuthService from '@/services/OAuthService';
+import { ApiDefinitionId } from '@/types/apiDefinition';
 
 interface ReturnType {
   schemeOptions?: ApiAuthSchemeMetadata[];
@@ -21,12 +22,11 @@ interface ReturnType {
 }
 
 interface Props {
-  apiName: string;
-  versionName: string;
+  definitionId: ApiDefinitionId;
   schemeName?: string;
 }
 
-export default function useApiAuthorization({ apiName, versionName, schemeName }: Props): ReturnType {
+export default function useApiAuthorization({ definitionId, schemeName }: Props): ReturnType {
   const [schemeOptions, setSchemeOptions] = useState<ApiAuthSchemeMetadata[] | undefined>();
   const [scheme, setScheme] = useState<ApiAuthScheme | undefined>();
   const [credentials, setCredentials] = useState<ApiAuthCredentials | undefined>();
@@ -37,7 +37,7 @@ export default function useApiAuthorization({ apiName, versionName, schemeName }
   const isAuthenticated = useRecoilValue(isAuthenticatedAtom);
 
   const fetchSchemeOptions = useCallback(async () => {
-    if (!apiName || !versionName || !isAuthenticated) {
+    if (!definitionId.apiName || !definitionId.versionName || !isAuthenticated) {
       setSchemeOptions(undefined);
       setIsLoading(false);
       return;
@@ -47,14 +47,14 @@ export default function useApiAuthorization({ apiName, versionName, schemeName }
       setScheme(undefined);
       setCredentials(undefined);
       setIsLoading(true);
-      setSchemeOptions(await ApiService.getSecurityRequirements(apiName, versionName));
+      setSchemeOptions(await ApiService.getSecurityRequirements(definitionId));
     } finally {
       setIsLoading(false);
     }
-  }, [apiName, versionName, ApiService, isAuthenticated]);
+  }, [definitionId, ApiService, isAuthenticated]);
 
   const fetchScheme = useCallback(async () => {
-    if (!apiName || !versionName || !schemeName) {
+    if (!definitionId.apiName || !definitionId.versionName || !schemeName) {
       setScheme(undefined);
       setIsLoading(false);
       return;
@@ -64,11 +64,11 @@ export default function useApiAuthorization({ apiName, versionName, schemeName }
       setScheme(undefined);
       setCredentials(undefined);
       setIsLoading(true);
-      setScheme(await ApiService.getSecurityCredentials(apiName, versionName, schemeName));
+      setScheme(await ApiService.getSecurityCredentials(definitionId, schemeName));
     } finally {
       setIsLoading(false);
     }
-  }, [apiName, versionName, schemeName, ApiService]);
+  }, [definitionId, schemeName, ApiService]);
 
   const authenticateWithOauth = useCallback(
     async (oauthFlow: string) => {
