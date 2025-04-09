@@ -10,6 +10,7 @@ export const ApiFilterParameters: Record<FilterType, FilterMetadata> = {
       { value: 'soap', label: 'SOAP' },
       { value: 'webhook', label: 'Webhook' },
       { value: 'websocket', label: 'WebSocket' },
+      { value: 'mcp', label: 'MCP' },
     ],
   },
   lifecycleStage: {
