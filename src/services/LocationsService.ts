@@ -7,12 +7,18 @@ const LocationsService = {
     return `/${window.location.search}`;
   },
 
-  getApiSearchUrl(search?: string): string {
+  getApiSearchUrl(search?: string, isSemanticSearch?: boolean): string {
     const searchParams = new URLSearchParams(window.location.search);
     if (search) {
       searchParams.set('search', search);
     } else {
       searchParams.delete('search');
+    }
+
+    if (isSemanticSearch) {
+      searchParams.set('ai-search', 'true');
+    } else {
+      searchParams.delete('ai-search');
     }
 
     return `/?${searchParams.toString()}`;

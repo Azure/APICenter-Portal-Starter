@@ -10,11 +10,9 @@ import { ApiEnvironment } from '@/types/apiEnvironment';
 import { ActiveFilterData } from '@/types/apiFilters';
 import { ApiVersion } from '@/types/apiVersion';
 import { IApiService } from '@/types/services/IApiService';
-import configAtom from '@/atoms/configAtom';
-import { AppCapabilities } from '@/types/config';
 
 const ApiService: IApiService = {
-  async getApis(search: string, filters: ActiveFilterData[] = []): Promise<ApiMetadata[]> {
+  async getApis(search: string, filters: ActiveFilterData[] = [], isSemanticSearch?: boolean): Promise<ApiMetadata[]> {
     const searchParams = new URLSearchParams();
     if (search.length) {
       searchParams.set('$search', search);
@@ -32,20 +30,15 @@ const ApiService: IApiService = {
       searchParams.set('$filter', filtersString);
     }
 
-    const config = getRecoil(configAtom);
-    const isSemanticSearchAvailable = !!config.capabilities.includes(AppCapabilities.SEMANTIC_SEARCH);
-
-    let response;
-
-    if (search.length && isSemanticSearchAvailable) {
-      response = await HttpService.post<{ value: ApiMetadata[] }>(`:search?${searchParams.toString()}`, {
+    if (search.length && isSemanticSearch) {
+      const response = await HttpService.post<{ value: ApiMetadata[] }>(`:search?${searchParams.toString()}`, {
         query: search,
         searchType: 'vector',
       });
-    } else {
-      response = await HttpService.get<{ value: ApiMetadata[] }>(`/apis?${searchParams.toString()}`);
+      return response.value || [];
     }
 
+    const response = await HttpService.get<{ value: ApiMetadata[] }>(`/apis?${searchParams.toString()}`);
     return response.value || [];
   },
 
