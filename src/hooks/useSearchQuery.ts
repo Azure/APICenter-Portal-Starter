@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
 import configAtom from '@/atoms/configAtom';
 import { AppCapabilities } from '@/types/config';
+import { UrlParams } from '@/constants/urlParams';
 
 interface ReturnType {
   search: string;
@@ -10,9 +11,6 @@ interface ReturnType {
   setSearch: (search: string, isSemanticSearch?: boolean) => void;
   clearSearch: () => void;
 }
-
-const SEARCH_PARAM = 'search';
-const IS_SEMANTIC_PARAM = 'ai-search';
 
 export default function useSearchQuery(): ReturnType {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -25,15 +23,15 @@ export default function useSearchQuery(): ReturnType {
         const searchParams = new URLSearchParams(prev);
 
         if (search.length) {
-          searchParams.set(SEARCH_PARAM, search);
+          searchParams.set(UrlParams.SEARCH_QUERY, search);
         } else {
-          searchParams.delete(SEARCH_PARAM);
+          searchParams.delete(UrlParams.SEARCH_QUERY);
         }
 
         if (isSemanticSearch) {
-          searchParams.set(IS_SEMANTIC_PARAM, 'true');
+          searchParams.set(UrlParams.IS_SEMANTIC_SEARCH, 'true');
         } else {
-          searchParams.delete(IS_SEMANTIC_PARAM);
+          searchParams.delete(UrlParams.IS_SEMANTIC_SEARCH);
         }
 
         return searchParams.toString();
@@ -47,8 +45,8 @@ export default function useSearchQuery(): ReturnType {
   }, [setSearch]);
 
   return {
-    search: searchParams.get(SEARCH_PARAM) || '',
-    isSemanticSearch: isSemanticSearchAvailable && searchParams.get(IS_SEMANTIC_PARAM) === 'true',
+    search: searchParams.get(UrlParams.SEARCH_QUERY) || '',
+    isSemanticSearch: isSemanticSearchAvailable && searchParams.get(UrlParams.IS_SEMANTIC_SEARCH) === 'true',
     setSearch,
     clearSearch,
   };
