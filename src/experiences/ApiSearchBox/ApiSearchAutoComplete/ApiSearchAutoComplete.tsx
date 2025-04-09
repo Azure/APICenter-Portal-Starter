@@ -162,7 +162,6 @@ export const ApiSearchAutoComplete: React.FC<Props> = ({
   }
 
   function renderSearchResults() {
-    // No results
     if (!searchResults.length) {
       return <div className={styles.noResults}>Could not find APIs. Try a different search term.</div>;
     }
@@ -190,17 +189,14 @@ export const ApiSearchAutoComplete: React.FC<Props> = ({
   }
 
   function renderContent() {
-    // Loading spinner
     if (isLoading) {
       return <Spinner size="small" className={styles.noResults} />;
     }
 
-    // Semantic search suggestions
     if (isSemanticSearchEnabled || (!!onSemanticSearchSelect && !recentSearches.list.length)) {
       return renderSemanticSearchSuggestions();
     }
 
-    // Recent searches
     if (!searchResults) {
       return renderRecentSearches();
     }
