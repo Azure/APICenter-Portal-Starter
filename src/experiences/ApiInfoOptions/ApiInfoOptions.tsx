@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo } from 'react';
 import { Button, Link, MessageBar, MessageBarBody, Spinner } from '@fluentui/react-components';
-import { ArrowDownloadRegular, Document20Regular, OpenRegular } from '@fluentui/react-icons';
+import { ArrowDownloadRegular, Document20Regular, Link20Regular, OpenRegular } from '@fluentui/react-icons';
 import DevPortalLogo from '@/assets/devPortal.png';
 import { ApiMetadata } from '@/types/api';
 import { ApiVersion } from '@/types/apiVersion';
@@ -12,6 +12,7 @@ import VsCodeLogo from '@/assets/vsCodeLogo.svg';
 import LocationsService from '@/services/LocationsService';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import CopyLink from '@/components/CopyLink';
+import config from '@/config';
 import styles from './ApiInfoOptions.module.scss';
 
 interface Props {
@@ -40,7 +41,9 @@ export const ApiInfoOptions: React.FC<Props> = ({ api, apiVersion, apiDefinition
   const devPortalUri = environment.data?.onboarding?.developerPortalUri?.[0];
 
   const handleOpenInVsCodeClick = useCallback(() => {
-    window.open(`vscode:extension/apidev.azure-api-center`);
+    window.open(
+      `vscode://apidev.azure-api-center?clientId=${config.authentication.clientId}&tenantId=${config.authentication.tenantId}&runtimeUrl=${config.dataApiHostName}`
+    );
   }, []);
 
   function renderContent() {
@@ -70,12 +73,14 @@ export const ApiInfoOptions: React.FC<Props> = ({ api, apiVersion, apiDefinition
                   Download <ArrowDownloadRegular />
                 </Link>
 
-                <Link
-                  className={styles.link}
-                  href={LocationsService.getApiSchemaExplorerUrl(api.name, apiVersion.name, apiDefinition.name)}
-                >
-                  View documentation
-                </Link>
+                {api.kind !== 'mcp' && (
+                  <Link
+                    className={styles.link}
+                    href={LocationsService.getApiSchemaExplorerUrl(api.name, apiVersion.name, apiDefinition.name)}
+                  >
+                    View documentation
+                  </Link>
+                )}
               </span>
             )}
           </h5>
@@ -88,6 +93,22 @@ export const ApiInfoOptions: React.FC<Props> = ({ api, apiVersion, apiDefinition
             </Button>
           </p>
         </div>
+
+        {!!apiDeployment?.server.runtimeUri.length && (
+          <div className={styles.section}>
+            <h5>
+              <span className={styles.panelLabel}>
+                <Link20Regular /> <strong>Endpoint URL</strong>
+              </span>
+
+              <CopyLink className={styles.link} url={apiDeployment.server.runtimeUri[0]}>
+                Copy URL
+              </CopyLink>
+            </h5>
+
+            <p>Use this URL to send requests to the API&apos;s server.</p>
+          </div>
+        )}
 
         {!!devPortalUri && (
           <div className={styles.section}>
