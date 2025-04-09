@@ -72,7 +72,7 @@ export class McpService {
       try {
         const res = await this.sendRequest<McpOperation[]>({ method: `${capability}/list` });
         spec[capability] = res[capability];
-      } catch { }
+      } catch {}
     }
 
     return JSON.stringify(spec);
