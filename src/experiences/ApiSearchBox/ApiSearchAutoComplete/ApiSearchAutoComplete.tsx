@@ -5,7 +5,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import useRecentSearches, { RecentSearchData, RecentSearchType } from '@/hooks/useRecentSearches.ts';
 import { ApiMetadata } from '@/types/api.ts';
 import LocationsService from '@/services/LocationsService';
-import { SemanticSearchToggle } from '@/components/SemanticSearchToggle/SemanticSearchToggle';
+import SemanticSearchToggle from '@/components/SemanticSearchToggle';
 import styles from './ApiSearchAutoComplete.module.scss';
 
 interface Props {
