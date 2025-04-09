@@ -228,9 +228,9 @@ export class McpService {
       this.pendingMessages.set(messageId, deferred);
     }
 
-    const requestUrl = this.messagingEndpoint.startsWith(this.serverUri)
+    const requestUrl = this.messagingEndpoint.startsWith(this.serverOrigin)
       ? this.messagingEndpoint
-      : `${this.serverUri}${this.messagingEndpoint}`;
+      : `${this.serverOrigin}${this.messagingEndpoint}`;
 
     this.fetchProxy(requestUrl, {
       method: 'POST',
