@@ -7,7 +7,7 @@ import { ApiEnvironment } from '@/types/apiEnvironment';
 import { ApiAuthScheme, ApiAuthSchemeMetadata } from '@/types/apiAuth';
 
 export interface IApiService {
-  getApis(search: string, filters?: ActiveFilterData[]): Promise<ApiMetadata[]>;
+  getApis(search: string, filters?: ActiveFilterData[], isSemanticSearch?: boolean): Promise<ApiMetadata[]>;
   getApi(id: string): Promise<ApiMetadata>;
   getVersions(apiId: string): Promise<ApiVersion[]>;
   getDeployments(apiId: string): Promise<ApiDeployment[]>;

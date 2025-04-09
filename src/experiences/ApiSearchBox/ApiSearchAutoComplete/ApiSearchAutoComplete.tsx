@@ -1,18 +1,36 @@
 import React, { useCallback } from 'react';
 import { Spinner } from '@fluentui/react-components';
-import { Cloud16Regular, Dismiss12Regular, Search16Regular } from '@fluentui/react-icons';
+import { Cloud16Regular, Dismiss12Regular, Search16Regular, SparkleRegular } from '@fluentui/react-icons';
 import { Link, useNavigate } from 'react-router-dom';
 import useRecentSearches, { RecentSearchData, RecentSearchType } from '@/hooks/useRecentSearches.ts';
 import { ApiMetadata } from '@/types/api.ts';
 import LocationsService from '@/services/LocationsService';
+import SemanticSearchToggle from '@/components/SemanticSearchToggle';
 import styles from './ApiSearchAutoComplete.module.scss';
 
 interface Props {
   searchResults?: ApiMetadata[];
   isLoading: boolean;
+  isSemanticSearchEnabled?: boolean;
+  onSemanticSearchSelect?: () => void;
 }
 
-export const ApiSearchAutoComplete: React.FC<Props> = ({ searchResults, isLoading }) => {
+const semanticSearchSuggestions = [
+  'Find APIs updated in the last 10 days',
+  'Search pets for category or breed',
+  'Retrieve pets by availability status',
+  'Search for pets with specific attributes (color, breed, age)',
+  'Find an API to track pet order status',
+  'An API to cancel or modify pet orders by tag or label',
+  'An API to retrieve details for a specific order',
+];
+
+export const ApiSearchAutoComplete: React.FC<Props> = ({
+  searchResults,
+  isLoading,
+  isSemanticSearchEnabled,
+  onSemanticSearchSelect,
+}) => {
   const navigate = useNavigate();
   const recentSearches = useRecentSearches();
 
@@ -75,84 +93,120 @@ export const ApiSearchAutoComplete: React.FC<Props> = ({ searchResults, isLoadin
     [recentSearches]
   );
 
-  if (!recentSearches.list.length && !searchResults && !isLoading) {
+  if (!recentSearches.list.length && !searchResults && !isLoading && !onSemanticSearchSelect) {
     return null;
   }
 
-  function renderHeader() {
-    if (searchResults?.length) {
-      return <h6>Suggestions</h6>;
+  function renderSemanticSearchOption() {
+    if (isSemanticSearchEnabled || !onSemanticSearchSelect) {
+      return;
     }
 
-    if (recentSearches.list.length) {
-      return (
+    return (
+      <a className={styles.option} onClick={onSemanticSearchSelect}>
+        <SemanticSearchToggle />
+      </a>
+    );
+  }
+
+  function renderSemanticSearchSuggestions() {
+    return (
+      <>
+        <h6>Ask things like</h6>
+
+        {semanticSearchSuggestions.map((suggestion) => (
+          <Link key={suggestion} to={LocationsService.getApiSearchUrl(suggestion, true)} className={styles.option}>
+            <SparkleRegular className={styles.semanticSearchIcon} />
+            <span className={styles.semanticSearchSuggestion}>{suggestion}</span>
+          </Link>
+        ))}
+      </>
+    );
+  }
+
+  function renderRecentSearches() {
+    if (!recentSearches.list.length) {
+      return null;
+    }
+
+    return (
+      <>
         <h6>
           Recents
           <button onClick={recentSearches.clear}>Clear</button>
         </h6>
-      );
-    }
 
-    return null;
+        {recentSearches.list.map((recent) => (
+          <Link
+            key={recent.id}
+            to={getRecentRecordUrl(recent)}
+            className={styles.option}
+            data-id={recent.id}
+            onClick={handleRecentClick}
+          >
+            {recent.type === 'api' ? <Cloud16Regular /> : <Search16Regular />}
+            <span className={styles.apiName}>{recent.search}</span>
+            {recent.api && (
+              <span className={styles.apiMeta}>
+                {recent.api.kind}; {recent.api.lifecycleStage && `${recent.api.lifecycleStage};`}; {recent.api.summary}
+              </span>
+            )}
+
+            <button className={styles.deleteBtn} value={recent.id} onClick={handleRecentRemoveClick}>
+              <Dismiss12Regular />
+            </button>
+          </Link>
+        ))}
+      </>
+    );
   }
 
-  function renderContent() {
-    // Loading spinner
-    if (isLoading) {
-      return <Spinner size="small" className={styles.noResults} />;
-    }
-
-    // Recent searches
-    if (!searchResults) {
-      return recentSearches.list.map((recent) => (
-        <Link
-          key={recent.id}
-          to={getRecentRecordUrl(recent)}
-          className={styles.option}
-          data-id={recent.id}
-          onClick={handleRecentClick}
-        >
-          {recent.type === 'api' ? <Cloud16Regular /> : <Search16Regular />}
-          <span className={styles.apiName}>{recent.search}</span>
-          {recent.api && (
-            <span className={styles.apiMeta}>
-              {recent.api.kind}; {recent.api.lifecycleStage && `${recent.api.lifecycleStage};`}; {recent.api.summary}
-            </span>
-          )}
-
-          <button className={styles.deleteBtn} value={recent.id} onClick={handleRecentRemoveClick}>
-            <Dismiss12Regular />
-          </button>
-        </Link>
-      ));
-    }
-
-    // No results
+  function renderSearchResults() {
     if (!searchResults.length) {
       return <div className={styles.noResults}>Could not find APIs. Try a different search term.</div>;
     }
 
-    // Search results
-    return searchResults.map((api) => (
-      <Link
-        key={api.name}
-        to={LocationsService.getApiInfoUrl(api.name)}
-        className={styles.option}
-        data-name={api.name}
-        onClick={handleSearchResultClick}
-      >
-        <Cloud16Regular />
-        <span className={styles.apiName}>{api.name}</span>
-        <span className={styles.apiMeta}>
-          {api.kind}; {api.lifecycleStage && `${api.lifecycleStage};`} {api.summary}
-        </span>
-      </Link>
-    ));
+    return (
+      <>
+        <h6>Suggestions</h6>
+        {searchResults.map((api) => (
+          <Link
+            key={api.name}
+            to={LocationsService.getApiInfoUrl(api.name)}
+            className={styles.option}
+            data-name={api.name}
+            onClick={handleSearchResultClick}
+          >
+            <Cloud16Regular />
+            <span className={styles.apiName}>{api.name}</span>
+            <span className={styles.apiMeta}>
+              {api.kind}; {api.lifecycleStage && `${api.lifecycleStage};`} {api.summary}
+            </span>
+          </Link>
+        ))}
+      </>
+    );
+  }
+
+  function renderContent() {
+    if (isLoading) {
+      return <Spinner size="small" className={styles.noResults} />;
+    }
+
+    if (isSemanticSearchEnabled || (!!onSemanticSearchSelect && !recentSearches.list.length)) {
+      return renderSemanticSearchSuggestions();
+    }
+
+    if (!searchResults) {
+      return renderRecentSearches();
+    }
+
+    return renderSearchResults();
   }
 
   return (
     <div className={styles.apiSearchAutoComplete}>
-      {renderHeader()}
+      {renderSemanticSearchOption()}
       {renderContent()}
     </div>
   );

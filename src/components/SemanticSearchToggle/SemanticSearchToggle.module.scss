@@ -1,0 +1,40 @@
+.semanticSearchToggle {
+  display: flex;
+  align-items: center;
+  padding: 0 5px;
+  color: var(--grey-7);
+  
+  .icon {
+    display: inline-block;
+    position: relative;
+    width: 26px;
+    height: 26px;
+    margin-right: 10px;
+    border-radius: 50%;
+    background: var(--grey-1);
+    
+    img {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      max-width: 100%;
+      transform: translate(-50%, -50%);
+    }
+  }
+  
+  .disableBtn {
+    width: 26px;
+    min-width: 26px;
+    height: 26px;
+    border-radius: 1rem;
+  }
+
+  &.isEnabled {
+    border-radius: 1rem;
+    background: var(--grey-1);
+    
+    .icon {
+      margin-right: 0;
+    }
+  }
+}

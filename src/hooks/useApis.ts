@@ -13,6 +13,7 @@ interface Props {
   filters?: ActiveFilterData[];
   /** If true: won't fetch if search is empty */
   isAutoCompleteMode?: boolean;
+  isSemanticSearch?: boolean;
 }
 
 interface ReturnType {
@@ -43,7 +44,7 @@ function sortApis(apis: ApiMetadata[], sortBy?: SortBy): ApiMetadata[] {
 /**
  * Provides a list of APIs based on search and filters
  */
-export default function useApis({ search, filters, isAutoCompleteMode }: Props = {}): ReturnType {
+export default function useApis({ search, filters, isAutoCompleteMode, isSemanticSearch }: Props = {}): ReturnType {
   const [apis, setApis] = useState<ApiMetadata[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -59,19 +60,19 @@ export default function useApis({ search, filters, isAutoCompleteMode }: Props =
 
       try {
         setIsLoading(true);
-        setApis(await ApiService.getApis(search, filters));
+        setApis(await ApiService.getApis(search, filters, isSemanticSearch));
       } finally {
         setIsLoading(false);
       }
     },
-    [ApiService, isAuthenticated, filters]
+    [isAuthenticated, ApiService, filters, isSemanticSearch]
   );
 
   const fetchApisDebounced = useMemo(() => debounce(fetchApis, 500), [fetchApis]);
 
   useEffect(() => {
     if (isAutoCompleteMode) {
-      if (!search) {
+      if (!search || isSemanticSearch) {
         setApis([]);
         setIsLoading(false);
         return;
@@ -83,7 +84,7 @@ export default function useApis({ search, filters, isAutoCompleteMode }: Props =
     }
 
     void fetchApis(search);
-  }, [search, fetchApis, fetchApisDebounced, isAutoCompleteMode]);
+  }, [search, fetchApis, fetchApisDebounced, isAutoCompleteMode, isSemanticSearch]);
 
   const sortedList = useMemo(() => sortApis(apis, sortBy), [apis, sortBy]);
 
