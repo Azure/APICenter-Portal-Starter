@@ -72,7 +72,7 @@ export class McpService {
       try {
         const res = await this.sendRequest<McpOperation[]>({ method: `${capability}/list` });
         spec[capability] = res[capability];
-      } catch {}
+      } catch { }
     }
 
     return JSON.stringify(spec);
@@ -228,7 +228,11 @@ export class McpService {
       this.pendingMessages.set(messageId, deferred);
     }
 
-    this.fetchProxy(`${this.serverUri}${this.messagingEndpoint}`, {
+    const requestUrl = this.messagingEndpoint.startsWith(this.serverUri)
+      ? this.messagingEndpoint
+      : `${this.serverUri}${this.messagingEndpoint}`;
+
+    this.fetchProxy(requestUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
