@@ -1,7 +1,6 @@
 import { groupBy } from 'lodash';
 import memoize from 'memoizee';
 import { getRecoil } from 'recoil-nexus';
-import appServicesAtom from '@/atoms/appServicesAtom';
 import HttpService from '@/services/HttpService';
 import { ApiMetadata } from '@/types/api';
 import { ApiAuthScheme, ApiAuthSchemeMetadata } from '@/types/apiAuth';
@@ -11,6 +10,8 @@ import { ApiEnvironment } from '@/types/apiEnvironment';
 import { ActiveFilterData } from '@/types/apiFilters';
 import { ApiVersion } from '@/types/apiVersion';
 import { IApiService } from '@/types/services/IApiService';
+import configAtom from '@/atoms/configAtom';
+import { AppCapabilities } from '@/types/config';
 
 const ApiService: IApiService = {
   async getApis(search: string, filters: ActiveFilterData[] = []): Promise<ApiMetadata[]> {
@@ -31,9 +32,8 @@ const ApiService: IApiService = {
       searchParams.set('$filter', filtersString);
     }
 
-    const { ConfigService } = getRecoil(appServicesAtom);
-    const settings = await ConfigService.getSettings();
-    const isSemanticSearchAvailable = settings.capabilities?.includes('semanticSearch') || false;
+    const config = getRecoil(configAtom);
+    const isSemanticSearchAvailable = !!config.capabilities.includes(AppCapabilities.SEMANTIC_SEARCH);
 
     let response;
 

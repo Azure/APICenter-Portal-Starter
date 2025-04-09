@@ -3,6 +3,7 @@ import { getRecoil, setRecoil } from 'recoil-nexus';
 import memoizee from 'memoizee';
 import isAccessDeniedAtom from '@/atoms/isAccessDeniedAtom';
 import appServicesAtom from '@/atoms/appServicesAtom';
+import configAtom from '@/atoms/configAtom';
 
 const BASE_HEADERS: HeadersInit = {
   Accept: 'application/json',
@@ -10,9 +11,9 @@ const BASE_HEADERS: HeadersInit = {
 };
 
 async function makeRequest<T>(endpoint: string, method: string, payload?: any): Promise<T> {
-  const { AuthService, ConfigService } = getRecoil(appServicesAtom);
+  const { AuthService } = getRecoil(appServicesAtom);
+  const config = getRecoil(configAtom);
   const accessToken = await AuthService.getAccessToken();
-  const config = await ConfigService.getSettings();
 
   const init: RequestInit = {
     method,

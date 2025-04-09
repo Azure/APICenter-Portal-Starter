@@ -1,8 +1,6 @@
 /* eslint-disable no-restricted-imports */
 import { atom } from 'recoil';
 import ApiService from '@/services/ApiService';
-import { ConfigService } from '@/services/ConfigService';
-import { IConfigService } from '@/services/IConfigService';
 import MsalAuthService from '@/services/MsalAuthService';
 import { IApiService } from '@/types/services/IApiService';
 import { IAuthService } from '@/types/services/IAuthService';
@@ -11,7 +9,6 @@ import { IAuthService } from '@/types/services/IAuthService';
 export interface AppServicesAtomState {
   ApiService?: IApiService;
   AuthService?: IAuthService;
-  ConfigService?: IConfigService;
 }
 
 const appServicesAtom = atom<AppServicesAtomState>({
@@ -19,7 +16,6 @@ const appServicesAtom = atom<AppServicesAtomState>({
   default: {
     ApiService,
     AuthService: MsalAuthService,
-    ConfigService: new ConfigService(),
   },
 });
 

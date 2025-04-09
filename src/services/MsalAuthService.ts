@@ -1,9 +1,19 @@
 import * as msal from '@azure/msal-browser';
 import { getRecoil } from 'recoil-nexus';
 import { MsalSettings } from '@/types/msalSettings';
-import appServicesAtom from '@/atoms/appServicesAtom';
+import configAtom from '@/atoms/configAtom';
 
 let msalInstance: msal.PublicClientApplication | undefined;
+
+function getAuthConfig(): MsalSettings {
+  const { authentication } = getRecoil(configAtom);
+
+  return {
+    ...authentication,
+    // Fixing scopes for backward compatibility
+    scopes: [authentication.scopes].flat(),
+  };
+}
 
 async function getMsalInstance(config: MsalSettings): Promise<msal.PublicClientApplication> {
   if (msalInstance) {
@@ -30,17 +40,6 @@ async function getMsalInstance(config: MsalSettings): Promise<msal.PublicClientA
   }
 
   return msalInstance;
-}
-
-async function getAuthConfig(): Promise<MsalSettings> {
-  const { ConfigService } = getRecoil(appServicesAtom);
-  const config = await ConfigService.getSettings();
-
-  // Fixing scopes for backward compatibility
-  config.authentication.scopes =
-    typeof config.authentication.scopes === 'string' ? [config.authentication.scopes] : config.authentication.scopes;
-
-  return config.authentication;
 }
 
 const MsalAuthService = {

@@ -127,7 +127,7 @@ export class McpService {
     });
 
     let metadata: McpServerPartialAuthMetadata | undefined;
-    if (metadataResponse.status >= 200 && metadataResponse.status < 300) {
+    if (metadataResponse.ok) {
       metadata = await metadataResponse.json();
     } else {
       metadata = {
@@ -156,7 +156,7 @@ export class McpService {
       }),
     });
 
-    if (registrationResponse.status >= 200 && registrationResponse.status < 300) {
+    if (registrationResponse.ok) {
       const { client_id } = await registrationResponse.json();
       this.authMetadataDeferredPromise.resolve({ ...metadata, client_id });
       return;

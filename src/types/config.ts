@@ -1,14 +1,13 @@
-/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
-
 import { MsalSettings } from './msalSettings';
+
+export enum AppCapabilities {
+  SEMANTIC_SEARCH = 'semanticSearch',
+}
 
 /**
  * The application settings contract.
  */
-export interface Settings {
+export interface Config {
   /**
    * Data API hostname, e.g. https://contoso.data.centraluseuap.azure-apicenter.ms.
    */
@@ -32,5 +31,5 @@ export interface Settings {
   /**
    * The capabilities supported by the service, depending on SKU and other parameters.
    */
-  capabilities?: string[];
+  capabilities: AppCapabilities[];
 }

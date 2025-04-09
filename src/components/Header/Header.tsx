@@ -1,28 +1,21 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Link, Text } from '@fluentui/react-components';
-import { getRecoil } from 'recoil-nexus';
+import { useRecoilValue } from 'recoil';
 import LogoSvg from '@/assets/logo.svg';
 import AuthBtn from '@/components/Header/AuthBtn';
 import LocationsService from '@/services/LocationsService';
-import appServicesAtom from '@/atoms/appServicesAtom';
+import configAtom from '@/atoms/configAtom';
 import styles from './Header.module.scss';
 
 const Header: React.FC = () => {
-  const [headingTitle, setHeadingTitle] = useState('API portal');
-
-  useEffect(() => {
-    const { ConfigService } = getRecoil(appServicesAtom);
-    ConfigService.getSettings().then((settings) => {
-      setHeadingTitle(settings.title);
-    });
-  }, [headingTitle]);
+  const config = useRecoilValue(configAtom);
 
   return (
     <header className={styles.header}>
       <Link href={LocationsService.getHomeUrl()} className={styles.logo}>
-        <img src={LogoSvg} alt={headingTitle} />
+        <img src={LogoSvg} alt={config.title} />
         <Text size={400} weight="semibold">
-          {headingTitle}
+          {config.title}
         </Text>
       </Link>
       <nav className={styles.navLinks}>
