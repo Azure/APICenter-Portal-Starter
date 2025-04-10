@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import { Spinner } from '@fluentui/react-components';
-import { Cloud16Regular, Dismiss12Regular, Search16Regular, SparkleRegular } from '@fluentui/react-icons';
+import { Cloud16Regular, Dismiss12Regular, History16Regular, SparkleRegular } from '@fluentui/react-icons';
 import { Link, useNavigate } from 'react-router-dom';
 import useRecentSearches, { RecentSearchData, RecentSearchType } from '@/hooks/useRecentSearches.ts';
 import { ApiMetadata } from '@/types/api.ts';
@@ -174,8 +174,7 @@ export const ApiSearchAutoComplete: React.FC<Props> = ({
                 </span>
                 <span className={styles.apiName}>{recent.search}</span>
                 <span className={styles.apiMeta}>
-                  {recent.api.kind}; {recent.api.lifecycleStage && `${recent.api.lifecycleStage};`};{' '}
-                  {recent.api.summary}
+                  {[recent.api.kind, recent.api.lifecycleStage, recent.api.summary].filter(Boolean).join('; ')}
                 </span>
               </>
             )}
@@ -183,7 +182,7 @@ export const ApiSearchAutoComplete: React.FC<Props> = ({
             {recent.type === RecentSearchType.QUERY && (
               <>
                 <span className={styles.iconWrapper}>
-                  <Search16Regular />
+                  <History16Regular />
                 </span>
                 <span className={styles.searchQuery}>{recent.search}</span>
               </>
@@ -226,7 +225,7 @@ export const ApiSearchAutoComplete: React.FC<Props> = ({
             <Cloud16Regular />
             <span className={styles.apiName}>{api.name}</span>
             <span className={styles.apiMeta}>
-              {api.kind}; {api.lifecycleStage && `${api.lifecycleStage};`} {api.summary}
+              {[api.kind, api.lifecycleStage, api.summary].filter(Boolean).join('; ')}
             </span>
           </Link>
         ))}
