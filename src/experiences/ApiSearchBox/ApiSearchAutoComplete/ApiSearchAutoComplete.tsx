@@ -247,6 +247,10 @@ export const ApiSearchAutoComplete: React.FC<Props> = ({
       return renderRecentSearches();
     }
 
+    if (isSemanticSearchEnabled) {
+      return null;
+    }
+
     return renderSearchResults();
   }
 
