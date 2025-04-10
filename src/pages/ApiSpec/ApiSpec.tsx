@@ -79,7 +79,7 @@ export const ApiSpec: React.FC = () => {
   }
 
   function renderContent() {
-    if (api.isLoading || !deployment) {
+    if (api.isLoading || deployment === undefined) {
       return <Spinner className={styles.spinner} />;
     }
 
