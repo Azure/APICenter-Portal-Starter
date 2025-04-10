@@ -228,9 +228,10 @@ export class McpService {
       this.pendingMessages.set(messageId, deferred);
     }
 
-    const requestUrl = this.messagingEndpoint.startsWith(this.serverOrigin)
-      ? this.messagingEndpoint
-      : `${this.serverOrigin}${this.messagingEndpoint}`;
+    let requestUrl = this.messagingEndpoint;
+    if (requestUrl.startsWith('/')) {
+      requestUrl = `${this.serverOrigin}${requestUrl}`;
+    }
 
     this.fetchProxy(requestUrl, {
       method: 'POST',
@@ -243,7 +244,7 @@ export class McpService {
       }),
     })
       .then((response) => {
-        if (response.status >= 400) {
+        if (!response.ok) {
           deferred.reject(new Error(`Error ${response.status}: ${response.statusText}`));
         }
       })

@@ -44,7 +44,7 @@ async function getMsalInstance(config: MsalSettings): Promise<msal.PublicClientA
 
 const MsalAuthService = {
   async isAuthenticated(): Promise<boolean> {
-    const config = await getAuthConfig();
+    const config = getAuthConfig();
     const msalInstance = await getMsalInstance(config);
     const accounts = msalInstance.getAllAccounts();
 
@@ -52,7 +52,7 @@ const MsalAuthService = {
   },
 
   async getAccessToken(): Promise<string> {
-    const config = await getAuthConfig();
+    const config = getAuthConfig();
     const msalInstance = await getMsalInstance(config);
     const authResult = await msalInstance.acquireTokenSilent({ scopes: config.scopes });
 
@@ -60,7 +60,7 @@ const MsalAuthService = {
   },
 
   async signIn(): Promise<void> {
-    const config = await getAuthConfig();
+    const config = getAuthConfig();
     const msalInstance = await getMsalInstance(config);
     const authResult = await msalInstance.loginPopup({ scopes: config.scopes });
 
@@ -68,7 +68,7 @@ const MsalAuthService = {
   },
 
   async signOut(): Promise<void> {
-    const config = await getAuthConfig();
+    const config = getAuthConfig();
     const msalInstance = await getMsalInstance(config);
     await msalInstance.logoutPopup();
   },
