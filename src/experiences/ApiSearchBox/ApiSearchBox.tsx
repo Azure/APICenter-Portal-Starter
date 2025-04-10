@@ -10,6 +10,7 @@ import configAtom from '@/atoms/configAtom';
 import { AppCapabilities } from '@/types/config';
 import SemanticSearchToggle from '@/components/SemanticSearchToggle';
 import ApiSearchAutoComplete from './ApiSearchAutoComplete';
+import SemanticSearchInfo from './SemanticSearchInfo';
 import styles from './ApiSearchBox.module.scss';
 
 export const ApiSearchBox: React.FC = () => {
@@ -128,6 +129,8 @@ export const ApiSearchBox: React.FC = () => {
           />
         </div>
       )}
+
+      {isSemanticSearchAvailable && <SemanticSearchInfo />}
     </form>
   );
 };
