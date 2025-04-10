@@ -2,6 +2,7 @@ import ClientOAuth2 from 'client-oauth2';
 import * as uuid from 'uuid';
 import { capitalize } from 'lodash';
 import { Oauth2Credentials, OAuthGrantTypes } from '@/types/apiAuth';
+import { apimFetchProxy } from '@/utils/apimProxy';
 
 export interface OAuthTokenResponse {
   /** Access token. */
@@ -82,7 +83,8 @@ function openAuthPopup(uri: string, listener: (event: MessageEvent<any>) => any)
 
 const OAuthService = {
   /** Acquires access token using specified grant flow. */
-  authenticate(credentials: Oauth2Credentials, grantType: string): Promise<string | undefined> {
+  // TODO: useProxy flag is added as a quick workaround for overcoming CORS issues for demo. Remove it when possible.
+  authenticate(credentials: Oauth2Credentials, grantType: string, useProxy?: boolean): Promise<string | undefined> {
     const backendUrl = window.location.origin;
 
     try {
@@ -92,7 +94,7 @@ const OAuthService = {
 
         case OAuthGrantTypes.authorizationCode:
         case OAuthGrantTypes.authorizationCodeWithPkce:
-          return this.authenticateCodeWithPkce(backendUrl, credentials);
+          return this.authenticateCodeWithPkce(backendUrl, credentials, useProxy);
       }
     } catch {
       throw new Error('Authentication failed');
@@ -138,7 +140,11 @@ const OAuthService = {
     return openAuthPopup(oauthClient.token.getUri(), listener);
   },
 
-  async authenticateCodeWithPkce(backendUrl: string, credentials: Oauth2Credentials): Promise<string | undefined> {
+  async authenticateCodeWithPkce(
+    backendUrl: string,
+    credentials: Oauth2Credentials,
+    useProxy?: boolean
+  ): Promise<string | undefined> {
     const codeVerifier = generateRandomString(64);
     const challengeMethod = crypto.subtle ? 'S256' : 'plain';
 
@@ -170,7 +176,9 @@ const OAuthService = {
         code: authorizationCode,
       });
 
-      const response = await fetch(credentials.tokenUrl, {
+      const fetchImpl = useProxy ? apimFetchProxy : fetch;
+
+      const response = await fetchImpl(credentials.tokenUrl, {
         method: 'POST',
         body: body.toString(),
         headers: {

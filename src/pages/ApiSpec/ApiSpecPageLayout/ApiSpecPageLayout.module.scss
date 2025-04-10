@@ -1,0 +1,33 @@
+@use '@/styles/screen';
+
+.apiSpecPageLayout {
+  display: flex;
+  flex: 1;
+  justify-content: stretch;
+
+  @include screen.small-to-medium {
+    flex-direction: column;
+  }
+
+  .operationsList {
+    box-sizing: border-box;
+    width: 335px;
+    padding: 32px 32px 32px 0;
+    border: solid var(--grey-2);
+    border-width: 0 1px 0 0;
+
+    @include screen.small-to-medium {
+      width: 100%;
+      border-width: 0 0 1px;
+    }
+
+    h4 {
+      margin: 0 0 14px;
+    }
+  }
+
+  .details {
+    flex: 1;
+    padding: 24px;
+  }
+}

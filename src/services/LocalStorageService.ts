@@ -3,6 +3,7 @@ import { SortBy } from '@/types/sorting';
 import { RecentSearchData } from '@/hooks/useRecentSearches';
 
 export enum StorageKeys {
+  SEMANTIC_SEARCH_INFO_DISMISSED = 'semanticSearchInfoDismissed',
   API_LIST_LAYOUT = 'apiListLayout',
   API_LIST_SORTING = 'apiListSortBy',
   RECENT_SEARCHES = 'recentSearches',
@@ -12,6 +13,7 @@ type StorageValuesMap = {
   [StorageKeys.API_LIST_LAYOUT]: Layouts;
   [StorageKeys.API_LIST_SORTING]: SortBy;
   [StorageKeys.RECENT_SEARCHES]: RecentSearchData[];
+  [StorageKeys.SEMANTIC_SEARCH_INFO_DISMISSED]: boolean;
 };
 
 const LocalStorageService = {

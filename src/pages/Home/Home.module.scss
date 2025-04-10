@@ -2,7 +2,9 @@
 
 .home {
   .searchPanel {
-    padding: 50px 0 65px;
+    box-sizing: border-box;
+    min-height: 290px;
+    padding: 50px 0 10px;
     background: linear-gradient(45deg, hsl(204deg 65% 71% / 100%) 0%, hsl(273deg 34% 75% / 100%) 43%, hsl(358deg 43% 75% / 100%) 57%, hsl(43deg 96% 63% / 100%) 100%);
     color: white;
     text-align: center;

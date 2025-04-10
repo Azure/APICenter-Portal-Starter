@@ -1,16 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { getRecoil, setRecoil } from 'recoil-nexus';
 import memoizee from 'memoizee';
-import config from '@/config';
 import isAccessDeniedAtom from '@/atoms/isAccessDeniedAtom';
 import appServicesAtom from '@/atoms/appServicesAtom';
-
-let baseUrl = `https://${config.dataApiHostName}`;
-
-// Append the default workspace to the base URL if it's not already there
-if (!config.dataApiHostName.includes('/workspaces/default')) {
-  baseUrl += '/workspaces/default';
-}
+import configAtom from '@/atoms/configAtom';
 
 const BASE_HEADERS: HeadersInit = {
   Accept: 'application/json',
@@ -19,6 +12,7 @@ const BASE_HEADERS: HeadersInit = {
 
 async function makeRequest<T>(endpoint: string, method: string, payload?: any): Promise<T> {
   const { AuthService } = getRecoil(appServicesAtom);
+  const config = getRecoil(configAtom);
   const accessToken = await AuthService.getAccessToken();
 
   const init: RequestInit = {
@@ -32,6 +26,13 @@ async function makeRequest<T>(endpoint: string, method: string, payload?: any): 
 
   if (payload) {
     init.body = JSON.stringify(payload);
+  }
+
+  let baseUrl = `https://${config.dataApiHostName}`;
+
+  // Append the default workspace to the base URL if it's not already there
+  if (!config.dataApiHostName.includes('/workspaces/default')) {
+    baseUrl += '/workspaces/default';
   }
 
   const response = await fetch(`${baseUrl}${endpoint}`, init);

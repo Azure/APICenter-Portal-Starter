@@ -3,7 +3,18 @@ import { ApiOperation, ApiOperationParameter } from '@microsoft/api-docs-ui';
 
 export type WithRef<T> = T & { $ref?: string };
 
+/**
+ * Operation type defines how the operation is presented to the user.
+ * DEFAULT type will cover most of the cases but if a special treatment is needed then a separate type can be defined.
+ * It can be used to have different details UI implementation for example.
+ */
+export enum OperationTypes {
+  DEFAULT = 'default',
+  MCP_RESOURCE = 'mcpResource',
+}
+
 export interface OperationMetadata<T = object> extends ApiOperation {
+  type: OperationTypes;
   category: string;
   spec?: T;
 }
@@ -23,15 +34,54 @@ export interface RawSchemaEntry {
   language: string;
 }
 
-export interface SchemaMetadata {
+export interface EnumProperty {
+  name: string;
+  description?: string;
+}
+
+export interface StaticProperty {
+  name: string;
+  value: string;
+  description?: string;
+}
+
+interface BaseSchemaMetadata {
   $ref?: string;
   refLabel?: string;
   typeLabel: React.ReactNode;
-  properties?: OperationParameterMetadata[];
+  properties?: unknown;
   rawSchema?: RawSchemaEntry;
-  isEnum?: boolean;
   isBinary?: boolean;
 }
+
+/**
+ * Static schema represents static data structure that already have assigned values.
+ */
+export interface StaticSchemaMetadata extends BaseSchemaMetadata {
+  properties?: StaticProperty[];
+  isEnum?: false;
+  isStatic: true;
+}
+
+/**
+ * Enum schema represents an enum of static values (all values are considered strings).
+ */
+export interface EnumSchemaMetadata extends BaseSchemaMetadata {
+  properties?: EnumProperty[];
+  isEnum: true;
+  isStatic: true;
+}
+
+/**
+ * Dynamic schema metadata.
+ */
+export interface DynamicSchemaMetadata extends BaseSchemaMetadata {
+  properties?: OperationParameterMetadata[];
+  isEnum?: false;
+  isStatic?: false;
+}
+
+export type SchemaMetadata = DynamicSchemaMetadata | StaticSchemaMetadata | EnumSchemaMetadata;
 
 export interface SampleDataEntry {
   data: string;
@@ -62,6 +112,7 @@ export enum ApiSpecTypes {
   OpenApiV2 = 'OpenApiV2',
   OpenApiV3 = 'OpenApiV3',
   GraphQL = 'GraphQL',
+  MCP = 'MCP',
 }
 
 /**

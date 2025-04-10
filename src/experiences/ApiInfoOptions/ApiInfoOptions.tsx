@@ -1,6 +1,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { Button, Link, MessageBar, MessageBarBody, Spinner } from '@fluentui/react-components';
 import { ArrowDownloadRegular, Document20Regular, Link20Regular, OpenRegular } from '@fluentui/react-icons';
+import { useRecoilValue } from 'recoil';
 import DevPortalLogo from '@/assets/devPortal.png';
 import { ApiMetadata } from '@/types/api';
 import { ApiVersion } from '@/types/apiVersion';
@@ -12,7 +13,7 @@ import VsCodeLogo from '@/assets/vsCodeLogo.svg';
 import LocationsService from '@/services/LocationsService';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import CopyLink from '@/components/CopyLink';
-import config from '@/config';
+import configAtom from '@/atoms/configAtom';
 import styles from './ApiInfoOptions.module.scss';
 
 interface Props {
@@ -26,6 +27,8 @@ interface Props {
 const DEFAULT_INSTRUCTIONS = 'Gain comprehensive insights into the API.';
 
 export const ApiInfoOptions: React.FC<Props> = ({ api, apiVersion, apiDefinition, apiDeployment, isLoading }) => {
+  const config = useRecoilValue(configAtom);
+
   const definitionId = useMemo(
     () => ({
       apiName: api.name,
@@ -44,7 +47,7 @@ export const ApiInfoOptions: React.FC<Props> = ({ api, apiVersion, apiDefinition
     window.open(
       `vscode://apidev.azure-api-center?clientId=${config.authentication.clientId}&tenantId=${config.authentication.tenantId}&runtimeUrl=${config.dataApiHostName}`
     );
-  }, []);
+  }, [config]);
 
   function renderContent() {
     if (isLoading || apiSpecUrl.isLoading || environment.isLoading) {
@@ -73,14 +76,12 @@ export const ApiInfoOptions: React.FC<Props> = ({ api, apiVersion, apiDefinition
                   Download <ArrowDownloadRegular />
                 </Link>
 
-                {api.kind !== 'mcp' && (
-                  <Link
-                    className={styles.link}
-                    href={LocationsService.getApiSchemaExplorerUrl(api.name, apiVersion.name, apiDefinition.name)}
-                  >
-                    View documentation
-                  </Link>
-                )}
+                <Link
+                  className={styles.link}
+                  href={LocationsService.getApiSchemaExplorerUrl(api.name, apiVersion.name, apiDefinition.name)}
+                >
+                  View documentation
+                </Link>
               </span>
             )}
           </h5>

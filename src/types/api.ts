@@ -17,7 +17,7 @@ export interface ApiMetadata {
   name: string;
   title: string;
   /** The kind of the API, e.g., "REST". */
-  kind: string;
+  kind?: string;
   description?: string;
   summary?: string;
   /** The lifecycle stage of the API, e.g., "development", "production", "retired". */

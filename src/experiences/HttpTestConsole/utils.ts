@@ -19,7 +19,7 @@ export const getFormDataFieldsMetadata = memoizee(
     const requestMetadata = apiSpec.getRequestMetadata(operation.name);
     const body = requestMetadata.body.find((b) => b.type === 'multipart/form-data');
 
-    return body?.schema.properties || [];
+    return (body?.schema.properties || []) as OperationParameterMetadata[];
   }
 );
 

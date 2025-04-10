@@ -1,16 +1,16 @@
-.testConsoleAuth {
+.apiAuthForm {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  
+
   .spinner {
     height: 58px;
   }
-  
+
   .error {
     color: var(--red-4);
   }
-  
+
   .status {
     color: var(--grey-4);
   }

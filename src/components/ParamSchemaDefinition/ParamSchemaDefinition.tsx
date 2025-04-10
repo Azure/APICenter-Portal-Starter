@@ -1,17 +1,16 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { ParametersTable, RawSchema } from '@microsoft/api-docs-ui';
+import { InfoTable, MarkdownRenderer, ParametersTable, RawSchema } from '@microsoft/api-docs-ui';
 import { Badge, Dropdown, Label, Option, Tab, TabList } from '@fluentui/react-components';
 import { MediaContentMetadata, SchemaMetadata } from '@/types/apiSpec';
 import RefLink from '@/components/RefLink';
+import { isEnumSchemaMetadata, isStaticSchemaMetadata } from '@/utils/apiSpec';
 import styles from './ParamSchemaDefinition.module.scss';
 
 interface Props {
-  title: string;
+  title?: string;
   schema?: SchemaMetadata;
   mediaContentList?: MediaContentMetadata[];
-  hiddenColumns?: React.ComponentProps<typeof ParametersTable>['hiddenColumns'];
   isGlobalDefinition?: boolean;
-  isEnum?: boolean;
 }
 
 enum DefinitionTabs {
@@ -31,9 +30,7 @@ export const ParamSchemaDefinition: React.FC<Props> = ({
   title,
   schema: inputSchema,
   mediaContentList,
-  hiddenColumns = ['in'],
   isGlobalDefinition = false,
-  isEnum = false,
 }) => {
   const [selectedTab, setSelectedTab] = useState<DefinitionTabs>(DefinitionTabs.TABLE);
   const [selectedMediaContent, setSelectedMediaContent] = useState<MediaContentMetadata | undefined>(
@@ -83,6 +80,10 @@ export const ParamSchemaDefinition: React.FC<Props> = ({
   }
 
   function renderTitle() {
+    if (!title) {
+      return null;
+    }
+
     if (isGlobalDefinition) {
       return (
         <h4 id={schema.refLabel}>
@@ -142,12 +143,36 @@ export const ParamSchemaDefinition: React.FC<Props> = ({
       );
     }
 
-    return (
-      <>
-        {isEnum && <h5>Enum values:</h5>}
-        <ParametersTable parameters={schema.properties} hiddenColumns={hiddenColumns} />
-      </>
-    );
+    if (isEnumSchemaMetadata(schema)) {
+      return (
+        <>
+          <h5>Enum values:</h5>
+          <ParametersTable
+            parameters={schema.properties}
+            hiddenColumns={['in', 'required', 'readOnly', 'type', 'description', 'examples']}
+          />
+        </>
+      );
+    }
+
+    if (isStaticSchemaMetadata(schema)) {
+      return (
+        <InfoTable columnLabels={['Key', 'Value', 'Description']}>
+          {schema.properties?.map((property) => (
+            <InfoTable.Row key={property.name}>
+              <InfoTable.Cell>{property.name}</InfoTable.Cell>
+              <InfoTable.Cell>{property.value}</InfoTable.Cell>
+              <InfoTable.Cell>
+                <MarkdownRenderer markdown={property.description} maxLength={200} />
+              </InfoTable.Cell>
+            </InfoTable.Row>
+          ))}
+        </InfoTable>
+      );
+    }
+
+    // Default case for dynamic schema
+    return <ParametersTable parameters={schema.properties} hiddenColumns={['in', 'readOnly']} />;
   }
 
   return (

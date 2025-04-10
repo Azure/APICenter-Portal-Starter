@@ -6,8 +6,11 @@ const isAuthenticatedAtom = atom<boolean>({
   default: false,
   effects: [
     ({ setSelf, getLoadable }): void => {
-      const { AuthService } = getLoadable(appServicesAtom).contents;
-      AuthService.isAuthenticated().then(setSelf);
+      // This needs to be run in the next execution frame to allow all atoms to be initialized first
+      setTimeout(() => {
+        const { AuthService } = getLoadable(appServicesAtom).contents;
+        AuthService.isAuthenticated().then(setSelf);
+      });
     },
   ],
 });

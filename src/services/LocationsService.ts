@@ -1,3 +1,5 @@
+import { UrlParams } from '@/constants/urlParams';
+
 const LocationsService = {
   getHomeUrl(preserveSearchParams = false): string {
     if (!preserveSearchParams) {
@@ -7,12 +9,18 @@ const LocationsService = {
     return `/${window.location.search}`;
   },
 
-  getApiSearchUrl(search?: string): string {
+  getApiSearchUrl(search?: string, isSemanticSearch?: boolean): string {
     const searchParams = new URLSearchParams(window.location.search);
     if (search) {
-      searchParams.set('search', search);
+      searchParams.set(UrlParams.SEARCH_QUERY, search);
     } else {
-      searchParams.delete('search');
+      searchParams.delete(UrlParams.SEARCH_QUERY);
+    }
+
+    if (isSemanticSearch) {
+      searchParams.set(UrlParams.IS_SEMANTIC_SEARCH, 'true');
+    } else {
+      searchParams.delete(UrlParams.IS_SEMANTIC_SEARCH);
     }
 
     return `/?${searchParams.toString()}`;

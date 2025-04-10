@@ -22,4 +22,4 @@ export const RootProvider: React.FC<Props> = ({ children, services }) => {
   );
 };
 
-export default RootProvider;
+export default React.memo(RootProvider);

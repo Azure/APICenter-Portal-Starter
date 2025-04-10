@@ -14,7 +14,7 @@ import {
   ApiSpecTypes,
   OperationCategory,
   OperationMetadata,
-  OperationParameterMetadata,
+  OperationTypes,
   RequestMetadata,
   ResponseMetadata,
   SchemaMetadata,
@@ -43,6 +43,7 @@ export default async function openApiSpecReader(specStr: string): Promise<ApiSpe
     fields: GraphQLFieldMap<T, U>
   ): Array<OperationMetadata<FieldSpec>> {
     return Object.values(fields).map((field) => ({
+      type: OperationTypes.DEFAULT,
       category,
       method: '',
       displayName: field.name,
@@ -129,35 +130,40 @@ export default async function openApiSpecReader(specStr: string): Promise<ApiSpe
     return getUsedRefsForType(operation.spec.type, requestRefs)
       .map((ref) => qlSchema.getType(ref) as GraphQLObjectType | GraphQLInterfaceType | GraphQLEnumType)
       .map((type) => {
-        let properties: OperationParameterMetadata[] = [];
         if (isEnumType(type)) {
-          properties = Object.values(type.getValues()).map((value) => ({
-            name: value.name,
-            type: 'string',
-            in: 'body',
-            description: value.description,
-          }));
-        } else {
-          properties = Object.values(type.getFields()).map((field) => ({
-            name: field.name,
-            type: gqlTypeToLabel(field.type),
-            in: 'body',
-            description: field.description,
-            required: isNonNullType(field.type),
-            readOnly: false,
-          }));
+          return {
+            $ref: type.name,
+            refLabel: type.name,
+            typeLabel: gqlTypeToLabel(type),
+            properties: Object.values(type.getValues()).map((value) => ({
+              name: value.name,
+              description: value.description,
+            })),
+            rawSchema: {
+              schema: specStr.substring(type.astNode.loc.start, type.astNode.loc.end),
+              language: 'graphql',
+            },
+            isEnum: true,
+            isStatic: true,
+          };
         }
 
         return {
           $ref: type.name,
           refLabel: type.name,
           typeLabel: gqlTypeToLabel(type),
-          properties,
+          properties: Object.values(type.getFields()).map((field) => ({
+            name: field.name,
+            type: gqlTypeToLabel(field.type),
+            in: 'body',
+            description: field.description,
+            required: isNonNullType(field.type),
+            readOnly: false,
+          })),
           rawSchema: {
             schema: specStr.substring(type.astNode.loc.start, type.astNode.loc.end),
             language: 'graphql',
           },
-          isEnum: isEnumType(type),
         };
       });
   });

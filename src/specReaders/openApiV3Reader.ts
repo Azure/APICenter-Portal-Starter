@@ -15,6 +15,7 @@ import {
   ApiSpecTypes,
   MediaContentMetadata,
   SampleDataEntry,
+  OperationTypes,
 } from '@/types/apiSpec';
 import { httpMethodsList } from '@/constants';
 import {
@@ -73,6 +74,7 @@ export default async function openApiSpecReader(specStr: string): Promise<ApiSpe
             .map((method: string) => {
               const opData = pathData[method];
               return {
+                type: OperationTypes.DEFAULT,
                 category: 'default',
                 displayName: opData.summary || pathName,
                 description: opData.summary,

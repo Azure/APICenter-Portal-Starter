@@ -13,10 +13,11 @@
     "dependencies": {
         "@azure/msal-browser": "3.13.0",
         "@fluentui/react-components": "9.56.8",
-        "@microsoft/api-docs-ui": "1.0.24",
+        "@microsoft/api-docs-ui": "1.0.25",
         "@vitejs/plugin-basic-ssl": "1.2.0",
         "classnames": "2.5.1",
         "client-oauth2": "4.3.3",
+        "eventsource": "3.0.6",
         "graphql": "16.10.0",
         "lodash": "4.17.21",
         "memoizee": "0.4.17",

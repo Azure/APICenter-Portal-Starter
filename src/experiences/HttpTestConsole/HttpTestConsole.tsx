@@ -8,7 +8,7 @@ import {
   HttpTestConsole as HttpApiTestConsole,
   SyntaxHighlighter,
 } from '@microsoft/api-docs-ui';
-import { Button, Drawer, DrawerBody, DrawerHeader, DrawerHeaderTitle } from '@fluentui/react-components';
+import { Body1Strong, Button, Drawer, DrawerBody, DrawerHeader, DrawerHeaderTitle } from '@fluentui/react-components';
 import { Dismiss24Regular } from '@fluentui/react-icons';
 import { uniqBy } from 'lodash';
 import { ApiSpecReader, OperationMetadata } from '@/types/apiSpec';
@@ -16,6 +16,9 @@ import { ApiDeployment } from '@/types/apiDeployment';
 import useHttpTestRequestController from '@/hooks/useHttpTestRequestController';
 import { ApiAuthCredentials } from '@/types/apiAuth';
 import useApiAuthorization from '@/hooks/useApiAuthorization';
+import TestConsoleError from '@/components/TestConsoleError';
+import { ApiDefinitionId } from '@/types/apiDefinition';
+import ApiAccessAuthForm from '@/experiences/ApiAccessAuthForm';
 import {
   getFormDataFieldsMetadata,
   getReqBodySupportedFormats,
@@ -24,12 +27,10 @@ import {
   inToParamsCollectionName,
   stringifyResponse,
 } from './utils';
-import TestConsoleAuth from './TestConsoleAuth';
 import styles from './HttpTestConsole.module.scss';
 
 interface Props {
-  apiName: string;
-  versionName: string;
+  definitionId: ApiDefinitionId;
   apiSpec: ApiSpecReader;
   operation?: OperationMetadata;
   deployment?: ApiDeployment;
@@ -39,20 +40,12 @@ interface Props {
 
 const methodsWithoutBody = ['get', 'head'];
 
-export const HttpTestConsole: React.FC<Props> = ({
-  apiName,
-  versionName,
-  apiSpec,
-  operation,
-  deployment,
-  isOpen,
-  onClose,
-}) => {
+export const HttpTestConsole: React.FC<Props> = ({ definitionId, apiSpec, operation, deployment, isOpen, onClose }) => {
   const defaults = getReqDataDefaults(apiSpec, operation, deployment);
   const [authCredentials, setAuthCredentials] = useState<ApiAuthCredentials | undefined>();
   const [reqData, setReqData] = useState<HttpReqData>(defaults);
 
-  const apiAuth = useApiAuthorization({ apiName, versionName });
+  const apiAuth = useApiAuthorization({ definitionId });
 
   const requestController = useHttpTestRequestController(operation);
 
@@ -160,13 +153,13 @@ export const HttpTestConsole: React.FC<Props> = ({
       return null;
     }
 
-    let content: React.ReactNode = <div className={styles.responseError}>{requestController.error}</div>;
+    let content: React.ReactNode = <TestConsoleError>{requestController.error}</TestConsoleError>;
     if (requestController.response) {
       content = <SyntaxHighlighter language="http">{stringifyResponse(requestController.response)}</SyntaxHighlighter>;
     }
 
     return (
-      <HttpApiTestConsole.Panel name="response" header="HTTP response" isOpenByDefault>
+      <HttpApiTestConsole.Panel name="response" header={<Body1Strong>HTTP response</Body1Strong>} isOpenByDefault>
         {content}
       </HttpApiTestConsole.Panel>
     );
@@ -185,7 +178,7 @@ export const HttpTestConsole: React.FC<Props> = ({
         <HttpApiTestConsole>
           {!apiAuth.isLoading && !!apiAuth.schemeOptions?.length && (
             <HttpApiTestConsole.Panel name="auth" header="Authorization" isOpenByDefault>
-              <TestConsoleAuth apiName={apiName} versionName={versionName} onChange={handleAuthCredentialsChange} />
+              <ApiAccessAuthForm definitionId={definitionId} onChange={handleAuthCredentialsChange} />
             </HttpApiTestConsole.Panel>
           )}
           <HttpApiTestConsole.ParamsListForm

@@ -1,17 +1,17 @@
 import { groupBy } from 'lodash';
 import memoize from 'memoizee';
-import { ActiveFilterData } from '@/types/apiFilters';
 import HttpService from '@/services/HttpService';
 import { ApiMetadata } from '@/types/api';
+import { ApiAuthScheme, ApiAuthSchemeMetadata } from '@/types/apiAuth';
 import { ApiDefinition, ApiDefinitionId } from '@/types/apiDefinition';
-import { ApiVersion } from '@/types/apiVersion';
 import { ApiDeployment } from '@/types/apiDeployment';
 import { ApiEnvironment } from '@/types/apiEnvironment';
+import { ActiveFilterData } from '@/types/apiFilters';
+import { ApiVersion } from '@/types/apiVersion';
 import { IApiService } from '@/types/services/IApiService';
-import { ApiAuthScheme, ApiAuthSchemeMetadata } from '@/types/apiAuth';
 
 const ApiService: IApiService = {
-  async getApis(search: string, filters: ActiveFilterData[] = []): Promise<ApiMetadata[]> {
+  async getApis(search: string, filters: ActiveFilterData[] = [], isSemanticSearch?: boolean): Promise<ApiMetadata[]> {
     const searchParams = new URLSearchParams();
     if (search.length) {
       searchParams.set('$search', search);
@@ -27,6 +27,14 @@ const ApiService: IApiService = {
         .join(' and ');
 
       searchParams.set('$filter', filtersString);
+    }
+
+    if (search.length && isSemanticSearch) {
+      const response = await HttpService.post<{ value: ApiMetadata[] }>(`:search?${searchParams.toString()}`, {
+        query: search,
+        searchType: 'vector',
+      });
+      return response.value || [];
     }
 
     const response = await HttpService.get<{ value: ApiMetadata[] }>(`/apis?${searchParams.toString()}`);
@@ -76,17 +84,17 @@ const ApiService: IApiService = {
     return await HttpService.get<ApiEnvironment>(`/environments/${environmentId}`);
   },
 
-  async getSecurityRequirements(apiName: string, versionName: string): Promise<ApiAuthSchemeMetadata[]> {
+  async getSecurityRequirements(definitionId: ApiDefinitionId): Promise<ApiAuthSchemeMetadata[]> {
     const response = await HttpService.get<{ value: ApiAuthSchemeMetadata[] }>(
-      `/apis/${apiName}/versions/${versionName}/securityRequirements`
+      `/apis/${definitionId.apiName}/versions/${definitionId.versionName}/securityRequirements`
     );
 
-    return response?.value;
+    return response?.value || [];
   },
 
-  async getSecurityCredentials(apiName: string, versionName: string, schemeName: string): Promise<ApiAuthScheme> {
+  async getSecurityCredentials(definitionId: ApiDefinitionId, schemeName: string): Promise<ApiAuthScheme> {
     return await HttpService.post<ApiAuthScheme>(
-      `/apis/${apiName}/versions/${versionName}/securityRequirements/${schemeName}:getCredentials`
+      `/apis/${definitionId.apiName}/versions/${definitionId.versionName}/securityRequirements/${schemeName}:getCredentials`
     );
   },
 };

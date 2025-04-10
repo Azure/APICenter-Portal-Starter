@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRecoilValue } from 'recoil';
 import { ApiDefinitionId } from '@/types/apiDefinition';
@@ -16,11 +17,11 @@ export default function useApiSpec(definitionId: ApiDefinitionId): ReturnType {
   const [spec, setSpec] = useState<string | undefined>();
   const [reader, setReader] = useState<ApiSpecReader | undefined>();
   const [isLoading, setIsLoading] = useState(true);
-
+  
   const ApiService = useApiService();
 
   const isAuthenticated = useRecoilValue(isAuthenticatedAtom);
-
+  
   const fetch = useCallback(async () => {
     if (!isDefinitionIdValid(definitionId) || !isAuthenticated) {
       setSpec(undefined);
@@ -31,8 +32,14 @@ export default function useApiSpec(definitionId: ApiDefinitionId): ReturnType {
 
     try {
       setIsLoading(true);
+
       const definition = await ApiService.getDefinition(definitionId);
       const spec = await ApiService.getSpecification(definitionId);
+      
+      if (!spec) {
+        throw new Error('Failed to fetch spec');
+      }
+
       setSpec(spec);
       setReader(await getSpecReader(spec, definition));
     } catch {

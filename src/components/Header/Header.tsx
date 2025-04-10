@@ -1,12 +1,15 @@
 import React from 'react';
 import { Link, Text } from '@fluentui/react-components';
-import config from '@/config';
+import { useRecoilValue } from 'recoil';
 import LogoSvg from '@/assets/logo.svg';
 import AuthBtn from '@/components/Header/AuthBtn';
 import LocationsService from '@/services/LocationsService';
+import configAtom from '@/atoms/configAtom';
 import styles from './Header.module.scss';
 
 const Header: React.FC = () => {
+  const config = useRecoilValue(configAtom);
+
   return (
     <header className={styles.header}>
       <Link href={LocationsService.getHomeUrl()} className={styles.logo}>
@@ -17,7 +20,7 @@ const Header: React.FC = () => {
       </Link>
       <nav className={styles.navLinks}>
         <Link appearance="subtle" href={LocationsService.getHomeUrl()}>
-          Home
+          APIs
         </Link>
 
         <Link appearance="subtle" href={LocationsService.getHelpUrl()} target="_blank" rel="noopener noreferrer">
