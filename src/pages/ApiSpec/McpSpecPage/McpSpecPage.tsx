@@ -7,13 +7,20 @@ import getMcpService from '@/services/McpService';
 import { ApiSpecReader } from '@/types/apiSpec';
 import getSpecReader from '@/specReaders/getSpecReader';
 import useApiDefinition from '@/hooks/useApiDefinition';
-import useApiAuthorization from '@/hooks/useApiAuthorization';
-import { ApiAuthCredentials } from '@/types/apiAuth';
-import { McpServerAuthMetadata } from '@/types/mcp';
+import { ApiAuthCredentials, Oauth2Credentials } from '@/types/apiAuth';
 import ApiSpecPageLayout from '../ApiSpecPageLayout';
 import pageStyles from '../ApiSpec.module.scss';
+import useApiService from '@/hooks/useApiService';
+import { getMcpServerOAuthCredentials } from '@/utils/mcp';
 import McpMetadataBasedAuthForm from './McpMetadataBasedAuthForm';
 import styles from './McpSpecPage.module.scss';
+
+enum McpServerAuthState {
+  NOT_AUTHORIZED,
+  DYNAMIC_REGISTRATION_FLOW,
+  API_ACCESS_FLOW,
+  AUTHORIZED,
+}
 
 interface Props {
   definitionId: ApiDefinitionId;
@@ -21,37 +28,55 @@ interface Props {
 }
 
 export const McpSpecPage: React.FC<Props> = ({ definitionId, deployment }) => {
-  const [mcpAuthMetadata, setMcpAuthMetadata] = useState<McpServerAuthMetadata | undefined>();
+  const [authState, setAuthState] = useState<McpServerAuthState>(McpServerAuthState.NOT_AUTHORIZED);
+  const [mcpOAuthCredentials, setMcpOAuthCredentials] = useState<Oauth2Credentials | undefined>();
   const [authCredentials, setAuthCredentials] = useState<ApiAuthCredentials | undefined>();
   const [apiSpec, setApiSpec] = useState<ApiSpecReader>();
   const [isSpecLoading, setIsSpecLoading] = useState(false);
-  const [isMcpAuthReady, setIsMcpAuthReady] = useState(false);
 
-  const apiAuth = useApiAuthorization({ definitionId });
+  const ApiService = useApiService();
   const definition = useApiDefinition(definitionId);
 
-  const apiAccessAuthRequired = !apiAuth.isLoading && !!apiAuth.schemeOptions?.length;
+  const isAuthorized = authState === McpServerAuthState.AUTHORIZED;
 
-  const mcpService = useMemo(() => {
-    if (apiAuth.isLoading) {
-      return undefined;
-    }
-
-    if (apiAccessAuthRequired && !authCredentials) {
-      return undefined;
-    }
-
-    return getMcpService(deployment.server.runtimeUri[0]);
-  }, [apiAuth, apiAccessAuthRequired, authCredentials, deployment]);
-
-  const isAuthFlowComplete = !!authCredentials || (!apiAccessAuthRequired && isMcpAuthReady && !mcpAuthMetadata);
-
-  const makeSpec = useCallback(async () => {
-    if (!isAuthFlowComplete) {
+  const determineAuthFlow = useCallback(async () => {
+    if (!definitionId || authState !== McpServerAuthState.NOT_AUTHORIZED) {
       return;
     }
 
-    if (!mcpService || !definition.value) {
+    // Use dynamic registration flow if the server has this feature
+    const mcpServerCredentials = await getMcpServerOAuthCredentials(deployment.server.runtimeUri[0]);
+    if (mcpServerCredentials) {
+      setMcpOAuthCredentials(mcpServerCredentials);
+      setAuthState(McpServerAuthState.DYNAMIC_REGISTRATION_FLOW);
+      return;
+    }
+
+    // Use API access flow if it was configured for this server
+    const securityRequirements = await ApiService.getSecurityRequirements(definitionId);
+    if (securityRequirements.length) {
+      setAuthState(McpServerAuthState.API_ACCESS_FLOW);
+      return;
+    }
+
+    // Otherwise, we can assume that the server is authorized
+    setAuthState(McpServerAuthState.AUTHORIZED);
+  }, [ApiService, authState, definitionId, deployment]);
+
+  useEffect(() => {
+    void determineAuthFlow();
+  }, [determineAuthFlow]);
+
+  const mcpService = useMemo(() => {
+    if (!isAuthorized || !deployment.server.runtimeUri) {
+      return undefined;
+    }
+
+    return getMcpService(deployment.server.runtimeUri[0], authCredentials);
+  }, [isAuthorized, deployment, authCredentials]);
+
+  const makeApiSpec = useCallback(async () => {
+    if (!isAuthorized || !mcpService || !definition.value) {
       return;
     }
 
@@ -70,53 +95,41 @@ export const McpSpecPage: React.FC<Props> = ({ definitionId, deployment }) => {
     } finally {
       setIsSpecLoading(false);
     }
-  }, [definition.value, isAuthFlowComplete, mcpService]);
+  }, [definition.value, isAuthorized, mcpService]);
 
   useEffect(() => {
-    if (!mcpService || authCredentials) {
-      return;
+    void makeApiSpec();
+  }, [makeApiSpec]);
+
+  const handleAuthCredentialsChange = useCallback((credentials?: ApiAuthCredentials) => {
+    setAuthCredentials(credentials);
+    if (!!credentials) {
+      setAuthState(McpServerAuthState.AUTHORIZED);
     }
+  }, []);
 
-    mcpService.getAuthMetadata().then((authMetadata: McpServerAuthMetadata) => {
-      setMcpAuthMetadata(authMetadata);
-      setIsMcpAuthReady(true);
-    });
-  }, [authCredentials, mcpService]);
-
-  useEffect(() => {
-    void makeSpec();
-  }, [makeSpec]);
-
-  useEffect(() => {
-    if (!mcpService || !isAuthFlowComplete) {
-      return;
-    }
-
-    mcpService.setAuthCredentials(authCredentials);
-  }, [authCredentials, isAuthFlowComplete, mcpService]);
-
-  if (definition.isLoading || apiAuth.isLoading || isSpecLoading) {
+  if (authState === McpServerAuthState.NOT_AUTHORIZED || definition.isLoading || isSpecLoading) {
     return <Spinner className={pageStyles.spinner} />;
   }
 
-  if (apiAccessAuthRequired && !authCredentials) {
+  if (authState === McpServerAuthState.API_ACCESS_FLOW) {
     return (
       <div className={styles.authPanel}>
-        <ApiAccessAuthForm definitionId={definitionId} onChange={setAuthCredentials} />
+        <ApiAccessAuthForm definitionId={definitionId} onChange={handleAuthCredentialsChange} />
       </div>
     );
   }
 
-  if (!isMcpAuthReady && !authCredentials) {
-    return <Spinner className={pageStyles.spinner} />;
-  }
-
-  if (mcpAuthMetadata && !authCredentials) {
+  if (authState === McpServerAuthState.DYNAMIC_REGISTRATION_FLOW) {
     return (
       <div className={styles.authPanel}>
-        <McpMetadataBasedAuthForm metadata={mcpAuthMetadata} onChange={setAuthCredentials} />
+        <McpMetadataBasedAuthForm credentials={mcpOAuthCredentials} onChange={handleAuthCredentialsChange} />
       </div>
     );
+  }
+
+  if (!isAuthorized) {
+    return null;
   }
 
   return <ApiSpecPageLayout definitionId={definitionId} deployment={deployment} apiSpec={apiSpec} />;

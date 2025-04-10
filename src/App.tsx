@@ -65,11 +65,7 @@ const App: React.FC = () => {
     return null;
   }
 
-  return (
-    <React.StrictMode>
-      <RouterProvider router={router} />
-    </React.StrictMode>
-  );
+  return <RouterProvider router={router} />;
 };
 
 export default React.memo(App);

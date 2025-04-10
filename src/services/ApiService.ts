@@ -90,7 +90,7 @@ const ApiService: IApiService = {
       `/apis/${definitionId.apiName}/versions/${definitionId.versionName}/securityRequirements`
     );
 
-    return response?.value;
+    return response?.value || [];
   },
 
   async getSecurityCredentials(definitionId: ApiDefinitionId, schemeName: string): Promise<ApiAuthScheme> {

@@ -1,7 +1,7 @@
 import { EventSource } from 'eventsource';
 import { DeferredPromise, makeDeferredPromise } from '@/utils/promise';
-import { McpInitData, McpOperation, McpServerAuthMetadata, McpServerPartialAuthMetadata, McpSpec } from '@/types/mcp';
-import { ApiAuthCredentials, OAuthGrantTypes } from '@/types/apiAuth';
+import { McpInitData, McpOperation, McpSpec } from '@/types/mcp';
+import { ApiAuthCredentials } from '@/types/apiAuth';
 import { apimFetchProxy } from '@/utils/apimProxy';
 
 interface MessagePayload {
@@ -13,10 +13,9 @@ interface MessagePayload {
 const INIT_ID = 1;
 
 export class McpService {
-  private readonly serverOrigin: string;
   public readonly serverUri: string;
 
-  private authCredentials?: ApiAuthCredentials;
+  public readonly authCredentials?: ApiAuthCredentials;
   private sse: EventSource;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private pendingMessages = new Map<number, DeferredPromise<any>>();
@@ -24,12 +23,12 @@ export class McpService {
   private lastMessageId = INIT_ID;
   private initData: McpInitData;
 
-  private authMetadataDeferredPromise = makeDeferredPromise<McpServerAuthMetadata | undefined>();
   private initDeferredPromise = makeDeferredPromise<void>();
 
-  constructor(serverUri: string) {
+  constructor(serverUri: string, authCredentials?: ApiAuthCredentials) {
+    this.authCredentials = authCredentials;
+
     this.serverUri = serverUri;
-    this.serverOrigin = new URL(serverUri).origin;
 
     this.fetchProxy = this.fetchProxy.bind(this);
     this.handleEndpointReceived = this.handleEndpointReceived.bind(this);
@@ -38,16 +37,11 @@ export class McpService {
 
     this.pendingMessages.set(INIT_ID, makeDeferredPromise());
 
-    void this.discoverAuthenticationMetadata();
-  }
+    this.sse = new EventSource(`${this.serverUri}/sse`, { fetch: this.fetchProxy });
 
-  public setAuthCredentials(authCredentials: ApiAuthCredentials): void {
-    this.authCredentials = authCredentials;
-    void this.startListeningToSse();
-  }
-
-  public getAuthMetadata(): Promise<McpServerAuthMetadata | undefined> {
-    return this.authMetadataDeferredPromise.promise;
+    this.sse.addEventListener('endpoint', this.handleEndpointReceived);
+    this.sse.addEventListener('error', this.handleErrorReceived);
+    this.sse.addEventListener('message', this.handleMessageReceived);
   }
 
   public closeConnection(): void {
@@ -88,18 +82,6 @@ export class McpService {
     });
   }
 
-  private startListeningToSse(): void {
-    if (this.sse) {
-      return;
-    }
-
-    this.sse = new EventSource(`${this.serverUri}/sse`, { fetch: this.fetchProxy });
-
-    this.sse.addEventListener('endpoint', this.handleEndpointReceived);
-    this.sse.addEventListener('error', this.handleErrorReceived);
-    this.sse.addEventListener('message', this.handleMessageReceived);
-  }
-
   private ensureInitialized(): Promise<void> {
     return this.initDeferredPromise.promise;
   }
@@ -119,51 +101,6 @@ export class McpService {
     });
 
     this.initDeferredPromise.resolve();
-  }
-
-  private async discoverAuthenticationMetadata(): Promise<void> {
-    const metadataResponse = await this.fetchProxy(`${this.serverOrigin}/.well-known/oauth-authorization-server`, {
-      method: 'GET',
-    });
-
-    let metadata: McpServerPartialAuthMetadata | undefined;
-    if (metadataResponse.ok) {
-      metadata = await metadataResponse.json();
-    } else {
-      metadata = {
-        issuer: this.serverOrigin,
-        authorization_endpoint: `${this.serverOrigin}/authorize`,
-        token_endpoint: `${this.serverOrigin}/token`,
-        registration_endpoint: `${this.serverOrigin}/register`,
-        jwks_uri: `${this.serverOrigin}/jwks`,
-        scopes_supported: ['openid', 'profile', 'email'],
-        response_types_supported: ['code', 'token'],
-        grant_types_supported: [OAuthGrantTypes.authorizationCode],
-      };
-    }
-
-    const registrationResponse = await this.fetchProxy(metadata.registration_endpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        client_name: 'APIC MCP Inspector',
-        redirect_uris: [window.location.origin],
-        response_types: ['code'],
-        grant_types: metadata.grant_types_supported,
-        token_endpoint_auth_method: 'client_secret_basic',
-      }),
-    });
-
-    if (registrationResponse.ok) {
-      const { client_id } = await registrationResponse.json();
-      this.authMetadataDeferredPromise.resolve({ ...metadata, client_id });
-      return;
-    }
-
-    this.authMetadataDeferredPromise.resolve(undefined);
-    this.startListeningToSse();
   }
 
   private handleEndpointReceived(event: MessageEvent): void {
@@ -230,7 +167,8 @@ export class McpService {
 
     let requestUrl = this.messagingEndpoint;
     if (requestUrl.startsWith('/')) {
-      requestUrl = `${this.serverOrigin}${requestUrl}`;
+      const origin = new URL(this.serverUri).origin;
+      requestUrl = `${origin}${requestUrl}`;
     }
 
     this.fetchProxy(requestUrl, {
@@ -257,7 +195,7 @@ export class McpService {
 }
 
 let currentInstance: McpService | undefined;
-export default function getMcpService(uri?: string): McpService | undefined {
+export default function getMcpService(uri?: string, authCredentials?: ApiAuthCredentials): McpService | undefined {
   let serverUri = uri;
   if (serverUri.endsWith('/sse')) {
     serverUri = serverUri.split('/').slice(0, -1).join('/');
@@ -269,7 +207,13 @@ export default function getMcpService(uri?: string): McpService | undefined {
 
   if (currentInstance?.serverUri !== serverUri) {
     currentInstance?.closeConnection();
-    currentInstance = new McpService(serverUri);
+    currentInstance = new McpService(serverUri, authCredentials);
   }
+
+  if (currentInstance && currentInstance.authCredentials !== authCredentials) {
+    // We should avoid such situations as they may lead to unexpected behavior
+    throw new Error('MCP service is already initialized at provided URL with different credentials');
+  }
+
   return currentInstance;
 }

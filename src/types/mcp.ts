@@ -8,7 +8,7 @@ export enum McpCapabilityTypes {
 
 type Role = 'user' | 'assistant';
 
-export interface McpServerPartialAuthMetadata {
+export interface McpServerAuthMetadata {
   issuer: string;
   authorization_endpoint: string;
   token_endpoint: string;
@@ -17,10 +17,6 @@ export interface McpServerPartialAuthMetadata {
   scopes_supported: string[];
   response_types_supported: string[];
   grant_types_supported: OAuthGrantTypes[];
-}
-
-export interface McpServerAuthMetadata extends McpServerPartialAuthMetadata {
-  client_id: string;
 }
 
 export interface McpCapabilityInfo {
