@@ -53,6 +53,16 @@ export const ApiSearchAutoComplete: React.FC<Props> = ({
     [navigate, recentSearches, searchResults]
   );
 
+  const handleSemanticSearchSuggestionClick = useCallback(
+    (e: React.PointerEvent<HTMLAnchorElement>) => {
+      recentSearches.add({
+        type: RecentSearchType.SEMANTIC_QUERY,
+        search: e.currentTarget.innerText,
+      });
+    },
+    [recentSearches]
+  );
+
   const getRecentRecordUrl = useCallback((recentRecord: RecentSearchData) => {
     if (recentRecord.type === RecentSearchType.API) {
       return LocationsService.getApiInfoUrl(recentRecord.search);
@@ -75,10 +85,18 @@ export const ApiSearchAutoComplete: React.FC<Props> = ({
         return;
       }
 
-      if (recentRecord.type === RecentSearchType.API) {
-        navigate(LocationsService.getApiInfoUrl(recentRecord.search));
-      } else {
-        navigate(LocationsService.getApiSearchUrl(recentRecord.search));
+      switch (recentRecord.type) {
+        case RecentSearchType.API:
+          navigate(LocationsService.getApiInfoUrl(recentRecord.search));
+          break;
+
+        case RecentSearchType.QUERY:
+          navigate(LocationsService.getApiSearchUrl(recentRecord.search));
+          break;
+
+        case RecentSearchType.SEMANTIC_QUERY:
+          navigate(LocationsService.getApiSearchUrl(recentRecord.search, true));
+          break;
       }
     },
     [navigate, recentSearches.list]
@@ -97,7 +115,7 @@ export const ApiSearchAutoComplete: React.FC<Props> = ({
     return null;
   }
 
-  function renderSemanticSearchOption() {
+  function renderSemanticSearchToggle() {
     if (isSemanticSearchEnabled || !onSemanticSearchSelect) {
       return;
     }
@@ -115,9 +133,14 @@ export const ApiSearchAutoComplete: React.FC<Props> = ({
         <h6>Ask things like</h6>
 
         {semanticSearchSuggestions.map((suggestion) => (
-          <Link key={suggestion} to={LocationsService.getApiSearchUrl(suggestion, true)} className={styles.option}>
-            <SparkleRegular className={styles.semanticSearchIcon} />
-            <span className={styles.semanticSearchSuggestion}>{suggestion}</span>
+          <Link
+            key={suggestion}
+            to={LocationsService.getApiSearchUrl(suggestion, true)}
+            className={styles.option}
+            onClick={handleSemanticSearchSuggestionClick}
+          >
+            <SparkleRegular className={styles.sparkleIcon} />
+            <span className={styles.searchQuery}>{suggestion}</span>
           </Link>
         ))}
       </>
@@ -144,12 +167,35 @@ export const ApiSearchAutoComplete: React.FC<Props> = ({
             data-id={recent.id}
             onClick={handleRecentClick}
           >
-            {recent.type === 'api' ? <Cloud16Regular /> : <Search16Regular />}
-            <span className={styles.apiName}>{recent.search}</span>
-            {recent.api && (
-              <span className={styles.apiMeta}>
-                {recent.api.kind}; {recent.api.lifecycleStage && `${recent.api.lifecycleStage};`}; {recent.api.summary}
-              </span>
+            {recent.type === RecentSearchType.API && (
+              <>
+                <span className={styles.iconWrapper}>
+                  <Cloud16Regular />
+                </span>
+                <span className={styles.apiName}>{recent.search}</span>
+                <span className={styles.apiMeta}>
+                  {recent.api.kind}; {recent.api.lifecycleStage && `${recent.api.lifecycleStage};`};{' '}
+                  {recent.api.summary}
+                </span>
+              </>
+            )}
+
+            {recent.type === RecentSearchType.QUERY && (
+              <>
+                <span className={styles.iconWrapper}>
+                  <Search16Regular />
+                </span>
+                <span className={styles.searchQuery}>{recent.search}</span>
+              </>
+            )}
+
+            {recent.type === RecentSearchType.SEMANTIC_QUERY && (
+              <>
+                <span className={styles.iconWrapper}>
+                  <SparkleRegular className={styles.sparkleIcon} />
+                </span>
+                <span className={styles.searchQuery}>{recent.search}</span>
+              </>
             )}
 
             <button className={styles.deleteBtn} value={recent.id} onClick={handleRecentRemoveClick}>
@@ -193,7 +239,7 @@ export const ApiSearchAutoComplete: React.FC<Props> = ({
       return <Spinner size="small" className={styles.noResults} />;
     }
 
-    if (isSemanticSearchEnabled || (!!onSemanticSearchSelect && !recentSearches.list.length)) {
+    if (!!onSemanticSearchSelect && !recentSearches.list.length && !searchResults) {
       return renderSemanticSearchSuggestions();
     }
 
@@ -206,7 +252,7 @@ export const ApiSearchAutoComplete: React.FC<Props> = ({
 
   return (
     <div className={styles.apiSearchAutoComplete}>
-      {renderSemanticSearchOption()}
+      {renderSemanticSearchToggle()}
       {renderContent()}
     </div>
   );

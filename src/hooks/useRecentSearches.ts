@@ -6,6 +6,7 @@ import recentSearchesAtom from '@/atoms/recentSearchesAtom';
 export enum RecentSearchType {
   API = 'api',
   QUERY = 'query',
+  SEMANTIC_QUERY = 'semantic-query',
 }
 
 export interface RecentSearchData {

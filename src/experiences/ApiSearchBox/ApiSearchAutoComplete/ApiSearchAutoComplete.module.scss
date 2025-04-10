@@ -10,17 +10,18 @@
   h6 {
     display: flex;
     justify-content: space-between;
-    margin: .5rem .75rem .125rem;
-    padding-bottom: .5rem;
+    margin: 0 12px 2px;
+    padding: 8px 0;
     border-bottom: 1px solid var(--grey-3);
-    font-size: 0.75rem;
-    font-weight: 400;
-    letter-spacing: 0.02rem;
+    color: var(--grey-5);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 16px;
 
     button {
       color: var(--blue-4);
       font: inherit;
-      line-height: 1rem;
+      font-weight: 400;
 
       &:hover {
         text-decoration: underline;
@@ -31,8 +32,8 @@
   .option {
     display: flex;
     align-items: center;
-    padding: 8px 10px;
-    color: inherit;
+    padding: 8px 40px 8px 10px;
+    color: var(--grey-6);
     font-size: 14px;
     gap: 1rem;
     letter-spacing: 0.01rem;
@@ -55,14 +56,26 @@
       }
     }
     
-    .semanticSearchIcon {
-      width: 16px;
-      height: 16px;
+    .sparkleIcon {
+      width: 20px;
+      height: 20px;
+    }
+    
+    .iconWrapper {
+      position: relative;
+      width: 23px;
+      
+      > svg {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
     }
 
     .apiName,
     .apiMeta,
-    .semanticSearchSuggestion{
+    .searchQuery {
       overflow: hidden;
       text-align: left;
       text-overflow: ellipsis;

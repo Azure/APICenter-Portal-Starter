@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Dismiss16Regular, Search24Regular } from '@fluentui/react-icons';
-import { Input } from '@fluentui/react-components';
+import { Button, Input } from '@fluentui/react-components';
 import { useLocation } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
 import useRecentSearches, { RecentSearchType } from '@/hooks/useRecentSearches.ts';
@@ -42,6 +42,10 @@ export const ApiSearchBox: React.FC = () => {
     activeElement.blur();
   }, [location]);
 
+  const preventFocusLoss = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+  }, []);
+
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setValue(e.target.value);
   }, []);
@@ -67,9 +71,10 @@ export const ApiSearchBox: React.FC = () => {
     (e: React.FormEvent) => {
       e.preventDefault();
 
-      if (!isSemanticSearch) {
-        recentSearches.add({ type: RecentSearchType.QUERY, search: value });
-      }
+      recentSearches.add({
+        type: isSemanticSearch ? RecentSearchType.SEMANTIC_QUERY : RecentSearchType.QUERY,
+        search: value,
+      });
 
       searchQuery.setSearch(value, isSemanticSearch);
       e.currentTarget.querySelector('input').blur();
@@ -96,7 +101,16 @@ export const ApiSearchBox: React.FC = () => {
         className={styles.input}
         size="large"
         contentBefore={renderSearchInputMode()}
-        contentAfter={!!value && <Dismiss16Regular onClick={handleClear} />}
+        contentAfter={
+          !!value && (
+            <Button
+              appearance="transparent"
+              icon={<Dismiss16Regular />}
+              onMouseDown={preventFocusLoss}
+              onClick={handleClear}
+            />
+          )
+        }
         placeholder={placeholder}
         value={value}
         onChange={handleChange}
@@ -105,7 +119,7 @@ export const ApiSearchBox: React.FC = () => {
       />
 
       {isFocused && (
-        <div onMouseDown={(e) => e.preventDefault()}>
+        <div onMouseDown={preventFocusLoss}>
           <ApiSearchAutoComplete
             searchResults={!!value ? apis.list : undefined}
             isLoading={apis.isLoading && !isSemanticSearch}
