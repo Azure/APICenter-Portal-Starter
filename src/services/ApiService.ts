@@ -1,6 +1,5 @@
 import { groupBy } from 'lodash';
 import memoize from 'memoizee';
-import { getRecoil } from 'recoil-nexus';
 import HttpService from '@/services/HttpService';
 import { ApiMetadata } from '@/types/api';
 import { ApiAuthScheme, ApiAuthSchemeMetadata } from '@/types/apiAuth';
