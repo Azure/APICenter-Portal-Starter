@@ -6,19 +6,17 @@ import App from './App';
 import './globals.scss';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <FluentProvider theme={webLightTheme} applyStylesToPortals>
-      <RootProvider
-        services={
-          {
-            // Override services here if needed
-          }
+  <FluentProvider theme={webLightTheme} applyStylesToPortals>
+    <RootProvider
+      services={
+        {
+          // Override services here if needed
         }
-      >
-        <div className="app-root">
-          <App />
-        </div>
-      </RootProvider>
-    </FluentProvider>
-  </React.StrictMode>
+      }
+    >
+      <div className="app-root">
+        <App />
+      </div>
+    </RootProvider>
+  </FluentProvider>
 );
