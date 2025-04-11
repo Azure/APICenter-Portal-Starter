@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { ResolvedHttpReqData } from '@microsoft/api-docs-ui';
 import { HttpStatusCodes } from '@/constants/HttpStatusCodes';
 import { OperationMetadata } from '@/types/apiSpec';
+import { apimFetchProxy } from '@/utils/apimProxy';
 
 interface ResponseType {
   headers: Record<string, string>;
@@ -41,7 +42,7 @@ export default function useHttpTestRequestController(operation?: OperationMetada
       setIsLoading(true);
 
       try {
-        const response = await fetch(reqData.url, {
+        const response = await apimFetchProxy(reqData.url, {
           method: reqData.method,
           headers: Object.fromEntries(reqData.headers.map(({ name, value }) => [name, value])),
           body: reqData.body,
