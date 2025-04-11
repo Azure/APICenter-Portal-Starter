@@ -34,6 +34,10 @@ const LocationsService = {
     return `/apis/${api}/versions/${version}/definitions/${definition}`;
   },
 
+  getAiSearchInfoUrl(): string {
+    return 'https://aka.ms/apicenter/docs/search';
+  },
+
   getHelpUrl(): string {
     return 'https://learn.microsoft.com/en-us/azure/api-center/overview';
   },

@@ -1,6 +1,18 @@
 .semanticSearchInfo {
   margin-top: 8px;
 
+  .infoLink {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--grey-0);
+    font-weight: 600;
+    
+    &:hover {
+      color: var(--grey-0);
+    }
+  }
+  
   .infoBlock {
     position: relative;
     width: 325px;

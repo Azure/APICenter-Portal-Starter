@@ -14,7 +14,7 @@ import SemanticSearchInfo from './SemanticSearchInfo';
 import styles from './ApiSearchBox.module.scss';
 
 export const ApiSearchBox: React.FC = () => {
-  const [isSemanticSearch, setIsSemanticSearch] = useState(false);
+  const [isSemanticSearchEnabled, setIsSemanticSearchEnabled] = useState(false);
   const [value, setValue] = useState('');
   const [isFocused, setIsFocused] = useState(false);
 
@@ -22,7 +22,7 @@ export const ApiSearchBox: React.FC = () => {
   const isSemanticSearchAvailable = config.capabilities.includes(AppCapabilities.SEMANTIC_SEARCH);
 
   const location = useLocation();
-  const apis = useApis({ search: value, isAutoCompleteMode: true, isSemanticSearch });
+  const apis = useApis({ search: value, isAutoCompleteMode: true, isSemanticSearch: isSemanticSearchEnabled });
   const recentSearches = useRecentSearches();
   const searchQuery = useSearchQuery();
 
@@ -31,7 +31,7 @@ export const ApiSearchBox: React.FC = () => {
   }, [searchQuery.search]);
 
   useEffect(() => {
-    setIsSemanticSearch(searchQuery.isSemanticSearch);
+    setIsSemanticSearchEnabled(searchQuery.isSemanticSearch);
   }, [searchQuery.isSemanticSearch]);
 
   useEffect(() => {
@@ -65,7 +65,7 @@ export const ApiSearchBox: React.FC = () => {
   }, []);
 
   const handleSemanticSearchToggle = useCallback(() => {
-    setIsSemanticSearch((prev) => !prev);
+    setIsSemanticSearchEnabled((prev) => !prev);
   }, []);
 
   const handleSubmit = useCallback(
@@ -73,18 +73,18 @@ export const ApiSearchBox: React.FC = () => {
       e.preventDefault();
 
       recentSearches.add({
-        type: isSemanticSearch ? RecentSearchType.SEMANTIC_QUERY : RecentSearchType.QUERY,
+        type: isSemanticSearchEnabled ? RecentSearchType.SEMANTIC_QUERY : RecentSearchType.QUERY,
         search: value,
       });
 
-      searchQuery.setSearch(value, isSemanticSearch);
+      searchQuery.setSearch(value, isSemanticSearchEnabled);
       e.currentTarget.querySelector('input').blur();
     },
-    [isSemanticSearch, recentSearches, searchQuery, value]
+    [isSemanticSearchEnabled, recentSearches, searchQuery, value]
   );
 
   function renderSearchInputMode() {
-    if (isSemanticSearch) {
+    if (isSemanticSearchEnabled) {
       return <SemanticSearchToggle isEnabled onDisable={handleSemanticSearchToggle} />;
     }
 
@@ -92,7 +92,7 @@ export const ApiSearchBox: React.FC = () => {
   }
 
   let placeholder = 'Search for an API';
-  if (isSemanticSearch) {
+  if (isSemanticSearchEnabled) {
     placeholder = 'Describe the API you are looking for';
   }
 
@@ -123,14 +123,14 @@ export const ApiSearchBox: React.FC = () => {
         <div onMouseDown={preventFocusLoss}>
           <ApiSearchAutoComplete
             searchResults={!!value ? apis.list : undefined}
-            isLoading={apis.isLoading && !isSemanticSearch}
-            isSemanticSearchEnabled={isSemanticSearch}
+            isLoading={apis.isLoading && !isSemanticSearchEnabled}
+            isSemanticSearchEnabled={isSemanticSearchEnabled}
             onSemanticSearchSelect={isSemanticSearchAvailable ? handleSemanticSearchToggle : undefined}
           />
         </div>
       )}
 
-      {isSemanticSearchAvailable && <SemanticSearchInfo />}
+      {isSemanticSearchAvailable && <SemanticSearchInfo isSemanticSearchEnabled={isSemanticSearchEnabled} />}
     </form>
   );
 };
