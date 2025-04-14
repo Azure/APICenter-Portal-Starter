@@ -20,6 +20,7 @@ import {
 import { httpMethodsList } from '@/constants';
 import {
   gatherSampleJsonData,
+  getRefLabel,
   getUsedRefsFromSubSchema,
   resolveRef,
   resolveSchema,
@@ -155,9 +156,26 @@ export default async function openApiSpecReader(specStr: string): Promise<ApiSpe
   const getOperationDefinitions = memoize((operationName: string): SchemaMetadata[] => {
     const operation = getOperation(operationName);
 
-    return getUsedRefsFromSubSchema(operation.spec).map((ref) =>
-      resolveSchema(resolveRef(apiSpec, ref) as OpenAPIV3.SchemaObject)
-    );
+    return getUsedRefsFromSubSchema(operation.spec)
+      .map((ref) => {
+        const category = ref.split('/')[2];
+        switch (category) {
+          case 'schemas':
+            return resolveSchema(resolveRef(apiSpec, ref) as OpenAPIV3.SchemaObject);
+
+          case 'responses':
+            const responseData = resolveRef(apiSpec, ref) as OpenAPIV3.ResponseObject;
+            return {
+              ...resolveSchema(responseData.content[Object.keys(responseData.content)[0]].schema),
+              $ref: ref,
+              refLabel: getRefLabel(ref),
+            };
+
+          default:
+            return undefined;
+        }
+      })
+      .filter(Boolean);
   });
 
   return {

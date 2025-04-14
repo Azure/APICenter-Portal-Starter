@@ -86,6 +86,10 @@ export function schemaToFieldType<T extends WithRef<OpenAPIV2.SchemaObject | Ope
 export function schemaToTypeLabel<T extends WithRef<OpenAPIV2.SchemaObject | OpenAPIV3.SchemaObject>>(
   schema?: T
 ): React.ReactNode {
+  if (schema.oneOf || schema.anyOf || schema.allOf) {
+    return 'union';
+  }
+
   if (!schema?.type) {
     return null;
   }
@@ -191,12 +195,37 @@ export function gatherSampleJsonData(
 }
 
 /**
+ * Prepares OpenAPI schema object for processing by resolving allOf and merging properties.
+ */
+export function prepareSchema<T extends OpenAPIV2.SchemaObject | OpenAPIV3.SchemaObject>(
+  schema?: WithRef<T>
+): WithRef<T> | undefined {
+  if (!schema) {
+    return undefined;
+  }
+
+  if (schema.allOf) {
+    const allOf = schema.allOf.map((s) => prepareSchema(s)).filter(Boolean) as Array<WithRef<T>>;
+
+    return {
+      ...schema,
+      properties: allOf.reduce((acc, s) => ({ ...acc, ...s.properties }), {}),
+      required: allOf.reduce((acc, s) => [...acc, ...(s.required || [])], []),
+    } as WithRef<T>;
+  }
+
+  return schema;
+}
+
+/**
  * Resolves OpenAPI schema object to a schema metadata object that we can use to easily render schema details.
  */
 export function resolveSchema(
-  schema?: WithRef<OpenAPIV2.SchemaObject | OpenAPIV3.SchemaObject>,
+  schemaInput?: WithRef<OpenAPIV2.SchemaObject | OpenAPIV3.SchemaObject>,
   placement = ''
 ): SchemaMetadata | undefined {
+  const schema = prepareSchema(schemaInput);
+
   if (!schema) {
     return undefined;
   }
