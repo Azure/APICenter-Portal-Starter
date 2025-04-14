@@ -15,9 +15,9 @@ const detailsViewByType: Record<OperationTypes, DetailsViewType> = {
 };
 
 export const ApiOperationDetails: React.FC<OperationDetailsViewProps> = (props) => {
-  const { apiSpec, operation, deployment } = props;
+  const { operation, deployment } = props;
 
-  const urlTemplate = resolveOpUrlTemplate(apiSpec, operation, deployment);
+  const urlTemplate = resolveOpUrlTemplate(operation, deployment);
 
   const DetailsView = detailsViewByType[operation?.type];
 

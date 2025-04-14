@@ -56,7 +56,7 @@ export const getReqDataDefaults = memoizee(
     const metadata = apiSpec.getRequestMetadata(operation.name);
 
     const result: HttpReqData = {
-      urlTemplate: resolveOpUrlTemplate(apiSpec, operation, deployment),
+      urlTemplate: resolveOpUrlTemplate(operation, deployment),
       method: operation.method,
       urlParams: [],
       query: [],
