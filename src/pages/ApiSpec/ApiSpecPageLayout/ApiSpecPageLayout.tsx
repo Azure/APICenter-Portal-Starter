@@ -19,7 +19,9 @@ export const ApiSpecPageLayout: React.FC<Props> = ({ definitionId, deployment, a
 
   if (!apiSpec?.type) {
     return (
-      <EmptyStateMessage>The specified API does not exist or its documentation can&apos;t be displayed.</EmptyStateMessage>
+      <EmptyStateMessage>
+        The specified API does not exist or its documentation can&apos;t be displayed.
+      </EmptyStateMessage>
     );
   }
 

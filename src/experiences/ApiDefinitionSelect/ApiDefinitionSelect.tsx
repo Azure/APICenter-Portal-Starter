@@ -52,7 +52,13 @@ export const ApiDefinitionSelect: React.FC<Props> = ({
   // Set initial values
   useEffect(() => {
     const defaultName = defaultSelection.version || apiVersions.list[0]?.name;
-    setVersion(find(apiVersions.list, { name: defaultName }) || null);
+    const version = find(apiVersions.list, { name: defaultName }) || null;
+    setVersion(version);
+
+    // If there is no version then there will be no definition so we need to mark it as null to avoid infinite loading state
+    if (!version) {
+      setDefinition(null);
+    }
   }, [apiVersions.list, defaultSelection.version]);
 
   useEffect(() => {
