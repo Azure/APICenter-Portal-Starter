@@ -14,7 +14,7 @@ import {
 import { McpCapabilityTypes, McpOperation, McpPrompt, McpResource, McpSpec, McpTool } from '@/types/mcp';
 import { schemaToFieldType, schemaToTypeLabel } from '@/utils/openApi';
 
-const RESOURCE_PROPERTIES = ['uri', 'name', 'description', 'mimeType', 'size'];
+const RESOURCE_PROPERTIES = ['uri', 'uriTemplate', 'name', 'description', 'mimeType', 'size'];
 
 const operationTypeByCapabilityType: Record<McpCapabilityTypes, OperationTypes> = {
   [McpCapabilityTypes.TOOLS]: OperationTypes.DEFAULT,
@@ -101,7 +101,7 @@ export default async function mcpReader(specStr: string): Promise<ApiSpecReader>
               typeLabel: 'object',
               properties: RESOURCE_PROPERTIES.filter((name) => name in metadata).map((name) => ({
                 name,
-                value: JSON.stringify(metadata[name], null, 2),
+                value: metadata[name],
               })),
               rawSchema: {
                 schema: JSON.stringify(metadata, null, 2),

@@ -40,7 +40,7 @@ export const McpSpecPage: React.FC<Props> = ({ definitionId, deployment }) => {
   const isAuthorized = authState === McpServerAuthState.AUTHORIZED;
 
   const determineAuthFlow = useCallback(async () => {
-    if (!definitionId || authState !== McpServerAuthState.NOT_AUTHORIZED) {
+    if (!definitionId || !deployment || authState !== McpServerAuthState.NOT_AUTHORIZED) {
       return;
     }
 
@@ -68,7 +68,7 @@ export const McpSpecPage: React.FC<Props> = ({ definitionId, deployment }) => {
   }, [determineAuthFlow]);
 
   const mcpService = useMemo(() => {
-    if (!isAuthorized || !deployment.server.runtimeUri) {
+    if (!isAuthorized || !deployment?.server.runtimeUri) {
       return undefined;
     }
 
