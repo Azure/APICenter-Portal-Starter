@@ -53,14 +53,22 @@ export const DefaultOperationDetails: React.FC<OperationDetailsViewProps> = ({
       );
     }
 
-    if (apiSpec.type === ApiSpecTypes.MCP && operation.category === McpCapabilityTypes.TOOLS) {
+    if (apiSpec.type === ApiSpecTypes.MCP) {
+      if (![McpCapabilityTypes.TOOLS, McpCapabilityTypes.PROMPTS].includes(operation.category as McpCapabilityTypes)) {
+        return null;
+      }
+
       return (
         <>
-          <Button onClick={handleTryApiClick}>Run tool</Button>
+          <Button onClick={handleTryApiClick}>
+            {operation.category === McpCapabilityTypes.TOOLS ? 'Run tool' : 'Get prompt'}
+          </Button>
+
           <McpTestConsole
             apiSpec={apiSpec}
             operation={operation}
             deployment={deployment}
+            capabilityType={operation.category as McpCapabilityTypes}
             isOpen={isTestConsoleOpen}
             onClose={handleTestConsoleClose}
           />

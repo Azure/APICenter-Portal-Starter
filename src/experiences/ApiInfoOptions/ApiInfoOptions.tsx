@@ -70,7 +70,8 @@ export const ApiInfoOptions: React.FC<Props> = ({ api, apiVersion, apiDefinition
               <Document20Regular /> <strong>API Definition</strong>
             </span>
 
-            {apiSpecUrl.value && api.kind !== 'mcp' && (
+            {/*{apiSpecUrl.value && api.kind !== 'mcp' && (*/}
+            {true && (
               <span className={styles.linkGroup}>
                 <Link href={apiSpecUrl.value} className={styles.link}>
                   Download <ArrowDownloadRegular />
