@@ -1,6 +1,6 @@
 import { EventSource } from 'eventsource';
 import { DeferredPromise, makeDeferredPromise } from '@/utils/promise';
-import { McpInitData, McpOperation, McpSpec } from '@/types/mcp';
+import { McpCapabilityTypes, McpInitData, McpOperation, McpResource, McpSpec } from '@/types/mcp';
 import { ApiAuthCredentials } from '@/types/apiAuth';
 import { apimFetchProxy } from '@/utils/apimProxy';
 
@@ -64,21 +64,47 @@ export class McpService {
 
     for (const capability of capabilities) {
       try {
-        const res = await this.sendRequest<McpOperation[]>({ method: `${capability}/list` });
+        const res = await this.sendRequest<Record<string, McpOperation[]>>({ method: `${capability}/list` });
         spec[capability] = res[capability];
+        if (capability === McpCapabilityTypes.RESOURCES) {
+          const templatesRes = await this.sendRequest<Record<string, McpResource[]>>({
+            method: `${capability}/templates/list`,
+          });
+          spec[capability].push(...(templatesRes.resourceTemplates || []));
+        }
       } catch {}
     }
 
     return JSON.stringify(spec);
   }
 
-  public callTool<T = void>(toolName: string, args: Record<string, unknown>): Promise<T> {
+  public async runTool<T = void>(name: string, args: Record<string, unknown>): Promise<T> {
+    await this.ensureInitialized();
     return this.sendRequest<T>({
       method: 'tools/call',
       params: {
-        name: toolName,
+        name,
         arguments: args,
       },
+    });
+  }
+
+  public async getPrompt<T = void>(name: string, args: Record<string, unknown>): Promise<T> {
+    await this.ensureInitialized();
+    return this.sendRequest<T>({
+      method: 'prompts/get',
+      params: {
+        name,
+        arguments: args,
+      },
+    });
+  }
+
+  public async readResource<T = void>(uri: string): Promise<T> {
+    await this.ensureInitialized();
+    return this.sendRequest<T>({
+      method: 'resources/read',
+      params: { uri },
     });
   }
 
