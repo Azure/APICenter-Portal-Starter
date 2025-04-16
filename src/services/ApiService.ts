@@ -13,7 +13,7 @@ import { IApiService } from '@/types/services/IApiService';
 const ApiService: IApiService = {
   async getApis(search: string, filters: ActiveFilterData[] = [], isSemanticSearch?: boolean): Promise<ApiMetadata[]> {
     const searchParams = new URLSearchParams();
-    if (search.length) {
+    if (search.length && !isSemanticSearch) {
       searchParams.set('$search', search);
     }
 

@@ -18,7 +18,11 @@ export const ApiList: React.FC = () => {
   const searchFilters = useSearchFilters();
   const searchQuery = useSearchQuery();
   const navigate = useNavigate();
-  const apis = useApis({ search: searchQuery.search, filters: searchFilters.activeFilters });
+  const apis = useApis({
+    search: searchQuery.search,
+    filters: searchFilters.activeFilters,
+    isSemanticSearch: searchQuery.isSemanticSearch,
+  });
 
   const adaptedApiList = useMemo(() => apis.list.map(apiAdapter), [apis.list]);
 
