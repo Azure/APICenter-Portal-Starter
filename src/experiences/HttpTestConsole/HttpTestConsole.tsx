@@ -145,7 +145,7 @@ export const HttpTestConsole: React.FC<Props> = ({ definitionId, apiSpec, operat
   }, []);
 
   const handleSendClick = useCallback(() => {
-    void requestController.send(HttpApiTestConsole.resolveHttpReqData(reqDataWithAuth, schemaParamsData, true));
+    void requestController.send(HttpApiTestConsole.resolveHttpReqData(reqDataWithAuth, schemaParamsData));
   }, [reqDataWithAuth, requestController, schemaParamsData]);
 
   function renderResponse() {

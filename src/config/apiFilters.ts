@@ -5,12 +5,12 @@ export const ApiFilterParameters: Record<FilterType, FilterMetadata> = {
     label: 'API type',
     options: [
       { value: 'rest', label: 'REST' },
+      { value: 'mcp', label: 'MCP' },
       { value: 'graphql', label: 'GraphQL' },
       { value: 'grpc', label: 'gRPC' },
       { value: 'soap', label: 'SOAP' },
       { value: 'webhook', label: 'Webhook' },
-      { value: 'websocket', label: 'WebSocket' },
-      { value: 'mcp', label: 'MCP' },
+      { value: 'websocket', label: 'WebSocket' }
     ],
   },
   lifecycleStage: {
