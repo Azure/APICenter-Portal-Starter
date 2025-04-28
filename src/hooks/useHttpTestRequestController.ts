@@ -65,7 +65,6 @@ export default function useHttpTestRequestController(operation?: OperationMetada
         setResponse(undefined);
         // TypeError is thrown when CORS is not enabled
         if (e instanceof TypeError) {
-          console.error(e);
           setError(
             'Since the browser initiates the request, it requires Cross-Origin Resource Sharing (CORS) enabled on the server.'
           );
