@@ -3,7 +3,7 @@ import { capitalize } from 'lodash';
 import { Body1Strong, Button, Drawer, DrawerBody, DrawerHeader, DrawerHeaderTitle } from '@fluentui/react-components';
 import { Dismiss24Regular } from '@fluentui/react-icons';
 import { HttpTestConsole, SyntaxHighlighter } from '@microsoft/api-docs-ui';
-import { HttpReqParam } from '@microsoft/api-docs-ui/src/types/testConsole';
+import { HttpReqParam } from '@microsoft/api-docs-ui/dist/types/testConsole';
 import { ApiSpecReader, OperationMetadata, OperationParameterMetadata, StaticProperty } from '@/types/apiSpec';
 import { ApiDeployment } from '@/types/apiDeployment';
 import useMcpTestRunController from '@/hooks/useMcpTestRunController';
