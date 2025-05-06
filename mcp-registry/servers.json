@@ -1,13 +1,24 @@
 [
   {
     "id": "a5e8a7f0-d4e4-4a1d-b12f-2896a23fd4f1",
-    "name": "@modelcontextprotocol/servers/src/filesystem",
+    "name": "filesystem",
     "description": "Node.js server implementing Model Context Protocol (MCP) for filesystem operations.",
+    "version": "0.0.3",
     "repository": {
       "url": "https://github.com/modelcontextprotocol/servers",
       "source": "github",
       "id": "b94b5f7e-c7c6-d760-2c78-a5e9b8a5b8c9"
-    },
-    "version": "0.0.3"
+    }
+  },
+  {
+    "id": "brave-search-12345",
+    "name": "server-brave-search",
+    "description": "MCP server for Brave Search API integration",
+    "version": "1.0.0",
+    "repository": {
+      "url": "https://github.com/modelcontextprotocol/servers",
+      "source": "github",
+      "id": "abc123de-f456-7890-ghij-klmnopqrstuv"
+    }
   }
 ]
