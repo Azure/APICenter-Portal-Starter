@@ -4,6 +4,8 @@
     "name": "Neon",
     "description": "Neon's MCP server acts as a bridge between natural language requests and the Neon API, translating requests into necessary API calls to create projects, branches, run queries, and perform migrations with ease.",
     "version": "0.0.1",
+    "x-ms-icon": "https://neon.tech/_next/static/svgs/6da928883916f39a4848774319dcaf81.svg"
+    "x-ms-partner": true,
     "remotes": [{
       "transport_type": "sse",
       "url": "https://mcp.neon.tech/server"
