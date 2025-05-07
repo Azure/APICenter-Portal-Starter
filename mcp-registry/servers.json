@@ -4,7 +4,10 @@
     "name": "Neon",
     "description": "Neon's MCP server acts as a bridge between natural language requests and the Neon API, translating requests into necessary API calls to create projects, branches, run queries, and perform migrations with ease.",
     "version": "0.0.1",
-    "deploymentUrl": "https://mcp.neon.tech/server",
+    "remotes": [{
+      "transport_type": "sse",
+      "url": "https://mcp.neon.tech/server"
+    }],
     "repository": {
       "url": "https://github.com/neondatabase-labs/mcp-server-neon",
       "source": "partner",
@@ -16,7 +19,10 @@
     "name": "filesystem",
     "description": "Node.js server implementing Model Context Protocol (MCP) for filesystem operations.",
     "version": "0.0.3",
-    "deploymentUrl": "localhost/mcp-filesystem",
+    "remotes": [{
+      "transport_type": "sse",
+      "url": "localhost/mcp-filesystem"
+    }],
     "repository": {
       "url": "https://github.com/modelcontextprotocol/servers",
       "source": "github",
@@ -28,7 +34,10 @@
     "name": "server-brave-search",
     "description": "MCP server for Brave Search API integration",
     "version": "1.0.0",
-    "deploymentUrl": "localhost/mcp-filesystem",
+    "remotes": [{
+      "transport_type": "sse",
+      "url": "localhost/brave-search-12345"
+    }],
     "repository": {
       "url": "https://github.com/modelcontextprotocol/servers",
       "source": "github",
