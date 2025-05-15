@@ -17,6 +17,23 @@
     }
   },
   {
+    "id": "stripe-mcp-server",
+    "name": "Stripe",
+    "description": "Execute Stripe API calls and access up-to-date Stripe knowledge to build your integration.",
+    "version": "0.0.1",
+    "x-ms-icon": "https://avatars.githubusercontent.com/u/77690634?s=64",
+    "x-ms-partner": true,
+    "remotes": [{
+      "transport_type": "sse",
+      "url": "Coming soon"
+    }],
+    "repository": {
+      "url": "Coming soon",
+      "source": "partner",
+      "id": ""
+    }
+  },
+  {
     "id": "a5e8a7f0-d4e4-4a1d-b12f-2896a23fd4f1",
     "name": "filesystem",
     "description": "Node.js server implementing Model Context Protocol (MCP) for filesystem operations.",
