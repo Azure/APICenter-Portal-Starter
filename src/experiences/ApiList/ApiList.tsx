@@ -59,7 +59,7 @@ export const ApiList: React.FC = () => {
   }
 
   return (
-    <InfoTable columnLabels={['Name', 'Description', 'Lifecycle stage', 'Type']}>
+    <InfoTable columnLabels={['Name', 'Summary', 'Lifecycle stage', 'Type']}>
       {adaptedApiList.map((api) => (
         <InfoTable.Row key={api.name}>
           <InfoTable.Cell>
