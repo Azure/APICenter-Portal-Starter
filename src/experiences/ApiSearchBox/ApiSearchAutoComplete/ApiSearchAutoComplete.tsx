@@ -223,7 +223,7 @@ export const ApiSearchAutoComplete: React.FC<Props> = ({
             onClick={handleSearchResultClick}
           >
             <Cloud16Regular />
-            <span className={styles.apiName}>{api.name}</span>
+            <span className={styles.apiName}>{api.title}</span>
             <span className={styles.apiMeta}>
               {[api.kind, api.lifecycleStage, api.summary].filter(Boolean).join('; ')}
             </span>
