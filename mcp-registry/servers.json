@@ -2,7 +2,7 @@
   {
     "id": "neon-mcp-server",
     "name": "Neon",
-    "description": "Neon's MCP server acts as a bridge between natural language requests and the Neon API, translating requests into necessary API calls to create projects, branches, run queries, and perform migrations with ease.",
+    "description": "Neon's MCP server bridges natural language to Neon API, enabling project creation, branch management, query execution, and database migrations through conversational interactions.",
     "version": "0.0.1",
     "x-ms-icon": "https://avatars.githubusercontent.com/u/77690634?s=64",
     "x-ms-partner": true,
