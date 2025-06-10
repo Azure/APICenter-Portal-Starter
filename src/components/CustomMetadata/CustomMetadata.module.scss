@@ -1,0 +1,37 @@
+.object {
+  > .property {
+    display: flex;
+    gap: 8px;
+
+    > .name {
+      min-width: 100px;
+      color: var(--grey-5);
+      font-weight: 600;
+    }
+    
+    + .property {
+      margin-top: 16px;
+    }
+  }
+}
+
+.array {
+  > span + span {
+    &::before {
+      content: ', ';
+    }
+  }
+
+  > .object {
+    padding-left: 8px;
+    border-left: 2px solid var(--grey-3);
+
+    > .property + .property {
+      margin-top: 8px;
+    }
+    
+    + .object {
+      margin-top: 16px;
+    }
+  }
+}

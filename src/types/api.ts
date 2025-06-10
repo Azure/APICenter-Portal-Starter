@@ -24,5 +24,6 @@ export interface ApiMetadata {
   lifecycleStage?: string;
   externalDocumentation?: ApiExternalDocumentation[];
   contacts?: ApiContact[];
+  customProperties?: Record<string, unknown>;
   lastUpdated?: string;
 }
