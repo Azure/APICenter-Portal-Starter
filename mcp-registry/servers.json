@@ -2,7 +2,7 @@
   {
     "id": "neon-mcp-server",
     "name": "Neon",
-    "description": "Neon's MCP server bridges natural language to Neon API, enabling project creation, branch management, query execution, and database migrations through conversational interactions.",
+    "description": "Manage and query Neon Postgres databases with natural language.",
     "version": "1.0.0",
     "x-ms-icon": "https://avatars.githubusercontent.com/u/77690634?s=64",
     "x-ms-partner": true,
@@ -21,7 +21,7 @@
   {
     "id": "github-mcp-server",
     "name": "GitHub",
-    "description": "The GitHub MCP Server is a Model Context Protocol (MCP) server that provides seamless integration with GitHub APIs, enabling advanced automation and interaction capabilities for developers and tools.",
+    "description": "Access GitHub repositories, issues, and pull requests through secure API integration.",
     "version": "1.0.0",
     "x-ms-icon": "https://avatars.githubusercontent.com/github?s=64",
     "x-ms-partner": true,
