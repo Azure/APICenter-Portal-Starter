@@ -38,6 +38,20 @@
     }
   },
   {
+    "id": "msdocs-mcp-server",
+    "name": "Microsoft docs",
+    "description": "AI assistant with real-time access to official Microsoft documentation.",
+    "version": "1.0.0",
+    "x-ms-icon": "https://avatars.githubusercontent.com/microsoft?s=64",
+    "x-ms-partner": true,
+    "remotes": [
+      {
+        "transport_type": "sse",
+        "url": "https://learn.microsoft.com/api/mcp"
+      }
+    ]
+  },
+  {
     "id": "atlassian-mcp-server",
     "name": "Atlassian",
     "description": "Connect to Jira and Confluence for issue tracking and documentation.",
@@ -51,20 +65,7 @@
       }
     ]
   },
-  {
-    "id": "square-mcp-server",
-    "name": "Square",
-    "description": "Process payments and manage customers through Square's API ecosystem.",
-    "version": "1.0.0",
-    "x-ms-icon": "https://avatars.githubusercontent.com/square?s=64",
-    "x-ms-partner": false,
-    "remotes": [
-      {
-        "transport_type": "sse",
-        "url": "https://mcp.squareup.com/sse"
-      }
-    ]
-  },
+
   {
     "id": "paypal-mcp-server",
     "name": "PayPal",
