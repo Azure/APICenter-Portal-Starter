@@ -52,48 +52,6 @@
     ]
   },
   {
-    "id": "zapier-mcp-server",
-    "name": "Zapier",
-    "description": "Create workflows and execute tasks across 30,000+ connected apps.",
-    "version": "1.0.0",
-    "x-ms-icon": "https://avatars.githubusercontent.com/zapier?s=64",
-    "x-ms-partner": false,
-    "remotes": [
-      {
-        "transport_type": "sse",
-        "url": "https://mcp.zapier.com/api/mcp/mcp"
-      }
-    ]
-  },
-  {
-    "id": "intercom-mcp-server",
-    "name": "Intercom",
-    "description": "Access customer conversations and support tickets for data analysis.",
-    "version": "1.0.0",
-    "x-ms-icon": "https://avatars.githubusercontent.com/intercom?s=64",
-    "x-ms-partner": false,
-    "remotes": [
-      {
-        "transport_type": "sse",
-        "url": "https://mcp.intercom.com/sse"
-      }
-    ]
-  },
-  {
-    "id": "asana-mcp-server",
-    "name": "Asana",
-    "description": "Create and manage tasks, projects, and comments through the Asana API.",
-    "version": "1.0.0",
-    "x-ms-icon": "https://avatars.githubusercontent.com/asana?s=64",
-    "x-ms-partner": false,
-    "remotes": [
-      {
-        "transport_type": "sse",
-        "url": "https://mcp.asana.com/sse"
-      }
-    ]
-  },
-  {
     "id": "square-mcp-server",
     "name": "Square",
     "description": "Process payments and manage customers through Square's API ecosystem.",
