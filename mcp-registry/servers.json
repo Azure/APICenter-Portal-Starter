@@ -38,20 +38,6 @@
     }
   },
   {
-    "id": "msdocs-mcp-server",
-    "name": "Microsoft docs",
-    "description": "AI assistant with real-time access to official Microsoft documentation.",
-    "version": "1.0.0",
-    "x-ms-icon": "https://avatars.githubusercontent.com/microsoft?s=64",
-    "x-ms-partner": true,
-    "remotes": [
-      {
-        "transport_type": "sse",
-        "url": "https://learn.microsoft.com/api/mcp"
-      }
-    ]
-  },
-  {
     "id": "atlassian-mcp-server",
     "name": "Atlassian",
     "description": "Connect to Jira and Confluence for issue tracking and documentation.",
@@ -122,20 +108,6 @@
     ]
   },
   {
-    "id": "sentry-mcp-server",
-    "name": "Sentry",
-    "description": "Retrieve and analyze application errors and performance issues from Sentry projects.",
-    "version": "1.0.0",
-    "x-ms-icon": "https://avatars.githubusercontent.com/sentry?s=64",
-    "x-ms-partner": false,
-    "remotes": [
-      {
-        "transport_type": "sse",
-        "url": "https://mcp.sentry.dev/sse"
-      }
-    ]
-  },
-  {
     "id": "paypal-mcp-server",
     "name": "PayPal",
     "description": "Create invoices, process payments, and access transaction data through PayPal services.",
@@ -146,20 +118,6 @@
       {
         "transport_type": "sse",
         "url": "https://mcp.paypal.com/sse"
-      }
-    ]
-  },
-  {
-    "id": "plaid-mcp-server",
-    "name": "Plaid",
-    "description": "Connect your LLM-powered application to Plaid’s developer tools.",
-    "version": "1.0.0",
-    "x-ms-icon": "https://avatars.githubusercontent.com/plaid?s=64",
-    "x-ms-partner": false,
-    "remotes": [
-      {
-        "transport_type": "sse",
-        "url": "https://api.dashboard.plaid.com/mcp/sse"
       }
     ]
   }
