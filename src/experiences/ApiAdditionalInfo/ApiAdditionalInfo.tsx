@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from '@fluentui/react-components';
 import { Open16Regular } from '@fluentui/react-icons';
 import { ApiMetadata } from '@/types/api';
+import CustomMetadata from '@/components/CustomMetadata';
 import styles from './ApiAdditionalInfo.module.scss';
 
 interface Props {
@@ -17,6 +18,8 @@ function normalizeUrl(url: string): string {
 }
 
 export const ApiAdditionalInfo: React.FC<Props> = ({ api }) => {
+  const hasCustomProperties = !!Object.keys(api.customProperties || {}).length;
+
   return (
     <div className={styles.apiAdditionalInfo}>
       {api.description && <p>{api.description}</p>}
@@ -57,6 +60,13 @@ export const ApiAdditionalInfo: React.FC<Props> = ({ api }) => {
               )}
             </React.Fragment>
           ))}
+        </>
+      )}
+
+      {hasCustomProperties && (
+        <>
+          <h4>Properties</h4>
+          <CustomMetadata value={api.customProperties} />
         </>
       )}
     </div>
