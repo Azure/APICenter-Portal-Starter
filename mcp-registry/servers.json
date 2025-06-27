@@ -65,7 +65,6 @@
       }
     ]
   },
-
   {
     "id": "paypal-mcp-server",
     "name": "PayPal",
@@ -77,6 +76,76 @@
       {
         "transport_type": "sse",
         "url": "https://mcp.paypal.com/sse"
+      }
+    ]
+  },
+  {
+    "id": "asana-mcp-server",
+    "name": "Asana",
+    "description": "Project Management",
+    "version": "1.0.0",
+    "x-ms-icon": "https://avatars.githubusercontent.com/asana?s=64",
+    "x-ms-partner": false,
+    "remotes": [
+      {
+        "transport_type": "sse",
+        "url": "https://mcp.asana.com/sse"
+      }
+    ]
+  },
+  {
+    "id": "dialer-mcp-server",
+    "name": "Dialer",
+    "description": "Outbound Phone Calls",
+    "version": "1.0.0",
+    "x-ms-icon": "https://avatars.githubusercontent.com/u/dialer?s=64",
+    "x-ms-partner": false,
+    "remotes": [
+      {
+        "transport_type": "sse",
+        "url": "https://getdialer.app/sse"
+      }
+    ]
+  },
+  {
+    "id": "globalping-mcp-server",
+    "name": "Globalping",
+    "description": "Software Development",
+    "version": "1.0.0",
+    "x-ms-icon": "https://avatars.githubusercontent.com/globalping?s=64",
+    "x-ms-partner": false,
+    "remotes": [
+      {
+        "transport_type": "sse",
+        "url": "https://mcp.globalping.dev/sse"
+      }
+    ]
+  },
+  {
+    "id": "intercom-mcp-server",
+    "name": "Intercom",
+    "description": "Customer Support",
+    "version": "1.0.0",
+    "x-ms-icon": "https://avatars.githubusercontent.com/intercom?s=64",
+    "x-ms-partner": false,
+    "remotes": [
+      {
+        "transport_type": "sse",
+        "url": "https://mcp.intercom.com/sse"
+      }
+    ]
+  },
+  {
+    "id": "linear-mcp-server",
+    "name": "Linear",
+    "description": "Project Management",
+    "version": "1.0.0",
+    "x-ms-icon": "https://avatars.githubusercontent.com/linear?s=64",
+    "x-ms-partner": false,
+    "remotes": [
+      {
+        "transport_type": "sse",
+        "url": "https://mcp.linear.app/sse"
       }
     ]
   }
