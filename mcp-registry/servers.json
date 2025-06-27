@@ -98,7 +98,7 @@
     "name": "Dialer",
     "description": "Outbound Phone Calls",
     "version": "1.0.0",
-    "x-ms-icon": "https://avatars.githubusercontent.com/u/dialer?s=64",
+    "x-ms-icon": "https://avatars.githubusercontent.com/dialer?s=64",
     "x-ms-partner": false,
     "remotes": [
       {
