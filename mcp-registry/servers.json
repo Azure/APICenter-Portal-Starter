@@ -66,6 +66,20 @@
     ]
   },
   {
+    "id": "box-mcp-server",
+    "name": "Box",
+    "description": "Use Box to securely store, manage and share your photos, videos, and documents in the cloud.",
+    "version": "1.0.0",
+    "x-ms-icon": "https://avatars.githubusercontent.com/box?s=64",
+    "x-ms-partner": true,
+    "remotes": [
+      {
+        "transport_type": "sse",
+        "url": "https://mcp.box.com/"
+      }
+    ]
+  },
+  {
     "id": "atlassian-mcp-server",
     "name": "Atlassian",
     "description": "Connect to Jira and Confluence for issue tracking and documentation.",
