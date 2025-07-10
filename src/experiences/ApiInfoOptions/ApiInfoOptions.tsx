@@ -10,6 +10,7 @@ import useApiSpecUrl from '@/hooks/useApiSpecUrl';
 import useDeploymentEnvironment from '@/hooks/useDeploymentEnvironment';
 import { ApiDeployment } from '@/types/apiDeployment';
 import VsCodeLogo from '@/assets/vsCodeLogo.svg';
+import VSCInsiders from '@/assets/vsCodeInsidersLogo.svg';
 import LocationsService from '@/services/LocationsService';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import CopyLink from '@/components/CopyLink';
@@ -22,6 +23,11 @@ interface Props {
   apiDefinition?: ApiDefinition;
   apiDeployment?: ApiDeployment;
   isLoading?: boolean;
+}
+
+const vscodetype = {
+  stable: 'vscode',
+  insiders: 'vscode-insiders',
 }
 
 const DEFAULT_INSTRUCTIONS = 'Gain comprehensive insights into the API.';
@@ -43,10 +49,14 @@ export const ApiInfoOptions: React.FC<Props> = ({ api, apiVersion, apiDefinition
 
   const devPortalUri = environment.data?.onboarding?.developerPortalUri?.[0];
 
-  const handleOpenInVsCodeClick = useCallback(() => {
-    window.open(
-      `vscode://apidev.azure-api-center?clientId=${config.authentication.clientId}&tenantId=${config.authentication.tenantId}&runtimeUrl=${config.dataApiHostName}`
-    );
+  const handleOpenInVsCodeClick = useCallback((vscodetype) => {
+    const link = `${vscodetype}://apidev.azure-api-center?clientId=${config.authentication.clientId}&tenantId=${config.authentication.tenantId}&runtimeUrl=${config.dataApiHostName}`;
+    window.open(link);
+  }, [config]);
+
+  const handleInstallMcpInVsCodeClick = useCallback((vscodetype, obj) => {
+    const link = `${vscodetype}:mcp/install?${encodeURIComponent(JSON.stringify(obj))}`;
+    window.open(link);
   }, [config]);
 
   function renderContent() {
@@ -89,8 +99,13 @@ export const ApiInfoOptions: React.FC<Props> = ({ api, apiVersion, apiDefinition
           <p>This file defines how to use the API, including the endpoints, policies, authentication, and responses.</p>
 
           <p>
-            <Button icon={<img src={VsCodeLogo} alt="VS Code" />} onClick={handleOpenInVsCodeClick}>
+            <Button size="medium" icon={<img src={VsCodeLogo} alt="VS Code" style={{ width: '16px', height: '16px' }} />} onClick={() => handleOpenInVsCodeClick(vscodetype.stable)}>
               Open in Visual Studio Code
+            </Button>
+          </p>
+          <p>
+            <Button size="medium" icon={<img src={VSCInsiders} alt="VS Code Insider" style={{ width: '16px', height: '16px' }} />} onClick={() => handleOpenInVsCodeClick(vscodetype.insiders)}>
+              Open in Visual Studio Code Insider
             </Button>
           </p>
         </div>
@@ -108,6 +123,31 @@ export const ApiInfoOptions: React.FC<Props> = ({ api, apiVersion, apiDefinition
             </h5>
 
             <p>Use this URL to send requests to the API&apos;s server.</p>
+          </div>
+        )}
+
+        {api.kind === 'mcp' && !!apiDeployment?.server.runtimeUri.length && (
+          <div className={styles.section}>
+            <h5>
+              <span className={styles.panelLabel}>
+                <img src={VsCodeLogo} alt="VS Code" />
+                <strong>MCP Installation</strong>
+              </span>
+            </h5>
+
+            <p>Install this Model Context Protocol (MCP) server in Visual Studio Code to enable AI-powered interactions with this API.</p>
+
+            <p>
+              <Button size="medium" icon={<img src={VsCodeLogo} alt="VS Code" style={{ width: '16px', height: '16px' }} />} onClick={() => handleInstallMcpInVsCodeClick(vscodetype.stable, { name: api.name, url: apiDeployment.server.runtimeUri[0] })}>
+                Install in Visual Studio Code
+              </Button>
+            </p>
+
+            <p>
+              <Button size="medium" icon={<img src={VSCInsiders} alt="VS Code Insider" style={{ width: '16px', height: '16px' }} />} onClick={() => handleInstallMcpInVsCodeClick(vscodetype.insiders, { name: api.name, url: apiDeployment.server.runtimeUri[0] })}>
+                Install in Visual Studio Code Insider
+              </Button>
+            </p>
           </div>
         )}
 
