@@ -36,6 +36,13 @@
     p {
       padding-left: 40px;
       color: var(--grey-4);
+
+      .actionButton {
+        :global(.fui-Button__icon) img {
+          width: 16px;
+          height: 16px;
+        }
+      }
     }
 
     + .section {
