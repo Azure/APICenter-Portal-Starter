@@ -97,7 +97,6 @@
     "name": "Zapier",
     "description": "Create workflows and execute tasks across 30,000+ connected apps.",
     "version": "1.0.0",
-    "x-ms-icon": "https://avatars.githubusercontent.com/zapier?s=64",
     "x-ms-partner": false,
     "remotes": [
       {
@@ -150,7 +149,6 @@
     "name": "Sentry",
     "description": "Retrieve and analyze application errors and performance issues from Sentry projects.",
     "version": "1.0.0",
-    "x-ms-icon": "https://avatars.githubusercontent.com/sentry?s=64",
     "x-ms-partner": false,
     "remotes": [
       {
