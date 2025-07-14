@@ -224,7 +224,6 @@
     "name": "Linear",
     "description": "Project Management",
     "version": "1.0.0",
-    "x-ms-icon": "https://avatars.githubusercontent.com/linear?s=64",
     "x-ms-partner": false,
     "remotes": [
       {
