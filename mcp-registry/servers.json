@@ -84,7 +84,6 @@
     "name": "Atlassian",
     "description": "Connect to Jira and Confluence for issue tracking and documentation.",
     "version": "1.0.0",
-    "x-ms-icon": "https://avatars.githubusercontent.com/atlassian?s=64",
     "x-ms-partner": false,
     "remotes": [
       {
@@ -112,7 +111,6 @@
     "name": "Intercom",
     "description": "Access customer conversations and support tickets for data analysis.",
     "version": "1.0.0",
-    "x-ms-icon": "https://avatars.githubusercontent.com/intercom?s=64",
     "x-ms-partner": false,
     "remotes": [
       {
@@ -126,7 +124,6 @@
     "name": "Asana",
     "description": "Create and manage tasks, projects, and comments through the Asana API.",
     "version": "1.0.0",
-    "x-ms-icon": "https://avatars.githubusercontent.com/asana?s=64",
     "x-ms-partner": false,
     "remotes": [
       {
@@ -140,7 +137,6 @@
     "name": "Square",
     "description": "Process payments and manage customers through Square's API ecosystem.",
     "version": "1.0.0",
-    "x-ms-icon": "https://avatars.githubusercontent.com/square?s=64",
     "x-ms-partner": false,
     "remotes": [
       {
@@ -168,7 +164,6 @@
     "name": "PayPal",
     "description": "Create invoices, process payments, and access transaction data through PayPal services.",
     "version": "1.0.0",
-    "x-ms-icon": "https://avatars.githubusercontent.com/paypal?s=64",
     "x-ms-partner": false,
     "remotes": [
       {
@@ -182,7 +177,6 @@
     "name": "Dialer",
     "description": "Outbound Phone Calls",
     "version": "1.0.0",
-    "x-ms-icon": "https://avatars.githubusercontent.com/dialer?s=64",
     "x-ms-partner": false,
     "remotes": [
       {
@@ -196,7 +190,6 @@
     "name": "Globalping",
     "description": "Software Development",
     "version": "1.0.0",
-    "x-ms-icon": "https://avatars.githubusercontent.com/globalping?s=64",
     "x-ms-partner": false,
     "remotes": [
       {
@@ -210,7 +203,6 @@
     "name": "Plaid",
     "description": "Connect your LLM-powered application to Plaid’s developer tools.",
     "version": "1.0.0",
-    "x-ms-icon": "https://avatars.githubusercontent.com/plaid?s=64",
     "x-ms-partner": false,
     "remotes": [
       {
