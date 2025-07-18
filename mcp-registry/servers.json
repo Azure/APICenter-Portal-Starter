@@ -84,7 +84,8 @@
     "name": "Atlassian",
     "description": "Connect to Jira and Confluence for issue tracking and documentation.",
     "version": "1.0.0",
-    "x-ms-partner": false,
+    "x-ms-icon": "https://avatars.githubusercontent.com/atlassian?s=64"
+    "x-ms-partner": true,
     "remotes": [
       {
         "transport_type": "sse",
