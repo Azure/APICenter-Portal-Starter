@@ -123,7 +123,6 @@ export const ApiDefinitionSelect: React.FC<Props> = ({
             value={version?.title || NO_VERSION_LABEL}
             selectedOptions={[version?.name]}
             disabled={!apiVersions.list.length}
-            inlinePopup
             onOptionSelect={handleVersionSelect}
           >
             {apiVersions.list.map((version) => (
@@ -146,7 +145,6 @@ export const ApiDefinitionSelect: React.FC<Props> = ({
             value={definition?.title || NO_DEFINITION_LABEL}
             selectedOptions={[definition?.name]}
             disabled={!apiDefinitions.list.length}
-            inlinePopup
             onOptionSelect={handleDefinitionSelect}
           >
             {apiDefinitions.list.map((definition) => (
@@ -169,7 +167,6 @@ export const ApiDefinitionSelect: React.FC<Props> = ({
             value={deployment?.title || NO_DEPLOYMENT_LABEL}
             selectedOptions={[deployment?.name]}
             disabled={!apiDeployments.list.length}
-            inlinePopup
             onOptionSelect={handleDeploymentSelect}
           >
             {apiDeployments.list.map((deployment) => (
