@@ -110,7 +110,10 @@ export const ApiDefinitionSelect: React.FC<Props> = ({
   );
 
   return (
-    <div className={classNames(styles.apiDefinitionSelect, isInline && styles.isInline)}>
+    <div
+      className={classNames(styles.apiDefinitionSelect, isInline && styles.isInline)}
+      onMouseDown={(e) => e.preventDefault()}
+    >
       {!hiddenSelects.includes('version') && (
         <div className={styles.selectionDropdown}>
           <label htmlFor="version-select">Version</label>
