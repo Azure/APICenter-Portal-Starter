@@ -86,6 +86,10 @@ export function schemaToFieldType<T extends WithRef<OpenAPIV2.SchemaObject | Ope
 export function schemaToTypeLabel<T extends WithRef<OpenAPIV2.SchemaObject | OpenAPIV3.SchemaObject>>(
   schema?: T
 ): React.ReactNode {
+  if (!schema) {
+    return '';
+  }
+
   if (schema.oneOf || schema.anyOf || schema.allOf) {
     return 'union';
   }
