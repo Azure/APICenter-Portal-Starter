@@ -1,0 +1,14 @@
+/* Custom layout for the Docs page to work with the sticky footer */
+body.docs-page {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    position: relative;
+
+    #root {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        padding-bottom: 3.5rem; /* Match the footer height */
+    }
+}

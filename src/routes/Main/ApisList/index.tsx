@@ -13,10 +13,7 @@ import { Api } from "../../../contracts/api";
 import { useApiService } from "../../../util/useApiService";
 import { useAuthService } from "../../../util/useAuthService";
 import { useConfigService } from "../../../util/useConfigService";
-import {
-    LocalStorageKey,
-    useLocalStorage,
-} from "../../../util/useLocalStorage";
+import { LocalStorageKey, useLocalStorage } from "../../../util/useLocalStorage";
 import { useLogger } from "../../../util/useLogger";
 import { useSession } from "../../../util/useSession";
 import useFilters, { TFilterTag } from "./Filters/useFilters";
@@ -65,12 +62,10 @@ const ApisList = () => {
     const authService = useAuthService();
     const logger = useLogger();
 
-    const [filters] = useFilters();
+    const [filters, setSearchParams, filterOptions, isFiltersReady] = useFilters();
     const [apis, setApis] = useState<Api[] | null>(null);
     const [isLoading, setIsLoading] = useState(false);
-    const [showRestrictedModal, setShowRestrictedModal] = useState<boolean>(
-        false
-    );
+    const [showRestrictedModal, setShowRestrictedModal] = useState<boolean>(false);
 
     const [searchParams] = useSearchParams();
     const search = searchParams.get("search");
@@ -80,97 +75,93 @@ const ApisList = () => {
     }, [isRestricted]);
 
     useEffect(() => {
-        logger.trackView("API list");
-        initialize();
-    }, [isAuthenticated, filters, search, sortBy]);
+        // Don't initialize until filters are loaded to avoid double API calls
+        if (isFiltersReady) {
+            logger.trackView("API list");
+            initialize();
+        }
+    }, [isAuthenticated, filters, search, sortBy, isFiltersReady]);
 
     const initialize = async () => {
-        const config = await configService.getSettings();
-        setIsLoading(true);
+        try {
+            setIsLoading(true);
 
-        let searchQuery = "";
-        let filterQuery = "";
+            // Get configuration and check authentication
+            const [config, authResult] = await Promise.all([
+                configService.getSettings(),
+                authService.isAuthenticated(),
+            ]);
+            session.setAuthenticated(authResult);
 
-        if (search) {
-            searchQuery = "$search=" + search;
-        }
+            // If not authenticated, stop here
+            if (!authResult) {
+                setIsLoading(false);
+                return;
+            }
 
-        if (filters?.length > 0 || config.scopingFilter?.length > 0) {
-            const groupedParams = groupByKey(filters, "filterTypeKey");
-            const groupedParamsArray = Object.values(groupedParams);
+            // Build query parameters
+            const searchQuery = search ? `$search=${search}` : "";
+            let filterQuery = "";
 
-            groupedParamsArray.forEach((paramGroup, index) => {
-                filterQuery += "(";
-                paramGroup.forEach((param: TFilterTag, paramIndex: number) => {
-                    filterQuery += param.filterQuery;
+            if (filters?.length > 0 || config.scopingFilter?.length > 0) {
+                const groupedParams = groupByKey(filters, "filterTypeKey");
+                const groupedParamsArray = Object.values(groupedParams);
 
-                    if (paramIndex !== paramGroup.length - 1) {
-                        filterQuery += " or ";
+                groupedParamsArray.forEach((paramGroup, index) => {
+                    filterQuery += "(";
+                    paramGroup.forEach((param: TFilterTag, paramIndex: number) => {
+                        filterQuery += param.filterQuery;
+                        if (paramIndex !== paramGroup.length - 1) {
+                            filterQuery += " or ";
+                        }
+                    });
+                    filterQuery += ")";
+                    if (index !== groupedParamsArray.length - 1) {
+                        filterQuery += " and ";
                     }
                 });
-                filterQuery += ")";
 
-                if (index !== groupedParamsArray.length - 1) {
-                    filterQuery += " and ";
+                if (filterQuery.length > 0) {
+                    filterQuery = `$filter=${filterQuery}`;
+                    if (config.scopingFilter?.length > 0) {
+                        filterQuery += ` and (${config.scopingFilter})`;
+                    }
+                } else if (config.scopingFilter?.length > 0) {
+                    filterQuery = `$filter=(${config.scopingFilter})`;
                 }
-            });
-
-            if (filterQuery.length > 0) {
-                filterQuery = "$filter=" + filterQuery;
-                if (config.scopingFilter?.length > 0) {
-                    filterQuery += " and (" + config.scopingFilter + ")";
-                }
-            } else if (config.scopingFilter?.length > 0) {
-                filterQuery = "$filter=(" + config.scopingFilter + ")";
             }
-        }
 
-        const result = await authService.isAuthenticated();
-        session.setAuthenticated(result);
-
-        setIsLoading(false);
-
-        if (filterQuery !== "" || searchQuery !== "") {
-            const queryString: string[] = [];
-            if (filterQuery) queryString.push(filterQuery);
-            if (searchQuery) queryString.push(searchQuery);
-
-            if (isAuthenticated) {
-                const apis = await apiService.getApis(queryString.join("&"));
-                setApis(sortApis(apis?.value, sortBy));
-                setIsLoading(false);
-            }
-        } else {
-            if (isAuthenticated) {
-                const apis = await apiService.getApis();
-                setApis(sortApis(apis?.value, sortBy));
-                setIsLoading(false);
-            }
+            // Fetch APIs with any filters
+            const queryString = [filterQuery, searchQuery].filter(Boolean).join("&");
+            console.log("Final query string:", queryString);
+            const apisResponse = await apiService.getApis(queryString || undefined);
+            setApis(sortApis(apisResponse?.value, sortBy));
+        } catch (error) {
+            console.error("Failed to load MCPss:", error);
+            setApis([]);
+        } finally {
+            setIsLoading(false);
         }
     };
 
     return (
         <section className={css.apisList}>
             {showRestrictedModal && <RestrictedAccessModal />}
-            <Filters />
+            <Filters filterOptions={filterOptions} />
 
             <div className={css.main}>
                 <FirstRow apis={apis} />
 
-                <FiltersActive />
+                <FiltersActive filtersActive={filters} setSearchParams={setSearchParams} />
 
                 {isLoading ? (
                     <Spinner size={"small"} />
                 ) : !isAuthenticated ? (
-                    <div className={css.emptyState}>
-                        Sign in or create an account to view APIs.
-                    </div>
+                    <div className={css.emptyState}>Failed to load MCPs.</div>
                 ) : apis?.length === 0 ? (
                     <div className={css.emptyState}>
                         <NoApis />
-                        <div>
-                            Could not find APIs. Try a different search term.
-                        </div>
+                        <div>Could not find MCP servers</div>
                     </div>
                 ) : layout === TLayout.table ? (
                     <ApisTable apis={apis} />

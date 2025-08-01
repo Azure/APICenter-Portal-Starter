@@ -15,7 +15,7 @@ export class MsalAuthService implements IAuthService {
     private msalInstance?: msal.PublicClientApplication;
     private scopes?: string[];
 
-    constructor(private readonly configService: IConfigService) { }
+    constructor(private readonly configService: IConfigService) {}
 
     private async getMsalInstance(): Promise<msal.PublicClientApplication> {
         if (this.msalInstance) {
@@ -23,7 +23,19 @@ export class MsalAuthService implements IAuthService {
         }
 
         const settings = await this.configService.getSettings();
-        const authorityUrl = (settings.authentication.authority || settings.authentication.azureAdInstance) + settings.authentication.tenantId;
+
+        // For anonymous access, skip MSAL initialization
+        if (settings.anonymousAccess) {
+            throw new Error("MSAL not available in anonymous access mode");
+        }
+
+        if (!settings.authentication) {
+            throw new Error("Authentication configuration is required for authenticated mode");
+        }
+
+        const authorityUrl =
+            (settings.authentication.authority || settings.authentication.azureAdInstance) +
+            settings.authentication.tenantId;
 
         const msalConfig: msal.Configuration = {
             auth: {
@@ -37,9 +49,10 @@ export class MsalAuthService implements IAuthService {
 
         this.msalInstance = msalInstance;
 
-        this.scopes = typeof settings.authentication.scopes === "string"
-            ? [settings.authentication.scopes]
-            : settings.authentication.scopes;
+        this.scopes =
+            typeof settings.authentication.scopes === "string"
+                ? [settings.authentication.scopes]
+                : settings.authentication.scopes;
 
         const accounts = msalInstance.getAllAccounts();
 
@@ -51,13 +64,31 @@ export class MsalAuthService implements IAuthService {
     }
 
     public async isAuthenticated(): Promise<boolean> {
-        const msalInstance = await this.getMsalInstance();
-        const accounts = msalInstance.getAllAccounts();
+        const settings = await this.configService.getSettings();
 
-        return accounts.length > 0;
+        // For anonymous access, always return true
+        if (settings.anonymousAccess) {
+            return true;
+        }
+
+        try {
+            const msalInstance = await this.getMsalInstance();
+            const accounts = msalInstance.getAllAccounts();
+            return accounts.length > 0;
+        } catch (error) {
+            console.warn("Authentication check failed:", error);
+            return false;
+        }
     }
 
     public async getAccessToken(): Promise<string> {
+        const settings = await this.configService.getSettings();
+
+        // For anonymous access, return empty string
+        if (settings.anonymousAccess) {
+            throw new Error("Access token not available in anonymous access mode");
+        }
+
         const msalInstance = await this.getMsalInstance();
         const authResult = await msalInstance.acquireTokenSilent({ scopes: this.scopes! });
 

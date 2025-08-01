@@ -26,34 +26,31 @@ const FirstRow: FC<{ apis: Api[] | null }> = ({ apis }) => {
 
     return (
         <div className={css.firstRow}>
-            {apisCount === 0 ? (
+            <div className={css.topRow}>
                 <p>
-                    Displaying <b>0</b> items
+                    Displaying <b>{apisCount}</b> items
                 </p>
-            ) : (
-                <p>
-                    Displaying <b>1</b> to <b>{apisCount}</b> of <b>{apisCount}</b> items
-                </p>
-            )}
 
-            <div className={css.controls}>
-                <div className={css.sortBy}>
-                    <label htmlFor={"sortBy"}>Sort by</label>
-                    <Dropdown
-                        id={"sortBy"}
-                        value={sortBy ? SortingOptions.find(o => o.value === sortBy)?.label : ""}
-                        selectedOptions={sortBy ? [sortBy] : []}
-                        onOptionSelect={(_, { optionValue }) => localStorageSortBy.set(optionValue)}
-                    >
-                        {SortingOptions.map(option => (
-                            <Option key={option.value} value={option.value}>
-                                {option.label}
-                            </Option>
-                        ))}
-                    </Dropdown>
+                <div className={css.controlsGroup}>
+                    <div className={css.sortBy}>
+                        <label htmlFor={"sortBy"}>Sort by</label>
+                        <Dropdown
+                            id={"sortBy"}
+                            value={sortBy ? SortingOptions.find(o => o.value === sortBy)?.label : ""}
+                            selectedOptions={sortBy ? [sortBy] : []}
+                            onOptionSelect={(_, { optionValue }) => localStorageSortBy.set(optionValue)}
+                        >
+                            {SortingOptions.map(option => (
+                                <Option key={option.value} value={option.value}>
+                                    {option.label}
+                                </Option>
+                            ))}
+                        </Dropdown>
+                    </div>
+                    <div className={css.layoutSwitch}>
+                        <LayoutSwitch />
+                    </div>
                 </div>
-
-                <LayoutSwitch />
             </div>
         </div>
     );

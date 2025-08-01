@@ -7,7 +7,7 @@ footer {
     justify-content: space-between;
     background-color: #E6E6E6;
     
-    .footerTop ,
+    .footerTop,
     .footerBottom {
         max-width: 100rem;
         width: calc(100% - 4rem);
@@ -24,7 +24,42 @@ footer {
 
     .footerBottom {
         height: 3.5rem;
-        justify-content: center;
+        justify-content: space-between;
+
+        .microsoftLogo {
+            display: flex;
+            align-items: center;
+            
+            img {
+                height: 54px;
+                width: auto;
+            }
+        }
+        
+        .disclaimer {
+            flex: 1;
+            text-align: center;
+            margin: 0 2rem;
+            
+            span {
+                color: #666;
+                font-size: 10px;
+                line-height: 1.4;
+                
+                strong {
+                    color: #333;
+                }
+                
+                a {
+                    color: #0078d4;
+                    text-decoration: none;
+                    
+                    &:hover {
+                        text-decoration: underline;
+                    }
+                }
+            }
+        }
 
         .copyright,
         .link {
@@ -34,5 +69,42 @@ footer {
         .link {
             padding-left: 2.75rem;
         }
+
+        .poweredBy {
+            color: #707070;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+
+            span {
+                font-weight: normal;
+                color: #666;
+            }
+
+            .copilotLink {
+                color: #0078d4;
+                text-decoration: none;
+                font-size: 10px;
+                font-weight: normal;
+
+                &:hover {
+                    text-decoration: underline;
+                }
+            }
+
+            .copilotIcon {
+                width: 16px;
+                height: 16px;
+                margin-top: 1px;
+            }
+        }
+    }
+    
+    &.docsFooter {
+        position: relative; /* Changed from fixed to relative */
+        width: 100%;
+        z-index: 10;
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
     }
 }

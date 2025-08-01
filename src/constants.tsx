@@ -3,25 +3,51 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { TOption } from "./types";
+
 export const TableColumns = [
     { label: "Name", value: "name" },
-    { label: "Type", value: "kind" },
-    { label: "Lifecycle", value: "lifecycleStage" },
-    { label: "Description", value: "description" },
-    { label: "Last updated", value: "lastUpdated" },
+    { label: "Description", value: "kind" },
+    { label: "Type", value: "lifecycleStage" },
+    { label: "Category", value: "description" },
     // {label: "Created by", value: "createdBy"},
 ] as const;
 
 export const SortingOptions = [
     { label: "A to Z, ascending", value: "name.asc" },
     { label: "Z to A, descending", value: "name.desc" },
-    { label: "Newest to oldest", value: "lastUpdated.desc" },
-    { label: "Oldest to newest", value: "lastUpdated.asc" },
 ];
 
-export const ApiFilters = {
+export const ApiFilters: {
+    [key: string]: {
+        label: string;
+        visible: boolean;
+        options: TOption[];
+    };
+} = {
+    types: {
+        label: "Types",
+        visible: true,
+        options: [],
+    },
+    vendors: {
+        label: "Vendors",
+        visible: true,
+        options: [],
+    },
+    endpoint: {
+        label: "Endpoint",
+        visible: true,
+        options: [],
+    },
+    categories: {
+        label: "Categories",
+        visible: true,
+        options: [],
+    },
     kind: {
         label: "API type",
+        visible: false,
         options: [
             { value: "rest", label: "REST" },
             { value: "graphql", label: "GraphQL" },
@@ -33,6 +59,7 @@ export const ApiFilters = {
     },
     lifecycleStage: {
         label: "Lifecycle",
+        visible: false,
         options: [
             { value: "design", label: "Design" },
             { value: "development", label: "Development" },

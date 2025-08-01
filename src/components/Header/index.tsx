@@ -1,90 +1,66 @@
-import { useEffect, useState } from "react";
-import { Button, Link, Text } from "@fluentui/react-components";
+import { Link, useNavigate } from "react-router-dom";
+import { Text } from "@fluentui/react-components";
+import { Link as FluentLink } from "@fluentui/react-components";
 
-import { Settings } from "../../contracts/settings";
-import { useAuthService } from "../../util/useAuthService";
-import { useConfigService } from "../../util/useConfigService";
-import { LocalStorageKey, useLocalStorage } from "../../util/useLocalStorage";
-import { useSession } from "../../util/useSession";
-import CloverLogo from "../logos/CloverLogo";
+import ApicIcon from "../../media/apic-icon.svg";
 
 import css from "./index.module.scss";
 
 const Header = () => {
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const dataApiEndpoint = useLocalStorage(LocalStorageKey.dataApiEndpoint);
-    const dataApiClientId = useLocalStorage(LocalStorageKey.dataApiClientId);
-    const dataApiTenantId = useLocalStorage(LocalStorageKey.dataApiTenantId);
-    const [config, setConfig] = useState<Settings>();
-    const configService = useConfigService();
-    const authService = useAuthService();
-    const session = useSession();
-    
-    const fetchConfig = async () => {
-        const config = await configService.getSettings();
-        setConfig(config);
-        dataApiEndpoint.set(config.dataApiHostName);
-        dataApiClientId.set(config.authentication.clientId);
-        dataApiTenantId.set(config.authentication.tenantId);
-        const isAuthenticatedResponse = await authService.isAuthenticated();
-        setIsAuthenticated(isAuthenticatedResponse);
-    };
+    const navigate = useNavigate();
 
-    const signIn = async () => {
-        await authService.signIn();
-        session.setAuthenticated(true);
-        setIsAuthenticated(true);
+    const handleLogoClick = () => {
+        navigate("/");
     };
-
-    const signOut = async () => {
-        await authService.signOut();
-        session.setAuthenticated(false);
-        setIsAuthenticated(false);
-        // Refresh the URL to the original state
-        window.location.href = window.location.origin;
-    };
-
-    useEffect(() => {
-        fetchConfig();
-    }, []);
 
     return (
         <header>
             <div className={css.logo}>
-                <CloverLogo />
-                {!!config && (
+                <button
+                    onClick={handleLogoClick}
+                    style={{
+                        background: "none",
+                        border: "none",
+                        padding: 0,
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                    }}
+                    aria-label={"Go to main page"}
+                >
+                    <img src={ApicIcon} alt={"API Center Icon"} style={{ width: "30px", height: "32px" }} />
+                </button>
+                <div style={{ marginLeft: "8px" }}>
                     <Text size={400} weight={"semibold"}>
-                        {config.title}
+                        MCP Center
                     </Text>
-                )}
+                    <div style={{ fontSize: "10px", color: "#666", marginTop: "-2px" }}>
+                        powered by{" "}
+                        <FluentLink
+                            href={"https://learn.microsoft.com/azure/api-center/overview"}
+                            target={"_blank"}
+                            rel={"noopener noreferrer"}
+                            style={{ fontSize: "10px", textDecoration: "none" }}
+                        >
+                            Azure API Center
+                        </FluentLink>
+                    </div>
+                </div>
             </div>
             <div className={css.headerRight}>
                 <div className={css.headerLinks}>
-                    <Link appearance={"subtle"} href={"/"}>
-                        Home
+                    <Link to={"/about"} className={css.headerLink}>
+                        About
                     </Link>
-                    <Link
+                    <FluentLink
                         appearance={"subtle"}
-                        href={"https://learn.microsoft.com/en-us/azure/api-center/overview"}
+                        href={"https://github.com/Azure/mcp-center"}
                         target={"_blank"}
                         rel={"noopener noreferrer"}
+                        className={css.headerLink}
                     >
-                        Help
-                    </Link>
-                </div>
-                <div className={css.signupButtonWrapper}>
-                    <Button
-                        appearance={"primary"}
-                        style={{
-                            backgroundColor: css.blueButton,
-                            minWidth: "unset",
-                        }}
-                        onClick={() => {
-                            isAuthenticated ? signOut() : signIn();
-                        }}
-                    >
-                        {isAuthenticated ? "Sign out" : "Sign in"}
-                    </Button>
+                        Onboard
+                    </FluentLink>
                 </div>
             </div>
         </header>

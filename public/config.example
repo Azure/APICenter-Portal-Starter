@@ -1,10 +1,5 @@
 {
-  "dataApiHostName": "<service name>.data.<region>.azure-apicenter.ms",
-  "title": "API portal",
-  "authentication": {
-      "clientId": "<client ID>",
-      "tenantId": "<tenant ID>",
-      "scopes": ["https://azure-apicenter.net/user_impersonation"],
-      "authority": "https://login.microsoftonline.com/"
-  }
+  "dataApiHostName": "apic-mcp-registry.data.eastus.azure-apicenter.ms",
+  "title": "MCP Center",
+  "anonymousAccess": true
 }

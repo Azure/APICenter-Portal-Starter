@@ -102,7 +102,7 @@ const Search = () => {
                         ""
                     )
                 }
-                placeholder={"Search for an API"}
+                placeholder={"Search MCP servers..."}
                 value={inputValue}
                 onChange={e => {
                     const value = e.target.value;
@@ -127,6 +127,9 @@ const Search = () => {
                     }
                 }}
             />
+            <div className={css.searchDescription}>
+                Build Your Scalable, Enterprise-Ready  MCP Registry with Azure API Center
+            </div>
             {isFocused &&
                 (inputValue !== "" ? (
                     searchResults.length ? (
@@ -158,7 +161,7 @@ const Search = () => {
                             {isLoading ? (
                                 <Spinner size={"small"} className={css.noResults} />
                             ) : (
-                                <div className={css.noResults}>Could not find APIs. Try a different search term.</div>
+                                <div className={css.noResults}>Could not find MCP servers</div>
                             )}
                         </div>
                     )
@@ -195,7 +198,9 @@ const Search = () => {
                                         <span className={css.apiName}>{recent.value}</span>
                                         {recent.type === "api" && recent.api && (
                                             <span className={css.apiMeta}>
-                                                {recent.api.kind}; {recent.api.lifecycleStage && `${recent.api.lifecycleStage};`}; {recent.api.summary}
+                                                {recent.api.kind};{" "}
+                                                {recent.api.lifecycleStage && `${recent.api.lifecycleStage};`};{" "}
+                                                {recent.api.summary}
                                             </span>
                                         )}
                                     </button>

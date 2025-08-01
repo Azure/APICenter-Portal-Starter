@@ -12,9 +12,7 @@
         "ghcr.io/devcontainers/features/node:1": {},
         "ghcr.io/devcontainers/features/powershell:latest": {}
     },
-    "overrideFeatureInstallOrder": [
-        "ghcr.io/devcontainers/features/common-utils"
-    ],
+    "overrideFeatureInstallOrder": ["ghcr.io/devcontainers/features/common-utils"],
     "customizations": {
         "vscode": {
             "extensions": [
@@ -33,9 +31,7 @@
             ]
         }
     },
-    "forwardPorts": [
-        4280, 5173
-    ],
+    "forwardPorts": [4280, 5173],
     "onCreateCommand": "/bin/bash ./.devcontainer/on-create.sh > ~/on-create.log",
     "remoteUser": "vscode",
     "hostRequirements": {

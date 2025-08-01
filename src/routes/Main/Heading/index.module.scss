@@ -1,13 +1,12 @@
 @import "/src/styles/index";
 
 .heading {
-	padding: 3.125rem 3.125rem 4rem;
-	background: linear-gradient(45deg, hsla(204, 65%, 71%, 1) 0%, hsla(273, 34%, 75%, 1) 43%, hsla(358, 43%, 75%, 1) 57%, hsla(43, 96%, 63%, 1) 100%);
+	padding: 3.125rem 3.125rem 4rem; /* Further reduced bottom padding from 4rem to 2rem */
 	color: white;
 	text-align: center;
 
 	h1 {
-		margin: 0 0 1rem;
+		margin: 0 0 2rem;
 		font-size: 2.5rem;
 		font-weight: 600;
 		line-height: 3.25rem;
@@ -52,6 +51,24 @@
 
 	.input {
 		width: 100%;
+	}
+
+	.searchDescription {
+		margin-top: 1rem;
+		font-size: 1rem;
+		font-weight: 400;
+		color: white;
+		text-align: center;
+		line-height: 1.6;
+		
+		a {
+			color: white;
+			text-decoration: underline;
+			
+			&:hover {
+				text-decoration: none;
+			}
+		}
 	}
 
 	.popup {

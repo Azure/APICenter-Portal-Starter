@@ -3,8 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { EnvironmentServer } from "./environmentServer";
 import { EnvironmentOnboarding } from "./environmentOnboarding";
+import { EnvironmentServer } from "./environmentServer";
 
 /**
  * The environment contract.

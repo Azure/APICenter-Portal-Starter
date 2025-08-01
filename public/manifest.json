@@ -1,0 +1,21 @@
+{
+    "name": "MCP Center",
+    "short_name": "MCP Center",
+    "description": "A portal for Model Context Protocol servers",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#32BEDD",
+    "icons": [
+        {
+            "src": "/favicon.svg",
+            "sizes": "16x16 32x32 48x48 64x64 72x72 96x96 128x128 256x256",
+            "type": "image/svg+xml"
+        },
+        {
+            "src": "/favicon.ico",
+            "sizes": "16x16 32x32",
+            "type": "image/x-icon"
+        }
+    ]
+}

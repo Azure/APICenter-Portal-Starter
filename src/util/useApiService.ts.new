@@ -1,0 +1,107 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+import { ApiDefinition } from "../contracts/apiDefinition";
+import { Method } from "../services/IHttpClient";
+import { useHttpClient } from "./useHttpClient";
+import { useConfigService } from "./useConfigService";
+
+export const useApiService = () => {
+    const httpClient = useHttpClient();
+    const configService = useConfigService();
+
+    return {
+        async getApis(queryString?: string): Promise<any> {
+            try {
+                const settings = await configService.getSettings();
+                console.log("API Service settings:", settings); // Debug log
+                
+                // Build URL with appropriate query parameters
+                let url = "apis";
+                const queryParams: string[] = [];
+                
+                if (queryString) {
+                    queryParams.push(queryString);
+                }
+
+                if (settings?.scopingFilter) {
+                    const filterParam = `$filter=${settings.scopingFilter}`;
+                    queryParams.push(filterParam);
+                }
+
+                if (queryParams.length > 0) {
+                    url += `?${queryParams.join("&")}`;
+                }
+
+                console.log("Fetching APIs with URL:", url); // Debug log
+                const response = await httpClient(url);
+                console.log("API response:", response); // Debug log
+
+                return {
+                    value: response?.value || [],
+                };
+            } catch (error) {
+                console.error("Error fetching APIs:", error);
+                return { value: [] };
+            }
+        },
+
+        async getApi(id: string): Promise<any> {
+            try {
+                return await httpClient(`apis/${id}`);
+            } catch (error) {
+                console.error(`Error fetching API ${id}:`, error);
+                return null;
+            }
+        },
+
+        async getVersions(apiId: string): Promise<any> {
+            try {
+                return await httpClient(`apis/${apiId}/versions`);
+            } catch (error) {
+                console.error(`Error fetching versions for API ${apiId}:`, error);
+                return { value: [] };
+            }
+        },
+
+        async getDeployments(apiId: string): Promise<any> {
+            try {
+                return await httpClient(`apis/${apiId}/deployments`);
+            } catch (error) {
+                console.error(`Error fetching deployments for API ${apiId}:`, error);
+                return { value: [] };
+            }
+        },
+
+        async getDefinitions(apiId: string, version: string): Promise<any> {
+            try {
+                return await httpClient(`apis/${apiId}/versions/${version}/definitions`);
+            } catch (error) {
+                console.error(`Error fetching definitions for API ${apiId} version ${version}:`, error);
+                return { value: [] };
+            }
+        },
+
+        async getDefinition(apiName: string, versionName: string, definitionName: string): Promise<ApiDefinition> {
+            try {
+                return await httpClient(`apis/${apiName}/versions/${versionName}/definitions/${definitionName}`);
+            } catch (error) {
+                console.error(`Error fetching definition ${definitionName}:`, error);
+                throw error;
+            }
+        },
+
+        async getSpecificationLink(apiName: string, versionName: string, definitionName: string): Promise<string> {
+            const url = `apis/${apiName}/versions/${versionName}/definitions/${definitionName}:exportSpecification`;
+            try {
+                const response = await httpClient(url, Method.POST);
+                return response?.value;
+            } catch (error) {
+                console.error(`Error fetching specification link:`, error);
+                throw error;
+            }
+        }
+    };
+};

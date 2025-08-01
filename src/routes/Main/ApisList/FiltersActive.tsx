@@ -6,7 +6,7 @@
 import { FC } from "react";
 import { Dismiss12Regular } from "@fluentui/react-icons";
 
-import useFilters, { TFilterTag } from "./Filters/useFilters";
+import { TFilterTag } from "./Filters/useFilters";
 
 import css from "./index.module.scss";
 
@@ -19,8 +19,12 @@ const FilterTag: FC<{ item: TFilterTag; onClick: () => void }> = ({ item, onClic
     </div>
 );
 
-const FiltersActive = () => {
-    const [filtersActive, setSearchParams] = useFilters();
+interface FiltersActiveProps {
+    filtersActive: TFilterTag[];
+    setSearchParams: (searchParams?: URLSearchParams | ((prev: URLSearchParams) => URLSearchParams)) => void;
+}
+
+const FiltersActive: FC<FiltersActiveProps> = ({ filtersActive, setSearchParams }) => {
 
     return filtersActive.length === 0 ? (
         <></>

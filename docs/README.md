@@ -1,19 +1,20 @@
 ---
 page_type: sample
 languages:
-- azdeveloper
-- typescript
-- powershell
-- bash
-- html
-- bicep
+    - azdeveloper
+    - typescript
+    - powershell
+    - bash
+    - html
+    - bicep
 products:
-- azure
-- static-web-apps
+    - azure
+    - static-web-apps
 urlFragment: APICenter-Portal-Starter
 name: Self-host Your Azure API Center Portal
 description: Reference implementation of API Center portal for a web-based API discovery and consumption experience
 ---
+
 <!-- YAML front-matter schema: https://review.learn.microsoft.com/en-us/help/contribute/samples/process/onboarding?branch=main#supported-metadata-fields-for-readmemd -->
 
 [![Open Source Love](https://firstcontributions.github.io/open-source-badges/badges/open-source-v1/open-source.svg)](https://github.com/firstcontributions/open-source-badges)
@@ -22,19 +23,19 @@ description: Reference implementation of API Center portal for a web-based API d
 
 ## Overview
 
-- [What is Azure API Center?](./#what-is-the-azure-api-center-portal)
-- [What is the Azure API Center Portal?](./#azure-api-center-portal)
-- [Prerequisites](./#prerequisites)
-- [Quick Start](./#quick-start)
-  - [Automated deployment using `azd`](./#automated-deployment-using-azd)
-  - [Running the portal locally](./#running-the-portal-locally)
-  - [Manual deployment to Azure Static Web Apps](./#manual-deployment-to-azure-static-web-apps)
-- [Contributing](./#contributing)
-- [Bugs & Issues & Feedback](./#bugs--issues--feedback)
-- [Code of Conduct](./#code-of-conduct)
-- [Trademark Notice](./#trademark-notice)
-- [Telemetry](./#telemetry)
-- [License](./#license)
+-   [What is Azure API Center?](./#what-is-the-azure-api-center-portal)
+-   [What is the Azure API Center Portal?](./#azure-api-center-portal)
+-   [Prerequisites](./#prerequisites)
+-   [Quick Start](./#quick-start)
+    -   [Automated deployment using `azd`](./#automated-deployment-using-azd)
+    -   [Running the portal locally](./#running-the-portal-locally)
+    -   [Manual deployment to Azure Static Web Apps](./#manual-deployment-to-azure-static-web-apps)
+-   [Contributing](./#contributing)
+-   [Bugs & Issues & Feedback](./#bugs--issues--feedback)
+-   [Code of Conduct](./#code-of-conduct)
+-   [Trademark Notice](./#trademark-notice)
+-   [Telemetry](./#telemetry)
+-   [License](./#license)
 
 ## What is the Azure API Center portal?
 
@@ -42,15 +43,16 @@ description: Reference implementation of API Center portal for a web-based API d
 
 ## Azure API Center Portal
 
-**API Center portal** is a website that empowers developers and stakeholders to seamlessly discover and engage with APIs. Our reference implementation of the API Center portal enables API platform teams to provide a web-based API discovery and consumption experience to API consumers. 
+**API Center portal** is a website that empowers developers and stakeholders to seamlessly discover and engage with APIs. Our reference implementation of the API Center portal enables API platform teams to provide a web-based API discovery and consumption experience to API consumers.
 
 The API Center portal reference implementation provides:
 
-- A framework for publishing and maintaining a customer-managed API portal.
-- A portal platform that customers can modify or extend to meet their needs.
-- Flexibility to host on different infrastructures, including deployment to Azure Static Web Apps or Azure App Service.
+-   A framework for publishing and maintaining a customer-managed API portal.
+-   A portal platform that customers can modify or extend to meet their needs.
+-   Flexibility to host on different infrastructures, including deployment to Azure Static Web Apps or Azure App Service.
 
 ## Limitations
+
 For free SKU API Center instances, a maximum of 5 APIs will be displayed in the API Center portal regardless of how many APIs are in the API Center.
 
 For standard SKU, there is no limit and all APIs will be displayed.
@@ -66,16 +68,16 @@ Before you begin, ensure you have met the following requirements:
 
 You have two options to deploy this self-hosted API Center Portal:
 
-- **Automated deployment** &ndash; Use the Azure developer CLI (`azd`) for one-step deployment of the portal app. This option is recommended for a streamlined deployment process.
-- **Manual deployment** &ndash; Follow step-by-step guidance to deploy the Azure Functions app and configure the event subscription. This option is recommended if you prefer to deploy and manage the resources manually.
+-   **Automated deployment** &ndash; Use the Azure developer CLI (`azd`) for one-step deployment of the portal app. This option is recommended for a streamlined deployment process.
+-   **Manual deployment** &ndash; Follow step-by-step guidance to deploy the Azure Functions app and configure the event subscription. This option is recommended if you prefer to deploy and manage the resources manually.
 
 ### Automated deployment using `azd`
 
 > **NOTE**: You will need the additional prerequisites for this option
-> 
-> - :white_check_mark: Azure Developer CLI (`azd`)
-> - :white_check_mark: Azure CLI
-> - :white_check_mark: GitHub CLI
+>
+> -   :white_check_mark: Azure Developer CLI (`azd`)
+> -   :white_check_mark: Azure CLI
+> -   :white_check_mark: GitHub CLI
 
 1. Fork this repository to your GitHub account and clone it.
 
@@ -88,7 +90,7 @@ You have two options to deploy this self-hosted API Center Portal:
     ```bash
     # Authenticate with Azure Developer CLI
     azd auth login
-    
+
     # Authenticate with Azure CLI
     az login
     ```
@@ -99,17 +101,17 @@ You have two options to deploy this self-hosted API Center Portal:
     azd up
     ```
 
-   Enter an environment name and select your desired `subscription` and `location`. Then, you will be asked to enter a few more values:
+    Enter an environment name and select your desired `subscription` and `location`. Then, you will be asked to enter a few more values:
 
-   1. Choose whether to use an existing API Center instance or not (`apiCenterExisted`).
-   1. Pass the values for `apiCenterName`, `apiCenterRegion` and `apiCenterResourceGroupName`, if you choose to use the existing API center resource (`apiCenterExisted` value to `true`).
-   1. Leave them blank, if you choose to create a new API center resource (`apiCenterExisted` value to `false`).
-   1. Pass `staticAppLocation` value for the Azure Static Web Apps instance. Wait a moment for the resource deployment to complete.
+    1. Choose whether to use an existing API Center instance or not (`apiCenterExisted`).
+    1. Pass the values for `apiCenterName`, `apiCenterRegion` and `apiCenterResourceGroupName`, if you choose to use the existing API center resource (`apiCenterExisted` value to `true`).
+    1. Leave them blank, if you choose to create a new API center resource (`apiCenterExisted` value to `false`).
+    1. Pass `staticAppLocation` value for the Azure Static Web Apps instance. Wait a moment for the resource deployment to complete.
 
-   > There are two scenarios:
-   > 
-   > 1. Portal with new API Center &ndash; You need to give `False` to `apiCenterExisted` and leave `apiCenterName`, `apiCenterRegion` and `apiCenterResourceGroupName` blank.
-   > 1. Portal with existing API Center &ndash; You need to give `True` to `apiCenterExisted` and pass values to `apiCenterName`, `apiCenterRegion` and `apiCenterResourceGroupName`.
+    > There are two scenarios:
+    >
+    > 1. Portal with new API Center &ndash; You need to give `False` to `apiCenterExisted` and leave `apiCenterName`, `apiCenterRegion` and `apiCenterResourceGroupName` blank.
+    > 1. Portal with existing API Center &ndash; You need to give `True` to `apiCenterExisted` and pass values to `apiCenterName`, `apiCenterRegion` and `apiCenterResourceGroupName`.
 
 1. If you want to integrate the CI/CD pipeline with GitHub Actions, you can use the following command to create a GitHub repository and push the code to the repository. First of all, log in to GitHub.
 
@@ -120,13 +122,13 @@ You have two options to deploy this self-hosted API Center Portal:
 
 1. Run the following commands to update your GitHub repository variables.
 
-   > **NOTE**: Make sure that you've forked this repository to your GitHub account before running the following commands.
+    > **NOTE**: Make sure that you've forked this repository to your GitHub account before running the following commands.
 
     ```bash
     # Bash
     AZURE_CLIENT_ID=$(./infra/scripts/get-azdvariable.sh --key AZURE_CLIENT_ID)
     azd pipeline config --principal-id $AZURE_CLIENT_ID
-    
+
     # PowerShell
     $AZURE_CLIENT_ID = $(./infra/scripts/Get-AzdVariable.ps1 -Key AZURE_CLIENT_ID)
     azd pipeline config --principal-id $AZURE_CLIENT_ID
@@ -157,9 +159,9 @@ For a full list of filterable properties, refer to the dataplane [API resource m
 ### Running the portal locally
 
 > **NOTE**: You will need the additional prerequisites for this option
-> 
-> - :white_check_mark: [Configured app registration in your Microsoft Entra ID tenant](https://learn.microsoft.com/azure/api-center/enable-api-center-portal#create-microsoft-entra-app-registration) with the right API permission scope and Redirect URI.
-> - :white_check_mark: Portal sign-in enabled with the [right role assignment](https://learn.microsoft.com/azure/api-center/enable-api-center-portal#enable-sign-in-to-portal-by-microsoft-entra-users-and-groups)
+>
+> -   :white_check_mark: [Configured app registration in your Microsoft Entra ID tenant](https://learn.microsoft.com/azure/api-center/enable-api-center-portal#create-microsoft-entra-app-registration) with the right API permission scope and Redirect URI.
+> -   :white_check_mark: Portal sign-in enabled with the [right role assignment](https://learn.microsoft.com/azure/api-center/enable-api-center-portal#enable-sign-in-to-portal-by-microsoft-entra-users-and-groups)
 
 Follow these steps to get your development environment set up:
 
@@ -199,9 +201,9 @@ Follow these steps to get your development environment set up:
 
 1. Start the development server - This command will start the portal in development mode running locally:
 
-   ```bash
-   npm start
-   ```
+    ```bash
+    npm start
+    ```
 
 ### Manual deployment to Azure Static Web Apps
 
@@ -221,18 +223,16 @@ To view your API Center portal running on Static Web Apps, click **View app in b
 
 :rocket: See [the contribution guidelines](CONTRIBUTING.md) for ideas and guidance on how to improve the template. Thank you! :rocket:
 
-
 ## Bugs & Issues & Feedback
 
 :sunny: We Love Hearing From You! :sunny:
 
-
 Your feedback is invaluable to us, and we encourage you to share your thoughts and suggestions in the repository's **Issues** section. You can also report bugs or submit feature requests there. Rest assured, we’ll be keeping a close eye on your input to continuously improve. While we’re dedicated to monitoring these issues, please note that this channel is not part of our Microsoft Azure Service Support.
- 
-**Microsoft Azure Support** assistance is limited to the initial setup of the Azure Function app that runs the linting engine. Best effort support is provided for problems that are caused by environmental factors, such as (but not limited to): hosting platform, development environment, network configuration. 
- 
+
+**Microsoft Azure Support** assistance is limited to the initial setup of the Azure Function app that runs the linting engine. Best effort support is provided for problems that are caused by environmental factors, such as (but not limited to): hosting platform, development environment, network configuration.
+
 If you need technical assistance with extending the linting engine or improving existing rules , please leverage existing technical communities such as Stack Overflow. We don't provide support through GitHub Issues.
- 
+
 We welcome and appreciate community contributions.
 
 ## Code of Conduct

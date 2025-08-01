@@ -14,21 +14,49 @@
 	border-radius: 0.5rem;
 	box-shadow: 0 0 0.125rem 0 rgba(0, 0, 0, 0.24), 0 0.125rem 0.25rem 0 rgba(0, 0, 0, 0.28);
 	cursor: pointer;
+	text-align: left;
 
 	.content {
 		height: 100%;
 		padding-bottom: 1rem;
+		text-align: left;
+
+		.headerSection {
+			display: flex;
+			align-items: stretch;
+			gap: 1rem;
+			margin-bottom: 0.75rem;
+
+			.apiIcon {
+				width: 40px;
+				height: auto;
+				min-height: 40px;
+				object-fit: contain;
+				flex-shrink: 0;
+				align-self: stretch;
+			}
+
+			.contentRight {
+				flex: 1;
+				display: flex;
+				flex-direction: column;
+				gap: 0.5rem;
+				justify-content: space-between;
+				min-width: 0; // Allows text to wrap if needed
+			}
+		}
 
 		h4 {
 			margin: 0 0 0.75rem;
 			font-size: 1.25rem;
 			font-weight: 600;
+			text-align: left;
 		}
 
 		.tags {
 			display: flex;
 			gap: 0.75rem;
-			margin-bottom: 0.75rem;
+			text-align: left;
 
 			span {
 				color: $gray;
@@ -49,12 +77,35 @@
 			font-size: 0.875rem;
 			font-weight: 400;
 			line-height: 1.25rem;
+			text-align: left;
 			/* 142.857% */
 		}
 	}
 
 	.menuButton {
 		align-self: flex-end;
+	}
+
+	.titleRow {
+		display: flex;
+		align-items: center;
+		gap: 0.25rem;
+
+		h4 {
+			margin: 0;
+		}
+
+		.globeIcon {
+			color: #0078d4;
+			margin-left: 0.5rem;
+			flex-shrink: 0;
+		}
+
+		.packageIcon {
+			color: #0078d4;
+			margin-left: 0.5rem;
+			flex-shrink: 0;
+		}
 	}
 }
 

@@ -7,50 +7,55 @@ import { ApiDefinition } from "../contracts/apiDefinition";
 import { Method } from "../services/IHttpClient";
 import { useHttpClient } from "./useHttpClient";
 
-
 export class ApiService {
     private requestCache: Map<string, Promise<any>> = new Map<string, Promise<any>>();
 
-    constructor(private httpClient: any) { }
+    constructor(private httpClient: any) {}
+
+    private readonly workspacePath = "workspaces/default";
 
     public async getApis(queryString?: string): Promise<any> {
-        return queryString ? await this.httpClient(`apis?${queryString}`) : await this.httpClient(`apis`);
+        return queryString
+            ? await this.httpClient(`${this.workspacePath}/apis?${queryString}`)
+            : await this.httpClient(`${this.workspacePath}/apis`);
     }
 
     public async getApi(id: string) {
-        return await this.httpClient(`apis/${id}`);
+        return await this.httpClient(`${this.workspacePath}/apis/${id}`);
     }
 
     public async getVersions(apiId: string) {
-        return await this.httpClient(`apis/${apiId}/versions`);
+        return await this.httpClient(`${this.workspacePath}/apis/${apiId}/versions`);
     }
 
     public async getDeployments(apiId: string) {
-        return await this.httpClient(`apis/${apiId}/deployments`);
+        return await this.httpClient(`${this.workspacePath}/apis/${apiId}/deployments`);
     }
 
     public async getDefinitions(apiId: string, version: string) {
-        return await this.httpClient(`apis/${apiId}/versions/${version}/definitions`);
+        return await this.httpClient(`${this.workspacePath}/apis/${apiId}/versions/${version}/definitions`);
     }
 
     public async getDefinition(apiName: string, versionName: string, definitionName: string): Promise<ApiDefinition> {
-        return await this.httpClient(`apis/${apiName}/versions/${versionName}/definitions/${definitionName}`);
+        return await this.httpClient(
+            `${this.workspacePath}/apis/${apiName}/versions/${versionName}/definitions/${definitionName}`
+        );
     }
 
     public async getSpecificationLink(apiName: string, versionName: string, definitionName: string): Promise<string> {
-        const url = `apis/${apiName}/versions/${versionName}/definitions/${definitionName}:exportSpecification`;
+        const url = `${this.workspacePath}/apis/${apiName}/versions/${versionName}/definitions/${definitionName}:exportSpecification`;
 
         if (this.requestCache.has(url)) {
             return this.requestCache.get(url)!; // Non-null assertion (!) since we know it exists
         }
 
-        const responsePromise =  this.httpClient(url, Method.POST)
+        const responsePromise = this.httpClient(url, Method.POST)
             .then(response => response.value)
             .catch(error => {
                 this.requestCache.delete(url);
                 return Promise.reject(error);
             });
-            
+
         this.requestCache.set(url, responsePromise);
 
         return responsePromise;

@@ -1,18 +1,18 @@
-import remarkGfm from "remark-gfm";
+import ReactMarkdown from "react-markdown"; // TODO: upgrade this package and all related ones when https://github.com/hashicorp/next-mdx-remote/issues/403 fixed
 import rehypeRaw from "rehype-raw";
 import rehypeTruncate from "rehype-truncate";
-import ReactMarkdown from "react-markdown"; // TODO: upgrade this package and all related ones when https://github.com/hashicorp/next-mdx-remote/issues/403 fixed
+import remarkGfm from "remark-gfm";
 
 type TMarkdownProcessorProps = {
     markdownToDisplay: string;
     maxChars?: number;
     truncate?: boolean;
-}
+};
 
 export const MarkdownProcessor = ({ markdownToDisplay, maxChars, truncate = false }: TMarkdownProcessorProps) => (
     <ReactMarkdown
         remarkPlugins={[remarkGfm]}
-        rehypePlugins={[rehypeRaw as any, [rehypeTruncate, { maxChars, disable: typeof maxChars === "undefined"}]]}
+        rehypePlugins={[rehypeRaw as any, [rehypeTruncate, { maxChars, disable: typeof maxChars === "undefined" }]]}
         className={truncate ? "markdown-truncate" : ""}
     >
         {markdownToDisplay}

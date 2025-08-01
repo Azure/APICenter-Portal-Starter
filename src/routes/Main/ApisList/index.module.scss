@@ -2,41 +2,54 @@
 
 .apisList {
 	display: flex;
-	padding: 2rem;
+	padding: 0 2rem 0.5rem;
 	gap: 2rem;
 	max-width: 100rem;
-	margin: 0 auto;
+	margin: -1.5rem auto 0; /* Negative top margin to pull content up closer to header */
 
 	.main {
 		width: 100%;
 
 		.firstRow {
 			display: flex;
-			align-items: center;
-			justify-content: space-between;
+			flex-direction: column;
+			gap: 0.5rem; /* Reduced gap from 1rem to 0.5rem */
+			margin-bottom: 0.5rem; /* Reduced margin from 1rem to 0.5rem */
+
+			.topRow {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+
+				.controlsGroup {
+					display: flex;
+					align-items: center;
+					gap: 1rem;
+				}
+			}
 
 			p {
 				font-size: 0.875rem;
 				line-height: 1.25rem;
 				/* 142.857% */
+				margin: 0;
 			}
 
-			.controls {
-				&>div {
+			.sortBy {
+				&>* {
 					display: inline-block;
+					vertical-align: middle;
 				}
 
-				.sortBy {
-					&>* {
-						display: inline-block;
-						vertical-align: middle;
-					}
-
-					label {
-						margin-right: .5rem;
-						font-weight: 600;
-					}
+				label {
+					margin-right: .5rem;
+					font-weight: 600;
 				}
+			}
+
+			.layoutSwitch {
+				display: flex;
+				align-items: center;
 			}
 		}
 	}
@@ -44,8 +57,8 @@
 
 .filtersActive {
 	display: flex;
-	gap: 1rem;
-	margin: 1rem 0 1.75rem;
+	gap: 0.5rem;
+	margin: 0.5rem 0 1rem; /* Reduced margins from 1rem 0 1.75rem to 0.5rem 0 1rem */
 	flex-wrap: wrap;
 
 	.filterTag {

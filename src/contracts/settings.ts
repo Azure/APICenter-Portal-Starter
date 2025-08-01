@@ -20,9 +20,14 @@ export interface Settings {
     title: string;
 
     /**
+     * Enable anonymous access mode.
+     */
+    anonymousAccess?: boolean;
+
+    /**
      * The authentication settings.
      */
-    authentication: MsalSettings;
+    authentication?: MsalSettings;
 
     /**
      * The scoping filter. If provided, only APIs with the specified metadata properties will be shown.

@@ -1,0 +1,25 @@
+<svg id="ae2eb0c6-61df-439d-aced-9ffa5f1206a9" xmlns="http://www.w3.org/2000/svg" width="84" height="84" viewBox="0 0 84 84">
+  <defs>
+    <linearGradient id="ab672f38-3adb-4497-a087-7aa6dcd17ea9" x1="-1037.6431" y1="107.6162" x2="-1061.9187" y2="35.9002" gradientTransform="matrix(1, 0, 0, -1, 1075, 117.9158)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#114a8b"/>
+      <stop offset="1" stop-color="#0669bc"/>
+    </linearGradient>
+    <linearGradient id="b17a7840-303d-4fbc-b08c-4af094494467" x1="-1030.0598" y1="74.1947" x2="-1035.6753" y2="72.296" gradientTransform="matrix(1, 0, 0, -1, 1075, 117.9158)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-opacity="0.3"/>
+      <stop offset="0.0712" stop-opacity="0.2"/>
+      <stop offset="0.321" stop-opacity="0.1"/>
+      <stop offset="0.6231" stop-opacity="0.05"/>
+      <stop offset="1" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="f18dd133-53d7-4464-884d-d909fd46e2d3" x1="-1033.148" y1="109.7084" x2="-1006.501" y2="38.7145" gradientTransform="matrix(1, 0, 0, -1, 1075, 117.9158)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#3ccbf4"/>
+      <stop offset="1" stop-color="#2892df"/>
+    </linearGradient>
+  </defs>
+  <g>
+    <path d="M28.8373,4.784H52.2125L27.9475,76.68a3.7275,3.7275,0,0,1-3.5318,2.5355H6.2245a3.7214,3.7214,0,0,1-3.5262-4.9114L25.3056,7.32A3.7274,3.7274,0,0,1,28.8373,4.784Z" fill="url(#ab672f38-3adb-4497-a087-7aa6dcd17ea9)"/>
+    <path d="M62.8047,53.0073H25.737a1.716,1.716,0,0,0-1.1709,2.9705L48.3849,78.2085a3.7445,3.7445,0,0,0,2.5546,1.007H71.9276Z" fill="#0078d4"/>
+    <path d="M28.8373,4.784A3.6971,3.6971,0,0,0,25.298,7.3681L2.7263,74.2433A3.7167,3.7167,0,0,0,6.235,79.2155H24.8959a3.9884,3.9884,0,0,0,3.0617-2.6042l4.5007-13.2648L48.5366,78.3424a3.8032,3.8032,0,0,0,2.3932.8731H71.84L62.6689,53.0073l-26.7352.0059L52.2974,4.784Z" fill="url(#b17a7840-303d-4fbc-b08c-4af094494467)"/>
+    <path d="M58.6931,7.3155a3.7215,3.7215,0,0,0-3.526-2.5315H29.1161a3.7221,3.7221,0,0,1,3.5263,2.5315L55.2509,74.3038a3.7219,3.7219,0,0,1-3.5263,4.9117H77.7757a3.7215,3.7215,0,0,0,3.5259-4.9117Z" fill="url(#f18dd133-53d7-4464-884d-d909fd46e2d3)"/>
+  </g>
+</svg>

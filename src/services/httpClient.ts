@@ -8,11 +8,16 @@ import { IHttpClient, Method } from "./IHttpClient";
 
 export class HttpClient implements IHttpClient {
     public async fetchData(url: string, method: Method = Method.GET): Promise<any> {
-        const accessToken = await authService.getAccessToken();
         const settings = await configService.getSettings();
 
-        if (!settings.dataApiHostName.includes("/workspaces/default")) {
-            url = "workspaces/default/" + url;
+        // For anonymous access, skip token acquisition
+        let accessToken: string | null = null;
+        if (!settings.anonymousAccess) {
+            try {
+                accessToken = await authService.getAccessToken();
+            } catch (error) {
+                console.warn("Failed to get access token, proceeding with anonymous access", error);
+            }
         }
 
         if (!url.startsWith("/")) {
@@ -26,29 +31,27 @@ export class HttpClient implements IHttpClient {
             "Content-Type": "application/json",
         };
 
-        if (accessToken) {
+        // Only add authorization header if we have a token and not in anonymous mode
+        if (accessToken && !settings.anonymousAccess) {
             headers.Authorization = "Bearer " + accessToken;
         }
 
         const response = await fetch(requestUrl, { method, headers });
 
-        switch (response.status) {
-            case 401:
-            case 403:
-                if (accessToken) {
-                    localStorage.setItem("MS_APIC_DEVPORTAL_isRestricted", "true");
-                    return null;
-                }
-                break;
+        if (!response.ok) {
+            if (settings.anonymousAccess || response.status === 404) {
+                return { value: [] };
+            }
 
-            case 404:
-                return null;
+            if (response.status === 401 || response.status === 403) {
+                localStorage.setItem("MS_APIC_DEVPORTAL_isRestricted", "true");
+                return { value: [] };
+            }
 
-            default:
-                break;
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const dataJson = await response.json();
-        return dataJson;
+        const data = await response.json();
+        return data;
     }
 }

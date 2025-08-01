@@ -8,12 +8,15 @@ import { Outlet } from "react-router-dom";
 import Footer from "./components/Footer";
 import Header from "./components/Header";
 
+// Use a wrapper div to create a flex container that ensures the footer stays at the bottom
 const Layout = () => (
-    <>
+    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
         <Header />
-        <Outlet />
+        <div style={{ flex: "1 0 auto" }}>
+            <Outlet />
+        </div>
         <Footer />
-    </>
+    </div>
 );
 
 export default Layout;

@@ -4,48 +4,125 @@
 
 .apiDetail {
 	position: fixed;
+	top: 0;
+	left: 0;
 	width: 100%;
 	height: 100%;
-	z-index: 1;
-	background: rgba(0, 0, 0, 0.60);
+	z-index: 1000; /* Increased z-index to ensure it's above all other elements */
+	background: rgba(0, 0, 0, 0.70);
 	animation: fadeIn .5s;
+	backdrop-filter: blur(4px);
+	display: flex;
+	justify-content: flex-end; /* Align container to the right */
 }
 
 .spinner {
 	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }
 
 .container {
 	box-sizing: border-box;
 	position: relative;
-	max-width: 38rem;
+	max-width: 48rem;
 	width: 90%;
-	height: 100%;
-	margin-left: auto;
-	padding: 2rem;
+	height: 100vh; /* Use viewport height to ensure full height */
+	margin: 0 0 0 auto; /* Keep right alignment */
+	padding: 3rem;
 	background: white;
-	box-shadow: 0 0 2rem rgba(0, 0, 0, .25);
+	box-shadow: 0 0 3rem rgba(0, 0, 0, .3);
 	overflow-y: auto;
+	border-radius: 8px 0 0 8px;
+	display: flex;
+	flex-direction: column;
 
 	p {
-		font-size: 0.875rem;
-		line-height: 1.25rem;
+		font-size: 1rem;
+		line-height: 1.6;
+		color: var(--colorNeutralForeground1);
 	}
 
 	.labelRow {
 		display: flex;
 		justify-content: space-between;
-		align-items: center;
-		margin-bottom: 1rem;
+		align-items: flex-start;
+		margin-bottom: 1.5rem;
+		padding-bottom: 1.5rem;
+		border-bottom: 1px solid var(--colorNeutralStroke1);
+
+		.titleSection {
+			display: flex;
+			flex-direction: column;
+			gap: 0.75rem;
+		}
 
 		h1 {
-			font-size: 1.5rem;
+			font-size: 2.25rem;
 			font-weight: 600;
-			line-height: 2rem;
+			line-height: 1.2;
+			color: var(--colorNeutralForeground1);
+			margin: 0;
+			padding-right: 2rem;
+			letter-spacing: -0.025em;
+			position: relative;
+			display: inline-flex;
+			align-items: center;
+		}
+
+		.titleRow {
+			display: flex;
+			align-items: center;
+			gap: 0.75rem;
+
+			.apiIcon {
+				width: 32px;
+				height: 32px;
+				border-radius: 6px;
+				object-fit: cover;
+				flex-shrink: 0;
+			}
+
+			h1 {
+				padding-right: 0;
+			}
+
+			.typeIcon {
+				color: #0078d4;
+				flex-shrink: 0;
+			}
+		}
+
+		.lastUpdated {
+			font-size: 0.875rem;
+			margin: 0;
+			color: var(--colorNeutralForeground2);
+			display: flex;
+			align-items: center;
+			
+			svg {
+				margin-right: 0.5rem;
+				font-size: 1rem;
+			}
 		}
 
 		a {
-			height: 1rem;
+			height: 2.5rem;
+			width: 2.5rem;
+			background-color: var(--colorNeutralBackground2);
+			border-radius: 50%;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			color: var(--colorNeutralForeground2);
+			transition: all 0.2s ease;
+			
+			&:hover {
+				background-color: var(--colorNeutralBackground3);
+				color: var(--colorNeutralForeground1);
+				transform: scale(1.05);
+			}
 		}
 	}
 
@@ -53,16 +130,7 @@
 		margin: .25rem 0 .5rem;
 	}
 
-	.metadataRow {
-		display: flex;
-		align-items: center;
-		margin-bottom: 1.5rem;
-
-		svg {
-			height: .5rem;
-			margin: 0 .75rem;
-		}
-	}
+	/* Removed metadataRow as it's now integrated into labelRow */
 
 	.tabsContainer {
 		margin: 1rem 0 1.25rem;
@@ -103,60 +171,52 @@
 	}
 }
 
+.optionsSection {
+	margin: 0;
+	padding: 0;
+	
+	.sectionTitle {
+		font-size: 1.25rem;
+		font-weight: 600;
+		color: var(--colorNeutralForeground1);
+		margin-bottom: 1rem;
+		border-bottom: 2px solid var(--colorBrandForeground1);
+		display: inline-block;
+		padding-bottom: 0.25rem;
+	}
+}
+
 .options {
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start; /* Align items to the left */
+	
 	.option {
-		display: flex;
-		margin: 1rem 0;
-	}
-
-	.optionInfo {
-		display: flex;
-		flex-direction: column;
-		align-items: baseline;
-		margin-left: 1rem;
-	}
-
-	.title {
-		display: flex;
-
-		.link {
-			display: flex;
-			align-items: center;
-			margin-left: 1rem;
-
-			svg {
-				margin-left: .25rem;
+		width: 100%;
+		
+		.optionInfo {
+			width: 100%;
+			
+			.buttonsWrapper {
+				margin-top: 0.5rem;
+				width: 100%;
+				display: flex;
+				flex-direction: column;
+				gap: 0.75rem;
+				align-items: flex-start; /* Align buttons to the left */
+				
+				p {
+					margin: 0;
+					width: auto; /* Allow buttons to size naturally */
+					
+					button {
+						justify-content: flex-start;
+						width: auto; /* Allow buttons to size naturally */
+					}
+				}
 			}
 		}
-	}
-
-	.description {
-		margin-top: .5rem;
-		color: $gray;
-	}
-
-	.buttonsWrapper {
-		display: flex;
-
-		button {
-			margin-top: 1.25rem;
-
-			&:first-of-type {
-				margin-right: 1.25rem;
-			}
-		}
-	}
-
-	.divider {
-		margin: 1rem 0;
-	}
-
-	.devPortalLogo {
-		background: url('../../../styles/images/developer-portal.png') center no-repeat;
-		background-size: contain;
-		min-width: 20px;
-		width: 20px;
-		height: 20px;
 	}
 }
 
@@ -167,13 +227,70 @@
 	}
 
 	.link {
-		display: flex;
+		display: inline-flex;
 		align-items: center;
 		margin-top: .5rem;
+		font-size: 0.875rem;
+		text-decoration: none;
+		color: var(--colorBrandForeground1);
+
+		&:hover {
+			text-decoration: underline;
+		}
 
 		svg {
-			margin-left: .25rem;
+			margin-left: 0.25rem;
+			font-size: 1rem;
 		}
+	}
+}
+
+.aboutSection {
+	margin: 0 0 1rem 0;
+	padding: 0 0 1rem 0;
+	
+	.sectionTitle {
+		font-size: 1.25rem;
+		font-weight: 600;
+		color: var(--colorNeutralForeground1);
+		margin-bottom: 1rem;
+		border-bottom: 2px solid var(--colorBrandForeground1);
+		display: inline-block;
+		padding-bottom: 0.25rem;
+	}
+
+	.aboutContent {
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
+		padding: 0.5rem 0 0 0;
+	}
+
+	.aboutRow {
+		display: block;
+		margin-bottom: 1rem;
+		
+		.rowTitle {
+			display: block;
+			margin-bottom: 0.5rem;
+			color: var(--colorNeutralForeground1);
+			font-size: 0.875rem;
+			font-weight: 600;
+			text-transform: uppercase;
+			letter-spacing: 0.5px;
+		}
+	}
+
+	.badge {
+		display: inline-block;
+		padding: 4px 12px;
+		border-radius: 3px;
+		background-color: var(--colorNeutralBackground3);
+		color: var(--colorNeutralForeground2);
+		font-size: 0.75rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
 	}
 }
 
@@ -187,5 +304,33 @@
 		path {
 			fill: #107C10;
 		}
+	}
+}
+
+.buttonsWrapper {
+	margin-top: 0.5rem;
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+	
+	.button {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+
+		button {
+			width: 100%;
+			justify-content: flex-start;
+			padding: 10px 16px;
+			border-radius: 4px;
+			transition: all 0.2s ease;
+		}
+	}
+}
+
+.insidersButton {
+	svg path {
+		fill: #3fb27f !important; /* Official VS Code Insiders green */
 	}
 }
