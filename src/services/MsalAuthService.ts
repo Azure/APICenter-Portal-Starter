@@ -8,6 +8,10 @@ let msalInstance: msal.PublicClientApplication | undefined;
 function getAuthConfig(): MsalSettings {
   const { authentication } = getRecoil(configAtom);
 
+  if (!authentication) {
+    throw new Error('Authentication configuration is not available. Use AnonymousAuthService instead.');
+  }
+
   return {
     ...authentication,
     // Fixing scopes for backward compatibility

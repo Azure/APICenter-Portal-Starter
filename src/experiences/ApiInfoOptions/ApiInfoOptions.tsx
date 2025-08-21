@@ -50,6 +50,10 @@ export const ApiInfoOptions: React.FC<Props> = ({ api, apiVersion, apiDefinition
   const devPortalUri = environment.data?.onboarding?.developerPortalUri?.[0];
 
   const handleOpenInVsCodeClick = useCallback((vscodetype) => {
+    if (!config.authentication) {
+      console.warn('Cannot open in VS Code: authentication configuration is not available');
+      return;
+    }
     const link = `${vscodetype}://apidev.azure-api-center?clientId=${config.authentication.clientId}&tenantId=${config.authentication.tenantId}&runtimeUrl=${config.dataApiHostName}`;
     window.open(link);
   }, [config]);
