@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anonymous Access Test - API Center Portal</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .config-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; }
+        .anonymous { background-color: #e8f5e8; }
+        .authenticated { background-color: #e8f0ff; }
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #ccc; }
+        .auth-btn { background-color: #0078d4; color: white; padding: 8px 16px; border: none; border-radius: 4px; }
+        .hidden { display: none; }
+        pre { background-color: #f5f5f5; padding: 10px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>Anonymous Access Implementation Test</h1>
+    
+    <h2>Test Scenario 1: Anonymous Access (No Authentication)</h2>
+    <div class="config-section anonymous">
+        <h3>Config JSON:</h3>
+        <pre>{
+  "dataApiHostName": "https://example.data.centraluseuap.azure-apicenter.ms",
+  "title": "Anonymous API Portal",
+  "scopingFilter": "",
+  "capabilities": []
+}</pre>
+        <h3>Expected Behavior:</h3>
+        <ul>
+            <li>✅ isAnonymousAccessEnabled = true</li>
+            <li>✅ AuthService = AnonymousAuthService</li>
+            <li>✅ AuthBtn hidden (returns null)</li>
+            <li>✅ All portal features accessible</li>
+        </ul>
+        
+        <div class="header">
+            <div>
+                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJMMTMuMDkgOC4yNkwyMCA5TDEzLjA5IDE1Ljc0TDEyIDIyTDEwLjkxIDE1Ljc0TDQgOUwxMC45MSA4LjI2TDEyIDJaIiBmaWxsPSIjMDA3OEQ0Ii8+Cjwvc3ZnPgo=" alt="Logo" width="24" height="24">
+                <span style="margin-left: 10px; font-weight: 600;">Anonymous API Portal</span>
+            </div>
+            <nav>
+                <a href="/" style="margin-right: 20px; color: #666;">APIs</a>
+                <a href="#" style="color: #666;">Help</a>
+            </nav>
+            <!-- AuthBtn is HIDDEN in anonymous mode -->
+        </div>
+    </div>
+
+    <h2>Test Scenario 2: Authenticated Access</h2>
+    <div class="config-section authenticated">
+        <h3>Config JSON:</h3>
+        <pre>{
+  "dataApiHostName": "https://example.data.centraluseuap.azure-apicenter.ms",
+  "title": "Authenticated API Portal",
+  "authentication": {
+    "clientId": "test-client-id",
+    "tenantId": "test-tenant-id",
+    "scopes": ["https://azure-apicenter.net/user_impersonation"],
+    "authority": "https://login.microsoftonline.com/"
+  },
+  "scopingFilter": "",
+  "capabilities": []
+}</pre>
+        <h3>Expected Behavior:</h3>
+        <ul>
+            <li>✅ isAnonymousAccessEnabled = false</li>
+            <li>✅ AuthService = MsalAuthService</li>
+            <li>✅ AuthBtn visible</li>
+            <li>✅ Authentication flow works normally</li>
+        </ul>
+        
+        <div class="header">
+            <div>
+                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJMMTMuMDkgOC4yNkwyMCA5TDEzLjA5IDE1Ljc0TDEyIDIyTDEwLjkxIDE1Ljc0TDQgOUwxMC45MSA4LjI2TDEyIDJaIiBmaWxsPSIjMDA3OEQ0Ii8+Cjwvc3ZnPgo=" alt="Logo" width="24" height="24">
+                <span style="margin-left: 10px; font-weight: 600;">Authenticated API Portal</span>
+            </div>
+            <nav>
+                <a href="/" style="margin-right: 20px; color: #666;">APIs</a>
+                <a href="#" style="color: #666;">Help</a>
+            </nav>
+            <button class="auth-btn">Sign in</button>
+        </div>
+    </div>
+
+    <h2>Implementation Summary</h2>
+    <div class="config-section">
+        <h3>Key Files Modified:</h3>
+        <ul>
+            <li><strong>src/types/config.ts</strong>: Made authentication optional</li>
+            <li><strong>src/atoms/isAnonymousAccessEnabledAtom.ts</strong>: New atom to detect anonymous mode</li>
+            <li><strong>src/services/AnonymousAuthService.ts</strong>: New service for anonymous access</li>
+            <li><strong>src/atoms/appServicesAtom.ts</strong>: Conditional service selection</li>
+            <li><strong>src/components/Header/AuthBtn/AuthBtn.tsx</strong>: Conditional rendering</li>
+        </ul>
+
+        <h3>Flow Logic:</h3>
+        <ol>
+            <li>Config loads from /config.json</li>
+            <li>isAnonymousAccessEnabledAtom checks if config.authentication exists</li>
+            <li>appServicesAtom selects appropriate AuthService</li>
+            <li>AuthBtn component conditionally renders based on anonymous mode</li>
+            <li>All portal features remain accessible in both modes</li>
+        </ol>
+    </div>
+</body>
+</html>
