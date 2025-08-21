@@ -12,8 +12,8 @@ export const RootProvider: React.FC<Props> = ({ children, services }) => {
   return (
     <RecoilRoot
       initializeState={({ set, getLoadable }) => {
-        const defaultServices = getLoadable(appServicesAtom).contents;
-        set(appServicesAtom, { ...defaultServices, ...services });
+          const defaultServices = getLoadable(appServicesAtom).contents;
+          set(appServicesAtom, { ...defaultServices, ...services });
       }}
     >
       <RecoilNexus />
