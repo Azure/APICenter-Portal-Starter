@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-imports */
-import { atom } from 'recoil';
+import { selector } from 'recoil';
 import ApiService from '@/services/ApiService';
 import MsalAuthService from '@/services/MsalAuthService';
 import AnonymousAuthService from '@/services/AnonymousAuthService';
@@ -13,26 +13,17 @@ export interface AppServicesAtomState {
   AuthService?: IAuthService;
 }
 
-const appServicesAtom = atom<AppServicesAtomState>({
+const appServicesAtom = selector<AppServicesAtomState>({
   key: 'appServices',
-  default: {
-    ApiService,
-    AuthService: MsalAuthService,
+  get: ({ get }) => {
+    const config = get(configAtom);
+    const isAnonymousAccess = !config?.authentication;
+    
+    return {
+      ApiService,
+      AuthService: isAnonymousAccess ? AnonymousAuthService : MsalAuthService,
+    };
   },
-  effects: [
-    ({ setSelf, getLoadable }) => {
-      // This needs to be run in the next execution frame to allow all atoms to be initialized first
-      setTimeout(() => {
-        const config = getLoadable(configAtom).contents;
-        const isAnonymousAccess = !config?.authentication;
-        
-        setSelf({
-          ApiService,
-          AuthService: isAnonymousAccess ? AnonymousAuthService : MsalAuthService,
-        });
-      });
-    },
-  ],
 });
 
 export default appServicesAtom;

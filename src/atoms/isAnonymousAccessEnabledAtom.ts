@@ -1,18 +1,12 @@
-import { atom } from 'recoil';
+import { selector } from 'recoil';
 import configAtom from './configAtom';
 
-const isAnonymousAccessEnabledAtom = atom<boolean>({
+const isAnonymousAccessEnabledAtom = selector<boolean>({
   key: 'isAnonymousAccessEnabled',
-  default: false,
-  effects: [
-    ({ setSelf, getLoadable }) => {
-      // This needs to be run in the next execution frame to allow all atoms to be initialized first
-      setTimeout(() => {
-        const config = getLoadable(configAtom).contents;
-        setSelf(!config?.authentication);
-      });
-    },
-  ],
+  get: ({ get }) => {
+    const config = get(configAtom);
+    return !config?.authentication;
+  },
 });
 
 export default isAnonymousAccessEnabledAtom;
