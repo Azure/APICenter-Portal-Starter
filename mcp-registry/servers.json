@@ -98,7 +98,7 @@
     "name": "Postman",
     "description": "Postman’s remote MCP server connects AI agents, assistants, and chatbots directly to your APIs on Postman.",
     "version": "1.0.0",
-    "x-ms-icon": "https://voyager.postman.com/logo/postman-logo-icon-orange.svg",
+    "x-ms-icon": "https://cdn.jsdelivr.net/gh/Azure/MCP/community/registry/icons/postman.svg",
     "x-ms-partner": true,
     "remotes": [
       {
