@@ -92,5 +92,19 @@
         "url": "https://mcp.atlassian.com/v1/sse"
       }
     ]
+  },
+  {
+    "id": "postman-mcp-server",
+    "name": "Postman",
+    "description": "Postman’s remote MCP server connects AI agents, assistants, and chatbots directly to your APIs on Postman. Use natural language to prompt AI to automate work across your Postman collections, environments, workspaces, and more.",
+    "version": "1.0.0",
+    "x-ms-icon": "https://voyager.postman.com/logo/postman-logo-icon-orange.svg",
+    "x-ms-partner": true,
+    "remotes": [
+      {
+        "transport_type": "sse",
+        "url": "https://mcp.postman.com/mcp"
+      }
+    ]
   }
 ]
