@@ -5,10 +5,12 @@ import LogoSvg from '@/assets/logo.svg';
 import AuthBtn from '@/components/Header/AuthBtn';
 import LocationsService from '@/services/LocationsService';
 import configAtom from '@/atoms/configAtom';
+import isAnonymousAccessEnabledAtom from '@/atoms/isAnonymousAccessEnabledAtom';
 import styles from './Header.module.scss';
 
 const Header: React.FC = () => {
   const config = useRecoilValue(configAtom);
+  const isAnonymousAccessEnabled = useRecoilValue(isAnonymousAccessEnabledAtom);
 
   return (
     <header className={styles.header}>
@@ -18,7 +20,7 @@ const Header: React.FC = () => {
           {config.title}
         </Text>
       </Link>
-      <nav className={styles.navLinks}>
+  <nav className={`${styles.navLinks} ${isAnonymousAccessEnabled ? styles.navLinksNoSeparator : ''}`}>
         <Link appearance="subtle" href={LocationsService.getHomeUrl()}>
           APIs
         </Link>
@@ -28,7 +30,7 @@ const Header: React.FC = () => {
         </Link>
       </nav>
 
-      <AuthBtn />
+  <AuthBtn />
     </header>
   );
 };

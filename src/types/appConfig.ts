@@ -16,8 +16,8 @@ export interface AppConfig {
   dataApiHostName: string;
   /** The API portal title. */
   title: string;
-  /** The authentication settings. */
-  authentication: MsalSettings;
+  /** The authentication settings. If not provided, anonymous access is enabled. */
+  authentication?: MsalSettings;
   /** The scoping filter. If provided, only APIs with the specified metadata properties will be shown. */
   scopingFilter: string;
 }

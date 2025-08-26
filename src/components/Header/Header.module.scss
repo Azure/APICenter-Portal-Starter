@@ -40,4 +40,11 @@
       gap: 8px;
     }
   }
+
+  // When the auth button is hidden (anonymous access), remove the splitter
+  .navLinksNoSeparator {
+    margin-right: 0;
+    padding-right: 0;
+    border-right: none;
+  }
 }

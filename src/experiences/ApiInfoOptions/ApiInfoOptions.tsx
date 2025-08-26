@@ -50,6 +50,7 @@ export const ApiInfoOptions: React.FC<Props> = ({ api, apiVersion, apiDefinition
   const devPortalUri = environment.data?.onboarding?.developerPortalUri?.[0];
 
   const handleOpenInVsCodeClick = useCallback((vscodetype) => {
+  if (!config.authentication) return;
     const link = `${vscodetype}://apidev.azure-api-center?clientId=${config.authentication.clientId}&tenantId=${config.authentication.tenantId}&runtimeUrl=${config.dataApiHostName}`;
     window.open(link);
   }, [config]);
@@ -98,16 +99,20 @@ export const ApiInfoOptions: React.FC<Props> = ({ api, apiVersion, apiDefinition
 
           <p>This file defines how to use the API, including the endpoints, policies, authentication, and responses.</p>
 
-          <p>
-            <Button size="medium" className={styles.actionButton} icon={<img src={VsCodeLogo} alt="VS Code" />} onClick={() => handleOpenInVsCodeClick(vscodetype.stable)}>
-              Open in Visual Studio Code
-            </Button>
-          </p>
-          <p>
-            <Button size="medium" className={styles.actionButton} icon={<img src={VSCInsiders} alt="VS Code Insider" />} onClick={() => handleOpenInVsCodeClick(vscodetype.insiders)}>
-              Open in Visual Studio Code Insider
-            </Button>
-          </p>
+          {config.authentication && (
+            <>
+              <p>
+                <Button size="medium" className={styles.actionButton} icon={<img src={VsCodeLogo} alt="VS Code" />} onClick={() => handleOpenInVsCodeClick(vscodetype.stable)}>
+                  Open in Visual Studio Code
+                </Button>
+              </p>
+              <p>
+                <Button size="medium" className={styles.actionButton} icon={<img src={VSCInsiders} alt="VS Code Insider" />} onClick={() => handleOpenInVsCodeClick(vscodetype.insiders)}>
+                  Open in Visual Studio Code Insider
+                </Button>
+              </p>
+            </>
+          )}
         </div>
 
         {!!apiDeployment?.server.runtimeUri.length && (
