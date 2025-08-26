@@ -2,6 +2,7 @@ import * as msal from '@azure/msal-browser';
 import { getRecoil } from 'recoil-nexus';
 import { MsalSettings } from '@/types/msalSettings';
 import configAtom from '@/atoms/configAtom';
+import isAnonymousAccessEnabledAtom from '@/atoms/isAnonymousAccessEnabledAtom';
 
 let msalInstance: msal.PublicClientApplication | undefined;
 
@@ -48,6 +49,10 @@ async function getMsalInstance(config: MsalSettings): Promise<msal.PublicClientA
 
 const MsalAuthService = {
   async isAuthenticated(): Promise<boolean> {
+    if (getRecoil(isAnonymousAccessEnabledAtom)) {
+      return true;
+    }
+
     const config = getAuthConfig();
     const msalInstance = await getMsalInstance(config);
     const accounts = msalInstance.getAllAccounts();
@@ -56,6 +61,10 @@ const MsalAuthService = {
   },
 
   async getAccessToken(): Promise<string> {
+    if (getRecoil(isAnonymousAccessEnabledAtom)) {
+      return '';
+    }
+
     const config = getAuthConfig();
     const msalInstance = await getMsalInstance(config);
     const authResult = await msalInstance.acquireTokenSilent({ scopes: config.scopes });
@@ -64,6 +73,10 @@ const MsalAuthService = {
   },
 
   async signIn(): Promise<void> {
+    if (getRecoil(isAnonymousAccessEnabledAtom)) {
+      return;
+    }
+
     const config = getAuthConfig();
     const msalInstance = await getMsalInstance(config);
     const authResult = await msalInstance.loginPopup({ scopes: config.scopes });
@@ -72,6 +85,10 @@ const MsalAuthService = {
   },
 
   async signOut(): Promise<void> {
+    if (getRecoil(isAnonymousAccessEnabledAtom)) {
+      return;
+    }
+
     const config = getAuthConfig();
     const msalInstance = await getMsalInstance(config);
     await msalInstance.logoutPopup();

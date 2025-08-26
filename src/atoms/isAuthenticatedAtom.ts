@@ -7,14 +7,12 @@ const isAuthenticatedAtom = atom<boolean>({
   default: false,
   effects: [
     ({ setSelf, getLoadable }): void => {
-      // This needs to be run in the next execution frame to allow all atoms to be initialized first
-      const tryResolve = () => {
+      const tryResolve = (): void => {
         const services = getLoadable(appServicesAtom).contents as { AuthService?: IAuthService } | undefined;
         const auth = services?.AuthService;
-
         if (!auth) {
           // Retry on next tick until services are initialized
-          setTimeout(tryResolve, 0);
+          setTimeout(tryResolve);
           return;
         }
 
@@ -24,7 +22,7 @@ const isAuthenticatedAtom = atom<boolean>({
           .catch(() => setSelf(false));
       };
 
-      setTimeout(tryResolve, 0);
+      setTimeout(tryResolve);
     },
   ],
 });
