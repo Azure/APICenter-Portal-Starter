@@ -102,16 +102,20 @@ export const ApiInfoOptions: React.FC<Props> = ({ api, apiVersion, apiDefinition
 
           <p>This file defines how to use the API, including the endpoints, policies, authentication, and responses.</p>
 
-          <p>
-            <Button size="medium" className={styles.actionButton} icon={<img src={VsCodeLogo} alt="VS Code" />} onClick={() => handleOpenInVsCodeClick(vscodetype.stable)}>
-              Open in Visual Studio Code
-            </Button>
-          </p>
-          <p>
-            <Button size="medium" className={styles.actionButton} icon={<img src={VSCInsiders} alt="VS Code Insider" />} onClick={() => handleOpenInVsCodeClick(vscodetype.insiders)}>
-              Open in Visual Studio Code Insider
-            </Button>
-          </p>
+          {config.authentication && (
+            <>
+              <p>
+                <Button size="medium" className={styles.actionButton} icon={<img src={VsCodeLogo} alt="VS Code" />} onClick={() => handleOpenInVsCodeClick(vscodetype.stable)}>
+                  Open in Visual Studio Code
+                </Button>
+              </p>
+              <p>
+                <Button size="medium" className={styles.actionButton} icon={<img src={VSCInsiders} alt="VS Code Insider" />} onClick={() => handleOpenInVsCodeClick(vscodetype.insiders)}>
+                  Open in Visual Studio Code Insider
+                </Button>
+              </p>
+            </>
+          )}
         </div>
 
         {!!apiDeployment?.server.runtimeUri.length && (
