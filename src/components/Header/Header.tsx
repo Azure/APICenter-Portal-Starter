@@ -20,7 +20,7 @@ const Header: React.FC = () => {
           {config.title}
         </Text>
       </Link>
-  <nav className={`${styles.navLinks} ${isAnonymousAccessEnabled ? styles.navLinksNoSeparator : ''}`}>
+      <nav className={styles.navLinks}>
         <Link appearance="subtle" href={LocationsService.getHomeUrl()}>
           APIs
         </Link>
@@ -30,7 +30,11 @@ const Header: React.FC = () => {
         </Link>
       </nav>
 
-  <AuthBtn />
+      {!isAnonymousAccessEnabled && (
+        <div className={styles.auth}>
+          <AuthBtn />
+        </div>
+      )}
     </header>
   );
 };
