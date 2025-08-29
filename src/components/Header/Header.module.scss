@@ -29,9 +29,6 @@
     display: flex;
     flex: 1;
     justify-content: flex-end;
-    margin-right: 34px;
-    padding-right: 34px;
-    border-right: 1px solid var(--grey-6);
     gap: 16px;
 
     @include screen.small {
@@ -40,11 +37,10 @@
       gap: 8px;
     }
   }
-
-  // When the auth button is hidden (anonymous access), remove the splitter
-  .navLinksNoSeparator {
-    margin-right: 0;
-    padding-right: 0;
-    border-right: none;
+  
+  .auth {
+    margin-left: 34px;
+    padding-left: 34px;
+    border-left: 1px solid var(--grey-6);
   }
 }
