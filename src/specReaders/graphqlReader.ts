@@ -27,7 +27,7 @@ type FieldSpec = GraphQLField<any, any>;
 /**
  * Returns an instance of ApiSpecReader that reads GraphQL spec from a string.
  */
-export default async function openApiSpecReader(specStr: string): Promise<ApiSpecReader> {
+export async function graphqlReader(specStr: string): Promise<ApiSpecReader> {
   const qlSchema = buildSchema(specStr);
 
   const getBaseUrl = memoize((): string => {

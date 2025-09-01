@@ -16,7 +16,7 @@ type StorageValuesMap = {
   [StorageKeys.SEMANTIC_SEARCH_INFO_DISMISSED]: boolean;
 };
 
-const LocalStorageService = {
+export const LocalStorageService = {
   StorageKeys,
 
   get<T extends StorageKeys>(key: T): StorageValuesMap[T] {
@@ -40,5 +40,3 @@ const LocalStorageService = {
     localStorage.removeItem(key);
   },
 };
-
-export default LocalStorageService;

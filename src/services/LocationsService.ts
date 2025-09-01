@@ -1,6 +1,6 @@
 import { UrlParams } from '@/constants/urlParams';
 
-const LocationsService = {
+export const LocationsService = {
   getHomeUrl(preserveSearchParams = false): string {
     if (!preserveSearchParams) {
       return '/';
@@ -42,5 +42,3 @@ const LocationsService = {
     return 'https://learn.microsoft.com/en-us/azure/api-center/overview';
   },
 };
-
-export default LocationsService;

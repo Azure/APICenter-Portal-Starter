@@ -1,6 +1,6 @@
 import { groupBy } from 'lodash';
 import memoize from 'memoizee';
-import HttpService from '@/services/HttpService';
+import { HttpService } from '@/services/HttpService';
 import { ApiMetadata } from '@/types/api';
 import { ApiAuthScheme, ApiAuthSchemeMetadata } from '@/types/apiAuth';
 import { ApiDefinition, ApiDefinitionId } from '@/types/apiDefinition';
@@ -10,7 +10,7 @@ import { ActiveFilterData } from '@/types/apiFilters';
 import { ApiVersion } from '@/types/apiVersion';
 import { IApiService } from '@/types/services/IApiService';
 
-const ApiService: IApiService = {
+export const ApiService: IApiService = {
   async getApis(search: string, filters: ActiveFilterData[] = [], isSemanticSearch?: boolean): Promise<ApiMetadata[]> {
     const searchParams = new URLSearchParams();
     if (search.length && !isSemanticSearch) {
@@ -98,5 +98,3 @@ const ApiService: IApiService = {
     );
   },
 };
-
-export default ApiService;

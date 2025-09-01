@@ -3,10 +3,10 @@ import { Dismiss16Regular, Search24Regular } from '@fluentui/react-icons';
 import { Button, Input } from '@fluentui/react-components';
 import { useLocation } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
-import useRecentSearches, { RecentSearchType } from '@/hooks/useRecentSearches.ts';
-import useSearchQuery from '@/hooks/useSearchQuery';
-import useApis from '@/hooks/useApis';
-import configAtom from '@/atoms/configAtom';
+import { useRecentSearches, RecentSearchType } from '@/hooks/useRecentSearches.ts';
+import { useSearchQuery } from '@/hooks/useSearchQuery';
+import { useApis } from '@/hooks/useApis';
+import { configAtom } from '@/atoms/configAtom';
 import { AppCapabilities } from '@/types/config';
 import SemanticSearchToggle from '@/components/SemanticSearchToggle';
 import ApiSearchAutoComplete from './ApiSearchAutoComplete';
@@ -25,6 +25,8 @@ export const ApiSearchBox: React.FC = () => {
   const apis = useApis({ search: value, isAutoCompleteMode: true, isSemanticSearch: isSemanticSearchEnabled });
   const recentSearches = useRecentSearches();
   const searchQuery = useSearchQuery();
+
+  const shouldShowAutoComplete = isFocused && (!isSemanticSearchEnabled || !value);
 
   useEffect(() => {
     setValue(searchQuery.search);
@@ -119,10 +121,10 @@ export const ApiSearchBox: React.FC = () => {
         onBlur={handleBlur}
       />
 
-      {isFocused && (
+      {shouldShowAutoComplete && (
         <div onMouseDown={preventFocusLoss}>
           <ApiSearchAutoComplete
-            searchResults={!!value ? apis.list : undefined}
+            searchResults={!!value ? apis.data : undefined}
             isLoading={apis.isLoading && !isSemanticSearchEnabled}
             isSemanticSearchEnabled={isSemanticSearchEnabled}
             onSemanticSearchSelect={isSemanticSearchAvailable ? handleSemanticSearchToggle : undefined}

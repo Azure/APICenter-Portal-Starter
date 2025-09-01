@@ -5,7 +5,7 @@ import { HttpBodyFormats, HttpParamSchemasByLocation, HttpReqData } from '@micro
 import { ApiSpecReader, OperationMetadata, OperationParameterMetadata } from '@/types/apiSpec';
 import { resolveOpUrlTemplate } from '@/utils/apiOperations';
 import { ApiDeployment } from '@/types/apiDeployment';
-import useHttpTestRequestController from '@/hooks/useHttpTestRequestController';
+import { useHttpTestRequestController } from '@/hooks/useHttpTestRequestController';
 
 export function inToParamsCollectionName(inValue: string): string {
   if (inValue === 'header') {
@@ -129,7 +129,7 @@ export const getSchemaParamsByLocation = memoizee(
 );
 
 export const stringifyResponse = memoizee(
-  (response: ReturnType<typeof useHttpTestRequestController>['response']): string | null => {
+  (response: ReturnType<typeof useHttpTestRequestController>['data']): string | null => {
     if (!response) {
       return null;
     }

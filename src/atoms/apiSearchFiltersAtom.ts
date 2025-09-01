@@ -9,7 +9,7 @@ function deserializeFilters(): ActiveFilterData[] {
   });
 }
 
-const apiSearchFiltersAtom = atom<ActiveFilterData[]>({
+export const apiSearchFiltersAtom = atom<ActiveFilterData[]>({
   key: 'apiSearchFilters',
   default: deserializeFilters(),
   effects: [
@@ -41,5 +41,3 @@ const apiSearchFiltersAtom = atom<ActiveFilterData[]>({
     },
   ],
 });
-
-export default apiSearchFiltersAtom;

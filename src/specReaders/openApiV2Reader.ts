@@ -27,7 +27,7 @@ import {
   schemaToTypeLabel,
   v2ParamMetadataToFieldType,
 } from '@/utils/openApi';
-import makeOpenApiResolverProxy from './openApiResolverProxy';
+import { makeOpenApiResolverProxy } from './openApiResolverProxy';
 
 function getMediaContentSampleData(type: string, schema: WithRef<OpenAPIV2.SchemaObject>): SampleDataEntry | undefined {
   if (type === 'application/json') {
@@ -75,7 +75,7 @@ function resolveMediaContent(
 /**
  * Returns an instance of ApiSpecReader that reads OpenAPI V2 spec from a string.
  */
-export default async function openApiSpecReader(specStr: string): Promise<ApiSpecReader> {
+export async function openApiV2Reader(specStr: string): Promise<ApiSpecReader> {
   const apiSpec = makeOpenApiResolverProxy<OpenAPIV2.Document>(yaml.parse(specStr));
 
   const getBaseUrl = memoize((): string => {

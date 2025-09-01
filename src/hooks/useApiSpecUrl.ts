@@ -1,43 +1,19 @@
-import { useCallback, useEffect, useState } from 'react';
 import { useRecoilValue } from 'recoil';
-import isAuthenticatedAtom from '@/atoms/isAuthenticatedAtom';
+import { useQuery } from '@tanstack/react-query';
+import { isAuthenticatedAtom } from '@/atoms/isAuthenticatedAtom';
 import { ApiDefinitionId } from '@/types/apiDefinition';
 import { isDefinitionIdValid } from '@/utils/apiDefinitions';
-import useApiService from '@/hooks/useApiService';
+import { useApiService } from '@/hooks/useApiService';
+import { QueryKeys } from '@/constants/QueryKeys';
 
-interface ReturnType {
-  value?: string;
-  isLoading: boolean;
-}
-
-export default function useApiSpecUrl(definitionId: ApiDefinitionId): ReturnType {
-  const [value, setValue] = useState<string | undefined>();
-  const [isLoading, setIsLoading] = useState(true);
-
+export function useApiSpecUrl(definitionId: ApiDefinitionId) {
   const ApiService = useApiService();
   const isAuthenticated = useRecoilValue(isAuthenticatedAtom);
 
-  const fetch = useCallback(async () => {
-    if (!isDefinitionIdValid(definitionId) || !isAuthenticated) {
-      setValue(undefined);
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-      setValue(await ApiService.getSpecificationLink(definitionId));
-    } finally {
-      setIsLoading(false);
-    }
-  }, [ApiService, definitionId, isAuthenticated]);
-
-  useEffect(() => {
-    void fetch();
-  }, [fetch]);
-
-  return {
-    value,
-    isLoading,
-  };
+  return useQuery<string | undefined>({
+    queryKey: [QueryKeys.ApiSpecUrl, definitionId],
+    queryFn: () => ApiService.getSpecificationLink(definitionId),
+    staleTime: Infinity,
+    enabled: isAuthenticated && isDefinitionIdValid(definitionId),
+  });
 }

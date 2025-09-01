@@ -1,8 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { ApiAuthCredentials, ApiAuthType } from '@/types/apiAuth';
-import useApiAuthorization from '@/hooks/useApiAuthorization';
+import { useApiAuthorization } from '@/hooks/useApiAuthorization';
 import { ApiDefinitionId } from '@/types/apiDefinition';
 import { ApiAuthForm } from '@/components/ApiAuthForm/ApiAuthForm';
+import { useApiAuthSchemes } from '@/hooks/useApiAuthSchemes';
 
 interface Props {
   definitionId: ApiDefinitionId;
@@ -12,6 +13,7 @@ interface Props {
 export const ApiAccessAuthForm: React.FC<Props> = ({ definitionId, onChange }) => {
   const [selectedScheme, setSelectedScheme] = useState<string>();
 
+  const apiAuthSchemes = useApiAuthSchemes(definitionId);
   const apiAuth = useApiAuthorization({
     definitionId,
     schemeName: selectedScheme,
@@ -31,12 +33,12 @@ export const ApiAccessAuthForm: React.FC<Props> = ({ definitionId, onChange }) =
 
   const authOptions = useMemo(
     () =>
-      apiAuth.schemeOptions?.map((option) => ({
+      apiAuthSchemes.data?.map((option) => ({
         name: option.name,
         title: option.title,
         type: option.securityScheme,
       })) || [],
-    [apiAuth.schemeOptions]
+    [apiAuthSchemes.data]
   );
 
   return (

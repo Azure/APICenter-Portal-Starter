@@ -1,9 +1,9 @@
 import React, { useCallback } from 'react';
 import { Button } from '@fluentui/react-components';
 import { useRecoilState, useRecoilValue } from 'recoil';
-import isAuthenticatedAtom from '@/atoms/isAuthenticatedAtom';
-import isAnonymousAccessEnabledAtom from '@/atoms/isAnonymousAccessEnabledAtom';
-import useAuthService from '@/hooks/useAuthService';
+import { isAuthenticatedAtom } from '@/atoms/isAuthenticatedAtom';
+import { isAnonymousAccessEnabledAtom } from '@/atoms/isAnonymousAccessEnabledAtom';
+import { useAuthService } from '@/hooks/useAuthService';
 import styles from './AuthBtn.module.scss';
 
 export const AuthBtn: React.FC = () => {

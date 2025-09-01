@@ -3,9 +3,9 @@ import { Link, Text } from '@fluentui/react-components';
 import { useRecoilValue } from 'recoil';
 import LogoSvg from '@/assets/logo.svg';
 import AuthBtn from '@/components/Header/AuthBtn';
-import LocationsService from '@/services/LocationsService';
-import configAtom from '@/atoms/configAtom';
-import isAnonymousAccessEnabledAtom from '@/atoms/isAnonymousAccessEnabledAtom';
+import { LocationsService } from '@/services/LocationsService';
+import { configAtom } from '@/atoms/configAtom';
+import { isAnonymousAccessEnabledAtom } from '@/atoms/isAnonymousAccessEnabledAtom';
 import styles from './Header.module.scss';
 
 const Header: React.FC = () => {

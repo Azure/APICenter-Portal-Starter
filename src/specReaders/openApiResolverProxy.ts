@@ -5,7 +5,7 @@ import { WithRef } from '@/types/apiSpec';
 /**
  * Creates a proxy object for an OpenAPI schema that automatically resolves $ref properties.
  */
-export default function makeOpenApiResolverProxy<T>(
+export function makeOpenApiResolverProxy<T>(
   obj: T | OpenAPIV2.ReferenceObject | OpenAPIV3.ReferenceObject,
   root?: OpenAPI.Document,
   seenRefs: string[] = []

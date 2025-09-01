@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { useRecoilState } from 'recoil';
 import { ApiMetadata } from '@/types/api.ts';
-import recentSearchesAtom from '@/atoms/recentSearchesAtom';
+import { recentSearchesAtom } from '@/atoms/recentSearchesAtom';
 
 export enum RecentSearchType {
   API = 'api',
@@ -25,7 +25,7 @@ interface ReturnType {
   clear: () => void;
 }
 
-export default function useRecentSearches(): ReturnType {
+export function useRecentSearches(): ReturnType {
   const [recentSearches, setRecentSearches] = useRecoilState(recentSearchesAtom);
 
   const add = useCallback(

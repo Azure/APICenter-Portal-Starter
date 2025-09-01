@@ -1,0 +1,14 @@
+export enum QueryKeys {
+  Apis = 'Apis',
+  Api = 'Api',
+  ApiVersions = 'ApiVersions',
+  ApiDefinitions = 'ApiDefinitions',
+  ApiDefinition = 'ApiDefinition',
+  ApiDeployments = 'ApiDeployments',
+  ApiDeploymentEnvironment = 'ApiDeploymentEnvironment',
+  ApiSpec = 'ApiSpec',
+  ApiSpecUrl = 'ApiSpecUrl',
+  ApiAuthScheme = 'ApiAuthScheme',
+  ApiAuthSchemeOptions = 'ApiAuthSchemeOptions',
+  HttpTestMutation = 'HttpTestMutation',
+}

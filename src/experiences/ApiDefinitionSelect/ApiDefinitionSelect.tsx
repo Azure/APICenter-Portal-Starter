@@ -5,9 +5,9 @@ import classNames from 'classnames';
 import { ApiVersion } from '@/types/apiVersion';
 import { ApiDefinition } from '@/types/apiDefinition';
 import { ApiDeployment } from '@/types/apiDeployment';
-import useApiVersions from '@/hooks/useApiVersions';
-import useApiDefinitions from '@/hooks/useApiDefinitions';
-import useApiDeployments from '@/hooks/useApiDeployments';
+import { useApiVersions } from '@/hooks/useApiVersions';
+import { useApiDefinitions } from '@/hooks/useApiDefinitions';
+import { useApiDeployments } from '@/hooks/useApiDeployments';
 import styles from './ApiDefinitionSelect.module.scss';
 
 export interface ApiDefinitionSelection {
@@ -51,25 +51,25 @@ export const ApiDefinitionSelect: React.FC<Props> = ({
 
   // Set initial values
   useEffect(() => {
-    const defaultName = defaultSelection.version || apiVersions.list[0]?.name;
-    const version = find(apiVersions.list, { name: defaultName }) || null;
+    const defaultName = defaultSelection.version || apiVersions.data?.[0]?.name;
+    const version = find(apiVersions.data, { name: defaultName }) || null;
     setVersion(version);
 
     // If there is no version then there will be no definition so we need to mark it as null to avoid infinite loading state
     if (!version) {
       setDefinition(null);
     }
-  }, [apiVersions.list, defaultSelection.version]);
+  }, [apiVersions.data, defaultSelection.version]);
 
   useEffect(() => {
-    const defaultName = defaultSelection.definition || apiDefinitions.list[0]?.name;
-    setDefinition(find(apiDefinitions.list, { name: defaultName }) || null);
-  }, [apiDefinitions.list, defaultSelection.definition]);
+    const defaultName = defaultSelection.definition || apiDefinitions.data?.[0]?.name;
+    setDefinition(find(apiDefinitions.data, { name: defaultName }) || null);
+  }, [apiDefinitions.data, defaultSelection.definition]);
 
   useEffect(() => {
-    const defaultName = defaultSelection.deployment || apiDeployments.list[0]?.name;
-    setDeployment(find(apiDeployments.list, { name: defaultName }) || null);
-  }, [apiDeployments.list, defaultSelection.deployment]);
+    const defaultName = defaultSelection.deployment || apiDeployments.data?.[0]?.name;
+    setDeployment(find(apiDeployments.data, { name: defaultName }) || null);
+  }, [apiDeployments.data, defaultSelection.deployment]);
 
   // Reset definition when version changes
   useEffect(() => {
@@ -90,23 +90,23 @@ export const ApiDefinitionSelect: React.FC<Props> = ({
 
   const handleVersionSelect = useCallback<React.ComponentProps<typeof Dropdown>['onOptionSelect']>(
     (_, data) => {
-      setVersion(apiVersions.list.find((version) => version.name === data.selectedOptions[0]));
+      setVersion(apiVersions.data?.find((version) => version.name === data.selectedOptions[0]));
     },
-    [apiVersions.list]
+    [apiVersions.data]
   );
 
   const handleDefinitionSelect = useCallback<React.ComponentProps<typeof Dropdown>['onOptionSelect']>(
     (_, data) => {
-      setDefinition(apiDefinitions.list.find((definition) => definition.name === data.selectedOptions[0]));
+      setDefinition(find(apiDefinitions.data, { name: data.selectedOptions[0] }));
     },
-    [apiDefinitions.list]
+    [apiDefinitions.data]
   );
 
   const handleDeploymentSelect = useCallback<React.ComponentProps<typeof Dropdown>['onOptionSelect']>(
     (_, data) => {
-      setDefinition(apiDeployments.list.find((deployment) => deployment.name === data.selectedOptions[0]));
+      setDefinition(find(apiDeployments.data, { name: data.selectedOptions[0] }));
     },
-    [apiDeployments.list]
+    [apiDeployments.data]
   );
 
   return (
@@ -125,10 +125,10 @@ export const ApiDefinitionSelect: React.FC<Props> = ({
             size={dropdownSize}
             value={version?.title || NO_VERSION_LABEL}
             selectedOptions={[version?.name]}
-            disabled={!apiVersions.list.length}
+            disabled={!apiVersions.data?.length}
             onOptionSelect={handleVersionSelect}
           >
-            {apiVersions.list.map((version) => (
+            {apiVersions.data?.map((version) => (
               <Option key={version.name} value={version.name}>
                 {version.title || version.name}
               </Option>
@@ -147,10 +147,10 @@ export const ApiDefinitionSelect: React.FC<Props> = ({
             size={dropdownSize}
             value={definition?.title || NO_DEFINITION_LABEL}
             selectedOptions={[definition?.name]}
-            disabled={!apiDefinitions.list.length}
+            disabled={!apiDefinitions.data?.length}
             onOptionSelect={handleDefinitionSelect}
           >
-            {apiDefinitions.list.map((definition) => (
+            {apiDefinitions.data?.map((definition) => (
               <Option key={definition.name} value={definition.name}>
                 {definition.title}
               </Option>
@@ -169,10 +169,10 @@ export const ApiDefinitionSelect: React.FC<Props> = ({
             size={dropdownSize}
             value={deployment?.title || NO_DEPLOYMENT_LABEL}
             selectedOptions={[deployment?.name]}
-            disabled={!apiDeployments.list.length}
+            disabled={!apiDeployments.data?.length}
             onOptionSelect={handleDeploymentSelect}
           >
-            {apiDeployments.list.map((deployment) => (
+            {apiDeployments.data?.map((deployment) => (
               <Option key={deployment.name} value={deployment.name}>
                 {deployment.title}
               </Option>

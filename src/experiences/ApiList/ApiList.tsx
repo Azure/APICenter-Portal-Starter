@@ -3,13 +3,13 @@ import { Badge, Link, Spinner } from '@fluentui/react-components';
 import { Api as DocsApi, InfoTable, ApiCard, MarkdownRenderer } from '@microsoft/api-docs-ui';
 import { useRecoilValue } from 'recoil';
 import { useNavigate } from 'react-router-dom';
-import useSearchFilters from '@/hooks/useSearchFilters';
-import useApis from '@/hooks/useApis';
-import useSearchQuery from '@/hooks/useSearchQuery';
-import apiAdapter from '@/experiences/ApiList/apiAdapter';
+import { useSearchFilters } from '@/hooks/useSearchFilters';
+import { useApis } from '@/hooks/useApis';
+import { useSearchQuery } from '@/hooks/useSearchQuery';
+import { apiAdapter } from '@/experiences/ApiList/apiAdapter';
 import { Layouts } from '@/types/layouts';
-import apiListLayoutAtom from '@/atoms/apiListLayoutAtom';
-import LocationsService from '@/services/LocationsService';
+import { apiListLayoutAtom } from '@/atoms/apiListLayoutAtom';
+import { LocationsService } from '@/services/LocationsService';
 import EmptyStateMessage from '@/components/EmptyStateMessage';
 import styles from './ApiList.module.scss';
 
@@ -24,7 +24,7 @@ export const ApiList: React.FC = () => {
     isSemanticSearch: searchQuery.isSemanticSearch,
   });
 
-  const adaptedApiList = useMemo(() => apis.list.map(apiAdapter), [apis.list]);
+  const adaptedApiList = useMemo(() => apis.data?.map(apiAdapter), [apis.data]);
 
   const apiLinkPropsProvider = useCallback(
     (api: DocsApi) => ({
@@ -44,7 +44,7 @@ export const ApiList: React.FC = () => {
     return <Spinner size="small" />;
   }
 
-  if (!apis.list.length) {
+  if (!apis.data.length) {
     return <EmptyStateMessage>Can’t find any search results. Try a different search term.</EmptyStateMessage>;
   }
 

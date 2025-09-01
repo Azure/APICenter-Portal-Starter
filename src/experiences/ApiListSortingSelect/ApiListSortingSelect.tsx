@@ -2,7 +2,7 @@ import React, { useCallback } from 'react';
 import { Dropdown, Option } from '@fluentui/react-components';
 import { useRecoilState } from 'recoil';
 import { SortBy, SortByOrder } from '@/types/sorting';
-import apiListSortingAtom from '@/atoms/apiListSortingAtom';
+import { apiListSortingAtom } from '@/atoms/apiListSortingAtom';
 
 function sortByToKey(sortBy?: SortBy): string | undefined {
   if (!sortBy) {

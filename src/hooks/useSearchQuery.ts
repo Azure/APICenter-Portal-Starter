@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
-import configAtom from '@/atoms/configAtom';
+import { configAtom } from '@/atoms/configAtom';
 import { AppCapabilities } from '@/types/config';
 import { UrlParams } from '@/constants/urlParams';
 
@@ -12,7 +12,7 @@ interface ReturnType {
   clearSearch: () => void;
 }
 
-export default function useSearchQuery(): ReturnType {
+export function useSearchQuery(): ReturnType {
   const [searchParams, setSearchParams] = useSearchParams();
   const config = useRecoilValue(configAtom);
   const isSemanticSearchAvailable = config.capabilities.includes(AppCapabilities.SEMANTIC_SEARCH);

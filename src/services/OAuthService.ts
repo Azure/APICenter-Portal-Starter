@@ -81,7 +81,7 @@ function openAuthPopup(uri: string, listener: (event: MessageEvent<any>) => any)
   });
 }
 
-const OAuthService = {
+export const OAuthService = {
   /** Acquires access token using specified grant flow. */
   // TODO: useProxy flag is added as a quick workaround for overcoming CORS issues for demo. Remove it when possible.
   authenticate(credentials: Oauth2Credentials, grantType: string, useProxy?: boolean): Promise<string | undefined> {
@@ -198,5 +198,3 @@ const OAuthService = {
     return openAuthPopup(`${credentials.authorizationUrl}?${args}`, listener);
   },
 };
-
-export default OAuthService;

@@ -149,6 +149,12 @@ export default [
     },
   },
   {
+    files: ['**/hooks/*.ts'],
+    rules: {
+      '@typescript-eslint/explicit-function-return-type': 'off',
+    },
+  },
+  {
     files: ['**/*.tsx'],
     rules: {
       '@typescript-eslint/explicit-function-return-type': 'off',

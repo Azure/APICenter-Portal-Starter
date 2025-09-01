@@ -1,42 +1,18 @@
-import { useCallback, useEffect, useState } from 'react';
 import { useRecoilValue } from 'recoil';
+import { useQuery } from '@tanstack/react-query';
 import { ApiVersion } from '@/types/apiVersion';
-import isAuthenticatedAtom from '@/atoms/isAuthenticatedAtom';
-import useApiService from '@/hooks/useApiService';
+import { isAuthenticatedAtom } from '@/atoms/isAuthenticatedAtom';
+import { useApiService } from '@/hooks/useApiService';
+import { QueryKeys } from '@/constants/QueryKeys';
 
-interface ReturnType {
-  list: ApiVersion[];
-  isLoading: boolean;
-}
-
-export default function useApiVersions(apiId?: string): ReturnType {
-  const [list, setList] = useState<ApiVersion[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
+export function useApiVersions(apiId?: string) {
   const ApiService = useApiService();
   const isAuthenticated = useRecoilValue(isAuthenticatedAtom);
 
-  const fetch = useCallback(async () => {
-    if (!apiId || !isAuthenticated) {
-      setList([]);
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-      setList(await ApiService.getVersions(apiId));
-    } finally {
-      setIsLoading(false);
-    }
-  }, [ApiService, apiId, isAuthenticated]);
-
-  useEffect(() => {
-    void fetch();
-  }, [fetch]);
-
-  return {
-    list,
-    isLoading,
-  };
+  return useQuery<ApiVersion[] | undefined>({
+    queryKey: [QueryKeys.ApiVersions, apiId],
+    queryFn: () => ApiService.getVersions(apiId),
+    staleTime: Infinity,
+    enabled: Boolean(isAuthenticated && apiId),
+  });
 }

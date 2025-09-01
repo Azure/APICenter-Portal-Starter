@@ -13,12 +13,12 @@ import { Dismiss24Regular } from '@fluentui/react-icons';
 import { uniqBy } from 'lodash';
 import { ApiSpecReader, OperationMetadata } from '@/types/apiSpec';
 import { ApiDeployment } from '@/types/apiDeployment';
-import useHttpTestRequestController from '@/hooks/useHttpTestRequestController';
+import { useHttpTestRequestController } from '@/hooks/useHttpTestRequestController';
 import { ApiAuthCredentials } from '@/types/apiAuth';
-import useApiAuthorization from '@/hooks/useApiAuthorization';
 import TestConsoleError from '@/components/TestConsoleError';
 import { ApiDefinitionId } from '@/types/apiDefinition';
 import ApiAccessAuthForm from '@/experiences/ApiAccessAuthForm';
+import { useApiAuthSchemes } from '@/hooks/useApiAuthSchemes';
 import {
   getFormDataFieldsMetadata,
   getReqBodySupportedFormats,
@@ -45,7 +45,7 @@ export const HttpTestConsole: React.FC<Props> = ({ definitionId, apiSpec, operat
   const [authCredentials, setAuthCredentials] = useState<ApiAuthCredentials | undefined>();
   const [reqData, setReqData] = useState<HttpReqData>(defaults);
 
-  const apiAuth = useApiAuthorization({ definitionId });
+  const apiAuthSchemes = useApiAuthSchemes(definitionId);
 
   const requestController = useHttpTestRequestController(operation);
 
@@ -145,17 +145,17 @@ export const HttpTestConsole: React.FC<Props> = ({ definitionId, apiSpec, operat
   }, []);
 
   const handleSendClick = useCallback(() => {
-    void requestController.send(HttpApiTestConsole.resolveHttpReqData(reqDataWithAuth, schemaParamsData, true));
+    void requestController.mutate(HttpApiTestConsole.resolveHttpReqData(reqDataWithAuth, schemaParamsData, true));
   }, [reqDataWithAuth, requestController, schemaParamsData]);
 
   function renderResponse() {
-    if (!requestController.response && !requestController.error) {
+    if (!requestController.data && !requestController.error) {
       return null;
     }
 
-    let content: React.ReactNode = <TestConsoleError>{requestController.error}</TestConsoleError>;
-    if (requestController.response) {
-      content = <SyntaxHighlighter language="http">{stringifyResponse(requestController.response)}</SyntaxHighlighter>;
+    let content: React.ReactNode = <TestConsoleError>{requestController.error?.message}</TestConsoleError>;
+    if (requestController.data) {
+      content = <SyntaxHighlighter language="http">{stringifyResponse(requestController.data)}</SyntaxHighlighter>;
     }
 
     return (
@@ -176,7 +176,7 @@ export const HttpTestConsole: React.FC<Props> = ({ definitionId, apiSpec, operat
       </DrawerHeader>
       <DrawerBody>
         <HttpApiTestConsole>
-          {!apiAuth.isLoading && !!apiAuth.schemeOptions?.length && (
+          {!apiAuthSchemes.isLoading && !!apiAuthSchemes.data?.length && (
             <HttpApiTestConsole.Panel name="auth" header="Authorization" isOpenByDefault>
               <ApiAccessAuthForm definitionId={definitionId} onChange={handleAuthCredentialsChange} />
             </HttpApiTestConsole.Panel>
@@ -232,8 +232,8 @@ export const HttpTestConsole: React.FC<Props> = ({ definitionId, apiSpec, operat
         </HttpApiTestConsole>
 
         <div className={styles.sendBtnWrapper}>
-          <Button appearance="primary" disabledFocusable={requestController.isLoading} onClick={handleSendClick}>
-            {requestController.isLoading ? 'Sending' : 'Send'}
+          <Button appearance="primary" disabledFocusable={requestController.isPending} onClick={handleSendClick}>
+            {requestController.isPending ? 'Sending' : 'Send'}
           </Button>
         </div>
       </DrawerBody>

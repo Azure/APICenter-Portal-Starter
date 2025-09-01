@@ -1,42 +1,18 @@
-import { useCallback, useEffect, useState } from 'react';
 import { useRecoilValue } from 'recoil';
+import { useQuery } from '@tanstack/react-query';
 import { ApiEnvironment } from '@/types/apiEnvironment';
-import isAuthenticatedAtom from '@/atoms/isAuthenticatedAtom';
-import useApiService from '@/hooks/useApiService';
+import { isAuthenticatedAtom } from '@/atoms/isAuthenticatedAtom';
+import { useApiService } from '@/hooks/useApiService';
+import { QueryKeys } from '@/constants/QueryKeys';
 
-interface ReturnType {
-  data?: ApiEnvironment;
-  isLoading: boolean;
-}
-
-export default function useDeploymentEnvironment(envId?: string): ReturnType {
-  const [environment, setEnvironment] = useState<ApiEnvironment | undefined>();
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-
+export function useDeploymentEnvironment(envId?: string) {
   const ApiService = useApiService();
   const isAuthenticated = useRecoilValue(isAuthenticatedAtom);
 
-  const fetch = useCallback(async () => {
-    if (!envId || !isAuthenticated) {
-      setEnvironment(undefined);
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-      setEnvironment(await ApiService.getEnvironment(envId));
-    } finally {
-      setIsLoading(false);
-    }
-  }, [ApiService, envId, isAuthenticated]);
-
-  useEffect(() => {
-    void fetch();
-  }, [fetch]);
-
-  return {
-    data: environment,
-    isLoading,
-  };
+  return useQuery<ApiEnvironment | undefined>({
+    queryKey: [QueryKeys.ApiDeploymentEnvironment, envId],
+    queryFn: () => ApiService.getEnvironment(envId),
+    staleTime: Infinity,
+    enabled: Boolean(isAuthenticated && envId),
+  });
 }
