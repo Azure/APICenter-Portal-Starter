@@ -11,7 +11,7 @@ export function useApiDeployments(apiId?: string) {
 
   return useQuery<ApiDeployment[] | undefined>({
     queryKey: [QueryKeys.ApiDeployments, apiId],
-    queryFn: () => ApiService.getDeployments(apiId),
+    queryFn: async () => (await ApiService.getDeployments(apiId)) ?? null,
     staleTime: Infinity,
     enabled: Boolean(isAuthenticated && apiId),
   });

@@ -12,7 +12,7 @@ export function useApiAuthSchemes(definitionId: ApiDefinitionId) {
 
   return useQuery<ApiAuthSchemeMetadata[] | undefined>({
     queryKey: [QueryKeys.ApiAuthSchemeOptions, definitionId],
-    queryFn: () => ApiService.getSecurityRequirements(definitionId),
+    queryFn: async () => (await ApiService.getSecurityRequirements(definitionId)) ?? null,
     staleTime: Infinity,
     enabled: Boolean(isAuthenticated && definitionId),
   });

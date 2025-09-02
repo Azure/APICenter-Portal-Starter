@@ -12,7 +12,7 @@ export function useApiSpecUrl(definitionId: ApiDefinitionId) {
 
   return useQuery<string | undefined>({
     queryKey: [QueryKeys.ApiSpecUrl, definitionId],
-    queryFn: () => ApiService.getSpecificationLink(definitionId),
+    queryFn: async () => (await ApiService.getSpecificationLink(definitionId)) ?? null,
     staleTime: Infinity,
     enabled: isAuthenticated && isDefinitionIdValid(definitionId),
   });

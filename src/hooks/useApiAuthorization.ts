@@ -36,7 +36,7 @@ export function useApiAuthorization({ definitionId, schemeName }: Props): Return
       if (scheme?.securityScheme === ApiAuthType.apiKey) {
         setCredentials({ ...scheme.apiKey, createdAt: new Date() });
       }
-      return scheme;
+      return scheme ?? null;
     },
     staleTime: Infinity,
     enabled: Boolean(isAuthenticated && definitionId.apiName && definitionId.versionName && schemeName),

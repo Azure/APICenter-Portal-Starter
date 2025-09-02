@@ -11,7 +11,7 @@ export function useApi(apiId?: string) {
 
   return useQuery<ApiMetadata | undefined>({
     queryKey: [QueryKeys.Api, apiId],
-    queryFn: () => ApiService.getApi(apiId),
+    queryFn: async () => (await ApiService.getApi(apiId)) ?? null,
     staleTime: Infinity,
     enabled: Boolean(isAuthenticated && apiId),
   });

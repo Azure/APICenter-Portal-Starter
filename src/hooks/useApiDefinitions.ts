@@ -11,7 +11,7 @@ export function useApiDefinitions(apiId?: string, version?: string) {
 
   return useQuery<ApiDefinition[] | undefined>({
     queryKey: [QueryKeys.ApiDefinitions, apiId, version],
-    queryFn: () => ApiService.getDefinitions(apiId, version),
+    queryFn: async () => (await ApiService.getDefinitions(apiId, version)) ?? null,
     staleTime: Infinity,
     enabled: Boolean(isAuthenticated && apiId && version),
   });

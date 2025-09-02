@@ -11,7 +11,7 @@ export function useApiVersions(apiId?: string) {
 
   return useQuery<ApiVersion[] | undefined>({
     queryKey: [QueryKeys.ApiVersions, apiId],
-    queryFn: () => ApiService.getVersions(apiId),
+    queryFn: async () => (await ApiService.getVersions(apiId)) ?? null,
     staleTime: Infinity,
     enabled: Boolean(isAuthenticated && apiId),
   });

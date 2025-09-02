@@ -11,7 +11,7 @@ export function useDeploymentEnvironment(envId?: string) {
 
   return useQuery<ApiEnvironment | undefined>({
     queryKey: [QueryKeys.ApiDeploymentEnvironment, envId],
-    queryFn: () => ApiService.getEnvironment(envId),
+    queryFn: async () => (await ApiService.getEnvironment(envId)) ?? null,
     staleTime: Infinity,
     enabled: Boolean(isAuthenticated && envId),
   });

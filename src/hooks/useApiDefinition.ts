@@ -11,7 +11,7 @@ export function useApiDefinition(definitionId: ApiDefinitionId) {
 
   return useQuery<ApiDefinition | undefined>({
     queryKey: [QueryKeys.ApiDefinition, definitionId],
-    queryFn: () => ApiService.getDefinition(definitionId),
+    queryFn: async () => (await ApiService.getDefinition(definitionId)) ?? null,
     staleTime: Infinity,
     enabled: Boolean(isAuthenticated && definitionId),
   });
