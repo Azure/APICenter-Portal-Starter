@@ -45,7 +45,7 @@ export function useApis({ search, filters, isAutoCompleteMode, isSemanticSearch 
   const sortBy = useRecoilValue(apiListSortingAtom);
 
   return useQuery<ApiMetadata[] | undefined>({
-    queryKey: [QueryKeys.Apis, search, isAutoCompleteMode, isSemanticSearch],
+    queryKey: [QueryKeys.Apis, search, filters, isAutoCompleteMode, isSemanticSearch],
     queryFn: async () => {
       if (isAutoCompleteMode && (!search || isSemanticSearch)) {
         return [];
