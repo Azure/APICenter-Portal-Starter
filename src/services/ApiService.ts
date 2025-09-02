@@ -9,6 +9,7 @@ import { ApiEnvironment } from '@/types/apiEnvironment';
 import { ActiveFilterData } from '@/types/apiFilters';
 import { ApiVersion } from '@/types/apiVersion';
 import { IApiService } from '@/types/services/IApiService';
+import { Server } from '@/types/server';
 
 export const ApiService: IApiService = {
   async getApis(search: string, filters: ActiveFilterData[] = [], isSemanticSearch?: boolean): Promise<ApiMetadata[]> {
@@ -43,6 +44,10 @@ export const ApiService: IApiService = {
 
   async getApi(name: string): Promise<ApiMetadata> {
     return await HttpService.get<ApiMetadata>(`/apis/${name}`);
+  },
+
+  async getServer(name: string): Promise<Server | undefined> {
+    return await HttpService.get<Server>(`/v0/servers/${name}`);
   },
 
   async getVersions(apiName: string): Promise<ApiVersion[]> {

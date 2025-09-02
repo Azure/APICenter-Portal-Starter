@@ -1,6 +1,7 @@
 export enum QueryKeys {
   Apis = 'Apis',
   Api = 'Api',
+  Server = 'Server',
   ApiVersions = 'ApiVersions',
   ApiDefinitions = 'ApiDefinitions',
   ApiDefinition = 'ApiDefinition',
