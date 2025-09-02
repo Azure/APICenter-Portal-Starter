@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import { Dismiss12Regular } from '@fluentui/react-icons';
 import classNames from 'classnames';
-import useSearchFilters from '@/hooks/useSearchFilters';
+import { useSearchFilters } from '@/hooks/useSearchFilters';
 import { ActiveFilterData, FilterType } from '@/types/apiFilters';
 import styles from './ActiveFiltersBadges.module.scss';
 

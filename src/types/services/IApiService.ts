@@ -5,10 +5,12 @@ import { ApiDeployment } from '@/types/apiDeployment';
 import { ApiDefinition, ApiDefinitionId } from '@/types/apiDefinition';
 import { ApiEnvironment } from '@/types/apiEnvironment';
 import { ApiAuthScheme, ApiAuthSchemeMetadata } from '@/types/apiAuth';
+import { Server } from '@/types/server';
 
 export interface IApiService {
   getApis(search: string, filters?: ActiveFilterData[], isSemanticSearch?: boolean): Promise<ApiMetadata[]>;
   getApi(id: string): Promise<ApiMetadata>;
+  getServer(name: string): Promise<Server | undefined>;
   getVersions(apiId: string): Promise<ApiVersion[]>;
   getDeployments(apiId: string): Promise<ApiDeployment[]>;
   getDefinitions(apiId: string, version: string): Promise<ApiDefinition[]>;

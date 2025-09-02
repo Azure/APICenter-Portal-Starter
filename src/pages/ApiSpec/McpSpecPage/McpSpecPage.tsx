@@ -3,14 +3,14 @@ import { Spinner } from '@fluentui/react-components';
 import ApiAccessAuthForm from '@/experiences/ApiAccessAuthForm';
 import { ApiDefinitionId } from '@/types/apiDefinition';
 import { ApiDeployment } from '@/types/apiDeployment';
-import getMcpService from '@/services/McpService';
+import { getMcpService } from '@/services/McpService';
 import { ApiSpecReader } from '@/types/apiSpec';
-import getSpecReader from '@/specReaders/getSpecReader';
-import useApiDefinition from '@/hooks/useApiDefinition';
+import { getSpecReader } from '@/specReaders/getSpecReader';
+import { useApiDefinition } from '@/hooks/useApiDefinition';
 import { ApiAuthCredentials, Oauth2Credentials } from '@/types/apiAuth';
 import ApiSpecPageLayout from '../ApiSpecPageLayout';
 import pageStyles from '../ApiSpec.module.scss';
-import useApiService from '@/hooks/useApiService';
+import { useApiService } from '@/hooks/useApiService';
 import { getMcpServerOAuthCredentials } from '@/utils/mcp';
 import McpMetadataBasedAuthForm from './McpMetadataBasedAuthForm';
 import styles from './McpSpecPage.module.scss';
@@ -76,7 +76,7 @@ export const McpSpecPage: React.FC<Props> = ({ definitionId, deployment }) => {
   }, [isAuthorized, deployment, authCredentials]);
 
   const makeApiSpec = useCallback(async () => {
-    if (!isAuthorized || !mcpService || !definition.value) {
+    if (!isAuthorized || !mcpService || !definition.data) {
       return;
     }
 
@@ -84,9 +84,9 @@ export const McpSpecPage: React.FC<Props> = ({ definitionId, deployment }) => {
       setIsSpecLoading(true);
       const spec = await mcpService.collectMcpSpec();
       const reader = await getSpecReader(spec, {
-        ...definition.value,
+        ...definition.data,
         specification: {
-          ...definition.value.specification,
+          ...definition.data.specification,
           // TODO: this probably needs to be more robust
           name: 'mcp',
         },
@@ -95,7 +95,7 @@ export const McpSpecPage: React.FC<Props> = ({ definitionId, deployment }) => {
     } finally {
       setIsSpecLoading(false);
     }
-  }, [definition.value, isAuthorized, mcpService]);
+  }, [definition.data, isAuthorized, mcpService]);
 
   useEffect(() => {
     void makeApiSpec();

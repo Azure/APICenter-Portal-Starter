@@ -1,11 +1,9 @@
 /* eslint-disable no-restricted-imports */
 import { atom, selector, DefaultValue } from 'recoil';
-import ApiService from '@/services/ApiService';
-import MsalAuthService from '@/services/MsalAuthService';
-import AnonymousAuthService from '@/services/AnonymousAuthService';
+import { ApiService } from '@/services/ApiService';
+import { MsalAuthService } from '@/services/MsalAuthService';
 import { IApiService } from '@/types/services/IApiService';
 import { IAuthService } from '@/types/services/IAuthService';
-import configAtom from './configAtom';
 
 // If adding more services here - make sure to restrict their default implementations imports in eslint config (no-restricted-imports rule)
 export interface AppServicesAtomState {
@@ -19,15 +17,12 @@ const appServicesOverridesAtom = atom<Partial<AppServicesAtomState>>({
   default: {},
 });
 
-const appServicesAtom = selector<AppServicesAtomState>({
+export const appServicesAtom = selector<AppServicesAtomState>({
   key: 'appServices',
   get: ({ get }) => {
-    const config = get(configAtom);
-    const isAnonymousAccess = !config?.authentication;
-
     const base: AppServicesAtomState = {
       ApiService,
-      AuthService: isAnonymousAccess ? AnonymousAuthService : MsalAuthService,
+      AuthService: MsalAuthService,
     };
 
     const overrides = get(appServicesOverridesAtom);
@@ -42,5 +37,3 @@ const appServicesAtom = selector<AppServicesAtomState>({
     set(appServicesOverridesAtom, newValue as Partial<AppServicesAtomState>);
   },
 });
-
-export default appServicesAtom;

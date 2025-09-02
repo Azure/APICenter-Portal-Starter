@@ -1,6 +1,6 @@
 import { groupBy } from 'lodash';
 import memoize from 'memoizee';
-import HttpService from '@/services/HttpService';
+import { HttpService } from '@/services/HttpService';
 import { ApiMetadata } from '@/types/api';
 import { ApiAuthScheme, ApiAuthSchemeMetadata } from '@/types/apiAuth';
 import { ApiDefinition, ApiDefinitionId } from '@/types/apiDefinition';
@@ -9,8 +9,9 @@ import { ApiEnvironment } from '@/types/apiEnvironment';
 import { ActiveFilterData } from '@/types/apiFilters';
 import { ApiVersion } from '@/types/apiVersion';
 import { IApiService } from '@/types/services/IApiService';
+import { Server } from '@/types/server';
 
-const ApiService: IApiService = {
+export const ApiService: IApiService = {
   async getApis(search: string, filters: ActiveFilterData[] = [], isSemanticSearch?: boolean): Promise<ApiMetadata[]> {
     const searchParams = new URLSearchParams();
     if (search.length && !isSemanticSearch) {
@@ -43,6 +44,10 @@ const ApiService: IApiService = {
 
   async getApi(name: string): Promise<ApiMetadata> {
     return await HttpService.get<ApiMetadata>(`/apis/${name}`);
+  },
+
+  async getServer(name: string): Promise<Server | undefined> {
+    return await HttpService.get<Server>(`/v0/servers/${name}`);
   },
 
   async getVersions(apiName: string): Promise<ApiVersion[]> {
@@ -98,5 +103,3 @@ const ApiService: IApiService = {
     );
   },
 };
-
-export default ApiService;

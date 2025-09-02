@@ -3,7 +3,7 @@ import { isEqual } from 'lodash';
 import { useRecoilState } from 'recoil';
 import { ApiFilterParameters } from '@/config/apiFilters';
 import { ActiveFilterData, FilterMetadata, FilterType } from '@/types/apiFilters';
-import apiSearchFiltersAtom from '@/atoms/apiSearchFiltersAtom';
+import { apiSearchFiltersAtom } from '@/atoms/apiSearchFiltersAtom';
 
 interface ReturnType {
   activeFilters: ActiveFilterData[];
@@ -14,7 +14,7 @@ interface ReturnType {
   clear: () => void;
 }
 
-export default function useSearchFilters(): ReturnType {
+export function useSearchFilters(): ReturnType {
   const [activeFilters, setActiveFilters] = useRecoilState(apiSearchFiltersAtom);
 
   const isActive = useCallback(

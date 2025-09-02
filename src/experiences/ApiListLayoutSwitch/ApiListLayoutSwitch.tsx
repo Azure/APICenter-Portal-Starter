@@ -3,7 +3,7 @@ import { ToggleButton } from '@fluentui/react-components';
 import { AppsListRegular, GridRegular } from '@fluentui/react-icons';
 import { useRecoilState } from 'recoil';
 import { Layouts } from '@/types/layouts';
-import apiListLayoutAtom from '@/atoms/apiListLayoutAtom';
+import { apiListLayoutAtom } from '@/atoms/apiListLayoutAtom';
 import styles from './ApiListLayoutSwitch.module.scss';
 
 export const ApiListLayoutSwitch: React.FC = () => {

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { HttpReqParam } from '@microsoft/api-docs-ui';
 import { OperationMetadata } from '@/types/apiSpec';
 import { ApiDeployment } from '@/types/apiDeployment';
-import getMcpService, { McpService } from '@/services/McpService';
+import { getMcpService, McpService } from '@/services/McpService';
 import { McpCapabilityTypes } from '@/types/mcp';
 
 interface ReturnType {
@@ -12,7 +12,8 @@ interface ReturnType {
   run: (args: HttpReqParam[]) => Promise<void>;
 }
 
-export default function useMcpTestRunController(
+// TODO: migrate to react-query mutation
+export function useMcpTestRunController(
   deployment?: ApiDeployment,
   operation?: OperationMetadata,
   shouldConnect?: boolean

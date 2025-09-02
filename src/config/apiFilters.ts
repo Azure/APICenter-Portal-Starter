@@ -10,7 +10,7 @@ export const ApiFilterParameters: Record<FilterType, FilterMetadata> = {
       { value: 'grpc', label: 'gRPC' },
       { value: 'soap', label: 'SOAP' },
       { value: 'webhook', label: 'Webhook' },
-      { value: 'websocket', label: 'WebSocket' }
+      { value: 'websocket', label: 'WebSocket' },
     ],
   },
   lifecycleStage: {

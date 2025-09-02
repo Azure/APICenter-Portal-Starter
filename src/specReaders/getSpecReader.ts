@@ -1,12 +1,12 @@
 import * as yaml from 'yaml';
-import { ApiSpecReader, ApiSpecReaderFactory } from '@/types/apiSpec';
-import openApiV2Reader from '@/specReaders/openApiV2Reader';
-import openApiV3Reader from '@/specReaders/openApiV3Reader';
-import graphqlReader from '@/specReaders/graphqlReader';
-import mcpReader from '@/specReaders/mcpReader';
+import { ApiSpecReader } from '@/types/apiSpec';
+import { openApiV2Reader } from '@/specReaders/openApiV2Reader';
+import { openApiV3Reader } from '@/specReaders/openApiV3Reader';
+import { graphqlReader } from '@/specReaders/graphqlReader';
+import { mcpReader } from '@/specReaders/mcpReader';
 import { ApiDefinition } from '@/types/apiDefinition';
 
-export default async function getSpecReader(spec: string, definition: ApiDefinition): Promise<ApiSpecReader> {
+export async function getSpecReader(spec: string, definition: ApiDefinition): Promise<ApiSpecReader> {
   switch (definition.specification?.name) {
     case 'mcp':
       return mcpReader(spec);

@@ -9,7 +9,7 @@ interface ReturnType {
 
 const SEARCH_PARAM = 'op';
 
-export default function useSelectedOperation(): ReturnType {
+export function useSelectedOperation(): ReturnType {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const set = useCallback(

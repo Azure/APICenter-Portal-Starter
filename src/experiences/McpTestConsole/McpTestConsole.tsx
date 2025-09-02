@@ -6,7 +6,7 @@ import { HttpTestConsole, SyntaxHighlighter } from '@microsoft/api-docs-ui';
 import { HttpReqParam } from '@microsoft/api-docs-ui/dist/types/testConsole';
 import { ApiSpecReader, OperationMetadata, OperationParameterMetadata, StaticProperty } from '@/types/apiSpec';
 import { ApiDeployment } from '@/types/apiDeployment';
-import useMcpTestRunController from '@/hooks/useMcpTestRunController';
+import { useMcpTestRunController } from '@/hooks/useMcpTestRunController';
 import TestConsoleError from '@/components/TestConsoleError';
 import { McpCapabilityTypes } from '@/types/mcp';
 import { getUrlTemplateParams, resolveUrlTemplate } from '@/utils/apiOperations';

@@ -1,6 +1,6 @@
 import { getRecoil } from 'recoil-nexus';
-import appServicesAtom from '@/atoms/appServicesAtom';
-import configAtom from '@/atoms/configAtom';
+import { appServicesAtom } from '@/atoms/appServicesAtom';
+import { configAtom } from '@/atoms/configAtom';
 
 const CORS_PROXY_ENDPOINT = 'https://apimanagement-cors-proxy-df.azure-api.net/sendrequest';
 

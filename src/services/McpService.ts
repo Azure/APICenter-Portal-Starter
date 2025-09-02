@@ -221,7 +221,7 @@ export class McpService {
 }
 
 let currentInstance: McpService | undefined;
-export default function getMcpService(uri?: string, authCredentials?: ApiAuthCredentials): McpService | undefined {
+export function getMcpService(uri?: string, authCredentials?: ApiAuthCredentials): McpService | undefined {
   let serverUri = uri;
   if (serverUri.endsWith('/sse')) {
     serverUri = serverUri.split('/').slice(0, -1).join('/');

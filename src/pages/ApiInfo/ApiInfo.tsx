@@ -13,10 +13,10 @@ import {
 } from '@fluentui/react-components';
 import { Dismiss24Regular } from '@fluentui/react-icons';
 import { useNavigate, useParams } from 'react-router-dom';
-import useApi from '@/hooks/useApi';
+import { useApi } from '@/hooks/useApi';
 import ApiAdditionalInfo from '../../experiences/ApiAdditionalInfo';
 import ApiInfoOptions from '../../experiences/ApiInfoOptions';
-import LocationsService from '@/services/LocationsService';
+import { LocationsService } from '@/services/LocationsService';
 import ApiDefinitionSelect, { ApiDefinitionSelection } from '@/experiences/ApiDefinitionSelect';
 import { EmptyStateMessage } from '@/components/EmptyStateMessage/EmptyStateMessage';
 import { setDocumentTitle } from '@/utils/dom';

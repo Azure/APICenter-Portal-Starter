@@ -22,7 +22,7 @@ const operationTypeByCapabilityType: Record<McpCapabilityTypes, OperationTypes> 
   [McpCapabilityTypes.PROMPTS]: OperationTypes.DEFAULT,
 };
 
-export default async function mcpReader(specStr: string): Promise<ApiSpecReader> {
+export async function mcpReader(specStr: string): Promise<ApiSpecReader> {
   const mcpSpec = JSON.parse(specStr) as McpSpec;
 
   const getBaseUrl = memoize((): string => {

@@ -1,18 +1,18 @@
 import { useRecoilValue } from 'recoil';
 import { useQuery } from '@tanstack/react-query';
-import { ApiDefinition } from '@/types/apiDefinition';
 import { isAuthenticatedAtom } from '@/atoms/isAuthenticatedAtom';
 import { useApiService } from '@/hooks/useApiService';
 import { QueryKeys } from '@/constants/QueryKeys';
+import { Server } from '@/types/server';
 
-export function useApiDefinitions(apiId?: string, version?: string) {
+export function useServer(name?: string) {
   const ApiService = useApiService();
   const isAuthenticated = useRecoilValue(isAuthenticatedAtom);
 
-  return useQuery<ApiDefinition[] | undefined>({
-    queryKey: [QueryKeys.ApiDefinitions, apiId, version],
-    queryFn: async () => (await ApiService.getDefinitions(apiId, version)) ?? null,
+  return useQuery<Server | undefined>({
+    queryKey: [QueryKeys.Server, name],
+    queryFn: async () => (await ApiService.getServer(name)) || null,
     staleTime: Infinity,
-    enabled: Boolean(isAuthenticated && apiId && version),
+    enabled: Boolean(isAuthenticated && name),
   });
 }

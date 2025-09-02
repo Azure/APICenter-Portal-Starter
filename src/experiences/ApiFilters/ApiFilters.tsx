@@ -8,7 +8,7 @@ import {
   Divider,
 } from '@fluentui/react-components';
 import { CheckboxOnChangeData } from '@fluentui/react-checkbox';
-import useSearchFilters from '@/hooks/useSearchFilters';
+import { useSearchFilters } from '@/hooks/useSearchFilters';
 import { FilterType } from '@/types/apiFilters';
 import styles from './ApiFilters.module.scss';
 

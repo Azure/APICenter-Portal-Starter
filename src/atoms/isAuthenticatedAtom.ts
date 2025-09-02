@@ -1,8 +1,8 @@
 import { atom } from 'recoil';
-import appServicesAtom from '@/atoms/appServicesAtom';
+import { appServicesAtom } from '@/atoms/appServicesAtom';
 import { IAuthService } from '@/types/services/IAuthService';
 
-const isAuthenticatedAtom = atom<boolean>({
+export const isAuthenticatedAtom = atom<boolean>({
   key: 'isAuthenticated',
   default: false,
   effects: [
@@ -26,5 +26,3 @@ const isAuthenticatedAtom = atom<boolean>({
     },
   ],
 });
-
-export default isAuthenticatedAtom;

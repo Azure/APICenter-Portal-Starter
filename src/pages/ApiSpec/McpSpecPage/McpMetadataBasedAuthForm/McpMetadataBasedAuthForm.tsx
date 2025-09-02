@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { ApiAuthCredentials, ApiAuthType, Oauth2Credentials } from '@/types/apiAuth';
 import ApiAuthForm from '@/components/ApiAuthForm';
-import OAuthService from '@/services/OAuthService';
+import { OAuthService } from '@/services/OAuthService';
 
 interface Props {
   credentials: Oauth2Credentials;

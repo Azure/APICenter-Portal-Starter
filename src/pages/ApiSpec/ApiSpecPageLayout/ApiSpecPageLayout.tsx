@@ -3,7 +3,7 @@ import ApiOperationDetails from '@/experiences/ApiOperationDetails';
 import ApiOperationsSelect from '@/experiences/ApiOperationsSelect';
 import EmptyStateMessage from '@/components/EmptyStateMessage';
 import { ApiDeployment } from '@/types/apiDeployment';
-import useSelectedOperation from '@/hooks/useSelectedOperation';
+import { useSelectedOperation } from '@/hooks/useSelectedOperation';
 import { ApiSpecReader } from '@/types/apiSpec';
 import { ApiDefinitionId } from '@/types/apiDefinition';
 import styles from './ApiSpecPageLayout.module.scss';

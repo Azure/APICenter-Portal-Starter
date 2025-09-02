@@ -4,10 +4,11 @@
   padding: 20px 0;
 
   .section {
-    h5 {
+    h3 {
       display: flex;
       align-items: center;
       margin-top: 0;
+      font-size: 1rem;
       gap: 16px;
       
       @include screen.small {
@@ -32,10 +33,23 @@
         }
       }
     }
-
-    p {
+    
+    p, h4 {
       padding-left: 40px;
+    }
+
+    h4 {
+      margin-bottom: 0.5rem;
+    }
+    
+    p {
       color: var(--grey-4);
+
+      &.buttonGroup {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
 
       .actionButton {
         :global(.fui-Button__icon) img {

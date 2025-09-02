@@ -1,8 +1,8 @@
 import { atom } from 'recoil';
 import { Layouts } from '@/types/layouts';
-import LocalStorageService from '@/services/LocalStorageService';
+import { LocalStorageService } from '@/services/LocalStorageService';
 
-const apiListLayoutAtom = atom<Layouts>({
+export const apiListLayoutAtom = atom<Layouts>({
   key: 'apiListLayout',
   default: LocalStorageService.get(LocalStorageService.StorageKeys.API_LIST_LAYOUT) || Layouts.TABLE,
   effects: [
@@ -16,5 +16,3 @@ const apiListLayoutAtom = atom<Layouts>({
     },
   ],
 });
-
-export default apiListLayoutAtom;

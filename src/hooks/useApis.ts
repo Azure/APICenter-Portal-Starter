@@ -1,12 +1,12 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRecoilValue } from 'recoil';
-import { debounce } from 'lodash';
+import { useQuery } from '@tanstack/react-query';
 import { ApiMetadata } from '@/types/api';
 import { ActiveFilterData } from '@/types/apiFilters';
 import { SortBy, SortByOrder } from '@/types/sorting';
-import apiListSortingAtom from '@/atoms/apiListSortingAtom';
-import isAuthenticatedAtom from '@/atoms/isAuthenticatedAtom';
-import useApiService from '@/hooks/useApiService';
+import { apiListSortingAtom } from '@/atoms/apiListSortingAtom';
+import { isAuthenticatedAtom } from '@/atoms/isAuthenticatedAtom';
+import { useApiService } from '@/hooks/useApiService';
+import { QueryKeys } from '@/constants/QueryKeys';
 
 interface Props {
   search?: string;
@@ -14,11 +14,6 @@ interface Props {
   /** If true: won't fetch if search is empty */
   isAutoCompleteMode?: boolean;
   isSemanticSearch?: boolean;
-}
-
-interface ReturnType {
-  list: ApiMetadata[];
-  isLoading: boolean;
 }
 
 function sortApis(apis: ApiMetadata[], sortBy?: SortBy): ApiMetadata[] {
@@ -44,52 +39,22 @@ function sortApis(apis: ApiMetadata[], sortBy?: SortBy): ApiMetadata[] {
 /**
  * Provides a list of APIs based on search and filters
  */
-export default function useApis({ search, filters, isAutoCompleteMode, isSemanticSearch }: Props = {}): ReturnType {
-  const [apis, setApis] = useState<ApiMetadata[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-
+export function useApis({ search, filters, isAutoCompleteMode, isSemanticSearch }: Props = {}) {
   const isAuthenticated = useRecoilValue(isAuthenticatedAtom);
   const ApiService = useApiService();
   const sortBy = useRecoilValue(apiListSortingAtom);
 
-  const fetchApis = useCallback(
-    async (search: string) => {
-      if (!isAuthenticated) {
-        return;
+  return useQuery<ApiMetadata[] | undefined>({
+    queryKey: [QueryKeys.Apis, search, filters, isAutoCompleteMode, isSemanticSearch],
+    queryFn: async () => {
+      if (isAutoCompleteMode && (!search || isSemanticSearch)) {
+        return [];
       }
 
-      try {
-        setIsLoading(true);
-        setApis(await ApiService.getApis(search, filters, isSemanticSearch));
-      } finally {
-        setIsLoading(false);
-      }
+      const apis = await ApiService.getApis(search, filters, isSemanticSearch);
+      return sortApis(apis, sortBy);
     },
-    [isAuthenticated, ApiService, filters, isSemanticSearch]
-  );
-
-  const fetchApisDebounced = useMemo(() => debounce(fetchApis, 500), [fetchApis]);
-
-  useEffect(() => {
-    if (isAutoCompleteMode) {
-      if (!search || isSemanticSearch) {
-        setApis([]);
-        setIsLoading(false);
-        return;
-      }
-
-      setIsLoading(true);
-      void fetchApisDebounced(search);
-      return;
-    }
-
-    void fetchApis(search);
-  }, [search, fetchApis, fetchApisDebounced, isAutoCompleteMode, isSemanticSearch]);
-
-  const sortedList = useMemo(() => sortApis(apis, sortBy), [apis, sortBy]);
-
-  return {
-    list: sortedList,
-    isLoading,
-  };
+    staleTime: Infinity,
+    enabled: isAuthenticated,
+  });
 }

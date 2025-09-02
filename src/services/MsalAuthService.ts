@@ -1,8 +1,8 @@
 import * as msal from '@azure/msal-browser';
 import { getRecoil } from 'recoil-nexus';
 import { MsalSettings } from '@/types/msalSettings';
-import configAtom from '@/atoms/configAtom';
-import isAnonymousAccessEnabledAtom from '@/atoms/isAnonymousAccessEnabledAtom';
+import { configAtom } from '@/atoms/configAtom';
+import { isAnonymousAccessEnabledAtom } from '@/atoms/isAnonymousAccessEnabledAtom';
 
 let msalInstance: msal.PublicClientApplication | undefined;
 
@@ -47,7 +47,7 @@ async function getMsalInstance(config: MsalSettings): Promise<msal.PublicClientA
   return msalInstance;
 }
 
-const MsalAuthService = {
+export const MsalAuthService = {
   async isAuthenticated(): Promise<boolean> {
     if (getRecoil(isAnonymousAccessEnabledAtom)) {
       return true;
@@ -94,5 +94,3 @@ const MsalAuthService = {
     await msalInstance.logoutPopup();
   },
 };
-
-export default MsalAuthService;

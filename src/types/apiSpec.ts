@@ -142,5 +142,3 @@ export interface ApiSpecReader {
    */
   getOperationDefinitions: (operationName: string) => SchemaMetadata[];
 }
-
-export type ApiSpecReaderFactory = (apiSpec: string) => Promise<ApiSpecReader> | ApiSpecReader;
