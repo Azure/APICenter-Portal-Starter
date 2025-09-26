@@ -1,0 +1,19 @@
+.apiListLayoutSwitch {
+  button {
+    &:first-of-type {
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+
+    &:last-of-type {
+      margin-left: -1px;
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+    }
+
+    &[aria-pressed='true'] {
+      background: var(--blue-1);
+      color: var(--blue-4);
+    }
+  }
+}

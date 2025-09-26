@@ -1,0 +1,46 @@
+@use '@/styles/screen';
+
+.header {
+  display: flex;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin: 0 auto;
+  padding: 14px 32px;
+  border-bottom: 1px solid var(--grey-3);
+
+  .logo {
+    display: flex;
+    align-items: center;
+    color: inherit;
+    
+    span {
+      white-space: nowrap;
+    }
+
+    &:hover {
+      color: inherit;
+      text-decoration: none;
+    }
+  }
+
+  .navLinks {
+    display: flex;
+    flex: 1;
+    justify-content: flex-end;
+    gap: 16px;
+
+    @include screen.small {
+      margin-right: 16px;
+      padding-right: 16px;
+      gap: 8px;
+    }
+  }
+  
+  .auth {
+    margin-left: 34px;
+    padding-left: 34px;
+    border-left: 1px solid var(--grey-6);
+  }
+}

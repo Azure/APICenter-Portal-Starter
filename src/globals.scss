@@ -1,0 +1,86 @@
+@use './styles/variables';
+@import '@microsoft/api-docs-ui/dist/index.css';
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+}
+
+* {
+  position: relative;
+}
+
+.app-root {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: transparent !important;
+
+  > main {
+    display: flex;
+    flex: 1;
+
+    > * {
+      flex: 1;
+    }
+  }
+
+  section {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 1440px;
+    margin: 0 auto;
+  }
+}
+
+#root {
+  display: flex;
+  height: 100%;
+
+  &[aria-hidden="true"] {
+    overflow: hidden;
+  }
+
+  // We should not give class to FluentProvider because it will be carried over to its portals and may cause unpredictable behavior
+  & > * {
+    flex: 1;
+  }
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  line-height: 1;
+}
+
+h1 {
+  font-size: 32px;
+}
+
+h3 {
+  font-size: 20px;
+}
+
+h4 {
+  font-size: 16px;
+}
+
+h5 {
+  font-size: 14px;
+}
+
+strong {
+  font-weight: 600;
+}
+
+button {
+  padding: 0;
+  border: none;
+  background-color: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}

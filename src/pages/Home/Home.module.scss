@@ -1,0 +1,79 @@
+@use '@/styles/screen';
+
+.home {
+  .searchPanel {
+    box-sizing: border-box;
+    min-height: 290px;
+    padding: 50px 0 10px;
+    background: linear-gradient(45deg, hsl(204deg 65% 71% / 100%) 0%, hsl(273deg 34% 75% / 100%) 43%, hsl(358deg 43% 75% / 100%) 57%, hsl(43deg 96% 63% / 100%) 100%);
+    color: white;
+    text-align: center;
+
+    h1 {
+      margin: 0 0 1rem;
+      font-size: 2.5rem;
+      line-height: 3.25rem;
+    }
+  }
+
+  .content {
+    display: flex;
+    padding: 32px;
+    gap: 32px;
+
+    @include screen.small-to-medium {
+      flex-direction: column;
+      padding: 16px;
+      gap: 16px;
+    }
+
+    .filters {
+      min-width: 250px;
+
+      @include screen.small-to-medium {
+        padding-bottom: 16px;
+        border-bottom: 1px solid var(--grey-2);
+      }
+
+      h3 {
+        font-size: 1rem;
+        line-height: 22px;
+      }
+
+      & > h3 {
+        margin: 0.5rem 0 1rem;
+      }
+    }
+
+    .mainContent {
+      width: 100%;
+
+      .emptyState {
+        color: var(--grey-4);
+        text-align: center;
+
+        img {
+          display: block;
+          margin: 32px auto;
+        }
+      }
+
+      .infoRow {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 16px;
+        gap: 1rem;
+
+        .sort {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+        }
+      }
+
+      .activeFilters {
+        margin: 16px 0;
+      }
+    }
+  }
+}

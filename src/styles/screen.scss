@@ -1,0 +1,15 @@
+// CSS variables are not working in media queries (probably removed by bundler as invalid CSS)
+$small: 600px;
+$medium: 800px;
+
+@mixin small {
+  @media (width <= $small) {
+    @content;
+  }
+}
+
+@mixin small-to-medium {
+  @media (width <= $medium) {
+    @content;
+  }
+}

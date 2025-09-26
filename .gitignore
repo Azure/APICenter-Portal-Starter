@@ -351,3 +351,8 @@ dist-ssr
 *.sln
 *.sw?
 .azure
+
+.yalc/
+yalc.lock
+
+config.json

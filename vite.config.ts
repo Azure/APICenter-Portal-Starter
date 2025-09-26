@@ -1,16 +1,18 @@
-/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
-
-import basicSsl from "@vitejs/plugin-basic-ssl";
-import react from "@vitejs/plugin-react";
-import { defineConfig } from "vite";
+import path from 'path';
+import { defineConfig } from 'vite';
+import basicSsl from '@vitejs/plugin-basic-ssl';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-    plugins: [react(), basicSsl()],
-    define: {
-        'process.env': {}
-    }
+  plugins: [basicSsl()],
+  publicDir: './src/public',
+  define: {
+    'process.env': {},
+  },
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+      querystring: 'qs',
+    },
+  },
 });

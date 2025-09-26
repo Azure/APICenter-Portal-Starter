@@ -1,0 +1,25 @@
+.apiSpec {
+  display: flex;
+  flex-direction: column;
+
+  .spinner {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .header {
+    padding: 24px 32px;
+    background: var(--grey-6);
+    color: var(--grey-0);
+
+    h1 {
+      margin: 0 0 28px;
+    }
+
+    a {
+      color: inherit;
+    }
+  }
+}

@@ -1,0 +1,107 @@
+.apiSearchAutoComplete {
+  position: absolute;
+  z-index: 1;
+  box-sizing: border-box;
+  width: 100%;
+  background: white;
+  box-shadow: 0 2px 4px rgb(0 0 0 / 50%);
+  color: black;
+
+  h6 {
+    display: flex;
+    justify-content: space-between;
+    margin: 0 12px 2px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--grey-3);
+    color: var(--grey-5);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 16px;
+
+    button {
+      color: var(--blue-4);
+      font: inherit;
+      font-weight: 400;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
+  .option {
+    display: flex;
+    align-items: center;
+    padding: 8px 40px 8px 10px;
+    color: var(--grey-6);
+    font-size: 14px;
+    gap: 1rem;
+    letter-spacing: 0.01rem;
+    text-decoration: none;
+    cursor: pointer;
+
+    .deleteBtn {
+      display: none;
+      position: absolute;
+      top: 50%;
+      right: 2px;
+      flex-shrink: 0;
+      width: 2rem;
+      height: 2rem;
+      transform: translateY(-50%);
+      background: var(--grey-2);
+
+      &:hover {
+        background: var(--grey-3);
+      }
+    }
+    
+    .sparkleIcon {
+      width: 20px;
+      height: 20px;
+    }
+    
+    .iconWrapper {
+      position: relative;
+      width: 23px;
+      
+      > svg {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+    }
+
+    .apiName,
+    .apiMeta,
+    .searchQuery {
+      overflow: hidden;
+      text-align: left;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .apiName {
+      width: 10rem;
+    }
+
+    .apiMeta {
+      width: 25rem;
+      color: var(--grey-5);
+    }
+
+    &:hover {
+      background: var(--grey-1);
+
+      .deleteBtn {
+        display: block;
+      }
+    }
+  }
+
+  .noResults {
+    padding: 3rem 0;
+    color: var(--grey-5);
+  }
+}

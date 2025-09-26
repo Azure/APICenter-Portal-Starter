@@ -1,0 +1,13 @@
+{
+  "extends": ["stylelint-config-standard-scss", "stylelint-config-property-sort-order-smacss"],
+  "plugins": ["stylelint-order"],
+  "rules": {
+    "selector-class-pattern": ".*",
+    "selector-pseudo-class-no-unknown": [
+      true,
+      {
+        "ignorePseudoClasses": ["global"]
+      }
+    ]
+  }
+}
