@@ -69,3 +69,10 @@ When debugging:
 2. Check **state-management.md** for atom dependencies
 3. Review **authentication.md** for auth-related issues
 4. Consult **api-integration.md** for backend problems
+
+---
+
+## Version History
+
+- **v1.0.0** (2025-01-17): Initial documentation set created (constitution, architecture, dependencies, patterns, state-management, services, folder-structure, api-integration, authentication, deployment)
+- **v1.1.0** (2025-01-17): Added routing, components, data-flow, configuration, testing-strategy, and todo documentation - completing comprehensive architecture documentation set
