@@ -1,7 +1,7 @@
 import memoizee from 'memoizee';
 import { groupBy, uniq, uniqBy } from 'lodash';
 import xmlFormat from 'xml-formatter';
-import { HttpBodyFormats, HttpParamSchemasByLocation, HttpReqData } from '@microsoft/api-docs-ui';
+import { HttpBodyFormats, HttpParamSchemasByLocation, HttpReqData } from 'api-docs-ui';
 import { ApiSpecReader, OperationMetadata, OperationParameterMetadata } from '@/types/apiSpec';
 import { resolveOpUrlTemplate } from '@/utils/apiOperations';
 import { ApiDeployment } from '@/types/apiDeployment';

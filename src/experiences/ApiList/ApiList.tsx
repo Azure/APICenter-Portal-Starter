@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo } from 'react';
 import { Badge, Link, Spinner } from '@fluentui/react-components';
-import { Api as DocsApi, InfoTable, ApiCard, MarkdownRenderer } from '@microsoft/api-docs-ui';
+import { Api as DocsApi, InfoTable, ApiCard, MarkdownRenderer } from 'api-docs-ui';
 import { useRecoilValue } from 'recoil';
 import { useNavigate } from 'react-router-dom';
 import { useSearchFilters } from '@/hooks/useSearchFilters';

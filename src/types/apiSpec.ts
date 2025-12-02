@@ -1,5 +1,5 @@
 import React from 'react';
-import { ApiOperation, ApiOperationParameter } from '@microsoft/api-docs-ui';
+import { ApiOperation, ApiOperationParameter } from 'api-docs-ui';
 
 export type WithRef<T> = T & { $ref?: string };
 

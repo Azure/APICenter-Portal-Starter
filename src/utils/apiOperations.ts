@@ -1,4 +1,4 @@
-import { HttpReqParam } from '@microsoft/api-docs-ui';
+import { HttpReqParam } from 'api-docs-ui';
 import { ApiDeployment } from '@/types/apiDeployment';
 import { OperationMetadata } from '@/types/apiSpec';
 

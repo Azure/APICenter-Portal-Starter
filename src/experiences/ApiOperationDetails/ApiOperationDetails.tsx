@@ -1,5 +1,5 @@
 import React from 'react';
-import { ApiOperationMethod, CopyToClipboard, InfoPanel } from '@microsoft/api-docs-ui';
+import { ApiOperationMethod, CopyToClipboard, InfoPanel } from 'api-docs-ui';
 import { resolveOpUrlTemplate } from '@/utils/apiOperations';
 import { OperationTypes } from '@/types/apiSpec';
 import { OperationDetailsViewProps } from './types';
