@@ -6,6 +6,7 @@ import { ApiDefinition, ApiDefinitionId } from '@/types/apiDefinition';
 import { ApiEnvironment } from '@/types/apiEnvironment';
 import { ApiAuthScheme, ApiAuthSchemeMetadata } from '@/types/apiAuth';
 import { Server } from '@/types/server';
+import { MetadataSchema } from '@/types/metadataSchema';
 
 export interface IApiService {
   getApis(search: string, filters?: ActiveFilterData[], isSemanticSearch?: boolean): Promise<ApiMetadata[]>;
@@ -20,4 +21,5 @@ export interface IApiService {
   getEnvironment(environmentId: string): Promise<ApiEnvironment>;
   getSecurityRequirements(definitionId: ApiDefinitionId): Promise<ApiAuthSchemeMetadata[]>;
   getSecurityCredentials(definitionId: ApiDefinitionId, schemeName: string): Promise<ApiAuthScheme>;
+  getMetadataSchemas(): Promise<MetadataSchema[]>;
 }

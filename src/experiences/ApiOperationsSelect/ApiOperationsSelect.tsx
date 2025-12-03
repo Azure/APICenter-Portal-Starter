@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { ApiOperationsList } from '@microsoft/api-docs-ui';
+import { ApiOperationsList } from 'api-docs-ui';
 import { Accordion, AccordionHeader, AccordionItem, AccordionPanel } from '@fluentui/react-components';
 import { ApiSpecReader, OperationMetadata } from '@/types/apiSpec';
 import { useSelectedOperation } from '@/hooks/useSelectedOperation';

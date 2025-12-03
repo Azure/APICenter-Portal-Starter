@@ -12,4 +12,5 @@ export enum QueryKeys {
   ApiAuthScheme = 'ApiAuthScheme',
   ApiAuthSchemeOptions = 'ApiAuthSchemeOptions',
   HttpTestMutation = 'HttpTestMutation',
+  MetadataSchemas = 'MetadataSchemas',
 }

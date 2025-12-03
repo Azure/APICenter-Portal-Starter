@@ -7,7 +7,7 @@ import {
   HttpReqParam,
   HttpTestConsole as HttpApiTestConsole,
   SyntaxHighlighter,
-} from '@microsoft/api-docs-ui';
+} from 'api-docs-ui';
 import { Body1Strong, Button, Drawer, DrawerBody, DrawerHeader, DrawerHeaderTitle } from '@fluentui/react-components';
 import { Dismiss24Regular } from '@fluentui/react-icons';
 import { uniqBy } from 'lodash';

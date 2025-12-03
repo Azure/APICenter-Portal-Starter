@@ -1,5 +1,5 @@
 import { Buffer } from 'buffer';
-import { ResolvedHttpReqData } from '@microsoft/api-docs-ui';
+import { ResolvedHttpReqData } from 'api-docs-ui';
 import { useMutation } from '@tanstack/react-query';
 import { HttpStatusCodes } from '@/constants/HttpStatusCodes';
 import { OperationMetadata } from '@/types/apiSpec';

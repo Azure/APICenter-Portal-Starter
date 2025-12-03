@@ -10,6 +10,7 @@ import { ActiveFilterData } from '@/types/apiFilters';
 import { ApiVersion } from '@/types/apiVersion';
 import { IApiService } from '@/types/services/IApiService';
 import { Server } from '@/types/server';
+import { MetadataSchema } from '@/types/metadataSchema';
 
 export const ApiService: IApiService = {
   async getApis(search: string, filters: ActiveFilterData[] = [], isSemanticSearch?: boolean): Promise<ApiMetadata[]> {
@@ -101,5 +102,10 @@ export const ApiService: IApiService = {
     return await HttpService.post<ApiAuthScheme>(
       `/apis/${definitionId.apiName}/versions/${definitionId.versionName}/securityRequirements/${schemeName}:getCredentials`
     );
+  },
+
+  async getMetadataSchemas(): Promise<MetadataSchema[]> {
+    const response = await HttpService.get<MetadataSchema[]>('/metadataSchemas', { skipWorkspacePrefix: true });
+    return response || [];
   },
 };

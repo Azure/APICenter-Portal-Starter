@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { ParametersTable } from '@microsoft/api-docs-ui';
+import { ParametersTable } from 'api-docs-ui';
 import { Button } from '@fluentui/react-components';
 import { ApiSpecReader, ApiSpecTypes } from '@/types/apiSpec';
 import ParamSchemaDefinition from '@/components/ParamSchemaDefinition';

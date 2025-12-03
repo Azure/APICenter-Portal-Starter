@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { HttpReqParam } from '@microsoft/api-docs-ui';
+import { HttpReqParam } from 'api-docs-ui';
 import { OperationMetadata } from '@/types/apiSpec';
 import { ApiDeployment } from '@/types/apiDeployment';
 import { getMcpService, McpService } from '@/services/McpService';

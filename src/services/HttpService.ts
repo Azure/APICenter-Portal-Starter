@@ -10,7 +10,17 @@ const BASE_HEADERS: HeadersInit = {
   'Content-Type': 'application/json',
 };
 
-async function makeRequest<T>(endpoint: string, method: string, payload?: any): Promise<T> {
+interface RequestOptions {
+  /** If true, skip adding the /workspaces/default prefix to the URL */
+  skipWorkspacePrefix?: boolean;
+}
+
+async function makeRequest<T>(
+  endpoint: string,
+  method: string,
+  payload?: any,
+  options?: RequestOptions
+): Promise<T> {
   const { AuthService } = getRecoil(appServicesAtom);
   const config = getRecoil(configAtom);
   const accessToken = await AuthService.getAccessToken();
@@ -31,7 +41,8 @@ async function makeRequest<T>(endpoint: string, method: string, payload?: any): 
   let baseUrl = `https://${config.dataApiHostName}`;
 
   // Append the default workspace to the base URL if it's not already there
-  if (!config.dataApiHostName.includes('/workspaces/default')) {
+  // unless skipWorkspacePrefix is set
+  if (!options?.skipWorkspacePrefix && !config.dataApiHostName.includes('/workspaces/default')) {
     baseUrl += '/workspaces/default';
   }
 
@@ -53,8 +64,8 @@ async function makeRequest<T>(endpoint: string, method: string, payload?: any): 
 const makeRequestWithCache = memoizee(makeRequest);
 
 export const HttpService = {
-  get<T>(endpoint: string): Promise<T | undefined> {
-    return makeRequestWithCache<T>(endpoint, 'GET');
+  get<T>(endpoint: string, options?: RequestOptions): Promise<T | undefined> {
+    return makeRequestWithCache<T>(endpoint, 'GET', undefined, options);
   },
 
   post<T>(endpoint: string, payload?: any): Promise<T | undefined> {

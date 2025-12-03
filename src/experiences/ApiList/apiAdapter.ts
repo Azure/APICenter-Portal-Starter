@@ -1,4 +1,4 @@
-import { Api as DocsApi } from '@microsoft/api-docs-ui';
+import { Api as DocsApi } from 'api-docs-ui';
 import { ApiMetadata } from '@/types/api';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
