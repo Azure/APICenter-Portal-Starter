@@ -139,14 +139,14 @@ export const stringifyResponse = memoizee(
       .join('\n');
 
     const contentType = response.headers['content-type'];
-    let formatedBody = response.body.toString();
+    let formatedBody = response.body;
 
     if (contentType?.includes('json')) {
       try {
-        formatedBody = JSON.stringify(JSON.parse(response.body.toString()), null, 2);
+        formatedBody = JSON.stringify(JSON.parse(response.body), null, 2);
       } catch {}
     } else if (contentType?.includes('xml')) {
-      formatedBody = xmlFormat(response.body.toString());
+      formatedBody = xmlFormat(response.body);
     }
 
     return [`HTTP/1.1 ${response.statusCode} ${response.statusText}`, headersString, formatedBody].join('\n\n');

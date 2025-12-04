@@ -1,4 +1,3 @@
-import { Buffer } from 'buffer';
 import { ResolvedHttpReqData } from 'api-docs-ui';
 import { useMutation } from '@tanstack/react-query';
 import { HttpStatusCodes } from '@/constants/HttpStatusCodes';
@@ -10,7 +9,7 @@ interface ResponseType {
   headers: Record<string, string>;
   statusCode: number;
   statusText: string;
-  body: Buffer;
+  body: string;
 }
 
 /**
@@ -37,7 +36,7 @@ export function useHttpTestRequestController(operation?: OperationMetadata) {
           headers: responseHeaders,
           statusCode: response.status,
           statusText: response.statusText || HttpStatusCodes[response.status] || 'Unknown',
-          body: Buffer.from(await response.arrayBuffer()),
+          body: await response.text(),
         };
       } catch (e) {
         if (e instanceof TypeError) {
