@@ -53,6 +53,7 @@ export const ApiDefinitionSelect: React.FC<Props> = ({
   useEffect(() => {
     const defaultName = defaultSelection.version || apiVersions.data?.[0]?.name;
     const version = find(apiVersions.data, { name: defaultName }) || null;
+
     setVersion(version);
 
     // If there is no version then there will be no definition so we need to mark it as null to avoid infinite loading state
@@ -71,11 +72,6 @@ export const ApiDefinitionSelect: React.FC<Props> = ({
     setDeployment(find(apiDeployments.data, { name: defaultName }) || null);
   }, [apiDeployments.data, defaultSelection.deployment]);
 
-  // Reset definition when version changes
-  useEffect(() => {
-    setDefinition(undefined);
-  }, [version]);
-
   /**
    * Trigger change event when all values are set and/or any value is changed.
    * If any of values is undefined the event won't trigger because it means that the value was not loaded yet.
@@ -90,6 +86,9 @@ export const ApiDefinitionSelect: React.FC<Props> = ({
 
   const handleVersionSelect = useCallback<React.ComponentProps<typeof Dropdown>['onOptionSelect']>(
     (_, data) => {
+      // Only reset definition when the user changes version.
+      // Avoids wiping the definition that gets initialized from cached query results.
+      setDefinition(undefined);
       setVersion(apiVersions.data?.find((version) => version.name === data.selectedOptions[0]));
     },
     [apiVersions.data]
@@ -104,7 +103,7 @@ export const ApiDefinitionSelect: React.FC<Props> = ({
 
   const handleDeploymentSelect = useCallback<React.ComponentProps<typeof Dropdown>['onOptionSelect']>(
     (_, data) => {
-      setDefinition(find(apiDeployments.data, { name: data.selectedOptions[0] }));
+      setDeployment(find(apiDeployments.data, { name: data.selectedOptions[0] }));
     },
     [apiDeployments.data]
   );
