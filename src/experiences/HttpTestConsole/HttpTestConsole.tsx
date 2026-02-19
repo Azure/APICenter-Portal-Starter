@@ -43,7 +43,8 @@ const methodsWithoutBody = ['get', 'head'];
 
 export const HttpTestConsole: React.FC<Props> = ({ definitionId, apiSpec, operation, deployment, isOpen, onClose }) => {
   const apiVersions = useApiVersions(definitionId.apiName);
-  const versionTitle = apiVersions.data?.find((v) => v.name === definitionId.versionName)?.title || definitionId.versionName;
+  const selectedVersion = apiVersions.data?.find((v) => v.name === definitionId.versionName);
+  const versionTitle = selectedVersion?.title === 'Original' ? '' : (selectedVersion?.title || definitionId.versionName);
   const defaults = getReqDataDefaults(apiSpec, operation, deployment, versionTitle);
   const [authCredentials, setAuthCredentials] = useState<ApiAuthCredentials | undefined>();
   const [reqData, setReqData] = useState<HttpReqData>(defaults);

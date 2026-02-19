@@ -19,7 +19,8 @@ export const ApiOperationDetails: React.FC<OperationDetailsViewProps> = (props) 
   const { definitionId, operation, deployment } = props;
 
   const apiVersions = useApiVersions(definitionId.apiName);
-  const versionTitle = apiVersions.data?.find((v) => v.name === definitionId.versionName)?.title || definitionId.versionName;
+  const selectedVersion = apiVersions.data?.find((v) => v.name === definitionId.versionName);
+  const versionTitle = selectedVersion?.title === 'Original' ? '' : (selectedVersion?.title || definitionId.versionName);
   const urlTemplate = resolveOpUrlTemplate(operation, deployment, versionTitle);
 
   const DetailsView = detailsViewByType[operation?.type];
