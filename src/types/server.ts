@@ -1,15 +1,23 @@
-interface PositionalArgument {
-  type: 'positional';
-  value: string;
+export interface PackageArgument {
+  name: string;
+  description?: string;
   is_required?: boolean;
+  value?: string;
+}
+
+export interface PackageTransport {
+  type: string;
 }
 
 export interface Package {
-  registry_name: string;
-  name: string;
+  registryType: string;
+  identifier: string;
   version: string;
-  runtime_hint: string; // e.g., "npx"
-  runtime_arguments: PositionalArgument[];
+  runtimeHint: string; // e.g., "npx"
+  runtimeArguments: PackageArgument[];
+  packageArguments?: PackageArgument[];
+  environmentVariables?: PackageArgument[];
+  transport?: PackageTransport;
 }
 
 export interface Remote {
@@ -18,9 +26,16 @@ export interface Remote {
 }
 
 export interface Server {
-  id: string;
-  description: string;
+  $schema?: string;
   name: string;
+  title?: string;
+  description?: string;
+  version?: string;
   packages?: Package[];
   remotes?: Remote[];
+}
+
+export interface ServerResponse {
+  server: Server;
+  _meta?: Record<string, unknown>;
 }

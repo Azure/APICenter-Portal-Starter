@@ -70,10 +70,8 @@ export const ApiInfoOptions: React.FC<Props> = ({ api, apiVersion, apiDefinition
       const vsCodeType = e.currentTarget.value || VsCodeTypes.Stable;
       const isLocal = e.currentTarget.getAttribute('data-local') === 'true';
 
-      let payload: Record<string, unknown> = {
-        name: api.name,
-        url: apiDeployment.server.runtimeUri[0],
-      };
+      let payload: Record<string, unknown>;
+
       if (isLocal) {
         const [pkg] = server.data.packages!;
         if (!pkg) {
@@ -81,9 +79,22 @@ export const ApiInfoOptions: React.FC<Props> = ({ api, apiVersion, apiDefinition
         }
 
         payload = {
-          name: pkg.name.split('/').pop() || pkg.name,
-          command: pkg.runtime_hint,
-          args: pkg.runtime_arguments.map((arg) => arg.value),
+          name: pkg.identifier.split('/').pop() || pkg.identifier,
+          type: pkg.transport?.type || 'stdio',
+          command: pkg.runtimeHint,
+          args: ['-y', pkg.identifier, ...pkg.runtimeArguments.map((arg) => arg.value)],
+        };
+      } else {
+        const runtimeUri = apiDeployment?.server.runtimeUri[0];
+        if (!runtimeUri) return;
+
+        const matchingRemote = server.data?.remotes?.find((r) => r.url === runtimeUri);
+        const transportType = matchingRemote?.transport_type || 'sse';
+
+        payload = {
+          name: api.name,
+          type: transportType,
+          url: runtimeUri,
         };
       }
 
@@ -175,7 +186,7 @@ export const ApiInfoOptions: React.FC<Props> = ({ api, apiVersion, apiDefinition
           </div>
         )}
 
-        {api.kind === 'mcp' && !!apiDeployment?.server.runtimeUri.length && (
+        {api.kind === 'mcp' && (!!apiDeployment?.server.runtimeUri.length || !!server.data?.packages) && (
           <div className={styles.section}>
             <h3>
               <span className={styles.panelLabel}>
@@ -191,15 +202,17 @@ export const ApiInfoOptions: React.FC<Props> = ({ api, apiVersion, apiDefinition
 
             <h4>Install in:</h4>
             <p className={styles.buttonGroup}>
-              <Button
-                size="medium"
-                className={styles.actionButton}
-                icon={<img height={18} src={VsCodeLogo} alt="VS Code" />}
-                value={VsCodeTypes.Stable}
-                onClick={handleInstallMcpInVsCodeClick}
-              >
-                Visual Studio Code
-              </Button>
+              {!!apiDeployment?.server.runtimeUri.length && (
+                <Button
+                  size="medium"
+                  className={styles.actionButton}
+                  icon={<img height={18} src={VsCodeLogo} alt="VS Code" />}
+                  value={VsCodeTypes.Stable}
+                  onClick={handleInstallMcpInVsCodeClick}
+                >
+                  Visual Studio Code
+                </Button>
+              )}
 
               {!!server.data?.packages && (
                 <Button
@@ -214,15 +227,17 @@ export const ApiInfoOptions: React.FC<Props> = ({ api, apiVersion, apiDefinition
                 </Button>
               )}
 
-              <Button
-                size="medium"
-                className={styles.actionButton}
-                icon={<img height={18} src={VSCInsiders} alt="VS Code Insider" />}
-                value={VsCodeTypes.Insiders}
-                onClick={handleInstallMcpInVsCodeClick}
-              >
-                Visual Studio Code Insider
-              </Button>
+              {!!apiDeployment?.server.runtimeUri.length && (
+                <Button
+                  size="medium"
+                  className={styles.actionButton}
+                  icon={<img height={18} src={VSCInsiders} alt="VS Code Insider" />}
+                  value={VsCodeTypes.Insiders}
+                  onClick={handleInstallMcpInVsCodeClick}
+                >
+                  Visual Studio Code Insider
+                </Button>
+              )}
 
               {!!server.data?.packages && (
                 <Button
