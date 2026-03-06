@@ -172,14 +172,16 @@ export const AgentChat: React.FC = () => {
             Start a conversation with the APIM SRE Agent. Ask about Azure API Management service live site issues.
           </div>
         )}
-        {messages.map((msg, i) => (
-          <div
-            key={i}
-            className={`${styles.message} ${msg.role === 'user' ? styles.userMessage : styles.assistantMessage}`}
-          >
-            {msg.role === 'assistant' ? <MarkdownRenderer markdown={msg.content} /> : msg.content}
-          </div>
-        ))}
+        {messages.map((msg, i) =>
+          msg.role === 'assistant' && !msg.content ? null : (
+            <div
+              key={i}
+              className={`${styles.message} ${msg.role === 'user' ? styles.userMessage : styles.assistantMessage}`}
+            >
+              {msg.role === 'assistant' ? <MarkdownRenderer markdown={msg.content} /> : msg.content}
+            </div>
+          )
+        )}
         {isLoading && (
           <div className={styles.thinkingIndicator}>
             <Spinner size="tiny" label="Agent is thinking..." />
