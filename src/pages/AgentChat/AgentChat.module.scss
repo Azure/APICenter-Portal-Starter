@@ -45,7 +45,6 @@
   border-radius: 8px;
   font-size: 0.875rem;
   line-height: 1.5;
-  white-space: pre-wrap;
   word-break: break-word;
 }
 
@@ -54,6 +53,7 @@
   background-color: var(--blue-1);
   color: var(--grey-7);
   border: 1px solid var(--blue-2);
+  white-space: pre-wrap;
 }
 
 .assistantMessage {
@@ -61,6 +61,41 @@
   background-color: var(--grey-1);
   color: var(--grey-7);
   border: 1px solid var(--grey-3);
+
+  h1, h2, h3, h4 {
+    margin: 0.5rem 0 0.25rem;
+    &:first-child {
+      margin-top: 0;
+    }
+  }
+
+  ul, ol {
+    margin: 0.25rem 0;
+    padding-left: 1.25rem;
+  }
+
+  p {
+    margin: 0.25rem 0;
+  }
+
+  code {
+    background-color: var(--grey-2);
+    padding: 0.1rem 0.3rem;
+    border-radius: 3px;
+    font-size: 0.8125rem;
+  }
+
+  pre {
+    background-color: var(--grey-2);
+    padding: 0.5rem;
+    border-radius: 4px;
+    overflow-x: auto;
+
+    code {
+      background: none;
+      padding: 0;
+    }
+  }
 }
 
 .inputArea {

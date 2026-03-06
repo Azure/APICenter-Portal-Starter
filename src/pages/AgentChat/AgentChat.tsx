@@ -3,6 +3,7 @@ import { Button, Input, Spinner } from '@fluentui/react-components';
 import { Send24Regular, Bot24Regular } from '@fluentui/react-icons';
 import { Link, useNavigate } from 'react-router-dom';
 import { LocationsService } from '@/services/LocationsService';
+import MarkdownRenderer from '@/components/MarkdownRenderer';
 import styles from './AgentChat.module.scss';
 
 const AGENT_ENDPOINT = 'https://apimsynctesting.azure-api.net/comms-agent/responses';
@@ -12,32 +13,67 @@ interface ChatMessage {
   content: string;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function extractTextFromResponse(data: any): string {
-  // Response shape: { output, content, message, response, ... }
-  // output/content may be an array of items with { type: "output_text", text: "..." }
-  // or an array of message objects with their own content arrays
-  const candidates = [data.output, data.content, data.message, data.response];
-  for (const candidate of candidates) {
-    if (typeof candidate === 'string') {
-      return candidate;
-    }
-    if (Array.isArray(candidate)) {
-      const texts = candidate.map((item: any) => {
-        if (typeof item === 'string') return item;
-        if (item?.text) return item.text;
-        if (Array.isArray(item?.content)) {
-          return item.content
-            .map((c: any) => (typeof c === 'string' ? c : c?.text ?? ''))
-            .filter(Boolean)
-            .join('');
-        }
-        return '';
-      }).filter(Boolean);
-      if (texts.length) return texts.join('\n');
-    }
+/**
+ * Parses an SSE stream from the Responses API, invoking onDelta for each text token
+ * and onComplete when the stream ends.
+ */
+async function readSSEStream(
+  response: Response,
+  onDelta: (text: string) => void,
+  onComplete: () => void
+): Promise<void> {
+  const reader = response.body?.getReader();
+  if (!reader) {
+    throw new Error('No readable stream in response');
   }
-  return JSON.stringify(data);
+
+  const decoder = new TextDecoder();
+  let buffer = '';
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      // Keep the last potentially-incomplete line in the buffer
+      buffer = lines.pop() ?? '';
+
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        const payload = line.slice(6).trim();
+        if (payload === '[DONE]') continue;
+
+        try {
+          const event = JSON.parse(payload);
+          // Responses API streaming events:
+          //   response.output_text.delta  → incremental text token
+          //   response.completed          → full response (fallback)
+          if (event.type === 'response.output_text.delta' && event.delta) {
+            onDelta(event.delta);
+          } else if (event.type === 'response.completed' && event.response) {
+            // Fallback: if we somehow missed deltas, extract full text
+            const output = event.response.output;
+            if (Array.isArray(output)) {
+              for (const item of output) {
+                if (Array.isArray(item?.content)) {
+                  for (const c of item.content) {
+                    if (c?.text) onDelta(c.text);
+                  }
+                }
+              }
+            }
+          }
+        } catch {
+          // Skip malformed JSON lines
+        }
+      }
+    }
+  } finally {
+    reader.releaseLock();
+    onComplete();
+  }
 }
 
 export const AgentChat: React.FC = () => {
@@ -64,12 +100,16 @@ export const AgentChat: React.FC = () => {
     setInput('');
     setIsLoading(true);
 
+    // Add an empty assistant message that we'll stream into
+    setMessages((prev) => [...prev, { role: 'assistant', content: '' }]);
+
     try {
       const response = await fetch(AGENT_ENDPOINT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           input: trimmed,
+          stream: true,
         }),
       });
 
@@ -77,13 +117,31 @@ export const AgentChat: React.FC = () => {
         throw new Error(`Agent responded with status ${response.status}`);
       }
 
-      const data = await response.json();
-      const assistantContent = extractTextFromResponse(data);
-      setMessages((prev) => [...prev, { role: 'assistant', content: assistantContent }]);
+      await readSSEStream(
+        response,
+        (delta) => {
+          // Append each token to the last (assistant) message
+          setMessages((prev) => {
+            const updated = [...prev];
+            const last = updated[updated.length - 1];
+            updated[updated.length - 1] = { ...last, content: last.content + delta };
+            return updated;
+          });
+        },
+        () => setIsLoading(false)
+      );
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
-      setMessages((prev) => [...prev, { role: 'assistant', content: `Error: ${errorMessage}` }]);
-    } finally {
+      setMessages((prev) => {
+        const updated = [...prev];
+        const last = updated[updated.length - 1];
+        if (last.role === 'assistant' && !last.content) {
+          updated[updated.length - 1] = { ...last, content: `Error: ${errorMessage}` };
+        } else {
+          updated.push({ role: 'assistant', content: `Error: ${errorMessage}` });
+        }
+        return updated;
+      });
       setIsLoading(false);
     }
   }, [input, isLoading]);
@@ -119,7 +177,7 @@ export const AgentChat: React.FC = () => {
             key={i}
             className={`${styles.message} ${msg.role === 'user' ? styles.userMessage : styles.assistantMessage}`}
           >
-            {msg.content}
+            {msg.role === 'assistant' ? <MarkdownRenderer markdown={msg.content} /> : msg.content}
           </div>
         ))}
         {isLoading && (
