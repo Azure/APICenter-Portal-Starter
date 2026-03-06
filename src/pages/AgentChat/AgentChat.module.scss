@@ -1,0 +1,83 @@
+.chatPage {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 110px);
+  padding: 1.5rem;
+  box-sizing: border-box;
+  max-width: 900px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.chatHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--grey-2);
+  margin-bottom: 1rem;
+
+  h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--grey-7);
+  }
+}
+
+.backLink {
+  text-decoration: none;
+  font-size: 0.875rem;
+}
+
+.messages {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+}
+
+.message {
+  max-width: 80%;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.userMessage {
+  align-self: flex-end;
+  background-color: var(--blue-1);
+  color: var(--grey-7);
+  border: 1px solid var(--blue-2);
+}
+
+.assistantMessage {
+  align-self: flex-start;
+  background-color: var(--grey-1);
+  color: var(--grey-7);
+  border: 1px solid var(--grey-3);
+}
+
+.inputArea {
+  display: flex;
+  gap: 0.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--grey-2);
+}
+
+.inputField {
+  flex: 1;
+}
+
+.thinkingIndicator {
+  align-self: flex-start;
+  padding: 0.75rem 1rem;
+  color: var(--grey-5);
+  font-style: italic;
+  font-size: 0.875rem;
+}

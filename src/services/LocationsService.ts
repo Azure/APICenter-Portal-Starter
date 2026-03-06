@@ -34,6 +34,10 @@ export const LocationsService = {
     return `/skills/${name}`;
   },
 
+  getAgentChatUrl(name: string): string {
+    return `/agents/${name}`;
+  },
+
   getApiSchemaExplorerUrl(api: string, version: string, definition: string): string {
     return `/apis/${api}/versions/${version}/definitions/${definition}`;
   },

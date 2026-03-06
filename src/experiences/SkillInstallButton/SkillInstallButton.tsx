@@ -2,7 +2,6 @@ import React, { useCallback } from 'react';
 import { Button } from '@fluentui/react-components';
 import { ArrowDownloadRegular } from '@fluentui/react-icons';
 import VsCodeLogo from '@/assets/vsCodeLogo.svg';
-import VSCInsiders from '@/assets/vsCodeInsidersLogo.svg';
 import { buildSkillDeeplink, VsCodeVariant } from '@/utils/skillDeeplink';
 import styles from './SkillInstallButton.module.scss';
 
@@ -15,7 +14,6 @@ interface SkillInstallButtonProps {
 
 enum VsCodeTypes {
   Stable = 'vscode',
-  Insiders = 'vscode-insiders',
 }
 
 /**
@@ -56,16 +54,6 @@ export const SkillInstallButton: React.FC<SkillInstallButtonProps> = ({ skillNam
           onClick={handleClick}
         >
           Visual Studio Code
-        </Button>
-
-        <Button
-          size="medium"
-          className={styles.actionButton}
-          icon={<img height={18} src={VSCInsiders} alt="VS Code Insiders" />}
-          value={VsCodeTypes.Insiders}
-          onClick={handleClick}
-        >
-          Visual Studio Code Insiders
         </Button>
       </p>
 

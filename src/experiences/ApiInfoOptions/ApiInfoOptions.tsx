@@ -10,7 +10,6 @@ import { useApiSpecUrl } from '@/hooks/useApiSpecUrl';
 import { useDeploymentEnvironment } from '@/hooks/useDeploymentEnvironment';
 import { ApiDeployment } from '@/types/apiDeployment';
 import VsCodeLogo from '@/assets/vsCodeLogo.svg';
-import VSCInsiders from '@/assets/vsCodeInsidersLogo.svg';
 import { LocationsService } from '@/services/LocationsService';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import CopyLink from '@/components/CopyLink';
@@ -36,7 +35,6 @@ interface Props {
 
 enum VsCodeTypes {
   Stable = 'vscode',
-  Insiders = 'vscode-insiders',
 }
 
 const DEFAULT_INSTRUCTIONS = 'Gain comprehensive insights into the API.';
@@ -174,16 +172,6 @@ export const ApiInfoOptions: React.FC<Props> = ({ api, apiVersion, apiDefinition
                 >
                   Visual Studio Code
                 </Button>
-
-                <Button
-                  size="medium"
-                  className={styles.actionButton}
-                  icon={<img height={18} src={VSCInsiders} alt="VS Code Insider" />}
-                  value={VsCodeTypes.Insiders}
-                  onClick={handleOpenInVsCodeClick}
-                >
-                  Visual Studio Code Insider
-                </Button>
               </p>
             </>
           )}
@@ -230,7 +218,7 @@ export const ApiInfoOptions: React.FC<Props> = ({ api, apiVersion, apiDefinition
                   value={VsCodeTypes.Stable}
                   onClick={handleInstallMcpInVsCodeClick}
                 >
-                  Visual Studio Code
+                  Visual Studio Code{!!server.data?.packages && ' (remote)'}
                 </Button>
               )}
 
@@ -243,32 +231,7 @@ export const ApiInfoOptions: React.FC<Props> = ({ api, apiVersion, apiDefinition
                   data-local="true"
                   onClick={handleInstallMcpInVsCodeClick}
                 >
-                  Visual Studio Code (local)
-                </Button>
-              )}
-
-              {!!apiDeployment?.server.runtimeUri.length && (
-                <Button
-                  size="medium"
-                  className={styles.actionButton}
-                  icon={<img height={18} src={VSCInsiders} alt="VS Code Insider" />}
-                  value={VsCodeTypes.Insiders}
-                  onClick={handleInstallMcpInVsCodeClick}
-                >
-                  Visual Studio Code Insider
-                </Button>
-              )}
-
-              {!!server.data?.packages && (
-                <Button
-                  size="medium"
-                  className={styles.actionButton}
-                  icon={<img height={18} src={VSCInsiders} alt="VS Code Insider" />}
-                  value={VsCodeTypes.Insiders}
-                  data-local="true"
-                  onClick={handleInstallMcpInVsCodeClick}
-                >
-                  Visual Studio Code Insider (local)
+                  Visual Studio Code{!!apiDeployment?.server.runtimeUri.length && ' (local)'}
                 </Button>
               )}
             </p>

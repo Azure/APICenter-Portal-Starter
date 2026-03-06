@@ -7,6 +7,7 @@ import { useSearchFilters } from '@/hooks/useSearchFilters';
 import { useApis } from '@/hooks/useApis';
 import { useSearchQuery } from '@/hooks/useSearchQuery';
 import { apiAdapter } from '@/experiences/ApiList/apiAdapter';
+import { ApiMetadata } from '@/types/api';
 import { Layouts } from '@/types/layouts';
 import { apiListLayoutAtom } from '@/atoms/apiListLayoutAtom';
 import { LocationsService } from '@/services/LocationsService';
@@ -24,14 +25,32 @@ export const ApiList: React.FC = () => {
     isSemanticSearch: searchQuery.isSemanticSearch,
   });
 
-  const adaptedApiList = useMemo(() => apis.data?.map(apiAdapter), [apis.data]);
+  const mockAgent: ApiMetadata = useMemo(() => ({
+    name: 'apim-sre-agent',
+    title: 'APIM SRE Agent',
+    kind: 'agent',
+    summary: 'An SRE agent to assist Azure API Management engineering team with service live site.',
+    lifecycleStage: 'production',
+  }), []);
+
+  const adaptedApiList = useMemo(() => {
+    const adapted = apis.data?.map(apiAdapter) ?? [];
+    return [apiAdapter(mockAgent), ...adapted];
+  }, [apis.data, mockAgent]);
 
   const apiLinkPropsProvider = useCallback(
     (api: DocsApi) => {
-      const isSkill = (api as DocsApi & { type?: string }).type === 'skill';
-      const url = isSkill
-        ? LocationsService.getSkillInfoUrl(api.name)
-        : LocationsService.getApiInfoUrl(api.name);
+      const typedApi = api as DocsApi & { type?: string };
+      const isSkill = typedApi.type === 'skill';
+      const isAgent = typedApi.type === 'agent';
+      let url: string;
+      if (isAgent) {
+        url = LocationsService.getAgentChatUrl(api.name);
+      } else if (isSkill) {
+        url = LocationsService.getSkillInfoUrl(api.name);
+      } else {
+        url = LocationsService.getApiInfoUrl(api.name);
+      }
 
       return {
         href: url,
