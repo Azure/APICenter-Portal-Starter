@@ -1,0 +1,16 @@
+.skillInfoPanel {
+  .metadata {
+    margin-bottom: 32px;
+  }
+
+  .spinner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .tabsContainer {
+    margin-top: 40px;
+  }
+}

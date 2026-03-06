@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { Badge, Link, Spinner } from '@fluentui/react-components';
 import { Api as DocsApi, InfoTable, ApiCard, MarkdownRenderer } from 'api-docs-ui';
-import { useRecoilValue } from 'recoil';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { useNavigate } from 'react-router-dom';
 import { useSearchFilters } from '@/hooks/useSearchFilters';
 import { useApis } from '@/hooks/useApis';
@@ -9,12 +9,14 @@ import { useSearchQuery } from '@/hooks/useSearchQuery';
 import { apiAdapter } from '@/experiences/ApiList/apiAdapter';
 import { Layouts } from '@/types/layouts';
 import { apiListLayoutAtom } from '@/atoms/apiListLayoutAtom';
+import { selectedSkillAtom } from '@/atoms/selectedSkillAtom';
 import { LocationsService } from '@/services/LocationsService';
 import EmptyStateMessage from '@/components/EmptyStateMessage';
 import styles from './ApiList.module.scss';
 
 export const ApiList: React.FC = () => {
   const layout = useRecoilValue(apiListLayoutAtom);
+  const setSelectedSkill = useSetRecoilState(selectedSkillAtom);
   const searchFilters = useSearchFilters();
   const searchQuery = useSearchQuery();
   const navigate = useNavigate();
@@ -27,17 +29,32 @@ export const ApiList: React.FC = () => {
   const adaptedApiList = useMemo(() => apis.data?.map(apiAdapter), [apis.data]);
 
   const apiLinkPropsProvider = useCallback(
-    (api: DocsApi) => ({
-      href: LocationsService.getApiInfoUrl(api.name),
-      onClick: (e: React.MouseEvent) => {
-        if (e.ctrlKey || e.button !== 0) {
-          return;
-        }
-        e.preventDefault();
-        navigate(LocationsService.getApiInfoUrl(api.name));
-      },
-    }),
-    [navigate]
+    (api: DocsApi) => {
+      const isSkill = (api as DocsApi & { type?: string }).type === 'skill';
+
+      if (isSkill) {
+        return {
+          href: '#',
+          onClick: (e: React.MouseEvent) => {
+            e.preventDefault();
+            setSelectedSkill(api.name);
+          },
+        };
+      }
+
+      const url = LocationsService.getApiInfoUrl(api.name);
+      return {
+        href: url,
+        onClick: (e: React.MouseEvent) => {
+          if (e.ctrlKey || e.button !== 0) {
+            return;
+          }
+          e.preventDefault();
+          navigate(url);
+        },
+      };
+    },
+    [navigate, setSelectedSkill]
   );
 
   const handleLoadMore = useCallback(

@@ -30,6 +30,10 @@ export const LocationsService = {
     return `/api-info/${name}${window.location.search}`;
   },
 
+  getSkillInfoUrl(name: string): string {
+    return `/skills/${name}`;
+  },
+
   getApiSchemaExplorerUrl(api: string, version: string, definition: string): string {
     return `/apis/${api}/versions/${version}/definitions/${definition}`;
   },

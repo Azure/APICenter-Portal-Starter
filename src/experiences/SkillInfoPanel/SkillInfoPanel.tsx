@@ -7,47 +7,37 @@ import {
   DrawerHeader,
   DrawerHeaderTitle,
   Spinner,
-  Subtitle2,
   Tab,
   TabList,
 } from '@fluentui/react-components';
 import { Dismiss24Regular } from '@fluentui/react-icons';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useRecoilState } from 'recoil';
 import { useApi } from '@/hooks/useApi';
-import ApiAdditionalInfo from '../../experiences/ApiAdditionalInfo';
-import ApiInfoOptions from '../../experiences/ApiInfoOptions';
-import { LocationsService } from '@/services/LocationsService';
+import { selectedSkillAtom } from '@/atoms/selectedSkillAtom';
+import ApiAdditionalInfo from '@/experiences/ApiAdditionalInfo';
+import ApiInfoOptions from '@/experiences/ApiInfoOptions';
 import ApiDefinitionSelect, { ApiDefinitionSelection } from '@/experiences/ApiDefinitionSelect';
 import { EmptyStateMessage } from '@/components/EmptyStateMessage/EmptyStateMessage';
-import { setDocumentTitle } from '@/utils/dom';
-import styles from './ApiInfo.module.scss';
-
-interface RouteParams {
-  id: string;
-}
+import styles from './SkillInfoPanel.module.scss';
 
 enum Tabs {
   OPTIONS = 'options',
   MORE_DETAILS = 'more-details',
 }
 
-export const ApiInfo: React.FC = () => {
+export const SkillInfoPanel: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tabs>(Tabs.OPTIONS);
   const [definitionSelection, setDefinitionSelection] = useState<ApiDefinitionSelection | undefined>(undefined);
-
-  const { id } = useParams() as Readonly<RouteParams>;
-  const navigate = useNavigate();
-  const api = useApi(id);
-
-  setDocumentTitle(`API Info${api.data?.title ? ` - ${api.data.title}` : ''}`);
+  const [selectedSkill, setSelectedSkill] = useRecoilState(selectedSkillAtom);
+  const api = useApi(selectedSkill);
 
   const handleTabSelect = useCallback<React.ComponentProps<typeof TabList>['onTabSelect']>((_, { value }) => {
     setActiveTab(value as Tabs);
   }, []);
 
   const handleClose = useCallback(() => {
-    navigate(LocationsService.getHomeUrl(true));
-  }, [navigate]);
+    setSelectedSkill(null);
+  }, [setSelectedSkill]);
 
   function renderSelectedTabContent() {
     if (activeTab === Tabs.OPTIONS) {
@@ -71,24 +61,16 @@ export const ApiInfo: React.FC = () => {
     }
 
     if (!api.data) {
-      return <EmptyStateMessage>The specified API does not exist</EmptyStateMessage>;
+      return <EmptyStateMessage>The specified skill does not exist.</EmptyStateMessage>;
     }
 
     return (
       <>
         <p className={styles.metadata}>Last update {new Date(api.data.lastUpdated).toLocaleDateString()}</p>
 
-        <Subtitle2>Select the API version</Subtitle2>
-        <Divider className={styles.divider} />
-
-        <p>
-          Choose the API version, definition format, and deployment lifecycle stage. You can then download the
-          definition, open it in Visual Studio Code, or run it in Postman.
-        </p>
-
         <ApiDefinitionSelect
-          apiId={id}
-          hiddenSelects={api.data.kind === 'mcp' || api.data.kind === 'skill' ? ['definition', 'deployment'] : []}
+          apiId={selectedSkill}
+          hiddenSelects={['version', 'definition', 'deployment']}
           onSelectionChange={setDefinitionSelection}
         />
 
@@ -106,7 +88,7 @@ export const ApiInfo: React.FC = () => {
   }
 
   return (
-    <Drawer className={styles.apiInfo} size="medium" position="end" open onOpenChange={handleClose}>
+    <Drawer className={styles.skillInfoPanel} size="medium" position="end" open={!!selectedSkill} onOpenChange={handleClose}>
       <DrawerHeader>
         <DrawerHeaderTitle
           action={<Button appearance="subtle" aria-label="Close" icon={<Dismiss24Regular />} onClick={handleClose} />}
@@ -114,9 +96,9 @@ export const ApiInfo: React.FC = () => {
           {api.data?.title}
         </DrawerHeaderTitle>
       </DrawerHeader>
-      <DrawerBody>{renderContent()}</DrawerBody>
+      <DrawerBody>{selectedSkill && renderContent()}</DrawerBody>
     </Drawer>
   );
 };
 
-export default React.memo(ApiInfo);
+export default React.memo(SkillInfoPanel);

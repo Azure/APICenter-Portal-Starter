@@ -10,6 +10,7 @@ import ApiFilters from '@/experiences/ApiFilters';
 import ApiListLayoutSwitch from '@/experiences/ApiListLayoutSwitch';
 import ApiListSortingSelect from '@/experiences/ApiListSortingSelect';
 import { ActiveFiltersBadges } from '@/experiences/ActiveFiltersBadges/ActiveFiltersBadges';
+import SkillInfoPanel from '@/experiences/SkillInfoPanel';
 import { setDocumentTitle } from '@/utils/dom';
 import styles from './Home.module.scss';
 
@@ -46,9 +47,10 @@ export const Home: React.FC = () => {
   return (
     <div className={styles.home}>
       <Outlet />
+      <SkillInfoPanel />
 
       <div className={styles.searchPanel}>
-        <h1>API portal (preview)</h1>
+        <h1>API Management Team Tools</h1>
 
         <ApiSearchBox />
       </div>

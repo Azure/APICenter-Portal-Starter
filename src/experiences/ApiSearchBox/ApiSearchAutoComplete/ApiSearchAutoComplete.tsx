@@ -48,7 +48,10 @@ export const ApiSearchAutoComplete: React.FC<Props> = ({
         api,
       });
 
-      navigate(LocationsService.getApiInfoUrl(api.name));
+      const url = api.kind === 'skill'
+        ? LocationsService.getSkillInfoUrl(api.name)
+        : LocationsService.getApiInfoUrl(api.name);
+      navigate(url);
     },
     [navigate, recentSearches, searchResults]
   );
@@ -65,6 +68,9 @@ export const ApiSearchAutoComplete: React.FC<Props> = ({
 
   const getRecentRecordUrl = useCallback((recentRecord: RecentSearchData) => {
     if (recentRecord.type === RecentSearchType.API) {
+      if (recentRecord.api?.kind === 'skill') {
+        return LocationsService.getSkillInfoUrl(recentRecord.search);
+      }
       return LocationsService.getApiInfoUrl(recentRecord.search);
     }
 
@@ -87,7 +93,11 @@ export const ApiSearchAutoComplete: React.FC<Props> = ({
 
       switch (recentRecord.type) {
         case RecentSearchType.API:
-          navigate(LocationsService.getApiInfoUrl(recentRecord.search));
+          if (recentRecord.api?.kind === 'skill') {
+            navigate(LocationsService.getSkillInfoUrl(recentRecord.search));
+          } else {
+            navigate(LocationsService.getApiInfoUrl(recentRecord.search));
+          }
           break;
 
         case RecentSearchType.QUERY:
@@ -217,7 +227,7 @@ export const ApiSearchAutoComplete: React.FC<Props> = ({
         {searchResults.map((api) => (
           <Link
             key={api.name}
-            to={LocationsService.getApiInfoUrl(api.name)}
+            to={api.kind === 'skill' ? LocationsService.getSkillInfoUrl(api.name) : LocationsService.getApiInfoUrl(api.name)}
             className={styles.option}
             data-name={api.name}
             onClick={handleSearchResultClick}
