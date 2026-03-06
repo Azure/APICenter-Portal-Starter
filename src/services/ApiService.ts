@@ -9,7 +9,7 @@ import { ApiEnvironment } from '@/types/apiEnvironment';
 import { ActiveFilterData } from '@/types/apiFilters';
 import { ApiVersion } from '@/types/apiVersion';
 import { IApiService, PaginatedResult } from '@/types/services/IApiService';
-import { Server } from '@/types/server';
+import { Server, ServerResponse } from '@/types/server';
 import { MetadataSchema } from '@/types/metadataSchema';
 import { DEFAULT_PAGE_SIZE } from '@/constants';
 
@@ -55,7 +55,8 @@ export const ApiService: IApiService = {
   },
 
   async getServer(name: string): Promise<Server | undefined> {
-    return await HttpService.get<Server>(`/v0/servers/${name}`);
+    const response = await HttpService.get<ServerResponse>(`/v0/servers/${name}`);
+    return response?.server;
   },
 
   async getVersions(apiName: string): Promise<ApiVersion[]> {

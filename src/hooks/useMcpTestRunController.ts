@@ -31,8 +31,7 @@ export function useMcpTestRunController(
 
     setMcpService((prev) => {
       prev?.closeConnection();
-      // return getMcpService(deployment?.server.runtimeUri[0]);
-      return getMcpService('http://localhost:3000');
+      return getMcpService(deployment?.server.runtimeUri[0]);
     });
   }, [deployment?.server.runtimeUri, shouldConnect]);
 

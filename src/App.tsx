@@ -4,6 +4,7 @@ import { useSetRecoilState } from 'recoil';
 import Home from '@/pages/Home';
 import ApiInfo from '@/pages/ApiInfo';
 import ApiSpec from '@/pages/ApiSpec';
+import SkillInfo from '@/pages/SkillInfo';
 import { configAtom } from '@/atoms/configAtom';
 import Layout from './Layout';
 
@@ -33,6 +34,10 @@ const App: React.FC = () => {
           {
             path: 'apis/:apiName/versions/:versionName/definitions/:definitionName',
             element: <ApiSpec />,
+          },
+          {
+            path: 'skills/:name',
+            element: <SkillInfo />,
           },
         ],
       },

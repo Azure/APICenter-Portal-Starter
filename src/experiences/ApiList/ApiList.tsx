@@ -27,16 +27,23 @@ export const ApiList: React.FC = () => {
   const adaptedApiList = useMemo(() => apis.data?.map(apiAdapter), [apis.data]);
 
   const apiLinkPropsProvider = useCallback(
-    (api: DocsApi) => ({
-      href: LocationsService.getApiInfoUrl(api.name),
-      onClick: (e: React.MouseEvent) => {
-        if (e.ctrlKey || e.button !== 0) {
-          return;
-        }
-        e.preventDefault();
-        navigate(LocationsService.getApiInfoUrl(api.name));
-      },
-    }),
+    (api: DocsApi) => {
+      const isSkill = (api as DocsApi & { type?: string }).type === 'skill';
+      const url = isSkill
+        ? LocationsService.getSkillInfoUrl(api.name)
+        : LocationsService.getApiInfoUrl(api.name);
+
+      return {
+        href: url,
+        onClick: (e: React.MouseEvent) => {
+          if (e.ctrlKey || e.button !== 0) {
+            return;
+          }
+          e.preventDefault();
+          navigate(url);
+        },
+      };
+    },
     [navigate]
   );
 

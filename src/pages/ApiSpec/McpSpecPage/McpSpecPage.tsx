@@ -3,7 +3,7 @@ import { Spinner } from '@fluentui/react-components';
 import ApiAccessAuthForm from '@/experiences/ApiAccessAuthForm';
 import { ApiDefinitionId } from '@/types/apiDefinition';
 import { ApiDeployment } from '@/types/apiDeployment';
-import { getMcpService } from '@/services/McpService';
+import { getMcpService, McpUnauthorizedError } from '@/services/McpService';
 import { ApiSpecReader } from '@/types/apiSpec';
 import { getSpecReader } from '@/specReaders/getSpecReader';
 import { useApiDefinition } from '@/hooks/useApiDefinition';
@@ -33,6 +33,7 @@ export const McpSpecPage: React.FC<Props> = ({ definitionId, deployment }) => {
   const [authCredentials, setAuthCredentials] = useState<ApiAuthCredentials | undefined>();
   const [apiSpec, setApiSpec] = useState<ApiSpecReader>();
   const [isSpecLoading, setIsSpecLoading] = useState(false);
+  const [error, setError] = useState<string | undefined>();
 
   const ApiService = useApiService();
   const definition = useApiDefinition(definitionId);
@@ -82,6 +83,7 @@ export const McpSpecPage: React.FC<Props> = ({ definitionId, deployment }) => {
 
     try {
       setIsSpecLoading(true);
+      setError(undefined);
       const spec = await mcpService.collectMcpSpec();
       const reader = await getSpecReader(spec, {
         ...definition.data,
@@ -92,6 +94,12 @@ export const McpSpecPage: React.FC<Props> = ({ definitionId, deployment }) => {
         },
       });
       setApiSpec(reader);
+    } catch (err) {
+      if (err instanceof McpUnauthorizedError) {
+        setError('Access denied. The MCP server returned 401 Unauthorized. Please verify your credentials and try again.');
+      } else {
+        setError('Failed to connect to the MCP server. Please try again later.');
+      }
     } finally {
       setIsSpecLoading(false);
     }
@@ -130,6 +138,10 @@ export const McpSpecPage: React.FC<Props> = ({ definitionId, deployment }) => {
 
   if (!isAuthorized) {
     return null;
+  }
+
+  if (error) {
+    return <div className={styles.authPanel}>{error}</div>;
   }
 
   return <ApiSpecPageLayout definitionId={definitionId} deployment={deployment} apiSpec={apiSpec} />;

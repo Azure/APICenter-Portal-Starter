@@ -86,7 +86,11 @@ export const ApiInfo: React.FC = () => {
           definition, open it in Visual Studio Code, or run it in Postman.
         </p>
 
-        <ApiDefinitionSelect apiId={id} onSelectionChange={setDefinitionSelection} />
+        <ApiDefinitionSelect
+          apiId={id}
+          hiddenSelects={api.data.kind === 'mcp' || api.data.kind === 'skill' ? ['definition', 'deployment'] : []}
+          onSelectionChange={setDefinitionSelection}
+        />
 
         <div className={styles.tabsContainer}>
           <TabList selectedValue={activeTab} onTabSelect={handleTabSelect}>
