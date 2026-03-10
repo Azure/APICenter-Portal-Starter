@@ -1,21 +1,28 @@
 import React, { useCallback, useMemo } from 'react';
 import { Badge, Link, Spinner } from '@fluentui/react-components';
-import { Api as DocsApi, InfoTable, ApiCard, MarkdownRenderer } from 'api-docs-ui';
 import { useRecoilValue } from 'recoil';
 import { useNavigate } from 'react-router-dom';
 import { useSearchFilters } from '@/hooks/useSearchFilters';
 import { useApis } from '@/hooks/useApis';
 import { useSearchQuery } from '@/hooks/useSearchQuery';
+import { ApiCard, type ApiCardApi } from '@/components/ApiCard';
+import { InfoTable } from '@/components/InfoTable';
+import MarkdownRenderer from '@/components/MarkdownRenderer';
+import { formatKindDisplay } from '@/utils/formatKind';
 import { apiAdapter } from '@/experiences/ApiList/apiAdapter';
+import { ContributeCard } from '@/experiences/ContributeCard';
 import { ApiMetadata } from '@/types/api';
+import { AppCapabilities } from '@/types/config';
 import { Layouts } from '@/types/layouts';
 import { apiListLayoutAtom } from '@/atoms/apiListLayoutAtom';
+import { configAtom } from '@/atoms/configAtom';
 import { LocationsService } from '@/services/LocationsService';
 import EmptyStateMessage from '@/components/EmptyStateMessage';
 import styles from './ApiList.module.scss';
 
 export const ApiList: React.FC = () => {
   const layout = useRecoilValue(apiListLayoutAtom);
+  const config = useRecoilValue(configAtom);
   const searchFilters = useSearchFilters();
   const searchQuery = useSearchQuery();
   const navigate = useNavigate();
@@ -39,8 +46,8 @@ export const ApiList: React.FC = () => {
   }, [apis.data, mockAgent]);
 
   const apiLinkPropsProvider = useCallback(
-    (api: DocsApi) => {
-      const typedApi = api as DocsApi & { type?: string };
+    (api: ApiCardApi) => {
+      const typedApi = api as ApiCardApi & { type?: string };
       const isSkill = typedApi.type === 'skill';
       const isAgent = typedApi.type === 'agent';
       let url: string;
@@ -98,14 +105,20 @@ export const ApiList: React.FC = () => {
     return <Spinner size="small" />;
   }
 
+  const showContributeCard = config.capabilities?.includes(AppCapabilities.CONTRIBUTIONS)
+    && !!config.contributions?.gitRepositoryUrl;
+
   if (!apis.data.length) {
-    return <EmptyStateMessage>Can’t find any search results. Try a different search term.</EmptyStateMessage>;
+    return <EmptyStateMessage>Can't find any search results. Try a different search term.</EmptyStateMessage>;
   }
 
   if (layout === Layouts.CARDS) {
     return (
       <>
         <div className={styles.cards}>
+          {showContributeCard && (
+            <ContributeCard url={config.contributions!.gitRepositoryUrl} />
+          )}
           {adaptedApiList.map((api) => (
             <ApiCard key={api.name} api={api} linkProps={apiLinkPropsProvider(api)} showType />
           ))}
@@ -134,11 +147,16 @@ export const ApiList: React.FC = () => {
               )}
             </InfoTable.Cell>
             <InfoTable.Cell>
-              {api.type && (
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
                 <Badge appearance="tint" color="informative" shape="rounded">
-                  {api.type}
+                  {['skill', 'a2a', 'mcp'].includes(api.type?.toLowerCase() ?? '') ? formatKindDisplay(api.type!) : 'API'}
                 </Badge>
-              )}
+                {!!api.type && !['skill', 'a2a', 'mcp'].includes(api.type.toLowerCase()) && (
+                  <Badge appearance="tint" color="informative" shape="rounded">
+                    {formatKindDisplay(api.type)}
+                  </Badge>
+                )}
+              </div>
             </InfoTable.Cell>
           </InfoTable.Row>
         ))}

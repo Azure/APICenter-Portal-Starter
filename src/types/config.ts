@@ -2,6 +2,7 @@ import { MsalSettings } from './msalSettings';
 
 export enum AppCapabilities {
   SEMANTIC_SEARCH = 'semanticSearch',
+  CONTRIBUTIONS = 'contributions',
 }
 
 /**
@@ -32,4 +33,12 @@ export interface Config {
    * The capabilities supported by the service, depending on SKU and other parameters.
    */
   capabilities: AppCapabilities[];
+
+  /**
+   * The contributions settings for the portal.
+   */
+  contributions?: {
+    enabled: boolean;
+    gitRepositoryUrl: string;
+  };
 }

@@ -1,0 +1,35 @@
+.tableContainer {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.infoTable {
+  width: 100%;
+}
+
+.collapsibleRow {
+  cursor: pointer;
+}
+
+.expandButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  padding: 0;
+}
+
+.chevron {
+  display: inline-block;
+  font-size: 0.625rem;
+  transition: transform 0.15s ease;
+}
+
+.chevronExpanded {
+  composes: chevron;
+  transform: rotate(90deg);
+}
