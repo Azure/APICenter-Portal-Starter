@@ -93,7 +93,7 @@ export const ApiSearchBox: React.FC = () => {
     return <Search24Regular style={{ color: 'var(--blue-3)' }} />;
   }
 
-  let placeholder = 'Search for an API';
+  let placeholder = 'Search the registry';
   if (isSemanticSearchEnabled) {
     placeholder = 'Describe the API you are looking for';
   }

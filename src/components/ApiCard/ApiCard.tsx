@@ -1,6 +1,5 @@
 import React from 'react';
 import { Badge } from '@fluentui/react-components';
-import MarkdownRenderer from '@/components/MarkdownRenderer';
 import { formatKindDisplay } from '@/utils/formatKind';
 import styles from './ApiCard.module.scss';
 
@@ -43,7 +42,7 @@ export const ApiCard: React.FC<Props> = ({ api, showType, linkProps }) => (
         </div>
       )}
       <h4 className={styles.title}>{api.displayName}</h4>
-      {api.description && <MarkdownRenderer markdown={api.description} maxLength={250} />}
+      {api.description && <p className={styles.description}>{api.description}</p>}
     </div>
   </a>
 );

@@ -48,7 +48,7 @@ export const Home: React.FC = () => {
       <Outlet />
 
       <div className={styles.searchPanel}>
-        <h1>API portal</h1>
+        <h1>Tools registry</h1>
 
         <ApiSearchBox />
       </div>

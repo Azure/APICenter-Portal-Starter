@@ -36,6 +36,17 @@
   line-height: 1.5rem;
 }
 
+.description {
+  margin: 0;
+  color: var(--colorNeutralForeground2);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 .link {
   text-decoration: none;
 }

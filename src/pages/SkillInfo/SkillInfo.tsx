@@ -51,8 +51,8 @@ export const SkillInfo: React.FC = () => {
       <section>
         <div className={styles.content}>
           <div className={styles.description}>
-            {api.data.description ? (
-              <MarkdownRenderer markdown={api.data.description} />
+            {(api.data.description || api.data.summary) ? (
+              <MarkdownRenderer markdown={(api.data.description || api.data.summary)!} />
             ) : (
               <EmptyStateMessage>No description available for this skill.</EmptyStateMessage>
             )}
