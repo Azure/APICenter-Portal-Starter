@@ -1,12 +1,32 @@
 import { atom } from 'recoil';
-import { ActiveFilterData, FilterType } from '@/types/apiFilters';
+import { ActiveFilterData, FilterOperator, FilterType } from '@/types/apiFilters';
 import { ApiFilterParameters } from '@/config/apiFilters';
+
+const OPERATOR_SEPARATOR = '::';
 
 function deserializeFilters(): ActiveFilterData[] {
   const searchParams = new URLSearchParams(window.location.search);
-  return Object.keys(ApiFilterParameters).flatMap((type: FilterType) => {
-    return searchParams.getAll(type).map((value) => ({ type, value }));
+  const filters: ActiveFilterData[] = [];
+
+  searchParams.forEach((rawValue, key) => {
+    const isKnownFilter = key in ApiFilterParameters;
+    const isCustomProperty = key.startsWith('customProperties/');
+
+    if (!isKnownFilter && !isCustomProperty) return;
+
+    let operator: FilterOperator | undefined;
+    let value = rawValue;
+
+    const sepIndex = rawValue.indexOf(OPERATOR_SEPARATOR);
+    if (sepIndex !== -1) {
+      operator = rawValue.substring(0, sepIndex) as FilterOperator;
+      value = rawValue.substring(sepIndex + OPERATOR_SEPARATOR.length);
+    }
+
+    filters.push({ type: key, value, operator });
   });
+
+  return filters;
 }
 
 export const apiSearchFiltersAtom = atom<ActiveFilterData[]>({
@@ -20,10 +40,16 @@ export const apiSearchFiltersAtom = atom<ActiveFilterData[]>({
       onSet((filters) => {
         const url = new URL(window.location.href);
 
-        const filtersByType = Object.fromEntries(Object.keys(ApiFilterParameters).map((key) => [key, []])) as Record<
-          FilterType,
-          ActiveFilterData[]
-        >;
+        // Collect all filter types (both static and dynamic)
+        const allTypes = new Set<string>([
+          ...Object.keys(ApiFilterParameters),
+          ...filters.map((f) => f.type),
+        ]);
+
+        const filtersByType: Record<string, ActiveFilterData[]> = {};
+        for (const type of allTypes) {
+          filtersByType[type] = [];
+        }
 
         filters.forEach((entry) => {
           filtersByType[entry.type].push(entry);
@@ -32,7 +58,10 @@ export const apiSearchFiltersAtom = atom<ActiveFilterData[]>({
         Object.entries(filtersByType).forEach(([type, entries]) => {
           url.searchParams.delete(type);
           entries.forEach((entry) => {
-            url.searchParams.append(type, entry.value);
+            const serialized = entry.operator
+              ? `${entry.operator}${OPERATOR_SEPARATOR}${entry.value}`
+              : entry.value;
+            url.searchParams.append(type, serialized);
           });
         });
 

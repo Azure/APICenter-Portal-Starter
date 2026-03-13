@@ -14,6 +14,8 @@ export interface MetadataSchema {
 export interface ParsedMetadataSchema {
   type?: string;
   title?: string;
+  enum?: string[];
+  oneOf?: Array<{ const?: string; description?: string }>;
   [key: string]: unknown;
 }
 
@@ -24,4 +26,5 @@ export interface MetadataSchemaWithTitle {
   name: string;
   title: string;
   type?: string;
+  options?: Array<{ value: string; label: string }>;
 }

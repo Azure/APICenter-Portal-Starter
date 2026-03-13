@@ -91,7 +91,8 @@
       color: var(--grey-5);
     }
 
-    &:hover {
+    &:hover,
+    &[data-active="true"] {
       background: var(--grey-1);
 
       .deleteBtn {

@@ -25,7 +25,12 @@ export const ApiService: IApiService = {
       const filtersByType = groupBy(filters, 'type');
       const filtersString = Object.values(filtersByType)
         .map((filters) => {
-          const filtersSet = filters.map((filter) => `${filter.type} eq '${filter.value}'`);
+          const filtersSet = filters.map((filter) => {
+            if (filter.operator === 'contains') {
+              return `contains(${filter.type}, '${filter.value}')`;
+            }
+            return `${filter.type} eq '${filter.value}'`;
+          });
           return `(${filtersSet.join(' or ')})`;
         })
         .join(' and ');

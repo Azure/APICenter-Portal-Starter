@@ -224,7 +224,7 @@ export const ApiSearchAutoComplete: React.FC<Props> = ({
     return (
       <>
         <h6>Suggestions</h6>
-        {searchResults.map((api) => (
+        {searchResults.slice(0, 5).map((api) => (
           <Link
             key={api.name}
             to={api.kind === 'skill' ? LocationsService.getSkillInfoUrl(api.name) : LocationsService.getApiInfoUrl(api.name)}

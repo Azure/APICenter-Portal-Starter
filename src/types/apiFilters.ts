@@ -1,4 +1,6 @@
-export type FilterType = 'kind' | 'lifecycleStage';
+export type FilterType = string;
+
+export type FilterOperator = 'eq' | 'contains';
 
 export interface FilterMetadata {
   label: string;
@@ -8,4 +10,5 @@ export interface FilterMetadata {
 export interface ActiveFilterData {
   type: FilterType;
   value: string;
+  operator?: FilterOperator;
 }

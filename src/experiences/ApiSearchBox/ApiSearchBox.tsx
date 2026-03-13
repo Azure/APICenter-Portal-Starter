@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Dismiss16Regular, Search24Regular } from '@fluentui/react-icons';
 import { Button, Input } from '@fluentui/react-components';
 import { useLocation } from 'react-router-dom';
@@ -17,6 +17,8 @@ export const ApiSearchBox: React.FC = () => {
   const [isSemanticSearchEnabled, setIsSemanticSearchEnabled] = useState(false);
   const [value, setValue] = useState('');
   const [isFocused, setIsFocused] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(-1);
+  const autoCompleteRef = useRef<HTMLDivElement>(null);
 
   const config = useRecoilValue(configAtom);
   const isSemanticSearchAvailable = config.capabilities.includes(AppCapabilities.SEMANTIC_SEARCH);
@@ -45,6 +47,23 @@ export const ApiSearchBox: React.FC = () => {
     activeElement.blur();
   }, [location]);
 
+  useEffect(() => {
+    setActiveIndex(-1);
+  }, [value, shouldShowAutoComplete]);
+
+  useEffect(() => {
+    if (!autoCompleteRef.current) return;
+    const options = autoCompleteRef.current.querySelectorAll<HTMLElement>('a');
+    options.forEach((opt, i) => {
+      if (i === activeIndex) {
+        opt.setAttribute('data-active', 'true');
+        opt.scrollIntoView({ block: 'nearest' });
+      } else {
+        opt.removeAttribute('data-active');
+      }
+    });
+  }, [activeIndex]);
+
   const preventFocusLoss = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
   }, []);
@@ -52,6 +71,23 @@ export const ApiSearchBox: React.FC = () => {
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setValue(e.target.value);
   }, []);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (!autoCompleteRef.current) return;
+    const options = autoCompleteRef.current.querySelectorAll('a');
+    if (!options.length) return;
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setActiveIndex(prev => (prev + 1) % options.length);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setActiveIndex(prev => (prev <= 0 ? options.length - 1 : prev - 1));
+    } else if (e.key === 'Enter' && activeIndex >= 0 && activeIndex < options.length) {
+      e.preventDefault();
+      options[activeIndex].click();
+    }
+  }, [activeIndex]);
 
   const handleClear = useCallback(() => {
     setValue('');
@@ -119,10 +155,11 @@ export const ApiSearchBox: React.FC = () => {
         onChange={handleChange}
         onFocus={handleFocus}
         onBlur={handleBlur}
+        onKeyDown={handleKeyDown}
       />
 
       {shouldShowAutoComplete && (
-        <div onMouseDown={preventFocusLoss}>
+        <div ref={autoCompleteRef} onMouseDown={preventFocusLoss}>
           <ApiSearchAutoComplete
             searchResults={!!value ? apis.data : undefined}
             isLoading={apis.isLoading && !isSemanticSearchEnabled}
