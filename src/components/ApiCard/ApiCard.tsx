@@ -17,7 +17,7 @@ interface Props {
   showType?: boolean;
 }
 
-const STANDALONE_KINDS = ['skill', 'a2a', 'mcp', 'plugin'];
+const STANDALONE_KINDS = ['skill', 'a2a', 'mcp', 'plugin', 'agent'];
 
 function getCategoryLabel(type?: string): string {
   if (type && STANDALONE_KINDS.includes(type.toLowerCase())) {

@@ -149,9 +149,9 @@ export const ApiList: React.FC = () => {
             <InfoTable.Cell>
               <div style={{ display: 'flex', gap: '0.5rem' }}>
                 <Badge appearance="tint" color="informative" shape="rounded">
-                  {['skill', 'a2a', 'mcp', 'plugin'].includes(api.type?.toLowerCase() ?? '') ? formatKindDisplay(api.type!) : 'API'}
+                  {['skill', 'a2a', 'mcp', 'plugin', 'agent'].includes(api.type?.toLowerCase() ?? '') ? formatKindDisplay(api.type!) : 'API'}
                 </Badge>
-                {!!api.type && !['skill', 'a2a', 'mcp', 'plugin'].includes(api.type.toLowerCase()) && (
+                {!!api.type && !['skill', 'a2a', 'mcp', 'plugin', 'agent'].includes(api.type.toLowerCase()) && (
                   <Badge appearance="tint" color="informative" shape="rounded">
                     {formatKindDisplay(api.type)}
                   </Badge>
