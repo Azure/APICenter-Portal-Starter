@@ -4,6 +4,7 @@ import {
   BotRegular,
   LinkMultipleRegular,
   FlashRegular,
+  PuzzlePieceRegular,
 } from '@fluentui/react-icons';
 import classNames from 'classnames';
 import { useSearchFilters } from '@/hooks/useSearchFilters';
@@ -21,6 +22,7 @@ const categories: CategoryDef[] = [
   { label: 'APIs', kindValue: 'rest', icon: <PlugConnectedRegular /> },
   { label: 'Agents', kindValue: 'agent', icon: <BotRegular /> },
   { label: 'MCP servers', kindValue: 'mcp', icon: <LinkMultipleRegular /> },
+  { label: 'Plugins', kindValue: 'plugin', icon: <PuzzlePieceRegular /> },
   { label: 'Skills', kindValue: 'skill', icon: <FlashRegular /> },
 ];
 

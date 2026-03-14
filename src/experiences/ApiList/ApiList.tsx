@@ -108,7 +108,7 @@ export const ApiList: React.FC = () => {
   const showContributeCard = config.capabilities?.includes(AppCapabilities.CONTRIBUTIONS)
     && !!config.contributions?.gitRepositoryUrl;
 
-  if (!apis.data.length) {
+  if (!apis.data?.length) {
     return <EmptyStateMessage>Can't find any search results. Try a different search term.</EmptyStateMessage>;
   }
 
@@ -149,9 +149,9 @@ export const ApiList: React.FC = () => {
             <InfoTable.Cell>
               <div style={{ display: 'flex', gap: '0.5rem' }}>
                 <Badge appearance="tint" color="informative" shape="rounded">
-                  {['skill', 'a2a', 'mcp'].includes(api.type?.toLowerCase() ?? '') ? formatKindDisplay(api.type!) : 'API'}
+                  {['skill', 'a2a', 'mcp', 'plugin'].includes(api.type?.toLowerCase() ?? '') ? formatKindDisplay(api.type!) : 'API'}
                 </Badge>
-                {!!api.type && !['skill', 'a2a', 'mcp'].includes(api.type.toLowerCase()) && (
+                {!!api.type && !['skill', 'a2a', 'mcp', 'plugin'].includes(api.type.toLowerCase()) && (
                   <Badge appearance="tint" color="informative" shape="rounded">
                     {formatKindDisplay(api.type)}
                   </Badge>

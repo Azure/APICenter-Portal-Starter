@@ -2,12 +2,13 @@ import { FilterMetadata, FilterType } from '@/types/apiFilters';
 
 export const ApiFilterParameters: Record<FilterType, FilterMetadata> = {
   kind: {
-    label: 'API type',
+    label: 'Asset type',
     options: [
       { value: 'rest', label: 'REST' },
       { value: 'mcp', label: 'MCP' },
       { value: 'skill', label: 'Skill' },
       { value: 'a2a', label: 'A2A' },
+      { value: 'plugin', label: 'Plugin' },
       { value: 'graphql', label: 'GraphQL' },
       { value: 'grpc', label: 'gRPC' },
       { value: 'soap', label: 'SOAP' },

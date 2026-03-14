@@ -40,9 +40,9 @@ export const SkillInfo: React.FC = () => {
       <div className={styles.header}>
         <section>
           <h1>{api.data.title}</h1>
-          {api.data.lastUpdated && (
+          {api.data.summary && (
             <p className={styles.lastUpdated}>
-              Last update {new Date(api.data.lastUpdated).toLocaleDateString()}
+              {api.data.summary}
             </p>
           )}
         </section>

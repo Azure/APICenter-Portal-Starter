@@ -88,7 +88,7 @@ export const ApiInfo: React.FC = () => {
 
         <ApiDefinitionSelect
           apiId={id}
-          hiddenSelects={api.data.kind === 'mcp' || api.data.kind === 'skill' ? ['definition', 'deployment'] : []}
+          hiddenSelects={['mcp', 'skill', 'plugin'].includes(api.data.kind ?? '') ? ['definition', 'deployment'] : []}
           onSelectionChange={setDefinitionSelection}
         />
 
