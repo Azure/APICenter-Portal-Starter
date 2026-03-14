@@ -1,6 +1,8 @@
 @use '@/styles/screen';
 
 .home {
+  overflow-x: hidden;
+
   .searchPanel {
     box-sizing: border-box;
     min-height: 200px;
@@ -21,7 +23,7 @@
       gap: 0.75rem;
       box-sizing: border-box;
       width: 100%;
-      max-width: 1440px;
+      max-width: 1140px;
       margin: 0 auto;
       padding: 0 32px;
 
@@ -48,11 +50,14 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 0.5rem;
       padding: 0.75rem 0;
+      flex-wrap: wrap;
     }
 
     .mainContent {
       width: 100%;
+      min-width: 0;
 
       .emptyState {
         color: var(--grey-4);

@@ -1,8 +1,18 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { Button, Input, Spinner } from '@fluentui/react-components';
-import { Send24Regular, Bot24Regular } from '@fluentui/react-icons';
-import { Link, useNavigate } from 'react-router-dom';
+import { Button, Input, Spinner, Tab, TabList, Badge } from '@fluentui/react-components';
+import {
+  Send24Regular,
+  Bot24Regular,
+  ThumbLike20Regular,
+  ThumbDislike20Regular,
+  Share24Regular,
+  Open24Regular,
+  DocumentRegular,
+  ChatRegular,
+} from '@fluentui/react-icons';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { LocationsService } from '@/services/LocationsService';
+import { useApi } from '@/hooks/useApi';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import styles from './AgentChat.module.scss';
 
@@ -11,6 +21,7 @@ const AGENT_ENDPOINT = 'https://apimsynctesting.azure-api.net/comms-agent/respon
 interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
+  timestamp: Date;
 }
 
 /**
@@ -47,13 +58,9 @@ async function readSSEStream(
 
         try {
           const event = JSON.parse(payload);
-          // Responses API streaming events:
-          //   response.output_text.delta  → incremental text token
-          //   response.completed          → full response (fallback)
           if (event.type === 'response.output_text.delta' && event.delta) {
             onDelta(event.delta);
           } else if (event.type === 'response.completed' && event.response) {
-            // Fallback: if we somehow missed deltas, extract full text
             const output = event.response.output;
             if (Array.isArray(output)) {
               for (const item of output) {
@@ -76,7 +83,26 @@ async function readSSEStream(
   }
 }
 
+function formatTimestamp(date: Date): string {
+  return date.toLocaleString(undefined, {
+    month: 'numeric',
+    day: 'numeric',
+    year: '2-digit',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  });
+}
+
+enum AgentTabs {
+  PLAYGROUND = 'playground',
+  DOCUMENTATION = 'documentation',
+}
+
 export const AgentChat: React.FC = () => {
+  const { name } = useParams<{ name: string }>();
+  const api = useApi(name);
+  const [activeTab, setActiveTab] = useState<AgentTabs>(AgentTabs.PLAYGROUND);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -95,13 +121,12 @@ export const AgentChat: React.FC = () => {
     const trimmed = input.trim();
     if (!trimmed || isLoading) return;
 
-    const userMessage: ChatMessage = { role: 'user', content: trimmed };
+    const userMessage: ChatMessage = { role: 'user', content: trimmed, timestamp: new Date() };
     setMessages((prev) => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
 
-    // Add an empty assistant message that we'll stream into
-    setMessages((prev) => [...prev, { role: 'assistant', content: '' }]);
+    setMessages((prev) => [...prev, { role: 'assistant', content: '', timestamp: new Date() }]);
 
     try {
       const response = await fetch(AGENT_ENDPOINT, {
@@ -120,7 +145,6 @@ export const AgentChat: React.FC = () => {
       await readSSEStream(
         response,
         (delta) => {
-          // Append each token to the last (assistant) message
           setMessages((prev) => {
             const updated = [...prev];
             const last = updated[updated.length - 1];
@@ -138,7 +162,7 @@ export const AgentChat: React.FC = () => {
         if (last.role === 'assistant' && !last.content) {
           updated[updated.length - 1] = { ...last, content: `Error: ${errorMessage}` };
         } else {
-          updated.push({ role: 'assistant', content: `Error: ${errorMessage}` });
+          updated.push({ role: 'assistant', content: `Error: ${errorMessage}`, timestamp: new Date() });
         }
         return updated;
       });
@@ -156,58 +180,129 @@ export const AgentChat: React.FC = () => {
     [sendMessage]
   );
 
+  const agentTitle = api.data?.title || name || 'Agent';
+  const agentSummary = api.data?.summary || api.data?.description;
+  const agentKind = api.data?.kind;
+  const lastUpdated = api.data?.lastUpdated ? new Date(api.data.lastUpdated).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' }) : undefined;
+
   return (
-    <div className={styles.chatPage}>
-      <div className={styles.chatHeader}>
-        <Bot24Regular />
-        <h2>APIM SRE Agent</h2>
+    <div className={styles.agentPage}>
+      <section className={styles.headerBar}>
         <Link to={LocationsService.getHomeUrl()} className={styles.backLink}>
-          ← Back to APIs
+          &#60; API Center home
         </Link>
-      </div>
+      </section>
 
-      <div className={styles.messages}>
-        {messages.length === 0 && (
-          <div className={styles.thinkingIndicator}>
-            Start a conversation with the APIM SRE Agent. Ask about Azure API Management service live site issues.
+      <section className={styles.agentHeader}>
+        <div className={styles.headerLeft}>
+          <h1>{agentTitle}</h1>
+          <div className={styles.badges}>
+            {agentKind && <Badge appearance="filled" color="brand">{agentKind.toUpperCase()}</Badge>}
+            {api.data?.lifecycleStage && <Badge appearance="outline">{api.data.lifecycleStage.toUpperCase()}</Badge>}
           </div>
-        )}
-        {messages.map((msg, i) =>
-          msg.role === 'assistant' && !msg.content ? null : (
-            <div
-              key={i}
-              className={`${styles.message} ${msg.role === 'user' ? styles.userMessage : styles.assistantMessage}`}
-            >
-              {msg.role === 'assistant' ? <MarkdownRenderer markdown={msg.content} /> : msg.content}
+          {agentSummary && <p className={styles.summary}>{agentSummary}</p>}
+          <div className={styles.meta}>
+            {api.data?.customProperties?.['version'] && <span><strong>VERSION</strong><br />{String(api.data.customProperties['version'])}</span>}
+            {api.data?.contacts?.[0]?.name && <span><strong>AUTHOR</strong><br />{api.data.contacts[0].name}</span>}
+            {lastUpdated && <span><strong>LAST UPDATED</strong><br />{lastUpdated}</span>}
+          </div>
+        </div>
+        <div className={styles.headerActions}>
+          <Button appearance="secondary" icon={<Share24Regular />}>Share</Button>
+          <Button appearance="primary" icon={<Open24Regular />}>Open in VS Code</Button>
+        </div>
+      </section>
+
+      <section className={styles.tabBar}>
+        <TabList selectedValue={activeTab} onTabSelect={(_, data) => setActiveTab(data.value as AgentTabs)}>
+          <Tab icon={<ChatRegular />} value={AgentTabs.PLAYGROUND}>Agent playground</Tab>
+          <Tab icon={<DocumentRegular />} value={AgentTabs.DOCUMENTATION}>Documentation</Tab>
+        </TabList>
+      </section>
+
+      {activeTab === AgentTabs.PLAYGROUND && (
+        <section className={styles.chatContainer}>
+          <div className={styles.messages}>
+            {messages.length === 0 && (
+              <div className={styles.emptyState}>
+                Start a conversation with the agent. Ask anything about its capabilities.
+              </div>
+            )}
+            {messages.map((msg, i) =>
+              msg.role === 'assistant' && !msg.content ? null : (
+                <div key={i} className={styles.messageRow}>
+                  {msg.role === 'assistant' && (
+                    <div className={styles.avatar}>
+                      <Bot24Regular />
+                    </div>
+                  )}
+                  <div className={`${styles.messageBubble} ${msg.role === 'user' ? styles.userBubble : styles.assistantBubble}`}>
+                    {msg.role === 'assistant' && (
+                      <div className={styles.messageHeader}>
+                        <span className={styles.senderName}>{agentTitle}</span>
+                        <span className={styles.timestamp}>{formatTimestamp(msg.timestamp)}</span>
+                      </div>
+                    )}
+                    <div className={styles.messageContent}>
+                      {msg.role === 'assistant' ? <MarkdownRenderer markdown={msg.content} /> : msg.content}
+                    </div>
+                    {msg.role === 'assistant' && msg.content && (
+                      <div className={styles.feedback}>
+                        <button className={styles.feedbackBtn} title="Helpful"><ThumbLike20Regular /></button>
+                        <button className={styles.feedbackBtn} title="Not helpful"><ThumbDislike20Regular /></button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )
+            )}
+            {isLoading && (
+              <div className={styles.messageRow}>
+                <div className={styles.avatar}>
+                  <Bot24Regular />
+                </div>
+                <div className={styles.thinkingIndicator}>
+                  <Spinner size="tiny" label="Agent is thinking..." />
+                </div>
+              </div>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+
+          <div className={styles.inputArea}>
+            <div className={styles.inputWrapper}>
+              <Input
+                className={styles.inputField}
+                value={input}
+                onChange={(_, data) => setInput(data.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Ask the agent something..."
+                disabled={isLoading}
+              />
+              <Button
+                className={styles.sendBtn}
+                appearance="transparent"
+                icon={<Send24Regular />}
+                onClick={() => void sendMessage()}
+                disabled={!input.trim() || isLoading}
+              />
             </div>
-          )
-        )}
-        {isLoading && (
-          <div className={styles.thinkingIndicator}>
-            <Spinner size="tiny" label="Agent is thinking..." />
+            <p className={styles.disclaimer}>
+              AI-generated content might be incorrect, so review carefully before use. Do not include personal or confidential information in the chat.
+            </p>
           </div>
-        )}
-        <div ref={messagesEndRef} />
-      </div>
+        </section>
+      )}
 
-      <div className={styles.inputArea}>
-        <Input
-          className={styles.inputField}
-          value={input}
-          onChange={(_, data) => setInput(data.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="Type a message..."
-          disabled={isLoading}
-        />
-        <Button
-          appearance="primary"
-          icon={<Send24Regular />}
-          onClick={() => void sendMessage()}
-          disabled={!input.trim() || isLoading}
-        >
-          Send
-        </Button>
-      </div>
+      {activeTab === AgentTabs.DOCUMENTATION && (
+        <section className={styles.documentationTab}>
+          {api.data?.description ? (
+            <MarkdownRenderer markdown={api.data.description} />
+          ) : (
+            <p className={styles.emptyState}>No documentation available for this agent.</p>
+          )}
+        </section>
+      )}
     </div>
   );
 };

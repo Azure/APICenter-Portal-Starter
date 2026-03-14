@@ -2,7 +2,9 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  min-height: 150px;
+  flex: 0 1 340px;
+  min-height: 200px;
+  min-width: 0;
   padding: 1.5rem;
   border: 1px solid var(--colorNeutralStroke1);
   border-radius: var(--borderRadiusMedium);
@@ -10,8 +12,10 @@
   color: var(--colorNeutralForeground1);
   text-decoration: none;
   cursor: pointer;
+  box-sizing: border-box;
   box-shadow: var(--shadow2);
   transition: box-shadow 0.15s ease, border-color 0.15s ease;
+  overflow: hidden;
 
   &:hover {
     border-color: var(--colorBrandStroke1);
