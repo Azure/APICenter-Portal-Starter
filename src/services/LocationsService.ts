@@ -34,6 +34,10 @@ export const LocationsService = {
     return `/skills/${name}`;
   },
 
+  getPluginInfoUrl(name: string): string {
+    return `/plugins/${name}`;
+  },
+
   getAgentChatUrl(name: string): string {
     return `/agents/${name}`;
   },

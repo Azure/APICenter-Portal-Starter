@@ -1,0 +1,153 @@
+.pluginInfo {
+  display: flex;
+  flex-direction: column;
+
+  .spinner {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .header {
+    padding: 24px 32px;
+    background: var(--grey-6);
+    color: var(--grey-0);
+
+    h1 {
+      margin: 0 0 8px;
+    }
+
+    .summary {
+      margin: 0;
+      opacity: 0.8;
+      font-size: 0.9rem;
+    }
+  }
+
+  .content {
+    display: flex;
+    gap: 48px;
+    padding: 32px 0;
+
+    @media (max-width: 768px) {
+      flex-direction: column-reverse;
+      gap: 24px;
+    }
+  }
+
+  .description {
+    flex: 1;
+    min-width: 0;
+    line-height: 1.6;
+
+    :global {
+      h1, h2, h3, h4, h5, h6 {
+        margin-top: 1.2em;
+        margin-bottom: 0.5em;
+      }
+
+      p {
+        margin-bottom: 0.75em;
+      }
+
+      code {
+        background-color: var(--grey-1, #f0f0f0);
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 0.85em;
+      }
+
+      pre {
+        background-color: var(--grey-1, #f0f0f0);
+        padding: 12px;
+        border-radius: 6px;
+        overflow-x: auto;
+
+        code {
+          background: none;
+          padding: 0;
+        }
+      }
+
+      ul, ol {
+        padding-left: 1.5em;
+        margin-bottom: 0.75em;
+      }
+
+      a {
+        color: var(--colorBrandForegroundLink, #0078d4);
+      }
+
+      img {
+        max-width: 100%;
+      }
+    }
+  }
+
+  .sidebar {
+    flex: 0 0 320px;
+    position: sticky;
+    top: 24px;
+    align-self: flex-start;
+
+    @media (max-width: 768px) {
+      flex: none;
+      position: static;
+      width: 100%;
+    }
+  }
+
+  .resourcesSection {
+    margin-top: 2rem;
+  }
+
+  .categoryHeading {
+    margin: 1.5rem 0 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    color: var(--colorNeutralForeground3);
+  }
+
+  .resourceList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .resourceItem {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--colorNeutralStroke1);
+    border-radius: var(--borderRadiusMedium);
+    background: var(--colorNeutralBackground1);
+    text-decoration: none;
+    color: var(--colorNeutralForeground1);
+    cursor: pointer;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+    &:hover {
+      border-color: var(--colorBrandStroke1);
+      box-shadow: var(--shadow4);
+    }
+  }
+
+  .resourceIcon {
+    display: flex;
+    align-items: center;
+    color: var(--colorBrandForeground1);
+    font-size: 1.25rem;
+  }
+
+  .resourceTitle {
+    font-size: 0.9375rem;
+    font-weight: 600;
+  }
+
+  .resourceBadge {
+    margin-left: auto;
+  }
+}

@@ -5,6 +5,7 @@ import Home from '@/pages/Home';
 import ApiInfo from '@/pages/ApiInfo';
 import ApiSpec from '@/pages/ApiSpec';
 import SkillInfo from '@/pages/SkillInfo';
+import PluginInfo from '@/pages/PluginInfo';
 import AgentChat from '@/pages/AgentChat';
 import { configAtom } from '@/atoms/configAtom';
 import Layout from './Layout';
@@ -39,6 +40,10 @@ const App: React.FC = () => {
           {
             path: 'skills/:name',
             element: <SkillInfo />,
+          },
+          {
+            path: 'plugins/:name',
+            element: <PluginInfo />,
           },
           {
             path: 'agents/:name',

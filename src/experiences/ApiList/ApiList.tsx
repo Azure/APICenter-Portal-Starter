@@ -50,11 +50,14 @@ export const ApiList: React.FC = () => {
       const typedApi = api as ApiCardApi & { type?: string };
       const isSkill = typedApi.type === 'skill';
       const isAgent = typedApi.type === 'agent';
+      const isPlugin = typedApi.type === 'plugin';
       let url: string;
       if (isAgent) {
         url = LocationsService.getAgentChatUrl(api.name);
       } else if (isSkill) {
         url = LocationsService.getSkillInfoUrl(api.name);
+      } else if (isPlugin) {
+        url = LocationsService.getPluginInfoUrl(api.name);
       } else {
         url = LocationsService.getApiInfoUrl(api.name);
       }
