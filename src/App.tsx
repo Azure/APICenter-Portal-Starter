@@ -51,7 +51,9 @@ const App: React.FC = () => {
           },
         ],
       },
-    ]);
+    ], {
+      basename: import.meta.env.BASE_URL?.replace(/\/+$/, '') || '/',
+    });
   }, [isInitialized]);
 
   const fetchConfig = useCallback(async () => {

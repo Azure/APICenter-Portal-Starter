@@ -7,6 +7,7 @@ import { ApiEnvironment } from '@/types/apiEnvironment';
 import { ApiAuthScheme, ApiAuthSchemeMetadata } from '@/types/apiAuth';
 import { Server } from '@/types/server';
 import { MetadataSchema } from '@/types/metadataSchema';
+import { PluginDetails } from '@/types/plugin';
 
 export interface PaginatedResult<T> {
   value: T[];
@@ -28,4 +29,5 @@ export interface IApiService {
   getSecurityRequirements(definitionId: ApiDefinitionId): Promise<ApiAuthSchemeMetadata[]>;
   getSecurityCredentials(definitionId: ApiDefinitionId, schemeName: string): Promise<ApiAuthScheme>;
   getMetadataSchemas(): Promise<MetadataSchema[]>;
+  getPlugin(name: string): Promise<PluginDetails>;
 }

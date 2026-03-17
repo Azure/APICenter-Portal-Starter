@@ -11,6 +11,7 @@ import { ApiVersion } from '@/types/apiVersion';
 import { IApiService, PaginatedResult } from '@/types/services/IApiService';
 import { Server, ServerResponse } from '@/types/server';
 import { MetadataSchema } from '@/types/metadataSchema';
+import { PluginDetails } from '@/types/plugin';
 import { DEFAULT_PAGE_SIZE } from '@/constants';
 
 export const ApiService: IApiService = {
@@ -115,6 +116,10 @@ export const ApiService: IApiService = {
     return await HttpService.post<ApiAuthScheme>(
       `/apis/${definitionId.apiName}/versions/${definitionId.versionName}/securityRequirements/${schemeName}:getCredentials`
     );
+  },
+
+  async getPlugin(name: string): Promise<PluginDetails> {
+    return await HttpService.get<PluginDetails>(`/plugins/${name}`);
   },
 
   async getMetadataSchemas(): Promise<MetadataSchema[]> {
