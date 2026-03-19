@@ -59,11 +59,11 @@ export const SkillInstallButton: React.FC<SkillInstallButtonProps> = ({ skillNam
 
       <p className={styles.hint}>
         Requires the{' '}
-        <a href="vscode:extension/azure-api-center.apic-skill-installer">
-          API Center Skill Installer
+        <a href="https://marketplace.visualstudio.com/items?itemName=apidev.azure-api-center">
+          Azure API Center
         </a>{' '}
         extension.{' '}
-        <a href="vscode:extension/azure-api-center.apic-skill-installer">Click here to install it in VS Code</a>.
+        <a href="https://marketplace.visualstudio.com/items?itemName=apidev.azure-api-center">Click here to install it in VS Code</a>.
       </p>
     </div>
   );

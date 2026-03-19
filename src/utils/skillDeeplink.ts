@@ -2,16 +2,16 @@
  * Generates a VS Code deeplink for installing a skill from Azure API Center.
  *
  * Deeplink format:
- *   vscode://azure-api-center.apic-skill-installer/install?sourceUrl=<encoded>&name=<encoded>
+ *   vscode://apidev.azure-api-center/install?sourceUrl=<encoded>&name=<encoded>
  *
  * This mirrors the MCP install deeplink pattern used by the portal:
  *   vscode:mcp/install?<encoded-json-payload>
  *
- * But for skills we use a URI handler registered by the apic-skill-installer extension.
+ * But for skills we use a URI handler registered by the Azure API Center extension.
  */
 
-const EXTENSION_PUBLISHER = 'azure-api-center';
-const EXTENSION_NAME = 'apic-skill-installer';
+const EXTENSION_PUBLISHER = 'apidev';
+const EXTENSION_NAME = 'azure-api-center';
 
 export type VsCodeVariant = 'vscode' | 'vscode-insiders';
 
