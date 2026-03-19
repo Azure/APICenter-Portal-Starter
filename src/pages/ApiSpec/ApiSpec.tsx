@@ -16,12 +16,13 @@ export const ApiSpec: React.FC = () => {
   const { apiName, versionName, definitionName } = useParams<Readonly<ApiDefinitionId>>() as ApiDefinitionId;
 
   const [deployment, setDeployment] = useState<ApiDeployment | null | undefined>();
+  const [resolvedDefinitionName, setResolvedDefinitionName] = useState<string | undefined>(undefined);
   const navigate = useNavigate();
 
   // This is needed to avoid unnecessary re-renders caused by new object creation
   const definitionId = useMemo(
-    () => ({ apiName, versionName, definitionName }),
-    [apiName, versionName, definitionName]
+    () => ({ apiName, versionName, definitionName: resolvedDefinitionName ?? definitionName }),
+    [apiName, versionName, definitionName, resolvedDefinitionName]
   );
 
   const api = useApi(definitionId.apiName);
@@ -36,22 +37,25 @@ export const ApiSpec: React.FC = () => {
         return;
       }
 
+      setResolvedDefinitionName(definitionSelection.definition.name);
+
       if (
-        definitionSelection.version.name === definitionId.versionName &&
-        definitionSelection.definition.name === definitionId.definitionName
+        definitionSelection.version.name === versionName &&
+        definitionSelection.definition.name === definitionName
       ) {
         return;
       }
 
-      navigate(
-        LocationsService.getApiSchemaExplorerUrl(
-          definitionId.apiName,
+      const url = LocationsService.getApiSchemaExplorerUrl(
+          apiName,
           definitionSelection.version.name,
           definitionSelection.definition.name
-        )
-      );
+        );
+      if (url) {
+        navigate(url, { replace: true });
+      }
     },
-    [definitionId, navigate]
+    [apiName, versionName, definitionName, navigate]
   );
 
   function renderHeader() {
@@ -83,7 +87,7 @@ export const ApiSpec: React.FC = () => {
   }
 
   function renderContent() {
-    if (api.isLoading || deployment === undefined) {
+    if (api.isLoading || deployment === undefined || !resolvedDefinitionName) {
       return <Spinner className={styles.spinner} />;
     }
 

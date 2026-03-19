@@ -17,6 +17,7 @@ export function useApiSpec(definitionId: ApiDefinitionId) {
     queryFn: async () => {
       const definition = await ApiService.getDefinition(definitionId);
       const spec = await ApiService.getSpecification(definitionId);
+      
       if (!spec) {
         throw new Error('Failed to fetch spec');
       }

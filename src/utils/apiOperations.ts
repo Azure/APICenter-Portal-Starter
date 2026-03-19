@@ -4,9 +4,9 @@ import { OperationMetadata } from '@/types/apiSpec';
 
 /**
  * Resolves complete URL template for a given operation on given deployment.
- * If there is no deployment, it will return a complete path with base URL.
+ * Uses the deployment's runtimeUri as the base URL directly.
  */
-export function resolveOpUrlTemplate(operation?: OperationMetadata, deployment?: ApiDeployment, versionName?: string): string {
+export function resolveOpUrlTemplate(operation?: OperationMetadata, deployment?: ApiDeployment): string {
   let host = deployment?.server.runtimeUri[0] || '';
 
   // Ensure protocol prefix is present
@@ -14,7 +14,7 @@ export function resolveOpUrlTemplate(operation?: OperationMetadata, deployment?:
     host = `https://${host}`;
   }
 
-  const components = [host, versionName || '', operation?.urlTemplate || ''];
+  const components = [host, operation?.urlTemplate || ''];
 
   return components
     .join('/')

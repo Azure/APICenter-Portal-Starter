@@ -96,7 +96,13 @@ export const ApiService: IApiService = {
   },
 
   getSpecification: memoize(async (definitionId: ApiDefinitionId): Promise<string | undefined> => {
-    const res = await fetch(await ApiService.getSpecificationLink(definitionId));
+    const specificationLink = await ApiService.getSpecificationLink(definitionId);
+
+    if (!specificationLink) {
+      return undefined;
+    }
+
+    const res = await fetch(specificationLink);
     return res.text();
   }),
 

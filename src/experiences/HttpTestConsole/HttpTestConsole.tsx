@@ -19,7 +19,6 @@ import TestConsoleError from '@/components/TestConsoleError';
 import { ApiDefinitionId } from '@/types/apiDefinition';
 import ApiAccessAuthForm from '@/experiences/ApiAccessAuthForm';
 import { useApiAuthSchemes } from '@/hooks/useApiAuthSchemes';
-import { useApiVersions } from '@/hooks/useApiVersions';
 import {
   getFormDataFieldsMetadata,
   getReqBodySupportedFormats,
@@ -42,10 +41,7 @@ interface Props {
 const methodsWithoutBody = ['get', 'head'];
 
 export const HttpTestConsole: React.FC<Props> = ({ definitionId, apiSpec, operation, deployment, isOpen, onClose }) => {
-  const apiVersions = useApiVersions(definitionId.apiName);
-  const selectedVersion = apiVersions.data?.find((v) => v.name === definitionId.versionName);
-  const versionTitle = selectedVersion?.title === 'Original' ? '' : (selectedVersion?.title || definitionId.versionName);
-  const defaults = getReqDataDefaults(apiSpec, operation, deployment, versionTitle);
+  const defaults = getReqDataDefaults(apiSpec, operation, deployment);
   const [authCredentials, setAuthCredentials] = useState<ApiAuthCredentials | undefined>();
   const [reqData, setReqData] = useState<HttpReqData>(defaults);
 
