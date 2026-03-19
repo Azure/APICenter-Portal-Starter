@@ -96,7 +96,7 @@ export const McpSpecPage: React.FC<Props> = ({ definitionId, deployment }) => {
       setApiSpec(reader);
     } catch (err) {
       if (err instanceof McpUnauthorizedError) {
-        setError('Access denied. The MCP server returned 401 Unauthorized. Please verify your credentials and try again.');
+        setError('The MCP server requires authentication, but required configuration cannot be determined automatically.');
       } else {
         setError('Failed to connect to the MCP server. Please try again later.');
       }

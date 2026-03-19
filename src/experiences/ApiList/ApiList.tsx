@@ -32,18 +32,18 @@ export const ApiList: React.FC = () => {
     isSemanticSearch: searchQuery.isSemanticSearch,
   });
 
-  const mockAgent: ApiMetadata = useMemo(() => ({
-    name: 'apim-sre-agent',
-    title: 'APIM SRE Agent',
-    kind: 'agent',
-    summary: 'An SRE agent to assist Azure API Management engineering team with service live site.',
-    lifecycleStage: 'production',
-  }), []);
+  // const mockAgent: ApiMetadata = useMemo(() => ({
+  //   name: 'apim-sre-agent',
+  //   title: 'APIM SRE Agent',
+  //   kind: 'agent',
+  //   summary: 'An SRE agent to assist Azure API Management engineering team with service live site.',
+  //   lifecycleStage: 'production',
+  // }), []);
 
   const adaptedApiList = useMemo(() => {
     const adapted = apis.data?.map(apiAdapter) ?? [];
-    return [apiAdapter(mockAgent), ...adapted];
-  }, [apis.data, mockAgent]);
+    return adapted;
+  }, [apis.data]);
 
   const apiLinkPropsProvider = useCallback(
     (api: ApiCardApi) => {
