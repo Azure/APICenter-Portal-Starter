@@ -1,4 +1,5 @@
 export interface PluginResource {
+  resourceId?: string;
   title: string;
   summary?: string;
   kind: string;

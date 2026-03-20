@@ -55,8 +55,11 @@ export const PluginInfo: React.FC = () => {
     if (!resources) return {};
 
     const groups: Record<string, ResolvedResource[]> = {};
-    for (const [path, resource] of Object.entries(resources)) {
-      const resourceName = path.split('/').pop() ?? path;
+
+    const items = Array.isArray(resources) ? resources : Object.values(resources);
+    for (const resource of items) {
+      // Extract the API name from resourceId (e.g. "/workspaces/default/apis/my-api" -> "my-api")
+      const resourceName = resource.resourceId?.replace(/\/+$/, '').split('/').pop() || resource.title;
       const category = resource.kind?.toLowerCase() ?? 'other';
       if (!groups[category]) groups[category] = [];
       groups[category].push({
@@ -104,7 +107,6 @@ export const PluginInfo: React.FC = () => {
 
       <section>
         <div className={styles.content}>
-          <div className={styles.description}>
             {plugin.data.description ? (
               <MarkdownRenderer markdown={plugin.data.description} />
             ) : (
@@ -129,7 +131,6 @@ export const PluginInfo: React.FC = () => {
                               {KIND_ICONS[resource.kind?.toLowerCase() ?? ''] ?? <PlugConnectedRegular />}
                             </span>
                             <span className={styles.resourceTitle}>{resource.title}</span>
-                            <p className={styles.summary}>{resource.summary}</p>
                             <Badge
                               className={styles.resourceBadge}
                               appearance="tint"
@@ -147,11 +148,6 @@ export const PluginInfo: React.FC = () => {
                 }
               </div>
             )}
-          </div>
-
-          <aside className={styles.sidebar}>
-            {/* Sidebar content for plugin actions */}
-          </aside>
         </div>
       </section>
     </div>

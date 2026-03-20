@@ -26,14 +26,7 @@
   }
 
   .content {
-    display: flex;
-    gap: 48px;
     padding: 32px 0;
-
-    @media (max-width: 768px) {
-      flex-direction: column-reverse;
-      gap: 24px;
-    }
   }
 
   .description {
@@ -85,18 +78,7 @@
     }
   }
 
-  .sidebar {
-    flex: 0 0 320px;
-    position: sticky;
-    top: 24px;
-    align-self: flex-start;
 
-    @media (max-width: 768px) {
-      flex: none;
-      position: static;
-      width: 100%;
-    }
-  }
 
   .resourcesSection {
     margin-top: 2rem;
@@ -104,10 +86,7 @@
 
   .categoryHeading {
     margin: 1.5rem 0 0.75rem;
-    font-size: 0.75rem;
     font-weight: 600;
-    letter-spacing: 0.05em;
-    color: var(--colorNeutralForeground3);
   }
 
   .resourceList {
