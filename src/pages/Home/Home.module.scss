@@ -40,6 +40,9 @@
   }
 
   .content {
+    box-sizing: border-box;
+    max-width: 1140px;
+    margin: 0 auto;
     padding: 0 32px 32px;
 
     @include screen.small-to-medium {
