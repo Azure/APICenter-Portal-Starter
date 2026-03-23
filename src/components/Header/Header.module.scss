@@ -37,10 +37,16 @@
       gap: 8px;
     }
   }
-  
+
+  .actions {
+    display: flex;
+    align-items: center;
+    margin-left: 16px;
+    gap: 8px;
+  }
+
   .auth {
-    margin-left: 34px;
-    padding-left: 34px;
+    padding-left: 16px;
     border-left: 1px solid var(--grey-6);
   }
 }
