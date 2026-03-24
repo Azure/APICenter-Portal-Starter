@@ -1,82 +1,25 @@
-# Azure API Center Portal - Documentation Index
+# API Center Portal — Wiki
 
-Quick navigation to the architecture and development documentation maintained in `.wiki/`.
+This is the entry point for all architecture, development, and requirements documentation.
 
-## Core Documentation
+## Project Documentation
 
-- **[constitution.md](../.specify/memory/constitution.md)** - Project principles, values, and governance
-- **[architecture.md](./architecture.md)** - High-level architecture overview and layers
-- **[dependencies.md](./dependencies.md)** - Third-party packages and their roles
-- **[patterns.md](./patterns.md)** - Key design patterns and conventions
+Start here for architecture, design patterns, and technical reference.
 
-## Technical Details
+→ [project/index.md](./project/index.md)
 
-- **[state-management.md](./state-management.md)** - Recoil atoms, selectors, and state flow
-- **[services.md](./services.md)** - Service layer architecture and implementations
-- **[routing.md](./routing.md)** - Route structure and navigation patterns
-- **[components.md](./components.md)** - Component hierarchy and organization
+Covers: architecture, state management, services, routing, components, API integration, authentication, deployment, configuration, folder structure, data flow, and testing strategy.
 
-## Integration & Infrastructure
+## Development Guidelines
 
-- **[api-integration.md](./api-integration.md)** - Azure API Center data plane integration
-- **[authentication.md](./authentication.md)** - Authentication modes and flows
-- **[deployment.md](./deployment.md)** - Infrastructure as code and deployment patterns
-- **[configuration.md](./configuration.md)** - Runtime configuration and environment setup
+Coding standards and implementation best practices.
 
-## Development
+→ [guidelines/index.md](./guidelines/index.md)
 
-- **[folder-structure.md](./folder-structure.md)** - Directory organization and file conventions
-- **[data-flow.md](./data-flow.md)** - Request/response flow and data transformation
-- **[testing-strategy.md](./testing-strategy.md)** - Testing approach and quality gates
-- **[guidelines/index.md](./guidelines/index.md)** - React, SCSS, and coding standards guidance
-- **[todo.md](./todo.md)** - Unresolved questions and future research
+Covers: React best practices, SCSS module conventions, TypeScript and coding standards.
 
-## Quick Reference
+## Requirements
 
-| Concern | File | Key Topics |
-|---------|------|------------|
-| Project setup | constitution.md | Principles, tech stack, standards |
-| System design | architecture.md | Layers, abstractions, boundaries |
-| External deps | dependencies.md | npm packages, versions, usage |
-| Code patterns | patterns.md | Service layer, hooks, atoms |
-| State mgmt | state-management.md | Recoil atoms, selectors, effects |
-| Backend calls | services.md | ApiService, HttpService, auth |
-| API Center | api-integration.md | Data plane APIs, endpoints |
-| Auth modes | authentication.md | MSAL vs anonymous flows |
-| Infrastructure | deployment.md | Bicep, azd, Static Web Apps |
-| Config | configuration.md | config.json, runtime settings |
-| File org | folder-structure.md | src/ layout, naming conventions |
-| Data flow | data-flow.md | Fetch → transform → render |
-| Testing | testing-strategy.md | Linting, type checking, quality |
-| Dev guidelines | guidelines/index.md | React, SCSS, JSDoc, standards |
-| TODOs | todo.md | Unknowns, research topics |
+Functional specifications and UI behaviour contracts.
 
-## Usage for AI Development
-
-When starting a new task:
-1. Review **constitution.md** for project principles
-2. Check **architecture.md** for system boundaries
-3. Consult relevant technical docs (state, services, etc.)
-4. Verify patterns in **patterns.md** before implementing
-5. Update **todo.md** when encountering unknowns
-
-When modifying code:
-1. Check **folder-structure.md** for file placement
-2. Review **data-flow.md** for impact analysis
-3. Follow **patterns.md** conventions
-4. Apply implementation conventions from **guidelines/index.md**
-5. Update relevant docs if adding new patterns
-
-When debugging:
-1. Trace through **data-flow.md**
-2. Check **state-management.md** for atom dependencies
-3. Review **authentication.md** for auth-related issues
-4. Consult **api-integration.md** for backend problems
-
----
-
-## Version History
-
-- **v1.0.0** (2025-01-17): Initial documentation set created (constitution, architecture, dependencies, patterns, state-management, services, folder-structure, api-integration, authentication, deployment)
-- **v1.1.0** (2025-01-17): Added routing, components, data-flow, configuration, testing-strategy, and todo documentation - completing comprehensive architecture documentation set
-- **v1.2.0** (2026-03-24): Added development guidelines index with React, SCSS, and coding standards references
+- [requirements/asset-list-controls.md](./requirements/asset-list-controls.md) — Search bar, filters, autocomplete, layout switching behaviour for the asset list.
