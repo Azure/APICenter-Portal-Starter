@@ -1,10 +1,11 @@
 import React, { useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { Badge, Spinner } from '@fluentui/react-components';
+import { Badge, Spinner, Tab, TabList } from '@fluentui/react-components';
 import {
   FlashRegular,
   BotRegular,
   PlugConnectedRegular,
+  DocumentRegular,
 } from '@fluentui/react-icons';
 import { usePlugin } from '@/hooks/usePlugin';
 import { setDocumentTitle } from '@/utils/dom';
@@ -106,14 +107,18 @@ export const PluginInfo: React.FC = () => {
 
   return (
     <div className={styles.pluginInfo}>
-      <div className={styles.header}>
-        <section>
-          <h1>{plugin.data.title}</h1>
-          {plugin.data.description && (
-            <p className={styles.summary}>{plugin.data.description}</p>
-          )}
-        </section>
-      </div>
+      <section className={styles.header}>
+        <h1>{plugin.data.title}</h1>
+        {plugin.data.description && (
+          <p className={styles.summary}>{plugin.data.description}</p>
+        )}
+      </section>
+
+      <section className={styles.tabBar}>
+        <TabList defaultSelectedValue="documentation">
+          <Tab icon={<DocumentRegular />} value="documentation">Documentation</Tab>
+        </TabList>
+      </section>
 
       <section>
         <div className={styles.content}>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { Spinner } from '@fluentui/react-components';
+import { Spinner, Tab, TabList } from '@fluentui/react-components';
+import { DocumentRegular } from '@fluentui/react-icons';
 import { useApi } from '@/hooks/useApi';
 import { setDocumentTitle } from '@/utils/dom';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
@@ -37,16 +38,18 @@ export const SkillInfo: React.FC = () => {
 
   return (
     <div className={styles.skillInfo}>
-      <div className={styles.header}>
-        <section>
-          <h1>{api.data.title}</h1>
-          {api.data.summary && (
-            <p className={styles.lastUpdated}>
-              {api.data.summary}
-            </p>
-          )}
-        </section>
-      </div>
+      <section className={styles.header}>
+        <h1>{api.data.title}</h1>
+        {api.data.summary && (
+          <p className={styles.summary}>{api.data.summary}</p>
+        )}
+      </section>
+
+      <section className={styles.tabBar}>
+        <TabList defaultSelectedValue="documentation">
+          <Tab icon={<DocumentRegular />} value="documentation">Documentation</Tab>
+        </TabList>
+      </section>
 
       <section>
         <div className={styles.content}>

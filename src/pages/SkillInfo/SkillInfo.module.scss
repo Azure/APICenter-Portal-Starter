@@ -9,19 +9,23 @@
     transform: translate(-50%, -50%);
   }
 
+  .tabBar {
+    padding: 0;
+    border-bottom: 1px solid var(--colorNeutralStroke1);
+  }
+
   .header {
-    padding: 24px 32px;
-    background: var(--grey-6);
-    color: var(--grey-0);
+    padding: 1rem 0 1.5rem;
 
     h1 {
-      margin: 0 0 8px;
+      margin: 0 0 0.5rem;
     }
 
-    .lastUpdated {
+    .summary {
       margin: 0;
-      opacity: 0.8;
-      font-size: 0.9rem;
+      color: var(--grey-6);
+      font-size: 0.875rem;
+      line-height: 1.5;
     }
   }
 

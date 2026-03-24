@@ -192,12 +192,6 @@ export const ModelPlayground: React.FC = () => {
 
   return (
     <div className={styles.modelPlayground}>
-      <section className={styles.headerBar}>
-        <Link to={LocationsService.getHomeUrl()} className={styles.backLink}>
-          &#60; API Center home
-        </Link>
-      </section>
-
       <section className={styles.modelHeader}>
         <div className={styles.headerLeft}>
           <h1>{modelTitle}</h1>

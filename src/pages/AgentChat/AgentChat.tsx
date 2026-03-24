@@ -187,12 +187,6 @@ export const AgentChat: React.FC = () => {
 
   return (
     <div className={styles.agentPage}>
-      <section className={styles.headerBar}>
-        <Link to={LocationsService.getHomeUrl()} className={styles.backLink}>
-          &#60; API Center home
-        </Link>
-      </section>
-
       <section className={styles.agentHeader}>
         <div className={styles.headerLeft}>
           <h1>{agentTitle}</h1>

@@ -1,10 +1,11 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import { Spinner } from '@fluentui/react-components';
+import { useNavigate, useParams, useLocation, Link } from 'react-router-dom';
+import { Badge, Spinner, Tab, TabList } from '@fluentui/react-components';
+import { DocumentRegular } from '@fluentui/react-icons';
+import { formatKindDisplay } from '@/utils/formatKind';
 import { ApiDefinitionId, ResourceType } from '@/types/apiDefinition';
 import { useApi } from '@/hooks/useApi';
 import { setDocumentTitle } from '@/utils/dom';
-import MarkdownRenderer from '@/components/MarkdownRenderer';
 import ApiDefinitionSelect, { ApiDefinitionSelection } from '@/experiences/ApiDefinitionSelect';
 import { LocationsService } from '@/services/LocationsService';
 import { ApiDeployment } from '@/types/apiDeployment';
@@ -67,26 +68,30 @@ export const ApiSpec: React.FC = () => {
     }
 
     return (
-      <div className={styles.header}>
-        <section>
-          <h1>{api.data.title}</h1>
-          <MarkdownRenderer markdown={api.data.summary} />
-
-          <div className={styles.definitionRow}>
-            <ApiDefinitionSelect
-              apiId={definitionId.apiName}
-              resourceType={resourceType}
-              defaultSelection={{
-                version: definitionId.versionName,
-                definition: definitionId.definitionName,
-              }}
-              hiddenSelects={['definition', 'deployment']}
-              isInline
-              onSelectionChange={handleDefinitionSelectionChange}
-            />
+      <section className={styles.header}>
+        <h1>{api.data.title}</h1>
+        {(api.data.kind || api.data.lifecycleStage) && (
+          <div className={styles.badges}>
+            {api.data.kind && <Badge appearance="filled" color="brand">{formatKindDisplay(api.data.kind)}</Badge>}
+            {api.data.lifecycleStage && <Badge appearance="outline">{api.data.lifecycleStage}</Badge>}
           </div>
-        </section>
-      </div>
+        )}
+        {api.data.summary && <p className={styles.summary}>{api.data.summary}</p>}
+
+        <div className={styles.definitionRow}>
+          <ApiDefinitionSelect
+            apiId={definitionId.apiName}
+            resourceType={resourceType}
+            defaultSelection={{
+              version: definitionId.versionName,
+              definition: definitionId.definitionName,
+            }}
+            hiddenSelects={['definition', 'deployment']}
+            isInline
+            onSelectionChange={handleDefinitionSelectionChange}
+          />
+        </div>
+      </section>
     );
   }
 
@@ -105,6 +110,11 @@ export const ApiSpec: React.FC = () => {
   return (
     <div className={styles.apiSpec}>
       {renderHeader()}
+      <section className={styles.tabBar}>
+        <TabList defaultSelectedValue="documentation">
+          <Tab icon={<DocumentRegular />} value="documentation">Documentation</Tab>
+        </TabList>
+      </section>
       <section>{renderContent()}</section>
     </div>
   );
