@@ -7,6 +7,8 @@ import ApiSpec from '@/pages/ApiSpec';
 import SkillInfo from '@/pages/SkillInfo';
 import PluginInfo from '@/pages/PluginInfo';
 import AgentChat from '@/pages/AgentChat';
+import ModelInfo from '@/pages/ModelInfo';
+import ModelPlayground from '@/pages/ModelPlayground';
 import { configAtom } from '@/atoms/configAtom';
 import Layout from './Layout';
 
@@ -28,13 +30,21 @@ const App: React.FC = () => {
             element: <Home />,
             children: [
               {
-                path: 'api-info/:id',
+                path: 'apis/:id',
                 element: <ApiInfo />,
+              },
+              {
+                path: 'languageModels/:id',
+                element: <ModelInfo />,
               },
             ],
           },
           {
             path: 'apis/:apiName/versions/:versionName/definitions/:definitionName',
+            element: <ApiSpec />,
+          },
+          {
+            path: 'languageModels/:apiName/versions/:versionName/definitions/:definitionName',
             element: <ApiSpec />,
           },
           {
@@ -48,6 +58,10 @@ const App: React.FC = () => {
           {
             path: 'agents/:name',
             element: <AgentChat />,
+          },
+          {
+            path: 'models/:name/playground',
+            element: <ModelPlayground />,
           },
         ],
       },

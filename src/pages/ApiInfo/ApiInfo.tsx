@@ -14,6 +14,7 @@ import {
 import { Dismiss24Regular } from '@fluentui/react-icons';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useApi } from '@/hooks/useApi';
+import { kindToResourceType } from '@/types/apiDefinition';
 import ApiAdditionalInfo from '../../experiences/ApiAdditionalInfo';
 import ApiInfoOptions from '../../experiences/ApiInfoOptions';
 import { LocationsService } from '@/services/LocationsService';
@@ -88,6 +89,7 @@ export const ApiInfo: React.FC = () => {
 
         <ApiDefinitionSelect
           apiId={id}
+          resourceType={kindToResourceType(api.data.kind)}
           hiddenSelects={['mcp', 'skill', 'plugin'].includes(api.data.kind ?? '') ? ['definition', 'deployment'] : []}
           onSelectionChange={setDefinitionSelection}
         />

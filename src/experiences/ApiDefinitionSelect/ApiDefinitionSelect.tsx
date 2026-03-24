@@ -3,7 +3,7 @@ import { Dropdown, Option } from '@fluentui/react-components';
 import { find, isUndefined } from 'lodash';
 import classNames from 'classnames';
 import { ApiVersion } from '@/types/apiVersion';
-import { ApiDefinition } from '@/types/apiDefinition';
+import { ApiDefinition, ResourceType } from '@/types/apiDefinition';
 import { ApiDeployment } from '@/types/apiDeployment';
 import { useApiVersions } from '@/hooks/useApiVersions';
 import { useApiDefinitions } from '@/hooks/useApiDefinitions';
@@ -18,6 +18,7 @@ export interface ApiDefinitionSelection {
 
 interface Props {
   apiId: string;
+  resourceType?: ResourceType;
   defaultSelection?: {
     version?: string;
     definition?: string;
@@ -34,6 +35,7 @@ const NO_DEPLOYMENT_LABEL = "Deployment isn't available";
 
 export const ApiDefinitionSelect: React.FC<Props> = ({
   apiId,
+  resourceType,
   defaultSelection = {},
   hiddenSelects = [],
   isInline,
@@ -43,9 +45,9 @@ export const ApiDefinitionSelect: React.FC<Props> = ({
   const [definition, setDefinition] = useState<ApiDefinition | null | undefined>();
   const [deployment, setDeployment] = useState<ApiDeployment | null | undefined>();
 
-  const apiVersions = useApiVersions(apiId);
-  const apiDefinitions = useApiDefinitions(apiId, version?.name);
-  const apiDeployments = useApiDeployments(apiId);
+  const apiVersions = useApiVersions(apiId, resourceType);
+  const apiDefinitions = useApiDefinitions(apiId, version?.name, resourceType);
+  const apiDeployments = useApiDeployments(apiId, resourceType);
 
   const dropdownSize = isInline ? 'small' : 'medium';
 

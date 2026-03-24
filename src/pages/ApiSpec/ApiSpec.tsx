@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { Spinner } from '@fluentui/react-components';
-import { ApiDefinitionId } from '@/types/apiDefinition';
+import { ApiDefinitionId, ResourceType } from '@/types/apiDefinition';
 import { useApi } from '@/hooks/useApi';
 import { setDocumentTitle } from '@/utils/dom';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
@@ -14,6 +14,8 @@ import styles from './ApiSpec.module.scss';
 
 export const ApiSpec: React.FC = () => {
   const { apiName, versionName, definitionName } = useParams<Readonly<ApiDefinitionId>>() as ApiDefinitionId;
+  const location = useLocation();
+  const resourceType: ResourceType = location.pathname.startsWith('/languageModels') ? 'languageModels' : 'apis';
 
   const [deployment, setDeployment] = useState<ApiDeployment | null | undefined>();
   const [resolvedDefinitionName, setResolvedDefinitionName] = useState<string | undefined>(undefined);
@@ -21,11 +23,11 @@ export const ApiSpec: React.FC = () => {
 
   // This is needed to avoid unnecessary re-renders caused by new object creation
   const definitionId = useMemo(
-    () => ({ apiName, versionName, definitionName: resolvedDefinitionName ?? definitionName }),
-    [apiName, versionName, definitionName, resolvedDefinitionName]
+    () => ({ apiName, versionName, definitionName: resolvedDefinitionName ?? definitionName, resourceType }),
+    [apiName, versionName, definitionName, resolvedDefinitionName, resourceType]
   );
 
-  const api = useApi(definitionId.apiName);
+  const api = useApi(definitionId.apiName, resourceType);
 
   setDocumentTitle(`API Specification${api.data?.title ? ` - ${api.data.title}` : ''}`);
 
@@ -49,7 +51,8 @@ export const ApiSpec: React.FC = () => {
       const url = LocationsService.getApiSchemaExplorerUrl(
           apiName,
           definitionSelection.version.name,
-          definitionSelection.definition.name
+          definitionSelection.definition.name,
+          resourceType,
         );
       if (url) {
         navigate(url, { replace: true });
@@ -72,6 +75,7 @@ export const ApiSpec: React.FC = () => {
           <div className={styles.definitionRow}>
             <ApiDefinitionSelect
               apiId={definitionId.apiName}
+              resourceType={resourceType}
               defaultSelection={{
                 version: definitionId.versionName,
                 definition: definitionId.definitionName,

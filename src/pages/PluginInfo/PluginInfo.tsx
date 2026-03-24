@@ -36,6 +36,7 @@ function getResourceUrl(name: string, kind?: string): string {
   const k = kind?.toLowerCase();
   if (k === 'agent') return LocationsService.getAgentChatUrl(name);
   if (k === 'skill') return LocationsService.getSkillInfoUrl(name);
+  if (k === 'languagemodel') return LocationsService.getModelInfoUrl(name);
   return LocationsService.getApiInfoUrl(name);
 }
 

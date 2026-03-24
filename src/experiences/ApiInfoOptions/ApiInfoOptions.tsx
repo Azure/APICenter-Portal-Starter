@@ -5,8 +5,7 @@ import { useRecoilValue } from 'recoil';
 import DevPortalLogo from '@/assets/devPortal.png';
 import { ApiMetadata } from '@/types/api';
 import { ApiVersion } from '@/types/apiVersion';
-import { ApiDefinition } from '@/types/apiDefinition';
-import { useApiSpecUrl } from '@/hooks/useApiSpecUrl';
+import { ApiDefinition, kindToResourceType } from '@/types/apiDefinition';import { useApiSpecUrl } from '@/hooks/useApiSpecUrl';
 import { useDeploymentEnvironment } from '@/hooks/useDeploymentEnvironment';
 import { ApiDeployment } from '@/types/apiDeployment';
 import VsCodeLogo from '@/assets/vsCodeLogo.svg';
@@ -47,8 +46,9 @@ export const ApiInfoOptions: React.FC<Props> = ({ api, apiVersion, apiDefinition
       apiName: api.name,
       versionName: apiVersion?.name,
       definitionName: apiDefinition?.name,
+      resourceType: kindToResourceType(api.kind),
     }),
-    [api.name, apiDefinition?.name, apiVersion?.name]
+    [api.name, api.kind, apiDefinition?.name, apiVersion?.name]
   );
 
   const apiSpecUrl = useApiSpecUrl(definitionId);
@@ -137,7 +137,7 @@ export const ApiInfoOptions: React.FC<Props> = ({ api, apiVersion, apiDefinition
               <Document20Regular /> <strong>API Definition</strong>
             </span>
 
-            {api.kind !== 'skill' && (
+            {api.kind !== 'skill' && api.kind?.toLowerCase() !== 'languagemodel' && (
               <span className={styles.linkGroup}>
                 {apiSpecUrl.data && api.kind !== 'mcp' && (
                   <Link href={apiSpecUrl.data} className={styles.link}>
@@ -148,11 +148,22 @@ export const ApiInfoOptions: React.FC<Props> = ({ api, apiVersion, apiDefinition
                 {(api.kind !== 'mcp' || !!server.data?.remotes?.length) && (
                   <Link
                     className={styles.link}
-                    href={LocationsService.getApiSchemaExplorerUrl(api.name, apiVersion.name, apiDefinition.name)}
+                    href={LocationsService.getApiSchemaExplorerUrl(api.name, apiVersion.name, apiDefinition.name, kindToResourceType(api.kind))}
                   >
                     View documentation
                   </Link>
                 )}
+              </span>
+            )}
+
+            {api.kind?.toLowerCase() === 'languagemodel' && (
+              <span className={styles.linkGroup}>
+                <Link
+                  className={styles.link}
+                  href={LocationsService.getModelPlaygroundUrl(api.name)}
+                >
+                  Open in playground <OpenRegular />
+                </Link>
               </span>
             )}
           </h3>

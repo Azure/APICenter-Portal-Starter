@@ -14,4 +14,5 @@ export enum QueryKeys {
   HttpTestMutation = 'HttpTestMutation',
   MetadataSchemas = 'MetadataSchemas',
   Plugin = 'Plugin',
+  LanguageModel = 'LanguageModel',
 }

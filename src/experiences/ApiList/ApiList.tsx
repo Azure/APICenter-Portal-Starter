@@ -48,16 +48,16 @@ export const ApiList: React.FC = () => {
   const apiLinkPropsProvider = useCallback(
     (api: ApiCardApi) => {
       const typedApi = api as ApiCardApi & { type?: string };
-      const isSkill = typedApi.type === 'skill';
-      const isAgent = typedApi.type === 'agent';
-      const isPlugin = typedApi.type === 'plugin';
+      const kind = typedApi.type?.toLowerCase();
       let url: string;
-      if (isAgent) {
+      if (kind === 'agent') {
         url = LocationsService.getAgentChatUrl(api.name);
-      } else if (isSkill) {
+      } else if (kind === 'skill') {
         url = LocationsService.getSkillInfoUrl(api.name);
-      } else if (isPlugin) {
+      } else if (kind === 'plugin') {
         url = LocationsService.getPluginInfoUrl(api.name);
+      } else if (kind === 'languagemodel') {
+        url = LocationsService.getModelInfoUrl(api.name);
       } else {
         url = LocationsService.getApiInfoUrl(api.name);
       }
@@ -152,9 +152,9 @@ export const ApiList: React.FC = () => {
             <InfoTable.Cell>
               <div style={{ display: 'flex', gap: '0.5rem' }}>
                 <Badge appearance="tint" color="informative" shape="rounded">
-                  {['skill', 'a2a', 'mcp', 'plugin', 'agent'].includes(api.type?.toLowerCase() ?? '') ? formatKindDisplay(api.type!) : 'API'}
+                  {['skill', 'a2a', 'mcp', 'plugin', 'agent', 'languagemodel'].includes(api.type?.toLowerCase() ?? '') ? formatKindDisplay(api.type!) : 'API'}
                 </Badge>
-                {!!api.type && !['skill', 'a2a', 'mcp', 'plugin', 'agent'].includes(api.type.toLowerCase()) && (
+                {!!api.type && !['skill', 'a2a', 'mcp', 'plugin', 'agent', 'languagemodel'].includes(api.type.toLowerCase()) && (
                   <Badge appearance="tint" color="informative" shape="rounded">
                     {formatKindDisplay(api.type)}
                   </Badge>

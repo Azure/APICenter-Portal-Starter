@@ -2,302 +2,194 @@
 
 ## Overview
 
-The application uses **React Router DOM v6** for client-side routing with nested route configuration. Navigation is primarily handled through React Router's `<Link>` and programmatic `useNavigate()` hook, with additional support for deep linking to API operations via URL parameters.
+The application uses **React Router DOM v6** (`createBrowserRouter`) for client-side routing. The router is created in `src/App.tsx` after config is fetched. All routes are children of a shared `<Layout />` component. The `basename` is derived from `import.meta.env.BASE_URL`.
 
 ---
 
-## Route Structure
+## Route Map
 
-### Root Route Configuration
+| Path | Component | Parent | Purpose |
+|------|-----------|--------|---------|
+| `/` | `Home` | `Layout` | Landing page with search, filters, and API/model catalog |
+| `/apis/:id` | `ApiInfo` | `Home` (nested) | Drawer panel for a regular API (versions, definitions, options) |
+| `/languageModels/:id` | `ModelInfo` | `Home` (nested) | Drawer panel for a language model (playground link, metadata) |
+| `/apis/:apiName/versions/:versionName/definitions/:definitionName` | `ApiSpec` | `Layout` | Spec explorer for regular APIs |
+| `/languageModels/:apiName/versions/:versionName/definitions/:definitionName` | `ApiSpec` | `Layout` | Spec explorer for language models |
+| `/skills/:name` | `SkillInfo` | `Layout` | Skill detail page |
+| `/plugins/:name` | `PluginInfo` | `Layout` | Plugin detail page |
+| `/agents/:name` | `AgentChat` | `Layout` | Agent conversational UI |
+| `/models/:name/playground` | `ModelPlayground` | `Layout` | Interactive model playground |
 
-Location: `src/main.tsx`
-
-```tsx
-const router = createBrowserRouter([
-  {
-    path: '/',
-    element: <Layout />,
-    children: [
-      { index: true, element: <HomePage /> },
-      { path: 'apis', element: <ApisPage /> },
-      { path: 'apis/:apiName', element: <ApiDetailsPage /> },
-      // Additional routes...
-    ],
-  },
-]);
-```
-
-### Route Hierarchy
+### Route Hierarchy (tree view)
 
 ```
-/                               → HomePage (landing/search)
-/apis                           → ApisPage (list view)
-/apis/:apiName                  → ApiDetailsPage (API detail with operations)
-/apis/:apiName?operation=...    → ApiDetailsPage (with operation selected)
-/apis/:apiName?version=...      → ApiDetailsPage (with version selected)
-/apis/:apiName?definition=...   → ApiDetailsPage (with definition selected)
+Layout
+├── / ............................................. Home (catalog + search)
+│   ├── /apis/:id ................................ ApiInfo drawer (nested outlet)
+│   └── /languageModels/:id ...................... ModelInfo drawer (nested outlet)
+├── /apis/:apiName/versions/:versionName/definitions/:definitionName .... ApiSpec
+├── /languageModels/:apiName/versions/:versionName/definitions/:definitionName .... ApiSpec
+├── /skills/:name ................................ SkillInfo
+├── /plugins/:name ............................... PluginInfo
+├── /agents/:name ................................ AgentChat
+└── /models/:name/playground ..................... ModelPlayground
 ```
-
-**Note**: Deep linking uses **URL search parameters** (not nested routes) for operation/version/definition state.
 
 ---
 
-## Route Components
+## Route Details
 
-### Layout Component
+### Home (`/`)
 
-- **Location**: `src/Layout.tsx`
-- **Purpose**: Shared shell for all routes (header, footer, main content area)
-- **Key Features**:
-  - Persistent header with navigation and auth
-  - Footer with version info and links
-  - Renders `<Outlet />` for nested route content
-  - Error boundary for route-level errors
+- **Component**: `src/pages/Home/Home.tsx`
+- **Purpose**: Landing page showing the combined API catalog (APIs, models, skills, plugins, agents) with search, category pills, filters, sorting, and layout toggle.
+- **Nested routes**: `apis/:id` and `languageModels/:id` render as side-drawer overlays within the Home page via `<Outlet />`.
+- **Query params**:
+  - `search` — text search query
+  - `ai-search` — `"true"` enables semantic/vector search
 
-### HomePage
+### ApiInfo (`/apis/:id`)
 
-- **Location**: `src/pages/HomePage/HomePage.tsx`
-- **Purpose**: Landing page with search box and featured APIs
-- **Entry Point**: Index route `/`
+- **Component**: `src/pages/ApiInfo/ApiInfo.tsx`
+- **Purpose**: Side drawer showing details for a regular API (non-model, non-skill, non-agent). Includes version/definition/deployment selectors, API options (download spec, open in VS Code, view documentation link), and additional metadata.
+- **Route param**: `:id` — API name
+- **Nuances**: Rendered as a child of `Home`, so the catalog list remains visible behind the drawer. The URL preserves existing search params (search query, filters) so closing the drawer returns to the same catalog state. This nested route does not conflict with the sibling spec route (`/apis/:apiName/versions/…`) because React Router matches the more specific multi-segment path first.
 
-### ApisPage
+### ModelInfo (`/languageModels/:id`)
 
-- **Location**: `src/pages/ApisPage/ApisPage.tsx`
-- **Purpose**: Full API catalog list with filters and search
-- **Entry Point**: `/apis`
-- **State Dependencies**: `apiSearchFiltersAtom`, `apiListLayoutAtom`, `apiListSortingAtom`
+- **Component**: `src/pages/ModelInfo/ModelInfo.tsx`
+- **Purpose**: Side drawer showing language model details — provider, model name, context window, task/input/output types, playground link, contacts, and documentation.
+- **Route param**: `:id` — language model name
+- **Nuances**: Same nested-drawer pattern as `ApiInfo`. The playground button navigates to `/models/:name/playground`. Does not show version/definition selectors (models use `LanguageModelService` not `ApiService`). This nested route does not conflict with the sibling spec route (`/languageModels/:apiName/versions/…`) because React Router matches the more specific multi-segment path first.
 
-### ApiDetailsPage
+### ApiSpec — APIs (`/apis/:apiName/versions/:versionName/definitions/:definitionName`)
 
-- **Location**: `src/pages/ApiDetailsPage/ApiDetailsPage.tsx`
-- **Purpose**: Single API details with versions, definitions, operations, test console
-- **Entry Point**: `/apis/:apiName`
-- **URL Parameters**:
-  - `:apiName` (route param) — API name (required)
-  - `?version=` (query param) — Selected version
-  - `?definition=` (query param) — Selected definition
-  - `?operation=` (query param) — Selected operation ID
-  - `?deployment=` (query param) — Selected deployment (for test console)
+- **Component**: `src/pages/ApiSpec/ApiSpec.tsx`
+- **Purpose**: Full-page specification explorer. Renders either `DefaultApiSpecPage` (OpenAPI/Swagger viewer) or `McpSpecPage` (MCP tool viewer) based on `api.kind`.
+- **Route params**: `:apiName`, `:versionName`, `:definitionName`
+- **Backend calls**: Uses `resourceType = 'apis'` — all data-plane requests hit `/apis/{name}/versions/…`.
+- **Nuance**: The version dropdown triggers in-place URL replacement via `navigate(url, { replace: true })`.
+
+### ApiSpec — Language Models (`/languageModels/:apiName/versions/:versionName/definitions/:definitionName`)
+
+- **Component**: `src/pages/ApiSpec/ApiSpec.tsx` (same component as above)
+- **Purpose**: Spec explorer for language model definitions.
+- **Route params**: Same as above.
+- **Backend calls**: Uses `resourceType = 'languageModels'` — requests hit `/languageModels/{name}/versions/…`.
+- **Detection**: `ApiSpec` reads `location.pathname` to determine `resourceType`:
+  ```ts
+  const resourceType: ResourceType = location.pathname.startsWith('/languageModels')
+    ? 'languageModels'
+    : 'apis';
+  ```
+- **Nuance**: The `resourceType` is threaded into `definitionId`, hooks (`useApi`, `useApiVersions`, etc.), and `ApiDefinitionSelect` so the correct data-plane collection is called.
+
+### SkillInfo (`/skills/:name`)
+
+- **Component**: `src/pages/SkillInfo/SkillInfo.tsx`
+- **Purpose**: Full-page detail view for a skill-type API.
+- **Route param**: `:name`
+
+### PluginInfo (`/plugins/:name`)
+
+- **Component**: `src/pages/PluginInfo/PluginInfo.tsx`
+- **Purpose**: Full-page detail view for a plugin-type API.
+- **Route param**: `:name`
+
+### AgentChat (`/agents/:name`)
+
+- **Component**: `src/pages/AgentChat/AgentChat.tsx`
+- **Purpose**: Conversational chat UI for an agent-type API.
+- **Route param**: `:name`
+
+### ModelPlayground (`/models/:name/playground`)
+
+- **Component**: `src/pages/ModelPlayground/ModelPlayground.tsx`
+- **Purpose**: Interactive playground for sending messages to a language model and viewing responses.
+- **Route param**: `:name`
+
+---
+
+## URL Construction — LocationsService
+
+All internal URL construction is centralized in `src/services/LocationsService.ts`. Components should use these helpers instead of building paths manually.
+
+| Method | Returns | Notes |
+|--------|---------|-------|
+| `getHomeUrl(preserveSearchParams?)` | `/` or `/?…` | Preserves search/filter params when `true` |
+| `getApiSearchUrl(search?, isSemanticSearch?)` | `/?search=…&ai-search=…` | Merges with current window search params |
+| `getApiInfoUrl(name)` | `/apis/{name}?…` | Appends current search params |
+| `getModelInfoUrl(name)` | `/languageModels/{name}?…` | Appends current search params |
+| `getSkillInfoUrl(name)` | `/skills/{name}` | |
+| `getPluginInfoUrl(name)` | `/plugins/{name}` | |
+| `getAgentChatUrl(name)` | `/agents/{name}` | |
+| `getModelPlaygroundUrl(name)` | `/models/{name}/playground` | |
+| `getApiSchemaExplorerUrl(api, version, definition, resourceType?)` | `/{resourceType}/{api}/versions/{version}/definitions/{definition}` | Defaults `resourceType` to `'apis'`. Pass `'languageModels'` for models. Use `kindToResourceType(api.kind)` to derive from an API's kind. |
+| `getAiSearchInfoUrl()` | External docs link | |
+| `getHelpUrl()` | External docs link | |
+
+### ResourceType and kindToResourceType
+
+The `ResourceType` type (`'apis' | 'languageModels'`) controls the URL prefix used for both **UI routes** and **data-plane API calls**. The helper `kindToResourceType(kind)` in `src/types/apiDefinition.ts` maps an API's `kind` field to the correct value:
+
+- `'languageModel'` → `'languageModels'`
+- Everything else → `'apis'`
 
 ---
 
 ## Navigation Patterns
 
-### 1. Declarative Navigation (Links)
+### Catalog → Detail Drawers
 
-**Usage**: Primary navigation (header, API cards, internal links)
+Clicking an item in the API list navigates based on its `kind` (via `apiAdapter` which maps `kind` → `type`):
 
-```tsx
-import { Link } from 'react-router-dom';
+| `type` value | Target URL | Source |
+|---|---|---|
+| `'agent'` | `/agents/{name}` | `getAgentChatUrl` |
+| `'skill'` | `/skills/{name}` | `getSkillInfoUrl` |
+| `'plugin'` | `/plugins/{name}` | `getPluginInfoUrl` |
+| `'languageModel'` | `/languageModels/{name}` | `getModelInfoUrl` |
+| anything else | `/apis/{name}` | `getApiInfoUrl` |
 
-<Link to="/apis">Browse All APIs</Link>
-<Link to={`/apis/${api.name}`}>View {api.title}</Link>
-```
+This logic lives in `ApiList.tsx` → `apiLinkPropsProvider`.
 
-**Header Navigation** (src/components/Header/Header.tsx):
-```tsx
-<Link to="/">Home</Link>
-<Link to="/apis">APIs</Link>
-```
+### Detail Drawer → Spec Explorer
 
-### 2. Programmatic Navigation
+From the `ApiInfo` drawer, the "View documentation" link navigates to the spec explorer using `getApiSchemaExplorerUrl(api.name, version, definition, kindToResourceType(api.kind))`. This ensures language models use `/languageModels/…` and regular APIs use `/apis/…`.
 
-**Usage**: After form submission, conditional redirects, dynamic navigation
+### Spec Explorer Version Switching
 
-```tsx
-import { useNavigate } from 'react-router-dom';
-
-const navigate = useNavigate();
-
-// Navigate to API detail after search
-navigate(`/apis/${selectedApi.name}`);
-
-// Navigate with query params
-navigate(`/apis/${apiName}?operation=${operationId}`);
-
-// Navigate back
-navigate(-1);
-```
-
-**Example**: `ApiSearchBox` navigates to API detail on selection.
-
-### 3. Deep Linking (Query Params)
-
-**Usage**: Shareable links to specific operation, version, or definition
-
-**Pattern**:
-```
-/apis/petstore?version=v2&definition=openapi&operation=getPetById
-```
-
-**Implementation** (ApiDetailsPage):
-```tsx
-const [searchParams, setSearchParams] = useSearchParams();
-
-const selectedOperation = searchParams.get('operation');
-const selectedVersion = searchParams.get('version');
-const selectedDefinition = searchParams.get('definition');
-
-// Update URL on operation select
-setSearchParams({ operation: operationId });
-```
-
-**Benefits**:
-- Bookmarkable operation/definition URLs
-- Back button works for operation navigation
-- No nested routes complexity
+When the user selects a different version/definition inside `ApiSpec`, the URL updates in-place via `navigate(url, { replace: true })` so the version change doesn't create a new history entry.
 
 ---
 
-## URL Parameter Management
+## Query Parameters
 
-### useSearchParams Hook
+Defined in `src/constants/urlParams.ts`:
 
-**Location**: React Router DOM built-in hook
+| Key | Constant | Used On | Purpose |
+|-----|----------|---------|---------|
+| `search` | `UrlParams.SEARCH_QUERY` | `/` | Text search query |
+| `ai-search` | `UrlParams.IS_SEMANTIC_SEARCH` | `/` | `"true"` for vector/semantic search |
 
-**Usage in ApiDetailsPage**:
-```tsx
-const [searchParams, setSearchParams] = useSearchParams();
-
-// Read
-const operation = searchParams.get('operation');
-
-// Write (merges with existing params)
-setSearchParams({ ...Object.fromEntries(searchParams), operation: 'newOp' });
-
-// Clear
-setSearchParams({});
-```
-
-### URLParams Constants
-
-**Location**: `src/constants/urlParams.ts`
-
-**Purpose**: Centralized query param key constants
-
-```typescript
-export const URL_PARAMS = {
-  OPERATION: 'operation',
-  VERSION: 'version',
-  DEFINITION: 'definition',
-  DEPLOYMENT: 'deployment',
-  // etc.
-} as const;
-```
-
-**Usage**:
-```tsx
-const operationId = searchParams.get(URL_PARAMS.OPERATION);
-```
-
----
-
-## LocationsService Integration
-
-### Purpose
-
-Manages browser location history and query parameters imperatively (outside React components).
-
-**Location**: `src/services/LocationsService/` (implementation TODO: verify methods)
-
-**Potential Methods** (based on usage patterns):
-```typescript
-interface ILocationsService {
-  updateQueryParams(params: Record<string, string>): void;
-  getQueryParam(key: string): string | null;
-  navigateTo(path: string): void;
-  goBack(): void;
-}
-```
-
-**Use Case**: Update URL from non-React code (e.g., analytics, event handlers, imperative redirects).
-
----
-
-## Route Guards & Protected Routes
-
-### Authentication Guard
-
-**Pattern**: Conditionally render routes based on `isAuthenticatedAtom`
-
-**Implementation** (if needed):
-```tsx
-const ProtectedRoute = ({ children }) => {
-  const isAuthenticated = useRecoilValue(isAuthenticatedAtom);
-  const isAnonymousEnabled = useRecoilValue(isAnonymousAccessEnabledAtom);
-
-  if (!isAuthenticated && !isAnonymousEnabled) {
-    return <Navigate to="/" replace />;
-  }
-
-  return children;
-};
-```
-
-**Current State**: No protected routes (anonymous access supported).
-
-### Access Denied State
-
-**Atom**: `isAccessDeniedAtom`
-
-**Trigger**: 401/403 responses from API Center → set to `true`
-
-**UI Response**: Show "Access Denied" message in `ApiDetailsPage` or `ApisPage` instead of data.
+The `/apis/:id` and `/languageModels/:id` routes inherit the parent `/` search params so closing the drawer restores the catalog state.
 
 ---
 
 ## Navigation State Persistence
 
-### Recent Searches
-
-- **Atom**: `recentSearchesAtom`
-- **Persistence**: localStorage (via Recoil effects)
-- **Usage**: Populate search suggestions on homepage
-
-### Filter State
-
-- **Atom**: `apiSearchFiltersAtom`
-- **Persistence**: Session-only (lost on refresh)
-- **Scope**: ApisPage filters (version, definition, lifecycle, custom metadata)
-
-### Layout Preferences
-
-- **Atom**: `apiListLayoutAtom` (grid vs list)
-- **Persistence**: localStorage (persisted across sessions)
-- **Scope**: ApisPage layout toggle
+| State | Atom | Persistence | Scope |
+|-------|------|-------------|-------|
+| Recent searches | `recentSearchesAtom` | localStorage | Homepage search suggestions |
+| Search filters | `apiSearchFiltersAtom` | Session-only | Active catalog filters |
+| Layout preference | `apiListLayoutAtom` | localStorage | Grid vs. list toggle |
+| Sorting | `apiListSortingAtom` | Session-only | Catalog sort order |
 
 ---
 
-## Routing Best Practices
+## Authentication & Access
 
-1. **Use URL Params for Shareable State**: Operation/version/definition selection → query params (shareable, bookmarkable).
-2. **Use Atoms for Transient State**: Filters, sorting, layout preferences → atoms (faster, no URL clutter).
-3. **Avoid Nested Routes for Simple UI**: React Router v6 nested routes add complexity; query params sufficient for this app.
-4. **Centralize URL Param Keys**: Use `urlParams.ts` constants to avoid typos.
-5. **Sync URL with State**: Use `useEffect` to sync `searchParams` changes to component state.
-6. **Guard Against Invalid Params**: Validate `apiName`, `operation`, etc. before fetching data.
-7. **Preserve URL on Error**: Don't redirect on 404 API; show error message with URL intact.
-
----
-
-## Error Boundaries
-
-### Route-Level Error Boundary
-
-**Location**: Layout component (wraps `<Outlet />`)
-
-**Purpose**: Catch render errors in route components without crashing app.
-
-**Fallback**: Show error message with "Go Home" button.
-
----
-
-## TODO: Routing
-
-- [ ] Verify `LocationsService` methods and signatures
-- [ ] Document 404 Not Found route (if exists)
-- [ ] Document redirect routes (e.g., `/apis/:apiName/` → `/apis/:apiName`)
-- [ ] Verify if error boundary exists in Layout.tsx
+There are no route guards. Authentication state (`isAuthenticatedAtom`) is checked at the data-fetching layer — hooks like `useApi`, `useApis`, etc. only fire queries when `isAuthenticated` is true. If the user is not authenticated and anonymous access is disabled, the UI shows an access-denied state rather than redirecting.
 - [ ] Document scroll restoration strategy (scroll to top on navigation?)
 - [ ] Verify if route-based code splitting implemented
 - [ ] Document deep link validation logic (invalid operation ID handling)

@@ -56,7 +56,38 @@ interface ApiAuthFormProps {
 
 ---
 
-### 2. CopyLink
+### 2. ApiCard
+
+**Purpose**: Reusable summary card for APIs and related asset types displayed in grids and list-like card collections.
+
+**Location**: `src/components/ApiCard/`
+
+**Props**:
+```typescript
+interface ApiCardProps {
+  api: {
+    name: string;
+    displayName: string;
+    description: string;
+    type?: string;
+    lifecycleStage?: string;
+  };
+  linkProps?: React.HTMLProps<HTMLAnchorElement>;
+  showType?: boolean;
+}
+```
+
+**Key Features**:
+- Renders the asset display name and description inside a clickable anchor wrapper
+- Shows category badges for APIs and standalone asset types such as skills, MCP servers, plugins, and models
+- Uses `formatKindDisplay()` to normalize kind labels for presentation
+- Supports passing link props from routing-aware parents without owning navigation logic
+
+**Used In**: Asset and API browsing experiences that need consistent summary cards.
+
+---
+
+### 3. CopyLink
 
 **Purpose**: Button to copy shareable link (e.g., API detail URL with operation deep link).
 
@@ -76,7 +107,7 @@ interface CopyLinkProps {
 
 ---
 
-### 3. CustomMetadata
+### 4. CustomMetadata
 
 **Purpose**: Displays custom metadata properties for an API (e.g., team, owner, cost center).
 
@@ -97,7 +128,7 @@ interface CustomMetadataProps {
 
 ---
 
-### 4. EmptyStateMessage
+### 5. EmptyStateMessage
 
 **Purpose**: Displays message and icon for empty/error states (no results, access denied, no data).
 
@@ -118,7 +149,30 @@ interface EmptyStateMessageProps {
 
 ---
 
-### 5. Footer
+### 6. ErrorBoundary
+
+**Purpose**: Top-level failure boundary that prevents the entire React tree from crashing on rendering or unhandled runtime errors.
+
+**Location**: `src/components/ErrorBoundary/`
+
+**Props**:
+```typescript
+interface ErrorBoundaryProps {
+  children: React.ReactNode;
+}
+```
+
+**Key Features**:
+- Uses React error boundary lifecycle methods to catch render-time failures
+- Listens for global `error` and `unhandledrejection` events to surface non-render failures through the same fallback UI
+- Logs caught failures to the console for debugging
+- Provides a recovery path by redirecting the user back to the home page
+
+**Used In**: Application shell and page-level composition where a global fallback is required.
+
+---
+
+### 7. Footer
 
 **Purpose**: App footer with version info, links, and copyright.
 
@@ -135,7 +189,7 @@ interface EmptyStateMessageProps {
 
 ---
 
-### 6. Header
+### 8. Header
 
 **Purpose**: App header with logo, navigation, search, and auth button.
 
@@ -158,7 +212,36 @@ interface EmptyStateMessageProps {
 
 ---
 
-### 7. MarkdownRenderer
+### 9. InfoTable
+
+**Purpose**: Shared table abstraction for rendering labeled tabular data with optional collapsible row groups.
+
+**Location**: `src/components/InfoTable/`
+
+**Props**:
+```typescript
+interface InfoTableProps {
+  columnLabels: string[];
+  children?: React.ReactNode;
+  noDataMessage?: string;
+}
+```
+
+**Composite API**:
+- `InfoTable.Row` exposes Fluent UI `TableRow`
+- `InfoTable.Cell` exposes Fluent UI `TableCell`
+- `InfoTable.CollapsibleRow` renders expandable section headers for grouped content
+
+**Key Features**:
+- Standardizes table chrome and empty-state handling
+- Injects shared `colSpan` and `noDataMessage` values into collapsible rows
+- Supports grouped detail views without every experience rebuilding table behavior
+
+**Used In**: Detail and inspection experiences that need consistent table rendering for specs, metadata, or related records.
+
+---
+
+### 10. MarkdownRenderer
 
 **Purpose**: Renders Markdown content (API descriptions, operation summaries).
 
@@ -184,7 +267,7 @@ interface MarkdownRendererProps {
 
 ---
 
-### 8. ParamSchemaDefinition
+### 11. ParamSchemaDefinition
 
 **Purpose**: Displays OpenAPI schema for parameters (type, format, required, example).
 
@@ -210,7 +293,7 @@ interface ParamSchemaDefinitionProps {
 
 ---
 
-### 9. RefLink
+### 12. RefLink
 
 **Purpose**: Renders link to referenced schema in OpenAPI spec (e.g., `$ref: "#/components/schemas/Pet"`).
 
@@ -230,7 +313,7 @@ interface RefLinkProps {
 
 ---
 
-### 10. SemanticSearchToggle
+### 13. SemanticSearchToggle
 
 **Purpose**: Toggle switch for enabling semantic search (requires Azure AI Search).
 
@@ -248,7 +331,7 @@ interface RefLinkProps {
 
 ---
 
-### 11. TestConsoleError
+### 14. TestConsoleError
 
 **Purpose**: Displays error messages in HTTP test console (network errors, 4xx/5xx responses).
 
@@ -287,7 +370,25 @@ interface TestConsoleErrorProps {
 
 ---
 
-### 2. ApiAccessAuthForm
+### 2. AddFilterDropdown
+
+**Purpose**: Popover-based filter builder that lets users add ad hoc metadata filters without exposing the full filter panel.
+
+**Location**: `src/experiences/AddFilterDropdown/`
+
+**Props**: None (uses `useSearchFilters()`).
+
+**Key Features**:
+- Reads filter metadata from `useSearchFilters()` to populate available filter properties dynamically
+- Supports `contains` and `equals` operators with operator-specific input behavior
+- Switches between free-text input and constrained dropdown values when exact-match options exist
+- Applies the selected filter and resets local UI state when the user confirms
+
+**Used In**: Asset discovery toolbars and search/filter surfaces.
+
+---
+
+### 3. ApiAccessAuthForm
 
 **Purpose**: Placeholder for API access token form (future feature?).
 
@@ -297,7 +398,7 @@ interface TestConsoleErrorProps {
 
 ---
 
-### 3. ApiAdditionalInfo
+### 4. ApiAdditionalInfo
 
 **Purpose**: Displays additional API metadata (tags, external docs, custom properties).
 
@@ -319,7 +420,7 @@ interface ApiAdditionalInfoProps {
 
 ---
 
-### 4. ApiDefinitionSelect
+### 5. ApiDefinitionSelect
 
 **Purpose**: Dropdown to select API definition (OpenAPI, AsyncAPI, gRPC, etc.).
 
@@ -341,7 +442,7 @@ interface ApiDefinitionSelectProps {
 
 ---
 
-### 5. ApiFilters
+### 6. ApiFilters
 
 **Purpose**: Filter panel for API list (lifecycle, kind, custom properties).
 
@@ -360,7 +461,7 @@ interface ApiDefinitionSelectProps {
 
 ---
 
-### 6. ApiInfoOptions
+### 7. ApiInfoOptions
 
 **Purpose**: Action buttons for API detail page (copy link, open in VS Code).
 
@@ -384,7 +485,7 @@ interface ApiInfoOptionsProps {
 
 ---
 
-### 7. ApiList
+### 8. ApiList
 
 **Purpose**: Renders list of APIs (grid or list layout).
 
@@ -406,7 +507,7 @@ interface ApiListProps {
 
 ---
 
-### 8. ApiListLayoutSwitch
+### 9. ApiListLayoutSwitch
 
 **Purpose**: Toggle button to switch between grid and list layouts.
 
@@ -420,7 +521,7 @@ interface ApiListProps {
 
 ---
 
-### 9. ApiListSortingSelect
+### 10. ApiListSortingSelect
 
 **Purpose**: Dropdown to select sorting order (name A-Z, recently updated, etc.).
 
@@ -440,7 +541,7 @@ interface ApiListProps {
 
 ---
 
-### 10. ApiOperationDetails
+### 11. ApiOperationDetails
 
 **Purpose**: Displays details for a selected API operation (method, path, description, parameters, responses).
 
@@ -463,7 +564,7 @@ interface ApiOperationDetailsProps {
 
 ---
 
-### 11. ApiOperationsSelect
+### 12. ApiOperationsSelect
 
 **Purpose**: Dropdown to select API operation (e.g., "GET /pets", "POST /pets/{id}").
 
@@ -484,7 +585,7 @@ interface ApiOperationsSelectProps {
 
 ---
 
-### 12. ApiSearchBox
+### 13. ApiSearchBox
 
 **Purpose**: Search box with autocomplete for finding APIs by name, title, description.
 
@@ -509,7 +610,47 @@ interface ApiSearchBoxProps {
 
 ---
 
-### 13. HttpTestConsole
+### 14. CategoryPills
+
+**Purpose**: Prominent category selector for narrowing the asset catalog to high-level kinds such as APIs, MCP servers, models, plugins, and skills.
+
+**Location**: `src/experiences/CategoryPills/`
+
+**Props**: None (uses `useSearchFilters()`).
+
+**Key Features**:
+- Maps category buttons to `kind` filters in the shared search filter model
+- Includes a dedicated `All assets` reset state that clears active kind filters
+- Uses Fluent UI icons and active styling to make category selection scannable
+- Clears existing kind filters before applying a newly selected category to keep the state deterministic
+
+**Used In**: Asset catalog entry points and browse pages.
+
+---
+
+### 15. ContributeCard
+
+**Purpose**: Call-to-action card that links users to an external contribution workflow for community assets.
+
+**Location**: `src/experiences/ContributeCard/`
+
+**Props**:
+```typescript
+interface ContributeCardProps {
+  url: string;
+}
+```
+
+**Key Features**:
+- Renders as a fully clickable external link card
+- Uses an inline GitHub icon to visually associate the action with source contribution
+- Frames contribution as a first-class catalog action alongside browsing experiences
+
+**Used In**: Asset discovery pages or marketing-style contribution surfaces.
+
+---
+
+### 16. HttpTestConsole
 
 **Purpose**: Interactive HTTP request form for testing API operations.
 
@@ -542,7 +683,7 @@ interface HttpTestConsoleProps {
 
 ---
 
-### 14. McpTestConsole
+### 17. McpTestConsole
 
 **Purpose**: Interactive MCP (Model Context Protocol) request form for testing MCP servers.
 
@@ -551,6 +692,30 @@ interface HttpTestConsoleProps {
 **Status**: TODO: Verify implementation (MCP streaming, SSE, protocol details).
 
 **Used In**: `ApiDetailsPage` (if API kind = MCP).
+
+---
+
+### 18. SkillInstallButton
+
+**Purpose**: Installation panel that generates a VS Code deeplink for downloading a skill into a local workspace.
+
+**Location**: `src/experiences/SkillInstallButton/`
+
+**Props**:
+```typescript
+interface SkillInstallButtonProps {
+  skillName: string;
+  sourceUrl: string;
+}
+```
+
+**Key Features**:
+- Builds a skill installation deeplink with `buildSkillDeeplink()`
+- Opens VS Code directly to the extension-driven install flow
+- Explains where the skill will be placed in the consumer workspace (`.github/skills/{skillName}`)
+- Links to the required Azure API Center extension in the marketplace
+
+**Used In**: Skill-specific detail or discovery pages.
 
 ---
 
