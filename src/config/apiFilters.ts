@@ -9,7 +9,7 @@ export const ApiFilterParameters: Record<FilterType, FilterMetadata> = {
       { value: 'skill', label: 'Skill' },
       { value: 'a2a', label: 'A2A' },
       { value: 'agent', label: 'Agent' },
-      { value: 'languageModel', label: 'Model' },
+      { value: 'languagemodel', label: 'Model' },
       { value: 'plugin', label: 'Plugin' },
       { value: 'graphql', label: 'GraphQL' },
       { value: 'grpc', label: 'gRPC' },
