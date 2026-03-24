@@ -59,8 +59,7 @@ export const ApiList: React.FC = () => {
       } else if (kind === 'plugin') {
         url = LocationsService.getPluginInfoUrl(api.name);
       } else if (kind === 'languagemodel') {
-        url = LocationsService.getHomeUrl(true);
-        state = { drawer: { kind: 'languageModel', name: api.name } };
+        url = LocationsService.getModelPlaygroundUrl(api.name);
       } else {
         url = LocationsService.getHomeUrl(true);
         state = { drawer: { kind: 'api', name: api.name } };

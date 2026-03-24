@@ -39,10 +39,7 @@ function getResourceNavigation(name: string, kind?: string): { to: string; state
   if (k === 'agent') return { to: LocationsService.getAgentChatUrl(name) };
   if (k === 'skill') return { to: LocationsService.getSkillInfoUrl(name) };
   if (k === 'languagemodel') {
-    return {
-      to: LocationsService.getHomeUrl(true),
-      state: { drawer: { kind: 'languageModel', name } },
-    };
+    return { to: LocationsService.getModelPlaygroundUrl(name) };
   }
   return {
     to: LocationsService.getHomeUrl(true),

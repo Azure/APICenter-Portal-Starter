@@ -23,18 +23,13 @@ function getNavigationTarget(api: ApiMetadata): { to: string; state?: HomeLocati
     return { to: LocationsService.getPluginInfoUrl(api.name) };
   }
 
+  if (kind === 'languagemodel') {
+    return { to: LocationsService.getModelPlaygroundUrl(api.name) };
+  }
+
   return {
     to: LocationsService.getHomeUrl(true),
-    state: getDrawerState(api),
-  };
-}
-
-function getDrawerState(api: ApiMetadata): HomeLocationState {
-  return {
-    drawer: {
-      kind: api.kind?.toLowerCase() === 'languagemodel' ? 'languageModel' : 'api',
-      name: api.name,
-    },
+    state: { drawer: { kind: 'api', name: api.name } },
   };
 }
 
