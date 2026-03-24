@@ -9,6 +9,7 @@ import {
   ChatRegular,
 } from '@fluentui/react-icons';
 import { Link, useParams } from 'react-router-dom';
+import { useApiDeployments } from '@/hooks/useApiDeployments';
 import { LocationsService } from '@/services/LocationsService';
 import { useLanguageModel } from '@/hooks/useLanguageModel';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
@@ -21,7 +22,7 @@ interface ChatMessage {
 }
 
 /**
- * Parses an SSE stream from the Responses API, invoking onDelta for each text token
+ * Parses an SSE stream from the Chat Completions API, invoking onDelta for each text token
  * and onComplete when the stream ends.
  */
 async function readSSEStream(
@@ -52,20 +53,11 @@ async function readSSEStream(
         if (payload === '[DONE]') continue;
 
         try {
-          const event = JSON.parse(payload);
-          if (event.type === 'response.output_text.delta' && event.delta) {
-            onDelta(event.delta);
-          } else if (event.type === 'response.completed' && event.response) {
-            const output = event.response.output;
-            if (Array.isArray(output)) {
-              for (const item of output) {
-                if (Array.isArray(item?.content)) {
-                  for (const c of item.content) {
-                    if (c?.text) onDelta(c.text);
-                  }
-                }
-              }
-            }
+          const chunk = JSON.parse(payload);
+          // Chat Completions streaming format: choices[0].delta.content
+          const content = chunk?.choices?.[0]?.delta?.content;
+          if (content) {
+            onDelta(content);
           }
         } catch {
           // Skip malformed JSON lines
@@ -94,12 +86,20 @@ enum PlaygroundTabs {
   DOCUMENTATION = 'documentation',
 }
 
-// TODO: Replace with per-model endpoint discovery from deployments
-const MODEL_ENDPOINT = '/chat/completions';
+const CHAT_PATH = '/chat/completions';
 
 export const ModelPlayground: React.FC = () => {
   const { name } = useParams<{ name: string }>();
   const model = useLanguageModel(name);
+  const deployments = useApiDeployments(name, 'languageModels');
+
+  const runtimeUrl = (() => {
+    const list = deployments.data ?? [];
+    const preferred = list.find((d) => d.recommended) ?? list[0];
+    const base = preferred?.server?.runtimeUri?.[0];
+    if (!base) return undefined;
+    return base.replace(/\/$/, '') + CHAT_PATH;
+  })();
   const [activeTab, setActiveTab] = useState<PlaygroundTabs>(PlaygroundTabs.PLAYGROUND);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
@@ -119,18 +119,27 @@ export const ModelPlayground: React.FC = () => {
     if (!trimmed || isLoading) return;
 
     const userMessage: ChatMessage = { role: 'user', content: trimmed, timestamp: new Date() };
-    setMessages((prev) => [...prev, userMessage]);
+    const updatedMessages = [...messages, userMessage];
+    setMessages([...updatedMessages, { role: 'assistant', content: '', timestamp: new Date() }]);
     setInput('');
     setIsLoading(true);
 
-    setMessages((prev) => [...prev, { role: 'assistant', content: '', timestamp: new Date() }]);
-
     try {
-      const response = await fetch(MODEL_ENDPOINT, {
+      if (!runtimeUrl) {
+        throw new Error('No deployment runtime URL available for this model');
+      }
+
+      const apiMessages = [
+        { role: 'system', content: 'You are a helpful assistant.' },
+        ...updatedMessages.map(({ role, content }) => ({ role, content })),
+      ];
+
+      const response = await fetch(runtimeUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          input: trimmed,
+          model: model.data?.modelName,
+          messages: apiMessages,
           stream: true,
         }),
       });
@@ -165,7 +174,7 @@ export const ModelPlayground: React.FC = () => {
       });
       setIsLoading(false);
     }
-  }, [input, isLoading]);
+  }, [input, isLoading, runtimeUrl, messages, model.data]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {

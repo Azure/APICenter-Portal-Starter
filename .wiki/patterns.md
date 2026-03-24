@@ -282,12 +282,10 @@ createBrowserRouter([
       {
         path: '/',
         element: <Home />,
-        children: [
-          {
-            path: 'api-info/:id',
-            element: <ApiInfo />,  // Rendered in <Outlet /> of Home
-          },
-        ],
+      },
+      {
+        path: 'apis/:apiName/versions/:versionName/definitions/:definitionName',
+        element: <ApiSpec />,
       },
     ],
   },

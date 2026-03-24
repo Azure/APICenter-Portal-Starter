@@ -1,8 +1,26 @@
 import { HttpService } from '@/services/HttpService';
-import { LanguageModelMetadata } from '@/types/languageModel';
+import { LanguageModelContextWindow, LanguageModelMetadata } from '@/types/languageModel';
 import { PaginatedResult } from '@/types/services/IApiService';
 import { ILanguageModelService } from '@/types/services/ILanguageModelService';
 import { DEFAULT_PAGE_SIZE } from '@/constants';
+
+/**
+ * The /apis/{name} response may return language-model-specific properties either at the
+ * top level or nested inside customProperties. This function normalises both shapes into
+ * a flat LanguageModelMetadata object so that the rest of the app doesn't have to care.
+ */
+function normalizeLanguageModel(raw: LanguageModelMetadata): LanguageModelMetadata {
+  const cp = (raw.customProperties ?? {}) as Record<string, unknown>;
+  return {
+    ...raw,
+    modelName: raw.modelName ?? (cp['modelName'] as string | undefined),
+    modelProvider: raw.modelProvider ?? (cp['modelProvider'] as string | undefined),
+    taskTypes: raw.taskTypes ?? (cp['taskTypes'] as string[] | undefined),
+    inputTypes: raw.inputTypes ?? (cp['inputTypes'] as string[] | undefined),
+    outputTypes: raw.outputTypes ?? (cp['outputTypes'] as string[] | undefined),
+    contextWindow: raw.contextWindow ?? (cp['contextWindow'] as LanguageModelContextWindow | undefined),
+  };
+}
 
 export const LanguageModelService: ILanguageModelService = {
   async getLanguageModels(search?: string): Promise<PaginatedResult<LanguageModelMetadata>> {
@@ -13,7 +31,7 @@ export const LanguageModelService: ILanguageModelService = {
     }
 
     const response = await HttpService.get<{ value: LanguageModelMetadata[]; nextLink?: string }>(
-      `/languageModels?${searchParams.toString()}`
+      `/apis?${searchParams.toString()}`
     );
     return { value: response?.value || [], nextLink: response?.nextLink };
   },
@@ -24,6 +42,7 @@ export const LanguageModelService: ILanguageModelService = {
   },
 
   async getLanguageModel(name: string): Promise<LanguageModelMetadata> {
-    return await HttpService.get<LanguageModelMetadata>(`/languageModels/${name}`);
+    const raw = await HttpService.get<LanguageModelMetadata>(`/apis/${name}`);
+    return normalizeLanguageModel(raw);
   },
 };

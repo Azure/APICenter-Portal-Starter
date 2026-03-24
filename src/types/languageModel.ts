@@ -6,7 +6,7 @@ export interface LanguageModelContextWindow {
 }
 
 /**
- * The Language Model contract returned by the /languageModels endpoint.
+ * The Language Model contract returned from the /apis endpoint for language-model assets.
  */
 export interface LanguageModelMetadata {
   name: string;

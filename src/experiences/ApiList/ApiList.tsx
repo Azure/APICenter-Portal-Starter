@@ -17,6 +17,7 @@ import { Layouts } from '@/types/layouts';
 import { apiListLayoutAtom } from '@/atoms/apiListLayoutAtom';
 import { configAtom } from '@/atoms/configAtom';
 import { LocationsService } from '@/services/LocationsService';
+import { HomeLocationState } from '@/types/homeDrawer';
 import EmptyStateMessage from '@/components/EmptyStateMessage';
 import styles from './ApiList.module.scss';
 
@@ -50,6 +51,7 @@ export const ApiList: React.FC = () => {
       const typedApi = api as ApiCardApi & { type?: string };
       const kind = typedApi.type?.toLowerCase();
       let url: string;
+      let state: HomeLocationState | undefined;
       if (kind === 'agent') {
         url = LocationsService.getAgentChatUrl(api.name);
       } else if (kind === 'skill') {
@@ -57,9 +59,11 @@ export const ApiList: React.FC = () => {
       } else if (kind === 'plugin') {
         url = LocationsService.getPluginInfoUrl(api.name);
       } else if (kind === 'languagemodel') {
-        url = LocationsService.getModelInfoUrl(api.name);
+        url = LocationsService.getHomeUrl(true);
+        state = { drawer: { kind: 'languageModel', name: api.name } };
       } else {
-        url = LocationsService.getApiInfoUrl(api.name);
+        url = LocationsService.getHomeUrl(true);
+        state = { drawer: { kind: 'api', name: api.name } };
       }
 
       return {
@@ -69,7 +73,7 @@ export const ApiList: React.FC = () => {
             return;
           }
           e.preventDefault();
-          navigate(url);
+          navigate(url, state ? { state } : undefined);
         },
       };
     },

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Outlet, useOutlet } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
 import ApiList from '@/experiences/ApiList';
 import AccessDeniedSvg from '@/assets/accessDenied.svg';
@@ -12,14 +12,18 @@ import ApiListLayoutSwitch from '@/experiences/ApiListLayoutSwitch';
 import ApiListSortingSelect from '@/experiences/ApiListSortingSelect';
 import { ActiveFiltersBadges } from '@/experiences/ActiveFiltersBadges/ActiveFiltersBadges';
 import { setDocumentTitle } from '@/utils/dom';
+import ApiInfo from '@/pages/ApiInfo';
+import ModelInfo from '@/pages/ModelInfo';
+import { HomeLocationState } from '@/types/homeDrawer';
 import styles from './Home.module.scss';
 
 export const Home: React.FC = () => {
   const isAuthenticated = useRecoilValue(isAuthenticatedAtom);
   const isAccessDenied = useRecoilValue(isAccessDeniedAtom);
+  const location = useLocation();
+  const selectedDrawer = (location.state as HomeLocationState | null)?.drawer;
 
-  const nestedRoute = useOutlet();
-  if (!nestedRoute) setDocumentTitle('API portal (preview)');
+  if (!selectedDrawer) setDocumentTitle('API portal (preview)');
 
   function renderApiList() {
     if (!isAuthenticated) {
@@ -46,7 +50,8 @@ export const Home: React.FC = () => {
 
   return (
     <div className={styles.home}>
-      <Outlet />
+      {selectedDrawer?.kind === 'api' && <ApiInfo name={selectedDrawer.name} />}
+      {selectedDrawer?.kind === 'languageModel' && <ModelInfo name={selectedDrawer.name} />}
 
       <div className={styles.searchPanel}>
         <h1>Tools registry</h1>

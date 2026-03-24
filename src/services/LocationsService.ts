@@ -27,10 +27,6 @@ export const LocationsService = {
     return `/?${searchParams.toString()}`;
   },
 
-  getApiInfoUrl(name: string): string {
-    return `/apis/${name}${window.location.search}`;
-  },
-
   getSkillInfoUrl(name: string): string {
     return `/skills/${name}`;
   },
@@ -43,12 +39,8 @@ export const LocationsService = {
     return `/agents/${name}`;
   },
 
-  getModelInfoUrl(name: string): string {
-    return `/languageModels/${name}${window.location.search}`;
-  },
-
   getModelPlaygroundUrl(name: string): string {
-    return `/models/${name}/playground`;
+    return `/languageModels/${name}/playground`;
   },
 
   getApiSchemaExplorerUrl(api: string, version: string, definition: string, resourceType: ResourceType = 'apis'): string {

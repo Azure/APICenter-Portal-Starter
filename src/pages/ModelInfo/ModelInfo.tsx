@@ -13,18 +13,18 @@ import {
   Tab,
   TabList,
 } from '@fluentui/react-components';
-import { Dismiss24Regular, ChatRegular, OpenRegular } from '@fluentui/react-icons';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Dismiss24Regular, OpenRegular } from '@fluentui/react-icons';
+import { useNavigate } from 'react-router-dom';
 import { useLanguageModel } from '@/hooks/useLanguageModel';
-import { supportsPlayground } from '@/types/languageModel';
+
 import { LocationsService } from '@/services/LocationsService';
 import { EmptyStateMessage } from '@/components/EmptyStateMessage/EmptyStateMessage';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import { setDocumentTitle } from '@/utils/dom';
 import styles from './ModelInfo.module.scss';
 
-interface RouteParams {
-  id: string;
+interface Props {
+  name: string;
 }
 
 enum Tabs {
@@ -32,11 +32,10 @@ enum Tabs {
   MORE_DETAILS = 'more-details',
 }
 
-export const ModelInfo: React.FC = () => {
+export const ModelInfo: React.FC<Props> = ({ name }) => {
   const [activeTab, setActiveTab] = useState<Tabs>(Tabs.OPTIONS);
-  const { id } = useParams() as Readonly<RouteParams>;
   const navigate = useNavigate();
-  const model = useLanguageModel(id);
+  const model = useLanguageModel(name);
 
   setDocumentTitle(`Model${model.data?.title ? ` - ${model.data.title}` : ''}`);
 
@@ -51,27 +50,15 @@ export const ModelInfo: React.FC = () => {
   function renderOptionsTab() {
     if (!model.data) return null;
 
-    const hasPlayground = supportsPlayground(model.data);
-
     return (
       <>
-        {hasPlayground && (
-          <div className={styles.playgroundSection}>
-            <h3>
-              <span className={styles.panelLabel}>
-                <ChatRegular /> <strong>Playground</strong>
-              </span>
-            </h3>
-            <p>Try out this model interactively by sending messages and viewing responses in real time.</p>
-            <Button
-              appearance="primary"
-              icon={<OpenRegular />}
-              onClick={() => navigate(LocationsService.getModelPlaygroundUrl(model.data!.name))}
-            >
-              Open playground
-            </Button>
-          </div>
-        )}
+        <Button
+          appearance="secondary"
+          icon={<OpenRegular />}
+          onClick={() => navigate(LocationsService.getModelPlaygroundUrl(model.data!.name))}
+        >
+          Open in playground
+        </Button>
 
         {model.data.modelProvider && (
           <div className={styles.section}>
@@ -214,7 +201,9 @@ export const ModelInfo: React.FC = () => {
           <Divider />
         </div>
 
-        {activeTab === Tabs.OPTIONS ? renderOptionsTab() : renderMoreDetailsTab()}
+        {activeTab === Tabs.OPTIONS
+          ? <div className={styles.tabContent}>{renderOptionsTab()}</div>
+          : <div className={styles.tabContent}>{renderMoreDetailsTab()}</div>}
       </>
     );
   }

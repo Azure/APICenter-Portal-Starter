@@ -11,28 +11,24 @@ The application uses **React Router DOM v6** (`createBrowserRouter`) for client-
 | Path | Component | Parent | Purpose |
 |------|-----------|--------|---------|
 | `/` | `Home` | `Layout` | Landing page with search, filters, and API/model catalog |
-| `/apis/:id` | `ApiInfo` | `Home` (nested) | Drawer panel for a regular API (versions, definitions, options) |
-| `/languageModels/:id` | `ModelInfo` | `Home` (nested) | Drawer panel for a language model (playground link, metadata) |
 | `/apis/:apiName/versions/:versionName/definitions/:definitionName` | `ApiSpec` | `Layout` | Spec explorer for regular APIs |
 | `/languageModels/:apiName/versions/:versionName/definitions/:definitionName` | `ApiSpec` | `Layout` | Spec explorer for language models |
 | `/skills/:name` | `SkillInfo` | `Layout` | Skill detail page |
 | `/plugins/:name` | `PluginInfo` | `Layout` | Plugin detail page |
 | `/agents/:name` | `AgentChat` | `Layout` | Agent conversational UI |
-| `/models/:name/playground` | `ModelPlayground` | `Layout` | Interactive model playground |
+| `/languageModels/:name/playground` | `ModelPlayground` | `Layout` | Interactive model playground |
 
 ### Route Hierarchy (tree view)
 
 ```
 Layout
 ├── / ............................................. Home (catalog + search)
-│   ├── /apis/:id ................................ ApiInfo drawer (nested outlet)
-│   └── /languageModels/:id ...................... ModelInfo drawer (nested outlet)
 ├── /apis/:apiName/versions/:versionName/definitions/:definitionName .... ApiSpec
 ├── /languageModels/:apiName/versions/:versionName/definitions/:definitionName .... ApiSpec
 ├── /skills/:name ................................ SkillInfo
 ├── /plugins/:name ............................... PluginInfo
 ├── /agents/:name ................................ AgentChat
-└── /models/:name/playground ..................... ModelPlayground
+└── /languageModels/:name/playground ............. ModelPlayground
 ```
 
 ---
@@ -43,24 +39,24 @@ Layout
 
 - **Component**: `src/pages/Home/Home.tsx`
 - **Purpose**: Landing page showing the combined API catalog (APIs, models, skills, plugins, agents) with search, category pills, filters, sorting, and layout toggle.
-- **Nested routes**: `apis/:id` and `languageModels/:id` render as side-drawer overlays within the Home page via `<Outlet />`.
+- **Drawer behavior**: API and language model tiles open a side drawer within `Home`, but the drawer does not have its own standalone route. The browser remains on `/` and the selected asset name is carried in navigation state.
 - **Query params**:
   - `search` — text search query
   - `ai-search` — `"true"` enables semantic/vector search
 
-### ApiInfo (`/apis/:id`)
+### ApiInfo (drawer in `Home`)
 
 - **Component**: `src/pages/ApiInfo/ApiInfo.tsx`
 - **Purpose**: Side drawer showing details for a regular API (non-model, non-skill, non-agent). Includes version/definition/deployment selectors, API options (download spec, open in VS Code, view documentation link), and additional metadata.
-- **Route param**: `:id` — API name
-- **Nuances**: Rendered as a child of `Home`, so the catalog list remains visible behind the drawer. The URL preserves existing search params (search query, filters) so closing the drawer returns to the same catalog state. This nested route does not conflict with the sibling spec route (`/apis/:apiName/versions/…`) because React Router matches the more specific multi-segment path first.
+- **Asset identifier**: `name` — API name
+- **Nuances**: Rendered directly inside `Home`, so the catalog list remains visible behind the drawer. Closing the drawer returns to the same catalog state on `/`.
 
-### ModelInfo (`/languageModels/:id`)
+### ModelInfo (drawer in `Home`)
 
 - **Component**: `src/pages/ModelInfo/ModelInfo.tsx`
 - **Purpose**: Side drawer showing language model details — provider, model name, context window, task/input/output types, playground link, contacts, and documentation.
-- **Route param**: `:id` — language model name
-- **Nuances**: Same nested-drawer pattern as `ApiInfo`. The playground button navigates to `/models/:name/playground`. Does not show version/definition selectors (models use `LanguageModelService` not `ApiService`). This nested route does not conflict with the sibling spec route (`/languageModels/:apiName/versions/…`) because React Router matches the more specific multi-segment path first.
+- **Asset identifier**: `name` — language model name
+- **Nuances**: Same nested-drawer pattern as `ApiInfo`. The playground button navigates to `/languageModels/:name/playground`. Does not show version/definition selectors.
 
 ### ApiSpec — APIs (`/apis/:apiName/versions/:versionName/definitions/:definitionName`)
 
@@ -75,14 +71,14 @@ Layout
 - **Component**: `src/pages/ApiSpec/ApiSpec.tsx` (same component as above)
 - **Purpose**: Spec explorer for language model definitions.
 - **Route params**: Same as above.
-- **Backend calls**: Uses `resourceType = 'languageModels'` — requests hit `/languageModels/{name}/versions/…`.
-- **Detection**: `ApiSpec` reads `location.pathname` to determine `resourceType`:
+- **Backend calls**: Even for language model UI routes, the data plane is normalized to `/apis/{name}/versions/…`.
+- **Detection**: `ApiSpec` reads `location.pathname` to determine which asset-type route segment should appear in the browser URL:
   ```ts
   const resourceType: ResourceType = location.pathname.startsWith('/languageModels')
     ? 'languageModels'
     : 'apis';
   ```
-- **Nuance**: The `resourceType` is threaded into `definitionId`, hooks (`useApi`, `useApiVersions`, etc.), and `ApiDefinitionSelect` so the correct data-plane collection is called.
+- **Nuance**: The `resourceType` is used for UI routing only. The service layer still sends the underlying requests to `/apis/...`.
 
 ### SkillInfo (`/skills/:name`)
 
@@ -102,7 +98,7 @@ Layout
 - **Purpose**: Conversational chat UI for an agent-type API.
 - **Route param**: `:name`
 
-### ModelPlayground (`/models/:name/playground`)
+### ModelPlayground (`/languageModels/:name/playground`)
 
 - **Component**: `src/pages/ModelPlayground/ModelPlayground.tsx`
 - **Purpose**: Interactive playground for sending messages to a language model and viewing responses.
@@ -118,22 +114,33 @@ All internal URL construction is centralized in `src/services/LocationsService.t
 |--------|---------|-------|
 | `getHomeUrl(preserveSearchParams?)` | `/` or `/?…` | Preserves search/filter params when `true` |
 | `getApiSearchUrl(search?, isSemanticSearch?)` | `/?search=…&ai-search=…` | Merges with current window search params |
-| `getApiInfoUrl(name)` | `/apis/{name}?…` | Appends current search params |
-| `getModelInfoUrl(name)` | `/languageModels/{name}?…` | Appends current search params |
 | `getSkillInfoUrl(name)` | `/skills/{name}` | |
 | `getPluginInfoUrl(name)` | `/plugins/{name}` | |
 | `getAgentChatUrl(name)` | `/agents/{name}` | |
-| `getModelPlaygroundUrl(name)` | `/models/{name}/playground` | |
-| `getApiSchemaExplorerUrl(api, version, definition, resourceType?)` | `/{resourceType}/{api}/versions/{version}/definitions/{definition}` | Defaults `resourceType` to `'apis'`. Pass `'languageModels'` for models. Use `kindToResourceType(api.kind)` to derive from an API's kind. |
+| `getModelPlaygroundUrl(name)` | `/languageModels/{name}/playground` | |
+| `getApiSchemaExplorerUrl(api, version, definition, resourceType?)` | `/{resourceType}/{api}/versions/{version}/definitions/{definition}` | Uses the asset-type route segment for browser navigation |
 | `getAiSearchInfoUrl()` | External docs link | |
 | `getHelpUrl()` | External docs link | |
 
 ### ResourceType and kindToResourceType
 
-The `ResourceType` type (`'apis' | 'languageModels'`) controls the URL prefix used for both **UI routes** and **data-plane API calls**. The helper `kindToResourceType(kind)` in `src/types/apiDefinition.ts` maps an API's `kind` field to the correct value:
+The `ResourceType` type (`'apis' | 'languageModels'`) controls the **browser route segment** used for asset-specific UI navigation. The helper `kindToResourceType(kind)` in `src/types/apiDefinition.ts` maps an API's `kind` field to the matching route segment:
 
 - `'languageModel'` → `'languageModels'`
 - Everything else → `'apis'`
+
+### Explicit UI/Data API Split
+
+This project intentionally separates the browser URL from the underlying data-plane URL:
+
+- **UI routing** is asset-typed. Example: a language model detail page should be `/languageModels/chat-gpt`.
+- **Data API calls** still go through `/apis/...` regardless of asset type. Example: loading that same language model still requests `/apis/chat-gpt`.
+
+This applies to the related model endpoints as well:
+
+- UI spec route: `/languageModels/chat-gpt/versions/{version}/definitions/{definition}`
+- Data API spec request: `/apis/chat-gpt/versions/{version}/definitions/{definition}`
+- UI playground route: `/languageModels/chat-gpt/playground`
 
 ---
 
@@ -143,19 +150,19 @@ The `ResourceType` type (`'apis' | 'languageModels'`) controls the URL prefix us
 
 Clicking an item in the API list navigates based on its `kind` (via `apiAdapter` which maps `kind` → `type`):
 
-| `type` value | Target URL | Source |
+| `type` value | Target destination | Source |
 |---|---|---|
 | `'agent'` | `/agents/{name}` | `getAgentChatUrl` |
 | `'skill'` | `/skills/{name}` | `getSkillInfoUrl` |
 | `'plugin'` | `/plugins/{name}` | `getPluginInfoUrl` |
-| `'languageModel'` | `/languageModels/{name}` | `getModelInfoUrl` |
-| anything else | `/apis/{name}` | `getApiInfoUrl` |
+| `'languageModel'` | Home drawer for `{name}` | Home navigation state |
+| anything else | Home drawer for `{name}` | Home navigation state |
 
 This logic lives in `ApiList.tsx` → `apiLinkPropsProvider`.
 
 ### Detail Drawer → Spec Explorer
 
-From the `ApiInfo` drawer, the "View documentation" link navigates to the spec explorer using `getApiSchemaExplorerUrl(api.name, version, definition, kindToResourceType(api.kind))`. This ensures language models use `/languageModels/…` and regular APIs use `/apis/…`.
+From the appropriate detail drawer, the "View documentation" link navigates to the spec explorer using `getApiSchemaExplorerUrl(api.name, version, definition, kindToResourceType(api.kind))`. The browser URL uses the asset-type route segment, while the service layer still sends the actual data-plane request to `/apis/...`.
 
 ### Spec Explorer Version Switching
 
@@ -172,7 +179,7 @@ Defined in `src/constants/urlParams.ts`:
 | `search` | `UrlParams.SEARCH_QUERY` | `/` | Text search query |
 | `ai-search` | `UrlParams.IS_SEMANTIC_SEARCH` | `/` | `"true"` for vector/semantic search |
 
-The `/apis/:id` and `/languageModels/:id` routes inherit the parent `/` search params so closing the drawer restores the catalog state.
+The `Home` route preserves its search params while drawers open and close, so the catalog state remains intact.
 
 ---
 

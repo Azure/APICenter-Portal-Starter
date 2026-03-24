@@ -56,8 +56,8 @@ export const ApiService: IApiService = {
     return { value: response.value || [], nextLink: response.nextLink };
   },
 
-  async getApi(name: string, resourceType: ResourceType = 'apis'): Promise<ApiMetadata> {
-    return await HttpService.get<ApiMetadata>(`/${resourceType}/${name}`);
+  async getApi(name: string, _resourceType: ResourceType = 'apis'): Promise<ApiMetadata> {
+    return await HttpService.get<ApiMetadata>(`/apis/${name}`);
   },
 
   async getServer(name: string): Promise<Server | undefined> {
@@ -65,32 +65,32 @@ export const ApiService: IApiService = {
     return response?.server;
   },
 
-  async getVersions(apiName: string, resourceType: ResourceType = 'apis'): Promise<ApiVersion[]> {
-    const response = await HttpService.get<{ value: ApiVersion[] }>(`/${resourceType}/${apiName}/versions?$top=${DEFAULT_PAGE_SIZE}`);
+  async getVersions(apiName: string, _resourceType: ResourceType = 'apis'): Promise<ApiVersion[]> {
+    const response = await HttpService.get<{ value: ApiVersion[] }>(`/apis/${apiName}/versions?$top=${DEFAULT_PAGE_SIZE}`);
     return response.value || [];
   },
 
-  async getDeployments(apiName: string, resourceType: ResourceType = 'apis'): Promise<ApiDeployment[]> {
-    const response = await HttpService.get<{ value: ApiDeployment[] }>(`/${resourceType}/${apiName}/deployments?$top=${DEFAULT_PAGE_SIZE}`);
+  async getDeployments(apiName: string, _resourceType: ResourceType = 'apis'): Promise<ApiDeployment[]> {
+    const response = await HttpService.get<{ value: ApiDeployment[] }>(`/apis/${apiName}/deployments?$top=${DEFAULT_PAGE_SIZE}`);
     return response.value || [];
   },
 
-  async getDefinitions(apiName: string, version: string, resourceType: ResourceType = 'apis'): Promise<ApiDefinition[]> {
+  async getDefinitions(apiName: string, version: string, _resourceType: ResourceType = 'apis'): Promise<ApiDefinition[]> {
     const response = await HttpService.get<{ value: ApiDefinition[] }>(
-      `/${resourceType}/${apiName}/versions/${version}/definitions?$top=${DEFAULT_PAGE_SIZE}`
+      `/apis/${apiName}/versions/${version}/definitions?$top=${DEFAULT_PAGE_SIZE}`
     );
     return response.value || [];
   },
 
-  async getDefinition({ apiName, versionName, definitionName, resourceType = 'apis' }: ApiDefinitionId): Promise<ApiDefinition> {
+  async getDefinition({ apiName, versionName, definitionName }: ApiDefinitionId): Promise<ApiDefinition> {
     return await HttpService.get<ApiDefinition>(
-      `/${resourceType}/${apiName}/versions/${versionName}/definitions/${definitionName}`
+      `/apis/${apiName}/versions/${versionName}/definitions/${definitionName}`
     );
   },
 
-  async getSpecificationLink({ apiName, versionName, definitionName, resourceType = 'apis' }: ApiDefinitionId): Promise<string> {
+  async getSpecificationLink({ apiName, versionName, definitionName }: ApiDefinitionId): Promise<string> {
     const response = await HttpService.post<{ value: string }>(
-      `/${resourceType}/${apiName}/versions/${versionName}/definitions/${definitionName}:exportSpecification`
+      `/apis/${apiName}/versions/${versionName}/definitions/${definitionName}:exportSpecification`
     );
     return response?.value;
   },
@@ -111,18 +111,16 @@ export const ApiService: IApiService = {
   },
 
   async getSecurityRequirements(definitionId: ApiDefinitionId): Promise<ApiAuthSchemeMetadata[]> {
-    const resourceType = definitionId.resourceType || 'apis';
     const response = await HttpService.get<{ value: ApiAuthSchemeMetadata[] }>(
-      `/${resourceType}/${definitionId.apiName}/versions/${definitionId.versionName}/securityRequirements?$top=${DEFAULT_PAGE_SIZE}`
+      `/apis/${definitionId.apiName}/versions/${definitionId.versionName}/securityRequirements?$top=${DEFAULT_PAGE_SIZE}`
     );
 
     return response?.value || [];
   },
 
   async getSecurityCredentials(definitionId: ApiDefinitionId, schemeName: string): Promise<ApiAuthScheme> {
-    const resourceType = definitionId.resourceType || 'apis';
     return await HttpService.post<ApiAuthScheme>(
-      `/${resourceType}/${definitionId.apiName}/versions/${definitionId.versionName}/securityRequirements/${schemeName}:getCredentials`
+      `/apis/${definitionId.apiName}/versions/${definitionId.versionName}/securityRequirements/${schemeName}:getCredentials`
     );
   },
 

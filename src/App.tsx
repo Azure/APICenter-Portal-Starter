@@ -2,12 +2,10 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { useSetRecoilState } from 'recoil';
 import Home from '@/pages/Home';
-import ApiInfo from '@/pages/ApiInfo';
 import ApiSpec from '@/pages/ApiSpec';
 import SkillInfo from '@/pages/SkillInfo';
 import PluginInfo from '@/pages/PluginInfo';
 import AgentChat from '@/pages/AgentChat';
-import ModelInfo from '@/pages/ModelInfo';
 import ModelPlayground from '@/pages/ModelPlayground';
 import { configAtom } from '@/atoms/configAtom';
 import Layout from './Layout';
@@ -28,16 +26,6 @@ const App: React.FC = () => {
           {
             path: '/',
             element: <Home />,
-            children: [
-              {
-                path: 'apis/:id',
-                element: <ApiInfo />,
-              },
-              {
-                path: 'languageModels/:id',
-                element: <ModelInfo />,
-              },
-            ],
           },
           {
             path: 'apis/:apiName/versions/:versionName/definitions/:definitionName',
@@ -60,7 +48,7 @@ const App: React.FC = () => {
             element: <AgentChat />,
           },
           {
-            path: 'models/:name/playground',
+            path: 'languageModels/:name/playground',
             element: <ModelPlayground />,
           },
         ],

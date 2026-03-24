@@ -231,11 +231,12 @@
 
 ### Routing
 - **Library**: React Router v6
-- **Structure**: Nested routes with `<Outlet />`
+- **Structure**: Top-level routes plus drawer rendering inside `Home`
 - **Routes**:
   - `/` - Home (API list)
-  - `/api-info/:id` - API details (nested in Home)
   - `/apis/:apiName/versions/:versionName/definitions/:definitionName` - Spec viewer
+  - `/languageModels/:apiName/versions/:versionName/definitions/:definitionName` - Language model spec viewer
+  - API and language model detail drawers open inside `Home` without their own standalone routes
 
 ---
 

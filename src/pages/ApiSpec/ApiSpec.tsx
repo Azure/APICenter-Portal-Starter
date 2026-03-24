@@ -58,7 +58,7 @@ export const ApiSpec: React.FC = () => {
         navigate(url, { replace: true });
       }
     },
-    [apiName, versionName, definitionName, navigate]
+    [apiName, versionName, definitionName, navigate, resourceType]
   );
 
   function renderHeader() {

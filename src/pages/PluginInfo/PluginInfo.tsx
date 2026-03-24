@@ -13,6 +13,7 @@ import { LocationsService } from '@/services/LocationsService';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import { EmptyStateMessage } from '@/components/EmptyStateMessage/EmptyStateMessage';
 import { PluginResource } from '@/types/plugin';
+import { HomeLocationState } from '@/types/homeDrawer';
 import styles from './PluginInfo.module.scss';
 
 const KIND_ICONS: Record<string, React.ReactNode> = {
@@ -32,12 +33,20 @@ function getCategoryLabel(kind: string): string {
   return CATEGORY_LABELS[kind] ?? `${formatKindDisplay(kind)}s`;
 }
 
-function getResourceUrl(name: string, kind?: string): string {
+function getResourceNavigation(name: string, kind?: string): { to: string; state?: HomeLocationState } {
   const k = kind?.toLowerCase();
-  if (k === 'agent') return LocationsService.getAgentChatUrl(name);
-  if (k === 'skill') return LocationsService.getSkillInfoUrl(name);
-  if (k === 'languagemodel') return LocationsService.getModelInfoUrl(name);
-  return LocationsService.getApiInfoUrl(name);
+  if (k === 'agent') return { to: LocationsService.getAgentChatUrl(name) };
+  if (k === 'skill') return { to: LocationsService.getSkillInfoUrl(name) };
+  if (k === 'languagemodel') {
+    return {
+      to: LocationsService.getHomeUrl(true),
+      state: { drawer: { kind: 'languageModel', name } },
+    };
+  }
+  return {
+    to: LocationsService.getHomeUrl(true),
+    state: { drawer: { kind: 'api', name } },
+  };
 }
 
 interface ResolvedResource {
@@ -123,9 +132,13 @@ export const PluginInfo: React.FC = () => {
                       </h3>
                       <div className={styles.resourceList}>
                         {items.map((resource) => (
+                          (() => {
+                            const navigation = getResourceNavigation(resource.name, resource.kind);
+                            return (
                           <Link
                             key={resource.name}
-                            to={getResourceUrl(resource.name, resource.kind)}
+                            to={navigation.to}
+                            state={navigation.state}
                             className={styles.resourceItem}
                           >
                             <span className={styles.resourceIcon}>
@@ -142,6 +155,8 @@ export const PluginInfo: React.FC = () => {
                               {formatKindDisplay(resource.kind ?? 'API')}
                             </Badge>
                           </Link>
+                            );
+                          })()
                         ))}
                       </div>
                     </div>

@@ -12,7 +12,7 @@ import {
   TabList,
 } from '@fluentui/react-components';
 import { Dismiss24Regular } from '@fluentui/react-icons';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useApi } from '@/hooks/useApi';
 import { kindToResourceType } from '@/types/apiDefinition';
 import ApiAdditionalInfo from '../../experiences/ApiAdditionalInfo';
@@ -23,8 +23,8 @@ import { EmptyStateMessage } from '@/components/EmptyStateMessage/EmptyStateMess
 import { setDocumentTitle } from '@/utils/dom';
 import styles from './ApiInfo.module.scss';
 
-interface RouteParams {
-  id: string;
+interface Props {
+  name: string;
 }
 
 enum Tabs {
@@ -32,13 +32,12 @@ enum Tabs {
   MORE_DETAILS = 'more-details',
 }
 
-export const ApiInfo: React.FC = () => {
+export const ApiInfo: React.FC<Props> = ({ name }) => {
   const [activeTab, setActiveTab] = useState<Tabs>(Tabs.OPTIONS);
   const [definitionSelection, setDefinitionSelection] = useState<ApiDefinitionSelection | undefined>(undefined);
 
-  const { id } = useParams() as Readonly<RouteParams>;
   const navigate = useNavigate();
-  const api = useApi(id);
+  const api = useApi(name);
 
   setDocumentTitle(`API Info${api.data?.title ? ` - ${api.data.title}` : ''}`);
 
@@ -88,7 +87,7 @@ export const ApiInfo: React.FC = () => {
         </p>
 
         <ApiDefinitionSelect
-          apiId={id}
+          apiId={name}
           resourceType={kindToResourceType(api.data.kind)}
           hiddenSelects={['mcp', 'skill', 'plugin'].includes(api.data.kind ?? '') ? ['definition', 'deployment'] : []}
           onSelectionChange={setDefinitionSelection}

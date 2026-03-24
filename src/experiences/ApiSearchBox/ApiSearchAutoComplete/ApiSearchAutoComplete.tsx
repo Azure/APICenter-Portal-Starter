@@ -5,8 +5,38 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useRecentSearches, RecentSearchData, RecentSearchType } from '@/hooks/useRecentSearches.ts';
 import { ApiMetadata } from '@/types/api.ts';
 import { LocationsService } from '@/services/LocationsService';
+import { HomeLocationState } from '@/types/homeDrawer';
 import SemanticSearchToggle from '@/components/SemanticSearchToggle';
 import styles from './ApiSearchAutoComplete.module.scss';
+
+function getNavigationTarget(api: ApiMetadata): { to: string; state?: HomeLocationState } {
+  const kind = api.kind?.toLowerCase();
+  if (kind === 'skill') {
+    return { to: LocationsService.getSkillInfoUrl(api.name) };
+  }
+
+  if (kind === 'agent') {
+    return { to: LocationsService.getAgentChatUrl(api.name) };
+  }
+
+  if (kind === 'plugin') {
+    return { to: LocationsService.getPluginInfoUrl(api.name) };
+  }
+
+  return {
+    to: LocationsService.getHomeUrl(true),
+    state: getDrawerState(api),
+  };
+}
+
+function getDrawerState(api: ApiMetadata): HomeLocationState {
+  return {
+    drawer: {
+      kind: api.kind?.toLowerCase() === 'languagemodel' ? 'languageModel' : 'api',
+      name: api.name,
+    },
+  };
+}
 
 interface Props {
   searchResults?: ApiMetadata[];
@@ -48,10 +78,8 @@ export const ApiSearchAutoComplete: React.FC<Props> = ({
         api,
       });
 
-      const url = api.kind === 'skill'
-        ? LocationsService.getSkillInfoUrl(api.name)
-        : LocationsService.getApiInfoUrl(api.name);
-      navigate(url);
+      const target = getNavigationTarget(api);
+      navigate(target.to, target.state ? { state: target.state } : undefined);
     },
     [navigate, recentSearches, searchResults]
   );
@@ -68,10 +96,7 @@ export const ApiSearchAutoComplete: React.FC<Props> = ({
 
   const getRecentRecordUrl = useCallback((recentRecord: RecentSearchData) => {
     if (recentRecord.type === RecentSearchType.API) {
-      if (recentRecord.api?.kind === 'skill') {
-        return LocationsService.getSkillInfoUrl(recentRecord.search);
-      }
-      return LocationsService.getApiInfoUrl(recentRecord.search);
+      return getNavigationTarget(recentRecord.api!).to;
     }
 
     return LocationsService.getApiSearchUrl(recentRecord.search);
@@ -93,10 +118,9 @@ export const ApiSearchAutoComplete: React.FC<Props> = ({
 
       switch (recentRecord.type) {
         case RecentSearchType.API:
-          if (recentRecord.api?.kind === 'skill') {
-            navigate(LocationsService.getSkillInfoUrl(recentRecord.search));
-          } else {
-            navigate(LocationsService.getApiInfoUrl(recentRecord.search));
+          {
+            const target = getNavigationTarget(recentRecord.api!);
+            navigate(target.to, target.state ? { state: target.state } : undefined);
           }
           break;
 
@@ -227,7 +251,8 @@ export const ApiSearchAutoComplete: React.FC<Props> = ({
         {searchResults.slice(0, 5).map((api) => (
           <Link
             key={api.name}
-            to={api.kind === 'skill' ? LocationsService.getSkillInfoUrl(api.name) : LocationsService.getApiInfoUrl(api.name)}
+            to={getNavigationTarget(api).to}
+            state={getNavigationTarget(api).state}
             className={styles.option}
             data-name={api.name}
             onClick={handleSearchResultClick}
