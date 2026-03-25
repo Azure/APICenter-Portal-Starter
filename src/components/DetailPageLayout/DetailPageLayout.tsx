@@ -1,5 +1,5 @@
 import React from 'react';
-import { Spinner } from '@fluentui/react-components';
+import { Button, MessageBar, MessageBarBody, Spinner } from '@fluentui/react-components';
 import { EmptyStateMessage } from '@/components/EmptyStateMessage/EmptyStateMessage';
 import styles from './DetailPageLayout.module.scss';
 
@@ -14,6 +14,8 @@ interface DetailPageLayoutProps {
   children?: React.ReactNode;
   isLoading?: boolean;
   emptyMessage?: string;
+  error?: string;
+  onRetry?: () => void;
 }
 
 export const DetailPageLayout: React.FC<DetailPageLayoutProps> = ({
@@ -27,11 +29,30 @@ export const DetailPageLayout: React.FC<DetailPageLayoutProps> = ({
   children,
   isLoading,
   emptyMessage,
+  error,
+  onRetry,
 }) => {
   if (isLoading) {
     return (
       <div className={styles.detailPage}>
         <Spinner className={styles.spinner} size="large" label="Loading..." labelPosition="below" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className={styles.detailPage}>
+        <section className={styles.errorState}>
+          <MessageBar intent="error">
+            <MessageBarBody>{error}</MessageBarBody>
+          </MessageBar>
+          {onRetry && (
+            <Button appearance="primary" onClick={onRetry}>
+              Try again
+            </Button>
+          )}
+        </section>
       </div>
     );
   }

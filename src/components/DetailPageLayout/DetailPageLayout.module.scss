@@ -63,6 +63,14 @@
     padding-bottom: 1rem;
   }
 
+  .errorState {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 32px 0;
+  }
+
   .tabBar {
     padding: 0;
     border-bottom: 1px solid var(--colorNeutralStroke1);

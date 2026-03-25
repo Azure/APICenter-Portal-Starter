@@ -53,7 +53,9 @@ export const ApiDetailPage: React.FC = () => {
         ) : undefined
       }
       isLoading={api.isLoading}
-      emptyMessage={!api.isLoading && !api.data ? 'The specified API does not exist.' : undefined}
+      error={api.isError ? 'Failed to load API details. Please check your connection and try again.' : undefined}
+      onRetry={() => api.refetch()}
+      emptyMessage={!api.isLoading && !api.isError && !api.data ? 'The specified API does not exist.' : undefined}
       sidebar={api.data ? <ApiAdditionalInfo api={api.data} /> : undefined}
     >
       {api.data && (

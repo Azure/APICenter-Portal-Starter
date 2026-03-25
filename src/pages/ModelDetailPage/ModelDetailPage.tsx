@@ -42,7 +42,9 @@ export const ModelDetailPage: React.FC = () => {
         ) : undefined
       }
       isLoading={model.isLoading}
-      emptyMessage={!model.isLoading && !model.data ? 'The specified model does not exist.' : undefined}
+      error={model.isError ? 'Failed to load model details. Please check your connection and try again.' : undefined}
+      onRetry={() => model.refetch()}
+      emptyMessage={!model.isLoading && !model.isError && !model.data ? 'The specified model does not exist.' : undefined}
       sidebar={
         model.data ? (
           <div className={styles.sidebar}>
