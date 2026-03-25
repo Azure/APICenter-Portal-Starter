@@ -13,7 +13,7 @@
     box-sizing: border-box;
     width: 335px;
     padding: 32px 32px 32px 0;
-    border: solid var(--grey-2);
+    border: solid var(--colorNeutralStroke2);
     border-width: 0 1px 0 0;
 
     @include screen.small-to-medium {

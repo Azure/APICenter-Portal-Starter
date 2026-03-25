@@ -23,7 +23,7 @@
 
     .summary {
       margin: 0;
-      color: var(--grey-6);
+      color: var(--colorNeutralForeground2);
       font-size: 0.875rem;
       line-height: 1.5;
     }
@@ -49,14 +49,14 @@
       }
 
       code {
-        background-color: var(--grey-1, #f0f0f0);
+        background-color: var(--colorNeutralBackground3);
         padding: 2px 6px;
         border-radius: 4px;
         font-size: 0.85em;
       }
 
       pre {
-        background-color: var(--grey-1, #f0f0f0);
+        background-color: var(--colorNeutralBackground3);
         padding: 12px;
         border-radius: 6px;
         overflow-x: auto;

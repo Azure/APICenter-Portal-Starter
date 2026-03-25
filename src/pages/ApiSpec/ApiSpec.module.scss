@@ -14,7 +14,7 @@
   }
 
   .backLink {
-    color: var(--blue-4);
+    color: var(--colorBrandForeground1);
     text-decoration: none;
     font-size: 0.875rem;
     font-weight: 500;
@@ -31,7 +31,7 @@
       margin: 0 0 0.5rem;
       font-size: 1.75rem;
       font-weight: 700;
-      color: var(--grey-8);
+      color: var(--colorNeutralForeground1);
     }
   }
 
@@ -43,7 +43,7 @@
 
   .summary {
     margin: 0 0 1.25rem;
-    color: var(--grey-6);
+    color: var(--colorNeutralForeground2);
     font-size: 0.875rem;
     line-height: 1.5;
     max-width: 600px;

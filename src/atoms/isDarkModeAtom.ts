@@ -13,8 +13,12 @@ export const isDarkModeAtom = atom<boolean>({
   default: getInitialDarkMode(),
   effects: [
     ({ onSet }) => {
+      // Set initial attribute on document for CSS-based dark mode detection
+      document.documentElement.setAttribute('data-theme', getInitialDarkMode() ? 'dark' : 'light');
+
       onSet((newValue) => {
         localStorage.setItem('darkMode', String(newValue));
+        document.documentElement.setAttribute('data-theme', newValue ? 'dark' : 'light');
       });
     },
   ],

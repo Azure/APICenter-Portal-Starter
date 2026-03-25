@@ -11,6 +11,11 @@
     color: white;
     text-align: center;
 
+    // Dark mode variant: deeper, more muted gradient
+    :global([data-theme="dark"]) & {
+      background: linear-gradient(45deg, hsl(204deg 45% 30%) 0%, hsl(273deg 25% 32%) 43%, hsl(358deg 30% 32%) 57%, hsl(43deg 50% 30%) 100%);
+    }
+
     h1 {
       margin: 0 0 1rem;
       font-size: 2.5rem;
@@ -63,7 +68,7 @@
       min-width: 0;
 
       .emptyState {
-        color: var(--grey-4);
+        color: var(--colorNeutralForeground4);
         text-align: center;
 
         img {

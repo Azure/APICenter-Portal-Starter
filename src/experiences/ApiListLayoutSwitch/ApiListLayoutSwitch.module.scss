@@ -12,8 +12,8 @@
     }
 
     &[aria-pressed='true'] {
-      background: var(--blue-1);
-      color: var(--blue-4);
+      background: var(--colorBrandBackground2);
+      color: var(--colorBrandForeground1);
     }
   }
 }

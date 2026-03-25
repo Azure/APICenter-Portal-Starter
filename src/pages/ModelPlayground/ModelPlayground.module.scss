@@ -9,7 +9,7 @@
 }
 
 .backLink {
-  color: var(--blue-4);
+  color: var(--colorBrandForeground1);
   text-decoration: none;
   font-size: 0.875rem;
   font-weight: 500;
@@ -32,7 +32,7 @@
     margin: 0 0 0.5rem;
     font-size: 1.75rem;
     font-weight: 700;
-    color: var(--grey-8);
+    color: var(--colorNeutralForeground1);
   }
 }
 
@@ -44,7 +44,7 @@
 
 .summary {
   margin: 0 0 1rem;
-  color: var(--grey-6);
+  color: var(--colorNeutralForeground2);
   font-size: 0.875rem;
   line-height: 1.5;
   max-width: 600px;
@@ -54,11 +54,11 @@
   display: flex;
   gap: 2.5rem;
   font-size: 0.75rem;
-  color: var(--grey-6);
+  color: var(--colorNeutralForeground2);
 
   span {
     strong {
-      color: var(--grey-8);
+      color: var(--colorNeutralForeground1);
       display: block;
       margin-bottom: 0.25rem;
     }
@@ -89,7 +89,7 @@
 
 .emptyState {
   text-align: center;
-  color: var(--grey-5);
+  color: var(--colorNeutralForeground3);
   padding: 3rem 1rem;
   font-size: 0.95rem;
 }
@@ -145,7 +145,7 @@
 
 .timestamp {
   font-size: 0.7rem;
-  color: var(--grey-5);
+  color: var(--colorNeutralForeground3);
 }
 
 .messageContent {
@@ -170,11 +170,11 @@
   cursor: pointer;
   padding: 4px;
   border-radius: 4px;
-  color: var(--grey-5);
+  color: var(--colorNeutralForeground3);
 
   &:hover {
     background: var(--colorNeutralBackground1Hover);
-    color: var(--grey-8);
+    color: var(--colorNeutralForeground1);
   }
 }
 
@@ -212,7 +212,7 @@
   margin: 0.5rem 0 0;
   text-align: center;
   font-size: 0.7rem;
-  color: var(--grey-5);
+  color: var(--colorNeutralForeground3);
 }
 
 .documentationTab {

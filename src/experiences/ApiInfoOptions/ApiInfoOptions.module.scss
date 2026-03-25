@@ -43,7 +43,7 @@
     }
     
     p {
-      color: var(--grey-4);
+      color: var(--colorNeutralForeground3);
 
       &.buttonGroup {
         display: flex;
@@ -62,7 +62,7 @@
     + .section {
       margin-top: 16px;
       padding-top: 16px;
-      border-top: 1px solid var(--grey-2);
+      border-top: 1px solid var(--colorNeutralStroke2);
     }
   }
 }

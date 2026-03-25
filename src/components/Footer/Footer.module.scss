@@ -3,8 +3,8 @@
   justify-content: flex-end;
   padding: 16px 32px;
   gap: 36px;
-  background-color: var(--grey-2);
-  color: var(--grey-4);
+  background-color: var(--colorNeutralBackground4);
+  color: var(--colorNeutralForeground4);
   font-weight: 600;
   
   a[href] {
@@ -17,7 +17,7 @@
 
     a {
       margin-left: 3px;
-      color: var(--blue-3);
+      color: var(--colorBrandForeground1);
     }
   }
 }

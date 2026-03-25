@@ -5,7 +5,7 @@
 
   .filterBadge {
     padding: 5px 12px;
-    border: solid 1px var(--grey-3);
+    border: solid 1px var(--colorNeutralStroke1);
     border-radius: var(--radius-m);
     font-size: 14px;
 
@@ -16,7 +16,7 @@
   }
 
   .clearBtn {
-    color: var(--grey-6);
+    color: var(--colorNeutralForeground2);
     font-size: 14px;
     font-weight: 600;
     text-decoration-line: underline;

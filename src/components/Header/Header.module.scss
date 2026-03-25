@@ -8,7 +8,7 @@
   width: 100%;
   margin: 0 auto;
   padding: 14px 32px;
-  border-bottom: 1px solid var(--grey-3);
+  border-bottom: 1px solid var(--colorNeutralStroke1);
 
   .logo {
     display: flex;
@@ -47,6 +47,6 @@
 
   .auth {
     padding-left: 16px;
-    border-left: 1px solid var(--grey-6);
+    border-left: 1px solid var(--colorNeutralForeground2);
   }
 }

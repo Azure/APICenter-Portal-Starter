@@ -8,7 +8,7 @@
 }
 
 .backLink {
-  color: var(--blue-4);
+  color: var(--colorBrandForeground1);
   text-decoration: none;
   font-size: 0.875rem;
   font-weight: 500;
@@ -31,7 +31,7 @@
     margin: 0 0 0.5rem;
     font-size: 1.75rem;
     font-weight: 700;
-    color: var(--grey-8);
+    color: var(--colorNeutralForeground1);
   }
 }
 
@@ -43,7 +43,7 @@
 
 .summary {
   margin: 0 0 1rem;
-  color: var(--grey-6);
+  color: var(--colorNeutralForeground2);
   font-size: 0.875rem;
   line-height: 1.5;
   max-width: 600px;
@@ -53,13 +53,13 @@
   display: flex;
   gap: 2.5rem;
   font-size: 0.75rem;
-  color: var(--grey-6);
+  color: var(--colorNeutralForeground2);
 
   span {
     strong {
       display: block;
       margin-bottom: 0.25rem;
-      color: var(--grey-5);
+      color: var(--colorNeutralForeground3);
       font-size: 0.6875rem;
       letter-spacing: 0.05em;
     }
@@ -74,7 +74,7 @@
 
 .tabBar {
   padding: 0;
-  border-bottom: 1px solid var(--grey-3);
+  border-bottom: 1px solid var(--colorNeutralStroke1);
 }
 
 // --- Chat area ---
@@ -98,7 +98,7 @@
 
 .emptyState {
   padding: 2rem;
-  color: var(--grey-5);
+  color: var(--colorNeutralForeground3);
   font-style: italic;
   font-size: 0.875rem;
   text-align: center;
@@ -141,20 +141,20 @@
   align-self: flex-end;
   margin-left: auto;
   padding: 0.75rem 1rem;
-  background: var(--blue-1);
-  color: var(--grey-7);
-  border: 1px solid var(--blue-2);
+  background: var(--colorBrandBackground2);
+  color: var(--colorNeutralForeground1);
+  border: 1px solid var(--colorBrandForeground2);
   border-radius: 12px 12px 4px 12px;
   white-space: pre-wrap;
 }
 
 .assistantBubble {
   padding: 0.5rem 0;
-  color: var(--grey-7);
+  color: var(--colorNeutralForeground1);
 
   h1, h2, h3, h4 {
     margin: 0.5rem 0 0.25rem;
-    color: var(--grey-8);
+    color: var(--colorNeutralForeground1);
     &:first-child {
       margin-top: 0;
     }
@@ -170,19 +170,19 @@
   }
 
   code {
-    background: var(--grey-2);
+    background: var(--colorNeutralBackground4);
     padding: 0.1rem 0.3rem;
     border-radius: 3px;
     font-size: 0.8125rem;
-    color: var(--grey-7);
+    color: var(--colorNeutralForeground1);
   }
 
   pre {
-    background: var(--grey-1);
+    background: var(--colorNeutralBackground3);
     padding: 0.75rem;
     border-radius: 6px;
     overflow-x: auto;
-    border: 1px solid var(--grey-3);
+    border: 1px solid var(--colorNeutralStroke1);
 
     code {
       background: none;
@@ -191,7 +191,7 @@
   }
 
   a {
-    color: var(--blue-4);
+    color: var(--colorBrandForeground1);
   }
 }
 
@@ -204,12 +204,12 @@
 
 .senderName {
   font-weight: 600;
-  color: var(--grey-8);
+  color: var(--colorNeutralForeground1);
   font-size: 0.875rem;
 }
 
 .timestamp {
-  color: var(--grey-5);
+  color: var(--colorNeutralForeground3);
   font-size: 0.75rem;
 }
 
@@ -226,14 +226,14 @@
   width: 28px;
   height: 28px;
   border-radius: 4px;
-  color: var(--grey-5);
+  color: var(--colorNeutralForeground3);
   background: transparent;
   cursor: pointer;
   transition: color 0.15s, background 0.15s;
 
   &:hover {
-    color: var(--grey-7);
-    background: var(--grey-2);
+    color: var(--colorNeutralForeground1);
+    background: var(--colorNeutralBackground4);
   }
 }
 
@@ -243,7 +243,7 @@
 
 .thinkingIndicator {
   padding: 0.5rem 0;
-  color: var(--grey-5);
+  color: var(--colorNeutralForeground3);
   font-style: italic;
   font-size: 0.875rem;
 }
@@ -252,14 +252,14 @@
 
 .inputArea {
   padding: 0.75rem 0 0;
-  border-top: 1px solid var(--grey-3);
+  border-top: 1px solid var(--colorNeutralStroke1);
 }
 
 .inputWrapper {
   display: flex;
   align-items: center;
-  background: var(--grey-1);
-  border: 1px solid var(--grey-3);
+  background: var(--colorNeutralBackground3);
+  border: 1px solid var(--colorNeutralStroke1);
   border-radius: 8px;
   padding: 0 0.25rem 0 0;
   overflow: hidden;
@@ -276,22 +276,22 @@
 }
 
 .sendBtn {
-  color: var(--blue-4);
+  color: var(--colorBrandForeground1);
   flex-shrink: 0;
 
   &:hover {
-    color: var(--blue-5);
+    color: var(--colorBrandForeground1Pressed);
   }
 
   &:disabled {
-    color: var(--grey-4);
+    color: var(--colorNeutralForeground4);
   }
 }
 
 .disclaimer {
   margin: 0.5rem 0 0;
   text-align: center;
-  color: var(--grey-5);
+  color: var(--colorNeutralForeground3);
   font-size: 0.6875rem;
 }
 

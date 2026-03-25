@@ -2,7 +2,7 @@
   display: flex;
   align-items: center;
   padding: 0 5px;
-  color: var(--grey-6);
+  color: var(--colorNeutralForeground2);
   
   .icon {
     display: inline-block;
@@ -11,7 +11,7 @@
     height: 26px;
     margin-right: 10px;
     border-radius: 50%;
-    background: var(--grey-1);
+    background: var(--colorNeutralBackground3);
     
     img {
       position: absolute;
@@ -31,8 +31,8 @@
 
   &.isEnabled {
     border-radius: 1rem;
-    background: var(--grey-1);
-    color: var(--grey-7);
+    background: var(--colorNeutralBackground3);
+    color: var(--colorNeutralForeground1);
     
     .icon {
       margin-right: 0;
