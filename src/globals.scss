@@ -34,6 +34,13 @@ body {
     width: 100%;
     max-width: 1140px;
     margin: 0 auto;
+    padding-left: 32px;
+    padding-right: 32px;
+
+    @media (max-width: 600px) {
+      padding-left: 16px;
+      padding-right: 16px;
+    }
   }
 }
 

@@ -116,6 +116,14 @@
       border-color: var(--colorBrandStroke1);
       box-shadow: var(--shadow4);
     }
+
+    @media (max-width: 600px) {
+      flex-wrap: wrap;
+
+      .resourceBadge {
+        margin-left: 0;
+      }
+    }
   }
 
   .resourceIcon {
