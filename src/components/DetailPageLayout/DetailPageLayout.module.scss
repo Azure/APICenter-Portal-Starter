@@ -1,0 +1,100 @@
+@use '@/styles/screen';
+
+.detailPage {
+  display: flex;
+  flex-direction: column;
+
+  .spinner {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .header {
+    padding: 1.5rem 0 1rem;
+
+    .headerContent {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 24px;
+
+      @include screen.small-to-medium {
+        flex-direction: column;
+        gap: 12px;
+      }
+    }
+
+    .headerText {
+      flex: 1;
+      min-width: 0;
+    }
+
+    h1 {
+      margin: 0 0 0.5rem;
+    }
+
+    .summary {
+      margin: 0 0 0.5rem;
+      color: var(--grey-6);
+      font-size: 0.875rem;
+      line-height: 1.5;
+    }
+
+    .metadata {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 0.5rem;
+      color: var(--grey-5);
+      font-size: 0.8125rem;
+    }
+
+    .headerActions {
+      display: flex;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+  }
+
+  .selector {
+    padding-bottom: 1rem;
+  }
+
+  .tabBar {
+    padding: 0;
+    border-bottom: 1px solid var(--colorNeutralStroke1);
+  }
+
+  .content {
+    display: flex;
+    gap: 48px;
+    padding: 32px 0;
+
+    @media (max-width: 768px) {
+      flex-direction: column-reverse;
+      gap: 24px;
+    }
+  }
+
+  .main {
+    flex: 1;
+    min-width: 0;
+    line-height: 1.6;
+  }
+
+  .sidebar {
+    flex: 0 0 320px;
+    position: sticky;
+    top: 24px;
+    align-self: flex-start;
+
+    @media (max-width: 768px) {
+      flex: none;
+      position: static;
+      width: 100%;
+    }
+  }
+}

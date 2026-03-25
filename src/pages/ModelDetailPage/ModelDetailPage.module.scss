@@ -1,0 +1,44 @@
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.section {
+  margin-bottom: 0;
+
+  h3 {
+    margin-bottom: 8px;
+  }
+}
+
+.detailsGrid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px 16px;
+  margin: 8px 0;
+
+  dt {
+    font-weight: 600;
+    color: var(--colorNeutralForeground2);
+  }
+
+  dd {
+    margin: 0;
+  }
+}
+
+.badgeSection {
+  margin-bottom: 24px;
+}
+
+.badges {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.descriptionSection {
+  margin-top: 8px;
+}

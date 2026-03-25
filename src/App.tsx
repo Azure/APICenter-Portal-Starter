@@ -7,6 +7,8 @@ import SkillInfo from '@/pages/SkillInfo';
 import PluginInfo from '@/pages/PluginInfo';
 import AgentChat from '@/pages/AgentChat';
 import ModelPlayground from '@/pages/ModelPlayground';
+import ApiDetailPage from '@/pages/ApiDetailPage';
+import ModelDetailPage from '@/pages/ModelDetailPage';
 import { configAtom } from '@/atoms/configAtom';
 import Layout from './Layout';
 
@@ -26,6 +28,14 @@ const App: React.FC = () => {
           {
             path: '/',
             element: <Home />,
+          },
+          {
+            path: 'apis/:apiName',
+            element: <ApiDetailPage />,
+          },
+          {
+            path: 'languageModels/:apiName',
+            element: <ModelDetailPage />,
           },
           {
             path: 'apis/:apiName/versions/:versionName/definitions/:definitionName',

@@ -35,6 +35,14 @@ export const LocationsService = {
     return `/plugins/${name}`;
   },
 
+  getApiDetailUrl(name: string): string {
+    return `/apis/${name}`;
+  },
+
+  getModelDetailUrl(name: string): string {
+    return `/languageModels/${name}`;
+  },
+
   getAgentChatUrl(name: string): string {
     return `/agents/${name}`;
   },

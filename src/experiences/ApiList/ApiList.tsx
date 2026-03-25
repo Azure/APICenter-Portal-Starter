@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useSearchFilters } from '@/hooks/useSearchFilters';
 import { useApis } from '@/hooks/useApis';
 import { useSearchQuery } from '@/hooks/useSearchQuery';
+import { useDesignVariation } from '@/hooks/useDesignVariation';
 import { ApiCard, type ApiCardApi } from '@/components/ApiCard';
 import { InfoTable } from '@/components/InfoTable';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
@@ -27,6 +28,7 @@ export const ApiList: React.FC = () => {
   const searchFilters = useSearchFilters();
   const searchQuery = useSearchQuery();
   const navigate = useNavigate();
+  const useFullPages = useDesignVariation('full-page-detail', 'full-redesign');
   const apis = useApis({
     search: searchQuery.search,
     filters: searchFilters.activeFilters,
@@ -59,10 +61,18 @@ export const ApiList: React.FC = () => {
       } else if (kind === 'plugin') {
         url = LocationsService.getPluginInfoUrl(api.name);
       } else if (kind === 'languagemodel') {
-        url = LocationsService.getModelPlaygroundUrl(api.name);
+        if (useFullPages) {
+          url = LocationsService.getModelDetailUrl(api.name);
+        } else {
+          url = LocationsService.getModelPlaygroundUrl(api.name);
+        }
       } else {
-        url = LocationsService.getHomeUrl(true);
-        state = { drawer: { kind: 'api', name: api.name } };
+        if (useFullPages) {
+          url = LocationsService.getApiDetailUrl(api.name);
+        } else {
+          url = LocationsService.getHomeUrl(true);
+          state = { drawer: { kind: 'api', name: api.name } };
+        }
       }
 
       return {
