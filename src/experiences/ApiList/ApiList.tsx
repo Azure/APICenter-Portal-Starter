@@ -86,7 +86,7 @@ export const ApiList: React.FC = () => {
         },
       };
     },
-    [navigate]
+    [navigate, useFullPages]
   );
 
   const handleLoadMore = useCallback(
