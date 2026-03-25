@@ -356,3 +356,7 @@ dist-ssr
 yalc.lock
 
 config.json
+
+# Design playground (local-only prototype tooling)
+playground/
+.env.local
