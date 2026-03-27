@@ -1,10 +1,11 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { Spinner } from '@fluentui/react-components';
-import { ApiDefinitionId } from '@/types/apiDefinition';
+import { useNavigate, useParams, useLocation, Link } from 'react-router-dom';
+import { Badge, Spinner, Tab, TabList } from '@fluentui/react-components';
+import { DocumentRegular } from '@fluentui/react-icons';
+import { formatKindDisplay } from '@/utils/formatKind';
+import { ApiDefinitionId, ResourceType } from '@/types/apiDefinition';
 import { useApi } from '@/hooks/useApi';
 import { setDocumentTitle } from '@/utils/dom';
-import MarkdownRenderer from '@/components/MarkdownRenderer';
 import ApiDefinitionSelect, { ApiDefinitionSelection } from '@/experiences/ApiDefinitionSelect';
 import { LocationsService } from '@/services/LocationsService';
 import { ApiDeployment } from '@/types/apiDeployment';
@@ -14,17 +15,20 @@ import styles from './ApiSpec.module.scss';
 
 export const ApiSpec: React.FC = () => {
   const { apiName, versionName, definitionName } = useParams<Readonly<ApiDefinitionId>>() as ApiDefinitionId;
+  const location = useLocation();
+  const resourceType: ResourceType = location.pathname.startsWith('/languageModels') ? 'languageModels' : 'apis';
 
   const [deployment, setDeployment] = useState<ApiDeployment | null | undefined>();
+  const [resolvedDefinitionName, setResolvedDefinitionName] = useState<string | undefined>(undefined);
   const navigate = useNavigate();
 
   // This is needed to avoid unnecessary re-renders caused by new object creation
   const definitionId = useMemo(
-    () => ({ apiName, versionName, definitionName }),
-    [apiName, versionName, definitionName]
+    () => ({ apiName, versionName, definitionName: resolvedDefinitionName ?? definitionName, resourceType }),
+    [apiName, versionName, definitionName, resolvedDefinitionName, resourceType]
   );
 
-  const api = useApi(definitionId.apiName);
+  const api = useApi(definitionId.apiName, resourceType);
 
   setDocumentTitle(`API Specification${api.data?.title ? ` - ${api.data.title}` : ''}`);
 
@@ -36,22 +40,26 @@ export const ApiSpec: React.FC = () => {
         return;
       }
 
+      setResolvedDefinitionName(definitionSelection.definition.name);
+
       if (
-        definitionSelection.version.name === definitionId.versionName &&
-        definitionSelection.definition.name === definitionId.definitionName
+        definitionSelection.version.name === versionName &&
+        definitionSelection.definition.name === definitionName
       ) {
         return;
       }
 
-      navigate(
-        LocationsService.getApiSchemaExplorerUrl(
-          definitionId.apiName,
+      const url = LocationsService.getApiSchemaExplorerUrl(
+          apiName,
           definitionSelection.version.name,
-          definitionSelection.definition.name
-        )
-      );
+          definitionSelection.definition.name,
+          resourceType,
+        );
+      if (url) {
+        navigate(url, { replace: true });
+      }
     },
-    [definitionId, navigate]
+    [apiName, versionName, definitionName, navigate, resourceType]
   );
 
   function renderHeader() {
@@ -60,30 +68,35 @@ export const ApiSpec: React.FC = () => {
     }
 
     return (
-      <div className={styles.header}>
-        <section>
-          <h1>{api.data.title}</h1>
-          <MarkdownRenderer markdown={api.data.summary} />
-
-          <div className={styles.definitionRow}>
-            <ApiDefinitionSelect
-              apiId={definitionId.apiName}
-              defaultSelection={{
-                version: definitionId.versionName,
-                definition: definitionId.definitionName,
-              }}
-              hiddenSelects={['definition', 'deployment']}
-              isInline
-              onSelectionChange={handleDefinitionSelectionChange}
-            />
+      <section className={styles.header}>
+        <h1>{api.data.title}</h1>
+        {(api.data.kind || api.data.lifecycleStage) && (
+          <div className={styles.badges}>
+            {api.data.kind && <Badge appearance="filled" color="brand" shape="circular">{formatKindDisplay(api.data.kind)}</Badge>}
+            {api.data.lifecycleStage && <Badge appearance="outline">{api.data.lifecycleStage}</Badge>}
           </div>
-        </section>
-      </div>
+        )}
+        {api.data.summary && <p className={styles.summary}>{api.data.summary}</p>}
+
+        <div className={styles.definitionRow}>
+          <ApiDefinitionSelect
+            apiId={definitionId.apiName}
+            resourceType={resourceType}
+            defaultSelection={{
+              version: definitionId.versionName,
+              definition: definitionId.definitionName,
+            }}
+            hiddenSelects={['definition', 'deployment']}
+            isInline
+            onSelectionChange={handleDefinitionSelectionChange}
+          />
+        </div>
+      </section>
     );
   }
 
   function renderContent() {
-    if (api.isLoading || deployment === undefined) {
+    if (api.isLoading || deployment === undefined || !resolvedDefinitionName) {
       return <Spinner className={styles.spinner} />;
     }
 
@@ -96,7 +109,15 @@ export const ApiSpec: React.FC = () => {
 
   return (
     <div className={styles.apiSpec}>
+      <section className={styles.headerBar}>
+        <Link to="/" className={styles.backLink}>&lt; Back to registry</Link>
+      </section>
       {renderHeader()}
+      <section className={styles.tabBar}>
+        <TabList defaultSelectedValue="documentation">
+          <Tab icon={<DocumentRegular />} value="documentation">Documentation</Tab>
+        </TabList>
+      </section>
       <section>{renderContent()}</section>
     </div>
   );

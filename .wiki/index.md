@@ -1,10 +1,10 @@
 # Azure API Center Portal - Documentation Index
 
-Quick navigation to all architectural documentation in `.specify/memory/`.
+Quick navigation to the architecture and development documentation maintained in `.wiki/`.
 
 ## Core Documentation
 
-- **[constitution.md](./constitution.md)** - Project principles, values, and governance
+- **[constitution.md](../.specify/memory/constitution.md)** - Project principles, values, and governance
 - **[architecture.md](./architecture.md)** - High-level architecture overview and layers
 - **[dependencies.md](./dependencies.md)** - Third-party packages and their roles
 - **[patterns.md](./patterns.md)** - Key design patterns and conventions
@@ -28,6 +28,7 @@ Quick navigation to all architectural documentation in `.specify/memory/`.
 - **[folder-structure.md](./folder-structure.md)** - Directory organization and file conventions
 - **[data-flow.md](./data-flow.md)** - Request/response flow and data transformation
 - **[testing-strategy.md](./testing-strategy.md)** - Testing approach and quality gates
+- **[guidelines/index.md](./guidelines/index.md)** - React, SCSS, and coding standards guidance
 - **[todo.md](./todo.md)** - Unresolved questions and future research
 
 ## Quick Reference
@@ -47,6 +48,7 @@ Quick navigation to all architectural documentation in `.specify/memory/`.
 | File org | folder-structure.md | src/ layout, naming conventions |
 | Data flow | data-flow.md | Fetch → transform → render |
 | Testing | testing-strategy.md | Linting, type checking, quality |
+| Dev guidelines | guidelines/index.md | React, SCSS, JSDoc, standards |
 | TODOs | todo.md | Unknowns, research topics |
 
 ## Usage for AI Development
@@ -62,7 +64,8 @@ When modifying code:
 1. Check **folder-structure.md** for file placement
 2. Review **data-flow.md** for impact analysis
 3. Follow **patterns.md** conventions
-4. Update relevant docs if adding new patterns
+4. Apply implementation conventions from **guidelines/index.md**
+5. Update relevant docs if adding new patterns
 
 When debugging:
 1. Trace through **data-flow.md**
@@ -76,3 +79,4 @@ When debugging:
 
 - **v1.0.0** (2025-01-17): Initial documentation set created (constitution, architecture, dependencies, patterns, state-management, services, folder-structure, api-integration, authentication, deployment)
 - **v1.1.0** (2025-01-17): Added routing, components, data-flow, configuration, testing-strategy, and todo documentation - completing comprehensive architecture documentation set
+- **v1.2.0** (2026-03-24): Added development guidelines index with React, SCSS, and coding standards references

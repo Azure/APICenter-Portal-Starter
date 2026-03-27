@@ -12,9 +12,10 @@ interface Props {
   definitionId: ApiDefinitionId;
   deployment: ApiDeployment;
   apiSpec?: ApiSpecReader;
+  sidebarExtra?: React.ReactNode;
 }
 
-export const ApiSpecPageLayout: React.FC<Props> = ({ definitionId, deployment, apiSpec }) => {
+export const ApiSpecPageLayout: React.FC<Props> = ({ definitionId, deployment, apiSpec, sidebarExtra }) => {
   const selectedOperation = useSelectedOperation();
 
   if (!apiSpec?.type) {
@@ -29,6 +30,7 @@ export const ApiSpecPageLayout: React.FC<Props> = ({ definitionId, deployment, a
     <div className={styles.apiSpecPageLayout}>
       <aside className={styles.operationsList}>
         <ApiOperationsSelect apiSpec={apiSpec} />
+        {sidebarExtra}
       </aside>
 
       <div className={styles.details}>

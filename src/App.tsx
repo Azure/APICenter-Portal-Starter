@@ -2,8 +2,13 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { useSetRecoilState } from 'recoil';
 import Home from '@/pages/Home';
-import ApiInfo from '@/pages/ApiInfo';
 import ApiSpec from '@/pages/ApiSpec';
+import SkillInfo from '@/pages/SkillInfo';
+import PluginInfo from '@/pages/PluginInfo';
+import AgentChat from '@/pages/AgentChat';
+import ApiDetailPage from '@/pages/ApiDetailPage';
+import ModelDetailPage from '@/pages/ModelDetailPage';
+import { ModelPlayground } from '@/pages/ModelPlayground';
 import { configAtom } from '@/atoms/configAtom';
 import Layout from './Layout';
 
@@ -23,20 +28,45 @@ const App: React.FC = () => {
           {
             path: '/',
             element: <Home />,
-            children: [
-              {
-                path: 'api-info/:id',
-                element: <ApiInfo />,
-              },
-            ],
+          },
+          {
+            path: 'apis/:apiName',
+            element: <ApiDetailPage />,
+          },
+          {
+            path: 'languageModels/:apiName',
+            element: <ModelDetailPage />,
+          },
+          {
+            path: 'languageModels/:name/playground',
+            element: <ModelPlayground />,
           },
           {
             path: 'apis/:apiName/versions/:versionName/definitions/:definitionName',
             element: <ApiSpec />,
           },
+          {
+            path: 'languageModels/:apiName/versions/:versionName/definitions/:definitionName',
+            element: <ApiSpec />,
+          },
+          {
+            path: 'skills/:name',
+            element: <SkillInfo />,
+          },
+          {
+            path: 'plugins/:name',
+            element: <PluginInfo />,
+          },
+          {
+            path: 'agents/:name',
+            element: <AgentChat />,
+          },
+
         ],
       },
-    ]);
+    ], {
+      basename: import.meta.env.BASE_URL?.replace(/\/+$/, '') || '/',
+    });
   }, [isInitialized]);
 
   const fetchConfig = useCallback(async () => {

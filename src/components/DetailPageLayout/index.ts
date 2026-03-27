@@ -1,0 +1,1 @@
+export { DetailPageLayout } from './DetailPageLayout';

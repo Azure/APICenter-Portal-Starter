@@ -1,12 +1,12 @@
 import React from 'react';
-import { Outlet, useOutlet } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
 import ApiList from '@/experiences/ApiList';
 import AccessDeniedSvg from '@/assets/accessDenied.svg';
 import { isAuthenticatedAtom } from '@/atoms/isAuthenticatedAtom';
 import { isAccessDeniedAtom } from '@/atoms/isAccessDeniedAtom';
 import ApiSearchBox from '@/experiences/ApiSearchBox';
-import ApiFilters from '@/experiences/ApiFilters';
+import CategoryPills from '@/experiences/CategoryPills';
+import AddFilterDropdown from '@/experiences/AddFilterDropdown';
 import ApiListLayoutSwitch from '@/experiences/ApiListLayoutSwitch';
 import ApiListSortingSelect from '@/experiences/ApiListSortingSelect';
 import { ActiveFiltersBadges } from '@/experiences/ActiveFiltersBadges/ActiveFiltersBadges';
@@ -17,8 +17,7 @@ export const Home: React.FC = () => {
   const isAuthenticated = useRecoilValue(isAuthenticatedAtom);
   const isAccessDenied = useRecoilValue(isAccessDeniedAtom);
 
-  const nestedRoute = useOutlet();
-  if (!nestedRoute) setDocumentTitle('API portal (preview)');
+  setDocumentTitle('API portal (preview)');
 
   function renderApiList() {
     if (!isAuthenticated) {
@@ -45,29 +44,23 @@ export const Home: React.FC = () => {
 
   return (
     <div className={styles.home}>
-      <Outlet />
-
       <div className={styles.searchPanel}>
-        <h1>API portal (preview)</h1>
+        <h1>Tools registry</h1>
 
-        <ApiSearchBox />
+        <div className={styles.searchRow}>
+          <ApiSearchBox />
+          <ApiListSortingSelect />
+          <AddFilterDropdown />
+        </div>
       </div>
 
       <section className={styles.content}>
-        <div className={styles.filters}>
-          <h3>Filter by</h3>
-
-          <ApiFilters />
+        <div className={styles.pillsRow}>
+          <CategoryPills />
+          <ApiListLayoutSwitch />
         </div>
 
         <div className={styles.mainContent}>
-          <div className={styles.infoRow}>
-            <label className={styles.sort}>
-              <strong>Sort by</strong>
-              <ApiListSortingSelect />
-            </label>
-            <ApiListLayoutSwitch />
-          </div>
           <ActiveFiltersBadges className={styles.activeFilters} />
           <div className={styles.results}>{renderApiList()}</div>
         </div>

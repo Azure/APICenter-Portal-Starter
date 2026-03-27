@@ -3,7 +3,7 @@ import { Spinner } from '@fluentui/react-components';
 import ApiAccessAuthForm from '@/experiences/ApiAccessAuthForm';
 import { ApiDefinitionId } from '@/types/apiDefinition';
 import { ApiDeployment } from '@/types/apiDeployment';
-import { getMcpService } from '@/services/McpService';
+import { getMcpService, McpUnauthorizedError } from '@/services/McpService';
 import { ApiSpecReader } from '@/types/apiSpec';
 import { getSpecReader } from '@/specReaders/getSpecReader';
 import { useApiDefinition } from '@/hooks/useApiDefinition';
@@ -25,14 +25,16 @@ enum McpServerAuthState {
 interface Props {
   definitionId: ApiDefinitionId;
   deployment: ApiDeployment;
+  sidebarExtra?: React.ReactNode;
 }
 
-export const McpSpecPage: React.FC<Props> = ({ definitionId, deployment }) => {
+export const McpSpecPage: React.FC<Props> = ({ definitionId, deployment, sidebarExtra }) => {
   const [authState, setAuthState] = useState<McpServerAuthState>(McpServerAuthState.NOT_AUTHORIZED);
   const [mcpOAuthCredentials, setMcpOAuthCredentials] = useState<Oauth2Credentials | undefined>();
   const [authCredentials, setAuthCredentials] = useState<ApiAuthCredentials | undefined>();
   const [apiSpec, setApiSpec] = useState<ApiSpecReader>();
   const [isSpecLoading, setIsSpecLoading] = useState(false);
+  const [error, setError] = useState<string | undefined>();
 
   const ApiService = useApiService();
   const definition = useApiDefinition(definitionId);
@@ -82,6 +84,7 @@ export const McpSpecPage: React.FC<Props> = ({ definitionId, deployment }) => {
 
     try {
       setIsSpecLoading(true);
+      setError(undefined);
       const spec = await mcpService.collectMcpSpec();
       const reader = await getSpecReader(spec, {
         ...definition.data,
@@ -92,6 +95,12 @@ export const McpSpecPage: React.FC<Props> = ({ definitionId, deployment }) => {
         },
       });
       setApiSpec(reader);
+    } catch (err) {
+      if (err instanceof McpUnauthorizedError) {
+        setError('The MCP server requires authentication, but required configuration cannot be determined automatically.');
+      } else {
+        setError('Failed to connect to the MCP server. Please try again later.');
+      }
     } finally {
       setIsSpecLoading(false);
     }
@@ -132,7 +141,11 @@ export const McpSpecPage: React.FC<Props> = ({ definitionId, deployment }) => {
     return null;
   }
 
-  return <ApiSpecPageLayout definitionId={definitionId} deployment={deployment} apiSpec={apiSpec} />;
+  if (error) {
+    return <div className={styles.authPanel}>{error}</div>;
+  }
+
+  return <ApiSpecPageLayout definitionId={definitionId} deployment={deployment} apiSpec={apiSpec} sidebarExtra={sidebarExtra} />;
 };
 
 export default React.memo(McpSpecPage);

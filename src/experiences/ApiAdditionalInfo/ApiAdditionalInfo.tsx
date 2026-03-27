@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from '@fluentui/react-components';
-import { Open16Regular } from '@fluentui/react-icons';
+import { Open16Regular, DocumentTextRegular, PeopleRegular, ListRegular } from '@fluentui/react-icons';
 import { ApiMetadata } from '@/types/api';
 import CustomMetadata from '@/components/CustomMetadata';
 import styles from './ApiAdditionalInfo.module.scss';
@@ -22,52 +22,71 @@ export const ApiAdditionalInfo: React.FC<Props> = ({ api }) => {
 
   return (
     <div className={styles.apiAdditionalInfo}>
-      {api.description && <p>{api.description}</p>}
-
       {!!api.externalDocumentation?.length && (
-        <>
-          <h4>External documentation</h4>
-          {api.externalDocumentation
-            .filter((d) => !!d.title && d.url)
-            .map((documentation) => (
-              <Link
-                key={documentation.title}
-                href={normalizeUrl(documentation.url)}
-                target="_blank"
-                className={styles.link}
-              >
-                {documentation.title} <Open16Regular />
-              </Link>
-            ))}
-        </>
+        <div className={styles.section}>
+          <h4>
+            <span className={styles.sectionLabel}>
+              <DocumentTextRegular />
+              <strong>External documentation</strong>
+            </span>
+          </h4>
+          <div className={styles.sectionContent}>
+            {api.externalDocumentation
+              .filter((d) => !!d.title && d.url)
+              .map((documentation) => (
+                <Link
+                  key={documentation.title}
+                  href={normalizeUrl(documentation.url)}
+                  target="_blank"
+                  className={styles.link}
+                >
+                  {documentation.title} <Open16Regular />
+                </Link>
+              ))}
+          </div>
+        </div>
       )}
 
       {!!api.contacts?.length && (
-        <>
-          <h4>Contact information</h4>
-          {api.contacts.map((contact) => (
-            <React.Fragment key={contact.name}>
-              {contact.url && (
-                <Link href={normalizeUrl(contact.url)} target="_blank" className={styles.link}>
-                  {contact.name} <Open16Regular />
-                </Link>
-              )}
+        <div className={styles.section}>
+          <h4>
+            <span className={styles.sectionLabel}>
+              <PeopleRegular />
+              <strong>Contact information</strong>
+            </span>
+          </h4>
+          <div className={styles.sectionContent}>
+            {api.contacts.map((contact) => (
+              <React.Fragment key={contact.name}>
+                {contact.url && (
+                  <Link href={normalizeUrl(contact.url)} target="_blank" className={styles.link}>
+                    {contact.name} <Open16Regular />
+                  </Link>
+                )}
 
-              {!contact.url && !!contact.email && (
-                <Link href={`mailto:${contact.email}`} target="_blank" className={styles.link}>
-                  {contact.name} <Open16Regular />
-                </Link>
-              )}
-            </React.Fragment>
-          ))}
-        </>
+                {!contact.url && !!contact.email && (
+                  <Link href={`mailto:${contact.email}`} target="_blank" className={styles.link}>
+                    {contact.name} <Open16Regular />
+                  </Link>
+                )}
+              </React.Fragment>
+            ))}
+          </div>
+        </div>
       )}
 
       {hasCustomProperties && (
-        <>
-          <h4>Properties</h4>
-          <CustomMetadata value={api.customProperties} />
-        </>
+        <div className={styles.section}>
+          <h4>
+            <span className={styles.sectionLabel}>
+              <ListRegular />
+              <strong>Properties</strong>
+            </span>
+          </h4>
+          <div className={styles.sectionContent}>
+            <CustomMetadata value={api.customProperties} />
+          </div>
+        </div>
       )}
     </div>
   );

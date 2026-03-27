@@ -1,55 +1,74 @@
 @use '@/styles/screen';
 
 .home {
+  overflow-x: hidden;
+
   .searchPanel {
     box-sizing: border-box;
-    min-height: 290px;
+    min-height: 200px;
     padding: 50px 0 10px;
     background: linear-gradient(45deg, hsl(204deg 65% 71% / 100%) 0%, hsl(273deg 34% 75% / 100%) 43%, hsl(358deg 43% 75% / 100%) 57%, hsl(43deg 96% 63% / 100%) 100%);
     color: white;
     text-align: center;
+
+    // Dark mode variant: deeper, more muted gradient
+    :global([data-theme="dark"]) & {
+      background: linear-gradient(45deg, hsl(204deg 45% 30%) 0%, hsl(273deg 25% 32%) 43%, hsl(358deg 30% 32%) 57%, hsl(43deg 50% 30%) 100%);
+    }
 
     h1 {
       margin: 0 0 1rem;
       font-size: 2.5rem;
       line-height: 3.25rem;
     }
+
+    .searchRow {
+      display: flex;
+      align-items: stretch;
+      gap: 0.75rem;
+      box-sizing: border-box;
+      width: 100%;
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 0 32px;
+
+      > * {
+        height: 48px;
+        box-sizing: border-box;
+      }
+
+      @include screen.small-to-medium {
+        flex-direction: column;
+        padding: 0 16px;
+      }
+    }
   }
 
   .content {
-    display: flex;
-    padding: 32px;
-    gap: 32px;
+    box-sizing: border-box;
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: 0 32px 32px;
 
     @include screen.small-to-medium {
-      flex-direction: column;
-      padding: 16px;
-      gap: 16px;
+      padding: 0 16px 16px;
     }
 
-    .filters {
-      min-width: 250px;
-
-      @include screen.small-to-medium {
-        padding-bottom: 16px;
-        border-bottom: 1px solid var(--grey-2);
-      }
-
-      h3 {
-        font-size: 1rem;
-        line-height: 22px;
-      }
-
-      & > h3 {
-        margin: 0.5rem 0 1rem;
-      }
+    .pillsRow {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 0;
+      flex-wrap: wrap;
     }
 
     .mainContent {
       width: 100%;
+      min-width: 0;
 
       .emptyState {
-        color: var(--grey-4);
+        color: var(--colorNeutralForeground4);
         text-align: center;
 
         img {
@@ -58,21 +77,8 @@
         }
       }
 
-      .infoRow {
-        display: flex;
-        justify-content: flex-end;
-        margin-bottom: 16px;
-        gap: 1rem;
-
-        .sort {
-          display: flex;
-          align-items: center;
-          gap: 1rem;
-        }
-      }
-
       .activeFilters {
-        margin: 16px 0;
+        margin-bottom: 16px;
       }
     }
   }

@@ -26,4 +26,5 @@ export interface ApiMetadata {
   contacts?: ApiContact[];
   customProperties?: Record<string, unknown>;
   lastUpdated?: string;
+  resourceIds?: string[];
 }

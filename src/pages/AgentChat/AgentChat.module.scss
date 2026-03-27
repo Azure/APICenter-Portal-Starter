@@ -1,0 +1,335 @@
+.agentPage {
+  display: flex;
+  flex-direction: column;
+}
+
+.headerBar {
+  padding-top: 0.75rem;
+  padding-bottom: 0;
+}
+
+.backLink {
+  color: var(--colorBrandForeground1);
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.agentHeader {
+  padding-top: 1.5rem;
+  padding-bottom: 1rem;
+
+  h1 {
+    margin: 0 0 0.5rem;
+  }
+}
+
+.summary {
+  margin: 0 0 0.5rem;
+  color: var(--colorNeutralForeground2);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.metadata {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+  color: var(--colorNeutralForeground3);
+  font-size: 0.8125rem;
+}
+
+
+
+.tabBar {
+  padding-top: 0;
+  padding-bottom: 0;
+
+  &::after {
+    content: '';
+    display: block;
+    border-bottom: 1px solid var(--colorNeutralStroke1);
+  }
+}
+
+// --- Chat area ---
+
+.chatContainer {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: 0 0 32px;
+  min-height: 400px;
+}
+
+.messages {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 1.5rem 0;
+}
+
+.emptyState {
+  padding: 2rem;
+  color: var(--colorNeutralForeground3);
+  font-style: italic;
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.messageRow {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
+}
+
+.avatar {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6366f1, #a855f7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  margin-top: 0.25rem;
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.messageBubble {
+  max-width: 80%;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  word-break: break-word;
+}
+
+.userBubble {
+  align-self: flex-end;
+  margin-left: auto;
+  padding: 0.75rem 1rem;
+  background: var(--colorBrandBackground2);
+  color: var(--colorNeutralForeground1);
+  border: 1px solid var(--colorBrandForeground2);
+  border-radius: 12px 12px 4px 12px;
+  white-space: pre-wrap;
+}
+
+.assistantBubble {
+  padding: 0.5rem 0;
+  color: var(--colorNeutralForeground1);
+
+  h1, h2, h3, h4 {
+    margin: 0.5rem 0 0.25rem;
+    color: var(--colorNeutralForeground1);
+    &:first-child {
+      margin-top: 0;
+    }
+  }
+
+  ul, ol {
+    margin: 0.25rem 0;
+    padding-left: 1.25rem;
+  }
+
+  p {
+    margin: 0.25rem 0;
+  }
+
+  code {
+    background: var(--colorNeutralBackground4);
+    padding: 0.1rem 0.3rem;
+    border-radius: 3px;
+    font-size: 0.8125rem;
+    color: var(--colorNeutralForeground1);
+  }
+
+  pre {
+    background: var(--colorNeutralBackground3);
+    padding: 0.75rem;
+    border-radius: 6px;
+    overflow-x: auto;
+    border: 1px solid var(--colorNeutralStroke1);
+
+    code {
+      background: none;
+      padding: 0;
+    }
+  }
+
+  a {
+    color: var(--colorBrandForeground1);
+  }
+}
+
+.messageHeader {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.senderName {
+  font-weight: 600;
+  color: var(--colorNeutralForeground1);
+  font-size: 0.875rem;
+}
+
+.timestamp {
+  color: var(--colorNeutralForeground3);
+  font-size: 0.75rem;
+}
+
+.feedback {
+  display: flex;
+  gap: 0.25rem;
+  margin-top: 0.5rem;
+}
+
+.feedbackBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  color: var(--colorNeutralForeground3);
+  background: transparent;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+
+  &:hover {
+    color: var(--colorNeutralForeground1);
+    background: var(--colorNeutralBackground4);
+  }
+}
+
+.messageContent {
+  line-height: 1.6;
+}
+
+.thinkingIndicator {
+  padding: 0.5rem 0;
+  color: var(--colorNeutralForeground3);
+  font-style: italic;
+  font-size: 0.875rem;
+}
+
+// --- Input area ---
+
+.inputArea {
+  padding: 0.75rem 0 0;
+}
+
+.inputWrapper {
+  position: relative;
+  background: var(--colorNeutralBackground1);
+  border: 1px solid var(--colorNeutralStroke1);
+  border-radius: 24px;
+  padding: 0;
+  overflow: hidden;
+
+  &:focus-within {
+    border-color: var(--colorNeutralStrokeAccessible);
+  }
+}
+
+.inputField {
+  display: block;
+  width: 100%;
+
+  // Override Fluent Textarea root <span>
+  &:global(.fui-Textarea) {
+    display: flex !important;
+    border: none !important;
+    background: transparent !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+
+    // Remove Fluent's focus indicator underline
+    &::after,
+    &::before {
+      display: none !important;
+    }
+  }
+
+  // Target the actual <textarea> element inside Fluent's wrapper
+  :global(.fui-Textarea__textarea) {
+    padding: 14px 56px 14px 20px !important;
+    font-size: var(--fontSizeBase300);
+    line-height: var(--lineHeightBase300);
+    resize: none !important;
+    max-height: 240px;
+    overflow-y: auto !important;
+    background: transparent !important;
+    border: none !important;
+    outline: none !important;
+  }
+}
+
+.sendBtn {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  border-radius: var(--borderRadiusCircular);
+  color: var(--colorNeutralForeground4);
+  background: transparent;
+  transition: background-color var(--durationNormal) var(--curveEasyEase),
+              color var(--durationNormal) var(--curveEasyEase),
+              transform var(--durationFast) var(--curveDecelerateMid);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+
+  &:disabled {
+    color: var(--colorNeutralForeground4);
+    background: transparent;
+  }
+}
+
+.sendBtnActive {
+  background-color: var(--colorBrandBackground);
+  color: var(--colorNeutralForegroundOnBrand);
+
+  &:hover {
+    background-color: var(--colorBrandBackgroundHover);
+    color: var(--colorNeutralForegroundOnBrand);
+  }
+
+  &:active {
+    background-color: var(--colorBrandBackgroundPressed);
+    transform: scale(0.95);
+  }
+}
+
+.disclaimer {
+  margin: 0.5rem 0 0;
+  text-align: center;
+  color: var(--colorNeutralForeground3);
+  font-size: 0.6875rem;
+}
+
+// --- Documentation tab ---
+
+.documentationTab {
+  padding: 2rem 0;
+}

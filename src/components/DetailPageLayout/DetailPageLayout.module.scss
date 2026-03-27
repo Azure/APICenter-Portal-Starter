@@ -1,0 +1,130 @@
+@use '@/styles/screen';
+
+.detailPage {
+  display: flex;
+  flex-direction: column;
+
+  .headerBar {
+    padding-top: 0.75rem;
+    padding-bottom: 0;
+  }
+
+  .backLink {
+    color: var(--colorBrandForeground1);
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  .spinner {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .header {
+    padding-top: 1.5rem;
+    padding-bottom: 1rem;
+
+    .headerContent {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 24px;
+
+      @include screen.small-to-medium {
+        flex-direction: column;
+        gap: 12px;
+      }
+    }
+
+    .headerText {
+      flex: 1;
+      min-width: 0;
+    }
+
+    h1 {
+      margin: 0 0 0.5rem;
+    }
+
+    .summary {
+      margin: 0 0 0.5rem;
+      color: var(--colorNeutralForeground2);
+      font-size: 0.875rem;
+      line-height: 1.5;
+    }
+
+    .metadata {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 0.5rem;
+      color: var(--colorNeutralForeground3);
+      font-size: 0.8125rem;
+    }
+
+    .headerActions {
+      flex-shrink: 0;
+    }
+  }
+
+  .selector {
+    padding-bottom: 1rem;
+  }
+
+  .errorState {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 32px 0;
+  }
+
+  .tabBar {
+    padding-top: 0;
+    padding-bottom: 0;
+
+    &::after {
+      content: '';
+      display: block;
+      border-bottom: 1px solid var(--colorNeutralStroke1);
+    }
+  }
+
+  .content {
+    display: flex;
+    gap: 48px;
+    padding: 32px 0;
+
+    @media (max-width: 768px) {
+      flex-direction: column-reverse;
+      gap: 24px;
+    }
+  }
+
+  .main {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    line-height: 1.6;
+  }
+
+  .sidebar {
+    flex: 0 0 320px;
+    position: sticky;
+    top: 24px;
+    align-self: flex-start;
+
+    @media (max-width: 768px) {
+      flex: none;
+      position: static;
+      width: 100%;
+    }
+  }
+}

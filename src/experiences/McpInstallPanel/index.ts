@@ -1,0 +1,1 @@
+export { McpInstallPanel } from './McpInstallPanel';

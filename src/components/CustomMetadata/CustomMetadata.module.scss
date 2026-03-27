@@ -5,7 +5,7 @@
 
     > .name {
       min-width: 100px;
-      color: var(--grey-5);
+      color: var(--colorNeutralForeground3);
       font-weight: 600;
     }
     
@@ -24,7 +24,7 @@
 
   > .object {
     padding-left: 8px;
-    border-left: 2px solid var(--grey-3);
+    border-left: 2px solid var(--colorNeutralStroke1);
 
     > .property + .property {
       margin-top: 8px;

@@ -5,8 +5,33 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useRecentSearches, RecentSearchData, RecentSearchType } from '@/hooks/useRecentSearches.ts';
 import { ApiMetadata } from '@/types/api.ts';
 import { LocationsService } from '@/services/LocationsService';
+import { HomeLocationState } from '@/types/homeDrawer';
 import SemanticSearchToggle from '@/components/SemanticSearchToggle';
 import styles from './ApiSearchAutoComplete.module.scss';
+
+function getNavigationTarget(api: ApiMetadata): { to: string; state?: HomeLocationState } {
+  const kind = api.kind?.toLowerCase();
+  if (kind === 'skill') {
+    return { to: LocationsService.getSkillInfoUrl(api.name) };
+  }
+
+  if (kind === 'agent') {
+    return { to: LocationsService.getAgentChatUrl(api.name) };
+  }
+
+  if (kind === 'plugin') {
+    return { to: LocationsService.getPluginInfoUrl(api.name) };
+  }
+
+  if (kind === 'languagemodel') {
+    return { to: LocationsService.getModelDetailUrl(api.name) };
+  }
+
+  return {
+    to: LocationsService.getHomeUrl(true),
+    state: { drawer: { kind: 'api', name: api.name } },
+  };
+}
 
 interface Props {
   searchResults?: ApiMetadata[];
@@ -48,7 +73,8 @@ export const ApiSearchAutoComplete: React.FC<Props> = ({
         api,
       });
 
-      navigate(LocationsService.getApiInfoUrl(api.name));
+      const target = getNavigationTarget(api);
+      navigate(target.to, target.state ? { state: target.state } : undefined);
     },
     [navigate, recentSearches, searchResults]
   );
@@ -65,7 +91,7 @@ export const ApiSearchAutoComplete: React.FC<Props> = ({
 
   const getRecentRecordUrl = useCallback((recentRecord: RecentSearchData) => {
     if (recentRecord.type === RecentSearchType.API) {
-      return LocationsService.getApiInfoUrl(recentRecord.search);
+      return getNavigationTarget(recentRecord.api!).to;
     }
 
     return LocationsService.getApiSearchUrl(recentRecord.search);
@@ -87,7 +113,10 @@ export const ApiSearchAutoComplete: React.FC<Props> = ({
 
       switch (recentRecord.type) {
         case RecentSearchType.API:
-          navigate(LocationsService.getApiInfoUrl(recentRecord.search));
+          {
+            const target = getNavigationTarget(recentRecord.api!);
+            navigate(target.to, target.state ? { state: target.state } : undefined);
+          }
           break;
 
         case RecentSearchType.QUERY:
@@ -214,10 +243,11 @@ export const ApiSearchAutoComplete: React.FC<Props> = ({
     return (
       <>
         <h6>Suggestions</h6>
-        {searchResults.map((api) => (
+        {searchResults.slice(0, 5).map((api) => (
           <Link
             key={api.name}
-            to={LocationsService.getApiInfoUrl(api.name)}
+            to={getNavigationTarget(api).to}
+            state={getNavigationTarget(api).state}
             className={styles.option}
             data-name={api.name}
             onClick={handleSearchResultClick}

@@ -1,6 +1,21 @@
 .apiAdditionalInfo {
-  h4 {
+  .section {
     margin-top: 24px;
+
+    > h4 {
+      margin-top: 0;
+      margin-bottom: 0.5rem;
+    }
+  }
+
+  .sectionLabel {
+    display: inline-flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .sectionContent {
+    padding-left: 33px;
   }
 
   svg {

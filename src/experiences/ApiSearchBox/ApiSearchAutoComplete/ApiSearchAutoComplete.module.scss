@@ -12,14 +12,14 @@
     justify-content: space-between;
     margin: 0 12px 2px;
     padding: 8px 0;
-    border-bottom: 1px solid var(--grey-3);
-    color: var(--grey-5);
+    border-bottom: 1px solid var(--colorNeutralStroke1);
+    color: var(--colorNeutralForeground3);
     font-size: 12px;
     font-weight: 600;
     line-height: 16px;
 
     button {
-      color: var(--blue-4);
+      color: var(--colorBrandForeground1);
       font: inherit;
       font-weight: 400;
 
@@ -33,7 +33,7 @@
     display: flex;
     align-items: center;
     padding: 8px 40px 8px 10px;
-    color: var(--grey-6);
+    color: var(--colorNeutralForeground2);
     font-size: 14px;
     gap: 1rem;
     letter-spacing: 0.01rem;
@@ -49,10 +49,10 @@
       width: 2rem;
       height: 2rem;
       transform: translateY(-50%);
-      background: var(--grey-2);
+      background: var(--colorNeutralBackground4);
 
       &:hover {
-        background: var(--grey-3);
+        background: var(--colorNeutralStroke1);
       }
     }
     
@@ -88,11 +88,12 @@
 
     .apiMeta {
       width: 25rem;
-      color: var(--grey-5);
+      color: var(--colorNeutralForeground3);
     }
 
-    &:hover {
-      background: var(--grey-1);
+    &:hover,
+    &[data-active="true"] {
+      background: var(--colorNeutralBackground3);
 
       .deleteBtn {
         display: block;
@@ -102,6 +103,6 @@
 
   .noResults {
     padding: 3rem 0;
-    color: var(--grey-5);
+    color: var(--colorNeutralForeground3);
   }
 }

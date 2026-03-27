@@ -1,8 +1,8 @@
-import { Api as DocsApi } from 'api-docs-ui';
+import { type ApiCardApi } from '@/components/ApiCard';
 import { ApiMetadata } from '@/types/api';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function apiAdapter(api: any): DocsApi & ApiMetadata {
+export function apiAdapter(api: any): ApiCardApi & ApiMetadata {
   const summary = api.summary;
 
   return {

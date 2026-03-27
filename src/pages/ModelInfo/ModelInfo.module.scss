@@ -1,0 +1,72 @@
+.modelInfo {
+  .metadata {
+    margin-bottom: 32px;
+  }
+
+  .spinner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .divider {
+    margin: 8px 0 12px;
+  }
+
+  .tabsContainer {
+    margin-top: 40px;
+  }
+
+  .tabContent {
+    padding: 20px 0;
+  }
+
+  .section {
+    margin-bottom: 24px;
+
+    h3 {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+  }
+
+  .panelLabel {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .badges {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+
+  .playgroundSection {
+    margin: 24px 0;
+    padding: 16px;
+    border: 1px solid var(--colorNeutralStroke1);
+    border-radius: 8px;
+    background: var(--colorNeutralBackground2);
+  }
+
+  .detailsGrid {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 8px 16px;
+    margin-bottom: 16px;
+
+    dt {
+      font-weight: 600;
+      color: var(--colorNeutralForeground2);
+    }
+
+    dd {
+      margin: 0;
+    }
+  }
+}

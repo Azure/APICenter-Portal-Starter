@@ -5,12 +5,10 @@ import { useRecoilValue } from 'recoil';
 import DevPortalLogo from '@/assets/devPortal.png';
 import { ApiMetadata } from '@/types/api';
 import { ApiVersion } from '@/types/apiVersion';
-import { ApiDefinition } from '@/types/apiDefinition';
-import { useApiSpecUrl } from '@/hooks/useApiSpecUrl';
+import { ApiDefinition, kindToResourceType } from '@/types/apiDefinition';import { useApiSpecUrl } from '@/hooks/useApiSpecUrl';
 import { useDeploymentEnvironment } from '@/hooks/useDeploymentEnvironment';
 import { ApiDeployment } from '@/types/apiDeployment';
 import VsCodeLogo from '@/assets/vsCodeLogo.svg';
-import VSCInsiders from '@/assets/vsCodeInsidersLogo.svg';
 import { LocationsService } from '@/services/LocationsService';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import CopyLink from '@/components/CopyLink';
@@ -18,22 +16,30 @@ import { configAtom } from '@/atoms/configAtom';
 import { useServer } from '@/hooks/useServer';
 import styles from './ApiInfoOptions.module.scss';
 
+/**
+ * Extracts the `sourceUrl` for a skill-type API from its custom properties.
+ */
+function getSkillSourceUrl(api: ApiMetadata): string | undefined {
+  return api.customProperties?.['sourceUrl'] as string | undefined;
+}
+
 interface Props {
   api: ApiMetadata;
   apiVersion?: ApiVersion;
   apiDefinition?: ApiDefinition;
   apiDeployment?: ApiDeployment;
   isLoading?: boolean;
+  /** When true, suppresses MCP Installation and Skill Installation sections (rendered in sidebar instead). */
+  hideInstallation?: boolean;
 }
 
 enum VsCodeTypes {
   Stable = 'vscode',
-  Insiders = 'vscode-insiders',
 }
 
 const DEFAULT_INSTRUCTIONS = 'Gain comprehensive insights into the API.';
 
-export const ApiInfoOptions: React.FC<Props> = ({ api, apiVersion, apiDefinition, apiDeployment, isLoading }) => {
+export const ApiInfoOptions: React.FC<Props> = ({ api, apiVersion, apiDefinition, apiDeployment, isLoading, hideInstallation }) => {
   const config = useRecoilValue(configAtom);
 
   const definitionId = useMemo(
@@ -41,13 +47,15 @@ export const ApiInfoOptions: React.FC<Props> = ({ api, apiVersion, apiDefinition
       apiName: api.name,
       versionName: apiVersion?.name,
       definitionName: apiDefinition?.name,
+      resourceType: kindToResourceType(api.kind),
     }),
-    [api.name, apiDefinition?.name, apiVersion?.name]
+    [api.name, api.kind, apiDefinition?.name, apiVersion?.name]
   );
 
   const apiSpecUrl = useApiSpecUrl(definitionId);
   const environment = useDeploymentEnvironment(apiDeployment?.environmentId);
   const server = useServer(api.name);
+  const skillSourceUrl = useMemo(() => getSkillSourceUrl(api), [api]);
 
   const devPortalUri = environment.data?.onboarding?.developerPortalUri?.[0];
 
@@ -78,11 +86,14 @@ export const ApiInfoOptions: React.FC<Props> = ({ api, apiVersion, apiDefinition
           return;
         }
 
+        const runtimeArgs = pkg.runtimeArguments.map((arg) => arg.value);
+        const args = pkg.runtimeHint === 'npx' ? ['-y', pkg.identifier, ...runtimeArgs] : runtimeArgs;
+
         payload = {
-          name: pkg.identifier.split('/').pop() || pkg.identifier,
+          name: api.title || pkg.identifier.split('/').pop() || pkg.identifier,
           type: pkg.transport?.type || 'stdio',
           command: pkg.runtimeHint,
-          args: ['-y', pkg.identifier, ...pkg.runtimeArguments.map((arg) => arg.value)],
+          args,
         };
       } else {
         const runtimeUri = apiDeployment?.server.runtimeUri[0];
@@ -92,7 +103,7 @@ export const ApiInfoOptions: React.FC<Props> = ({ api, apiVersion, apiDefinition
         const transportType = matchingRemote?.transport_type || 'sse';
 
         payload = {
-          name: api.name,
+          name: api.title || api.name,
           type: transportType,
           url: runtimeUri,
         };
@@ -108,7 +119,9 @@ export const ApiInfoOptions: React.FC<Props> = ({ api, apiVersion, apiDefinition
       return <Spinner size="small" />;
     }
 
-    if (!apiVersion || !apiDefinition) {
+    const hasMcpInstallableContent = api.kind === 'mcp' && (!!apiDeployment?.server.runtimeUri.length || !!server.data?.packages);
+
+    if ((!apiVersion || !apiDefinition) && !hasMcpInstallableContent) {
       return (
         <MessageBar>
           <MessageBarBody>There are no available options for this API.</MessageBarBody>
@@ -118,26 +131,33 @@ export const ApiInfoOptions: React.FC<Props> = ({ api, apiVersion, apiDefinition
 
     return (
       <>
+        {apiVersion && apiDefinition && (
         <div className={styles.section}>
           <h3>
             <span className={styles.panelLabel}>
               <Document20Regular /> <strong>API Definition</strong>
             </span>
 
-            {apiSpecUrl.data && api.kind !== 'mcp' && (
+            {api.kind !== 'skill' && api.kind?.toLowerCase() !== 'languagemodel' && (
               <span className={styles.linkGroup}>
-                <Link href={apiSpecUrl.data} className={styles.link}>
-                  Download <ArrowDownloadRegular />
-                </Link>
+                {apiSpecUrl.data && api.kind !== 'mcp' && (
+                  <Link href={apiSpecUrl.data} className={styles.link}>
+                    Download <ArrowDownloadRegular />
+                  </Link>
+                )}
 
-                <Link
-                  className={styles.link}
-                  href={LocationsService.getApiSchemaExplorerUrl(api.name, apiVersion.name, apiDefinition.name)}
-                >
-                  View documentation
-                </Link>
+                {(api.kind !== 'mcp' || !!server.data?.remotes?.length) && (
+                  <Link
+                    className={styles.link}
+                    href={LocationsService.getApiSchemaExplorerUrl(api.name, apiVersion.name, apiDefinition.name, kindToResourceType(api.kind))}
+                  >
+                    View documentation
+                  </Link>
+                )}
               </span>
             )}
+
+
           </h3>
 
           <p>This file defines how to use the API, including the endpoints, policies, authentication, and responses.</p>
@@ -155,20 +175,11 @@ export const ApiInfoOptions: React.FC<Props> = ({ api, apiVersion, apiDefinition
                 >
                   Visual Studio Code
                 </Button>
-
-                <Button
-                  size="medium"
-                  className={styles.actionButton}
-                  icon={<img height={18} src={VSCInsiders} alt="VS Code Insider" />}
-                  value={VsCodeTypes.Insiders}
-                  onClick={handleOpenInVsCodeClick}
-                >
-                  Visual Studio Code Insider
-                </Button>
               </p>
             </>
           )}
         </div>
+        )}
 
         {!!apiDeployment?.server.runtimeUri.length && (
           <div className={styles.section}>
@@ -186,7 +197,7 @@ export const ApiInfoOptions: React.FC<Props> = ({ api, apiVersion, apiDefinition
           </div>
         )}
 
-        {api.kind === 'mcp' && (!!apiDeployment?.server.runtimeUri.length || !!server.data?.packages) && (
+        {!hideInstallation && hasMcpInstallableContent && (
           <div className={styles.section}>
             <h3>
               <span className={styles.panelLabel}>
@@ -210,7 +221,7 @@ export const ApiInfoOptions: React.FC<Props> = ({ api, apiVersion, apiDefinition
                   value={VsCodeTypes.Stable}
                   onClick={handleInstallMcpInVsCodeClick}
                 >
-                  Visual Studio Code
+                  Visual Studio Code{!!server.data?.packages && ' (remote)'}
                 </Button>
               )}
 
@@ -223,35 +234,27 @@ export const ApiInfoOptions: React.FC<Props> = ({ api, apiVersion, apiDefinition
                   data-local="true"
                   onClick={handleInstallMcpInVsCodeClick}
                 >
-                  Visual Studio Code (local)
-                </Button>
-              )}
-
-              {!!apiDeployment?.server.runtimeUri.length && (
-                <Button
-                  size="medium"
-                  className={styles.actionButton}
-                  icon={<img height={18} src={VSCInsiders} alt="VS Code Insider" />}
-                  value={VsCodeTypes.Insiders}
-                  onClick={handleInstallMcpInVsCodeClick}
-                >
-                  Visual Studio Code Insider
-                </Button>
-              )}
-
-              {!!server.data?.packages && (
-                <Button
-                  size="medium"
-                  className={styles.actionButton}
-                  icon={<img height={18} src={VSCInsiders} alt="VS Code Insider" />}
-                  value={VsCodeTypes.Insiders}
-                  data-local="true"
-                  onClick={handleInstallMcpInVsCodeClick}
-                >
-                  Visual Studio Code Insider (local)
+                  Visual Studio Code{!!apiDeployment?.server.runtimeUri.length && ' (local)'}
                 </Button>
               )}
             </p>
+          </div>
+        )}
+
+        {api.kind === 'skill' && skillSourceUrl && (
+          <div className={styles.section}>
+            <h3>
+              <span className={styles.panelLabel}>
+                <Link20Regular />
+                <strong>Source Repository</strong>
+              </span>
+
+              <Link href={skillSourceUrl} target="_blank" className={styles.link}>
+                Open on GitHub <OpenRegular />
+              </Link>
+            </h3>
+
+            <p>Browse the skill source code and files on GitHub.</p>
           </div>
         )}
 

@@ -5,11 +5,11 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    color: var(--grey-0);
+    color: var(--colorNeutralForegroundOnBrand);
     font-weight: 600;
     
     &:hover {
-      color: var(--grey-0);
+      color: var(--colorNeutralForegroundOnBrand);
     }
   }
   
@@ -18,9 +18,9 @@
     width: 325px;
     margin: auto;
     padding: 10px;
-    background: var(--grey-0);
+    background: var(--colorNeutralBackground1);
     box-shadow: 0 1.2px 3.6px 0 #0000001C, 0 6.4px 14.4px 0 #0002;
-    color: var(--grey-7);
+    color: var(--colorNeutralForeground1);
     font-size: 13px;
     line-height: 18px;
     text-align: left;
@@ -34,7 +34,7 @@
       font-weight: 600;
       
       .icon {
-        color: var(--blue-3);
+        color: var(--colorBrandForeground1);
       }
     }
     

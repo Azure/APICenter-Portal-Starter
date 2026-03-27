@@ -3,7 +3,7 @@ import memoize from 'memoizee';
 import { HttpService } from '@/services/HttpService';
 import { ApiMetadata } from '@/types/api';
 import { ApiAuthScheme, ApiAuthSchemeMetadata } from '@/types/apiAuth';
-import { ApiDefinition, ApiDefinitionId } from '@/types/apiDefinition';
+import { ApiDefinition, ApiDefinitionId, ResourceType } from '@/types/apiDefinition';
 import { ApiDeployment } from '@/types/apiDeployment';
 import { ApiEnvironment } from '@/types/apiEnvironment';
 import { ActiveFilterData } from '@/types/apiFilters';
@@ -11,6 +11,7 @@ import { ApiVersion } from '@/types/apiVersion';
 import { IApiService, PaginatedResult } from '@/types/services/IApiService';
 import { Server, ServerResponse } from '@/types/server';
 import { MetadataSchema } from '@/types/metadataSchema';
+import { PluginDetails } from '@/types/plugin';
 import { DEFAULT_PAGE_SIZE } from '@/constants';
 
 export const ApiService: IApiService = {
@@ -25,7 +26,12 @@ export const ApiService: IApiService = {
       const filtersByType = groupBy(filters, 'type');
       const filtersString = Object.values(filtersByType)
         .map((filters) => {
-          const filtersSet = filters.map((filter) => `${filter.type} eq '${filter.value}'`);
+          const filtersSet = filters.map((filter) => {
+            if (filter.operator === 'contains') {
+              return `contains(${filter.type}, '${filter.value}')`;
+            }
+            return `${filter.type} eq '${filter.value}'`;
+          });
           return `(${filtersSet.join(' or ')})`;
         })
         .join(' and ');
@@ -50,7 +56,7 @@ export const ApiService: IApiService = {
     return { value: response.value || [], nextLink: response.nextLink };
   },
 
-  async getApi(name: string): Promise<ApiMetadata> {
+  async getApi(name: string, _resourceType: ResourceType = 'apis'): Promise<ApiMetadata> {
     return await HttpService.get<ApiMetadata>(`/apis/${name}`);
   },
 
@@ -59,17 +65,17 @@ export const ApiService: IApiService = {
     return response?.server;
   },
 
-  async getVersions(apiName: string): Promise<ApiVersion[]> {
+  async getVersions(apiName: string, _resourceType: ResourceType = 'apis'): Promise<ApiVersion[]> {
     const response = await HttpService.get<{ value: ApiVersion[] }>(`/apis/${apiName}/versions?$top=${DEFAULT_PAGE_SIZE}`);
     return response.value || [];
   },
 
-  async getDeployments(apiName: string): Promise<ApiDeployment[]> {
+  async getDeployments(apiName: string, _resourceType: ResourceType = 'apis'): Promise<ApiDeployment[]> {
     const response = await HttpService.get<{ value: ApiDeployment[] }>(`/apis/${apiName}/deployments?$top=${DEFAULT_PAGE_SIZE}`);
     return response.value || [];
   },
 
-  async getDefinitions(apiName: string, version: string): Promise<ApiDefinition[]> {
+  async getDefinitions(apiName: string, version: string, _resourceType: ResourceType = 'apis'): Promise<ApiDefinition[]> {
     const response = await HttpService.get<{ value: ApiDefinition[] }>(
       `/apis/${apiName}/versions/${version}/definitions?$top=${DEFAULT_PAGE_SIZE}`
     );
@@ -90,7 +96,13 @@ export const ApiService: IApiService = {
   },
 
   getSpecification: memoize(async (definitionId: ApiDefinitionId): Promise<string | undefined> => {
-    const res = await fetch(await ApiService.getSpecificationLink(definitionId));
+    const specificationLink = await ApiService.getSpecificationLink(definitionId);
+
+    if (!specificationLink) {
+      return undefined;
+    }
+
+    const res = await fetch(specificationLink);
     return res.text();
   }),
 
@@ -110,6 +122,10 @@ export const ApiService: IApiService = {
     return await HttpService.post<ApiAuthScheme>(
       `/apis/${definitionId.apiName}/versions/${definitionId.versionName}/securityRequirements/${schemeName}:getCredentials`
     );
+  },
+
+  async getPlugin(name: string): Promise<PluginDetails> {
+    return await HttpService.get<PluginDetails>(`/plugins/${name}`);
   },
 
   async getMetadataSchemas(): Promise<MetadataSchema[]> {

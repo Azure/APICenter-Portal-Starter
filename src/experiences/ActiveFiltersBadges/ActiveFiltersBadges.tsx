@@ -16,7 +16,8 @@ export const ActiveFiltersBadges: React.FC<Props> = ({ className }) => {
     (e: React.PointerEvent<HTMLButtonElement>) => {
       const type = e.currentTarget.getAttribute('data-type') as FilterType;
       const value = e.currentTarget.value;
-      searchFilters.remove({ type, value });
+      const operator = e.currentTarget.getAttribute('data-operator') as ActiveFilterData['operator'];
+      searchFilters.remove({ type, value, operator: operator || undefined });
     },
     [searchFilters]
   );
@@ -27,12 +28,13 @@ export const ActiveFiltersBadges: React.FC<Props> = ({ className }) => {
 
   function renderFilterBadge(filter: ActiveFilterData) {
     const filterMetadata = searchFilters.metadata[filter.type];
-    const optionMetadata = filterMetadata.options.find((option) => option.value === filter.value)!;
+    if (!filterMetadata) return null;
+    const optionMetadata = filterMetadata.options.find((option) => option.value === filter.value);
 
     return (
-      <div key={`${filter.type}.${filter.value}`} className={styles.filterBadge}>
-        {filterMetadata.label}: <strong>{optionMetadata.label}</strong>
-        <button title="Remove" data-type={filter.type} value={filter.value} onClick={handleRemoveClick}>
+      <div key={`${filter.type}.${filter.operator}.${filter.value}`} className={styles.filterBadge}>
+        {filterMetadata.label} {filter.operator === 'contains' ? 'contains' : '='} <strong>{optionMetadata?.label ?? filter.value}</strong>
+        <button title="Remove" data-type={filter.type} data-operator={filter.operator || ''} value={filter.value} onClick={handleRemoveClick}>
           <Dismiss12Regular />
         </button>
       </div>

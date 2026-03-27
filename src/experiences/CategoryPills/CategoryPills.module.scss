@@ -1,0 +1,44 @@
+.categoryPills {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 1rem;
+  border: 1px solid var(--colorNeutralStroke1);
+  border-radius: 999px;
+  background: var(--colorNeutralBackground1);
+  color: var(--colorNeutralForeground1);
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.25rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease, border-color 0.15s ease;
+
+  &:hover {
+    background: var(--colorNeutralBackground1Hover);
+    border-color: var(--colorNeutralStroke1Hover);
+  }
+
+  .icon {
+    display: inline-flex;
+    font-size: 1rem;
+  }
+}
+
+.active {
+  background: var(--colorBrandBackground);
+  border-color: var(--colorBrandBackground);
+  color: var(--colorNeutralForegroundOnBrand);
+
+  &:hover {
+    background: var(--colorBrandBackgroundHover);
+    border-color: var(--colorBrandBackgroundHover);
+  }
+}

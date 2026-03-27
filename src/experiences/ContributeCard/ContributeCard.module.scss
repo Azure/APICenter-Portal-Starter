@@ -1,0 +1,43 @@
+.contributeCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  min-height: 200px;
+  padding: 1.5rem;
+  border: 1px solid var(--colorNeutralStroke1);
+  border-radius: var(--borderRadiusMedium);
+  background: var(--colorNeutralBackground1);
+  color: var(--colorNeutralForeground1);
+  text-decoration: none;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+
+  &:hover {
+    border-color: var(--colorBrandStroke1);
+    box-shadow: var(--shadow8);
+  }
+
+  .icon {
+    width: 48px;
+    height: 48px;
+    color: var(--colorNeutralForeground2);
+  }
+
+  .title {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+    line-height: 1.5rem;
+  }
+
+  .subtitle {
+    margin: 0;
+    color: var(--colorNeutralForeground2);
+    font-size: 0.8125rem;
+    line-height: 1.125rem;
+    text-align: center;
+  }
+}

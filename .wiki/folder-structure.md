@@ -226,8 +226,9 @@ pages/
 
 **Routes**:
 - `/` → Home
-- `/api-info/:id` → ApiInfo (nested in Home)
 - `/apis/:apiName/versions/:versionName/definitions/:definitionName` → ApiSpec
+- `/languageModels/:apiName/versions/:versionName/definitions/:definitionName` → ApiSpec
+- `ApiInfo` and `ModelInfo` are rendered as Home drawers, not standalone routes
 
 ---
 

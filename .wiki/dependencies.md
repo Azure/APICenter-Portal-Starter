@@ -19,8 +19,9 @@
 
 **Routes**:
 - `/` - Home
-- `/api-info/:id` - API details (nested)
 - `/apis/:apiName/versions/:versionName/definitions/:definitionName` - Spec viewer
+- `/languageModels/:apiName/versions/:versionName/definitions/:definitionName` - Language model spec viewer
+- API and language model detail drawers are opened from `Home` via navigation state rather than dedicated routes
 
 ---
 

@@ -1,4 +1,5 @@
 import { UrlParams } from '@/constants/urlParams';
+import { ResourceType } from '@/types/apiDefinition';
 
 export const LocationsService = {
   getHomeUrl(preserveSearchParams = false): string {
@@ -26,12 +27,32 @@ export const LocationsService = {
     return `/?${searchParams.toString()}`;
   },
 
-  getApiInfoUrl(name: string): string {
-    return `/api-info/${name}${window.location.search}`;
+  getSkillInfoUrl(name: string): string {
+    return `/skills/${name}`;
   },
 
-  getApiSchemaExplorerUrl(api: string, version: string, definition: string): string {
-    return `/apis/${api}/versions/${version}/definitions/${definition}`;
+  getPluginInfoUrl(name: string): string {
+    return `/plugins/${name}`;
+  },
+
+  getApiDetailUrl(name: string): string {
+    return `/apis/${name}`;
+  },
+
+  getModelDetailUrl(name: string): string {
+    return `/languageModels/${name}`;
+  },
+
+  getAgentChatUrl(name: string): string {
+    return `/agents/${name}`;
+  },
+
+  getModelPlaygroundUrl(name: string): string {
+    return `/languageModels/${name}/playground`;
+  },
+
+  getApiSchemaExplorerUrl(api: string, version: string, definition: string, resourceType: ResourceType = 'apis'): string {
+    return `/${resourceType}/${api}/versions/${version}/definitions/${definition}`;
   },
 
   getAiSearchInfoUrl(): string {
