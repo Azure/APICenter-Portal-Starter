@@ -23,6 +23,7 @@ export const ApiDetailPage: React.FC = () => {
   const { apiName } = useParams<{ apiName: string }>();
   const api = useApi(apiName);
   const [definitionSelection, setDefinitionSelection] = useState<ApiDefinitionSelection | undefined>();
+  const [selectedTab, setSelectedTab] = useState<string>('documentation');
 
   setDocumentTitle(`API${api.data?.title ? ` - ${api.data.title}` : ''}`);
 
@@ -110,31 +111,21 @@ export const ApiDetailPage: React.FC = () => {
 
   const isMcp = kind === 'mcp';
 
-  // Render additional info as accordion sections in the left operations sidebar for all page types
+  const hasCustomProps = !!Object.keys(api.data?.customProperties || {}).length;
+
+  // Left sidebar: only external docs and contacts (no properties — those go in a tab)
   const sidebarExtra = useMemo(() => {
     if (!api.data) return undefined;
     const hasExternalDocs = !!api.data.externalDocumentation?.length;
     const hasContacts = !!api.data.contacts?.length;
-    const hasCustomProps = !!Object.keys(api.data.customProperties || {}).length;
-    if (!hasExternalDocs && !hasContacts && !hasCustomProps) return undefined;
+    if (!hasExternalDocs && !hasContacts) return undefined;
 
     const sections: string[] = [];
-    if (hasCustomProps) sections.push('properties');
     if (hasExternalDocs) sections.push('docs');
     if (hasContacts) sections.push('contacts');
 
     return (
       <Accordion multiple defaultOpenItems={sections}>
-        {hasCustomProps && (
-          <AccordionItem value="properties">
-            <AccordionHeader as="h4" size="large">
-              <strong>Properties</strong>
-            </AccordionHeader>
-            <AccordionPanel>
-              <CustomMetadata value={api.data.customProperties} />
-            </AccordionPanel>
-          </AccordionItem>
-        )}
         {hasExternalDocs && (
           <AccordionItem value="docs">
             <AccordionHeader as="h4" size="large">
@@ -250,8 +241,9 @@ export const ApiDetailPage: React.FC = () => {
         </>
       }
       tabs={
-        <TabList defaultSelectedValue="documentation">
+        <TabList selectedValue={selectedTab} onTabSelect={(_, d) => setSelectedTab(d.value as string)}>
           <Tab icon={<DocumentRegular />} value="documentation">Documentation</Tab>
+          {hasCustomProps && <Tab value="properties">Additional properties</Tab>}
         </TabList>
       }
       selector={
@@ -295,7 +287,10 @@ export const ApiDetailPage: React.FC = () => {
       emptyMessage={!api.isLoading && !api.isError && !api.data ? 'The specified API does not exist.' : undefined}
       sidebar={undefined}
     >
-      {api.data && renderDocumentation()}
+      {api.data && selectedTab === 'documentation' && renderDocumentation()}
+      {api.data && selectedTab === 'properties' && (
+        <CustomMetadata value={api.data.customProperties} />
+      )}
     </DetailPageLayout>
   );
 };

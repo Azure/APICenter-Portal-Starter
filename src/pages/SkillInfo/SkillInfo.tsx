@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Badge, Button, Tab, TabList } from '@fluentui/react-components';
 import { DocumentRegular } from '@fluentui/react-icons';
@@ -8,7 +8,7 @@ import { DetailPageLayout } from '@/components/DetailPageLayout/DetailPageLayout
 import { HeaderActions } from '@/experiences/HeaderActions';
 import { buildSkillDeeplink } from '@/utils/skillDeeplink';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
-import ApiAdditionalInfo from '@/experiences/ApiAdditionalInfo';
+import CustomMetadata from '@/components/CustomMetadata';
 import { EmptyStateMessage } from '@/components/EmptyStateMessage/EmptyStateMessage';
 import VsCodeLogo from '@/assets/vsCodeLogo.svg';
 
@@ -18,6 +18,7 @@ const SKILL_SOURCE_URL = 'https://github.com/vercel-labs/agent-skills/tree/main/
 export const SkillInfo: React.FC = () => {
   const { name } = useParams<{ name: string }>();
   const api = useApi(name);
+  const [selectedTab, setSelectedTab] = useState<string>('documentation');
 
   setDocumentTitle(`Skill${api.data?.title ? ` - ${api.data.title}` : ''}`);
 
@@ -32,14 +33,7 @@ export const SkillInfo: React.FC = () => {
     window.open(deeplink);
   }, [skillSourceUrl, api.data?.name]);
 
-  const sidebarContent = useMemo(() => {
-    if (!api.data) return undefined;
-    const hasExternalDocs = !!api.data.externalDocumentation?.length;
-    const hasContacts = !!api.data.contacts?.length;
-    const hasCustomProps = !!Object.keys(api.data.customProperties || {}).length;
-    if (!hasExternalDocs && !hasContacts && !hasCustomProps) return undefined;
-    return <ApiAdditionalInfo api={api.data} />;
-  }, [api.data]);
+  const hasCustomProps = !!Object.keys(api.data?.customProperties || {}).length;
 
   return (
     <DetailPageLayout
@@ -52,8 +46,9 @@ export const SkillInfo: React.FC = () => {
         </>
       }
       tabs={
-        <TabList defaultSelectedValue="documentation">
+        <TabList selectedValue={selectedTab} onTabSelect={(_, d) => setSelectedTab(d.value as string)}>
           <Tab icon={<DocumentRegular />} value="documentation">Documentation</Tab>
+          {hasCustomProps && <Tab value="properties">Additional properties</Tab>}
         </TabList>
       }
       headerActions={
@@ -71,14 +66,17 @@ export const SkillInfo: React.FC = () => {
       error={api.isError ? 'Failed to load skill details. Please check your connection and try again.' : undefined}
       onRetry={() => api.refetch()}
       emptyMessage={!api.isLoading && !api.isError && !api.data ? 'The specified skill does not exist.' : undefined}
-      sidebar={sidebarContent}
+      sidebar={undefined}
     >
-      {api.data && (
+      {api.data && selectedTab === 'documentation' && (
         (api.data.description || api.data.summary) ? (
           <MarkdownRenderer markdown={(api.data.description || api.data.summary)!} />
         ) : (
           <EmptyStateMessage>No description available for this skill.</EmptyStateMessage>
         )
+      )}
+      {api.data && selectedTab === 'properties' && (
+        <CustomMetadata value={api.data.customProperties} />
       )}
     </DetailPageLayout>
   );
