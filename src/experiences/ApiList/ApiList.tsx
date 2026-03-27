@@ -5,7 +5,6 @@ import { useNavigate } from 'react-router-dom';
 import { useSearchFilters } from '@/hooks/useSearchFilters';
 import { useApis } from '@/hooks/useApis';
 import { useSearchQuery } from '@/hooks/useSearchQuery';
-import { useDesignVariation } from '@/hooks/useDesignVariation';
 import { ApiCard, type ApiCardApi } from '@/components/ApiCard';
 import { InfoTable } from '@/components/InfoTable';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
@@ -18,7 +17,6 @@ import { Layouts } from '@/types/layouts';
 import { apiListLayoutAtom } from '@/atoms/apiListLayoutAtom';
 import { configAtom } from '@/atoms/configAtom';
 import { LocationsService } from '@/services/LocationsService';
-import { HomeLocationState } from '@/types/homeDrawer';
 import EmptyStateMessage from '@/components/EmptyStateMessage';
 import styles from './ApiList.module.scss';
 
@@ -28,7 +26,6 @@ export const ApiList: React.FC = () => {
   const searchFilters = useSearchFilters();
   const searchQuery = useSearchQuery();
   const navigate = useNavigate();
-  const useFullPages = useDesignVariation('full-page-detail', 'full-redesign');
   const apis = useApis({
     search: searchQuery.search,
     filters: searchFilters.activeFilters,
@@ -53,7 +50,6 @@ export const ApiList: React.FC = () => {
       const typedApi = api as ApiCardApi & { type?: string };
       const kind = typedApi.type?.toLowerCase();
       let url: string;
-      let state: HomeLocationState | undefined;
       if (kind === 'agent') {
         url = LocationsService.getAgentChatUrl(api.name);
       } else if (kind === 'skill') {
@@ -61,18 +57,9 @@ export const ApiList: React.FC = () => {
       } else if (kind === 'plugin') {
         url = LocationsService.getPluginInfoUrl(api.name);
       } else if (kind === 'languagemodel') {
-        if (useFullPages) {
-          url = LocationsService.getModelDetailUrl(api.name);
-        } else {
-          url = LocationsService.getModelPlaygroundUrl(api.name);
-        }
+        url = LocationsService.getModelPlaygroundUrl(api.name);
       } else {
-        if (useFullPages) {
-          url = LocationsService.getApiDetailUrl(api.name);
-        } else {
-          url = LocationsService.getHomeUrl(true);
-          state = { drawer: { kind: 'api', name: api.name } };
-        }
+        url = LocationsService.getApiDetailUrl(api.name);
       }
 
       return {
@@ -82,11 +69,11 @@ export const ApiList: React.FC = () => {
             return;
           }
           e.preventDefault();
-          navigate(url, state ? { state } : undefined);
+          navigate(url);
         },
       };
     },
-    [navigate, useFullPages]
+    [navigate]
   );
 
   const handleLoadMore = useCallback(
@@ -164,11 +151,11 @@ export const ApiList: React.FC = () => {
             </InfoTable.Cell>
             <InfoTable.Cell>
               <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <Badge appearance="tint" color="informative" shape="rounded">
+                <Badge appearance="filled" color="brand" shape="circular">
                   {['skill', 'a2a', 'mcp', 'plugin', 'agent', 'languagemodel'].includes(api.type?.toLowerCase() ?? '') ? formatKindDisplay(api.type!) : 'API'}
                 </Badge>
                 {!!api.type && !['skill', 'a2a', 'mcp', 'plugin', 'agent', 'languagemodel'].includes(api.type.toLowerCase()) && (
-                  <Badge appearance="tint" color="informative" shape="rounded">
+                  <Badge appearance="tint" color="brand" shape="circular">
                     {formatKindDisplay(api.type)}
                   </Badge>
                 )}

@@ -72,7 +72,7 @@ export const ApiSpec: React.FC = () => {
         <h1>{api.data.title}</h1>
         {(api.data.kind || api.data.lifecycleStage) && (
           <div className={styles.badges}>
-            {api.data.kind && <Badge appearance="filled" color="brand">{formatKindDisplay(api.data.kind)}</Badge>}
+            {api.data.kind && <Badge appearance="filled" color="brand" shape="circular">{formatKindDisplay(api.data.kind)}</Badge>}
             {api.data.lifecycleStage && <Badge appearance="outline">{api.data.lifecycleStage}</Badge>}
           </div>
         )}
@@ -109,6 +109,9 @@ export const ApiSpec: React.FC = () => {
 
   return (
     <div className={styles.apiSpec}>
+      <section className={styles.headerBar}>
+        <Link to="/" className={styles.backLink}>&lt; Back to registry</Link>
+      </section>
       {renderHeader()}
       <section className={styles.tabBar}>
         <TabList defaultSelectedValue="documentation">

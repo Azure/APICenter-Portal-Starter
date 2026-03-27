@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { Badge, Button, Input, Spinner, Tab, TabList } from '@fluentui/react-components';
+import { Badge, Button, Textarea, Spinner, Tab, TabList } from '@fluentui/react-components';
 import {
-  Send24Regular,
+  ArrowRight24Regular,
   Bot24Regular,
   ThumbLike20Regular,
   ThumbDislike20Regular,
@@ -105,6 +105,15 @@ export const ModelPlayground: React.FC = () => {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const autoGrow = useCallback(() => {
+    const el = textareaRef.current;
+    if (el) {
+      el.style.height = 'auto';
+      el.style.height = `${Math.min(el.scrollHeight, 240)}px`;
+    }
+  }, []);
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -188,23 +197,19 @@ export const ModelPlayground: React.FC = () => {
 
   const modelTitle = model.data?.title || name || 'Model';
   const modelSummary = model.data?.summary || model.data?.description;
-  const lastUpdated = model.data?.lastUpdated ? new Date(model.data.lastUpdated).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' }) : undefined;
 
   return (
     <div className={styles.modelPlayground}>
+      <section className={styles.headerBar}>
+        <Link to="/" className={styles.backLink}>&lt; Back to registry</Link>
+      </section>
       <section className={styles.modelHeader}>
-        <div className={styles.headerLeft}>
-          <h1>{modelTitle}</h1>
-          <div className={styles.badges}>
-            <Badge appearance="filled" color="brand">Model</Badge>
-            {model.data?.lifecycleStage && <Badge appearance="outline">{model.data.lifecycleStage.toUpperCase()}</Badge>}
-          </div>
-          {modelSummary && <p className={styles.summary}>{modelSummary}</p>}
-          <div className={styles.meta}>
-            {model.data?.modelProvider && <span><strong>PROVIDER</strong><br />{model.data.modelProvider}</span>}
-            {model.data?.modelName && <span><strong>MODEL</strong><br />{model.data.modelName}</span>}
-            {lastUpdated && <span><strong>LAST UPDATED</strong><br />{lastUpdated}</span>}
-          </div>
+        <h1>{modelTitle}</h1>
+        {modelSummary && <p className={styles.summary}>{modelSummary}</p>}
+        <div className={styles.metadata}>
+          <Badge appearance="filled" color="brand" shape="circular">Model</Badge>
+          {model.data?.lifecycleStage && <Badge appearance="tint" color="brand" shape="circular">{model.data.lifecycleStage}</Badge>}
+          {model.data?.lastUpdated && <span>Last updated {new Date(model.data.lastUpdated).toLocaleDateString()}</span>}
         </div>
       </section>
 
@@ -266,18 +271,20 @@ export const ModelPlayground: React.FC = () => {
 
           <div className={styles.inputArea}>
             <div className={styles.inputWrapper}>
-              <Input
+              <Textarea
                 className={styles.inputField}
+                textarea={{ ref: textareaRef }}
                 value={input}
-                onChange={(_, data) => setInput(data.value)}
+                onChange={(_, data) => { setInput(data.value); autoGrow(); }}
                 onKeyDown={handleKeyDown}
                 placeholder="Send a message..."
                 disabled={isLoading}
+                resize="none"
               />
               <Button
-                className={styles.sendBtn}
+                className={`${styles.sendBtn} ${input.trim() ? styles.sendBtnActive : ''}`}
                 appearance="transparent"
-                icon={<Send24Regular />}
+                icon={<ArrowRight24Regular />}
                 onClick={() => void sendMessage()}
                 disabled={!input.trim() || isLoading}
               />

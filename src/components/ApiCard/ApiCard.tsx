@@ -35,9 +35,9 @@ export const ApiCard: React.FC<Props> = ({ api, showType, linkProps }) => (
     <div className={styles.cardContent}>
       {showType && (
         <div className={styles.tags}>
-          <Badge appearance="tint" color="informative" shape="rounded">{getCategoryLabel(api.type)}</Badge>
+          <Badge appearance="filled" color="brand" shape="circular">{getCategoryLabel(api.type)}</Badge>
           {!!api.type && !STANDALONE_KINDS.includes(api.type.toLowerCase()) && (
-            <Badge appearance="tint" color="informative" shape="rounded">{formatKindDisplay(api.type)}</Badge>
+            <Badge appearance="tint" color="brand" shape="circular">{formatKindDisplay(api.type)}</Badge>
           )}
         </div>
       )}

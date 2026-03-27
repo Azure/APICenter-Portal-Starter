@@ -5,7 +5,8 @@
 }
 
 .headerBar {
-  padding: 0.75rem 32px;
+  padding-top: 0.75rem;
+  padding-bottom: 0;
 }
 
 .backLink {
@@ -20,54 +21,40 @@
 }
 
 .modelHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  padding: 1.5rem 0;
-  gap: 2rem;
-}
+  padding-top: 1.5rem;
+  padding-bottom: 1rem;
 
-.headerLeft {
   h1 {
     margin: 0 0 0.5rem;
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: var(--colorNeutralForeground1);
   }
-}
-
-.badges {
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 0.75rem;
 }
 
 .summary {
-  margin: 0 0 1rem;
+  margin: 0 0 0.5rem;
   color: var(--colorNeutralForeground2);
   font-size: 0.875rem;
   line-height: 1.5;
-  max-width: 600px;
 }
 
-.meta {
+.metadata {
   display: flex;
-  gap: 2.5rem;
-  font-size: 0.75rem;
-  color: var(--colorNeutralForeground2);
-
-  span {
-    strong {
-      color: var(--colorNeutralForeground1);
-      display: block;
-      margin-bottom: 0.25rem;
-    }
-  }
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+  color: var(--colorNeutralForeground3);
+  font-size: 0.8125rem;
 }
 
 .tabBar {
-  padding: 0;
-  border-bottom: 1px solid var(--colorNeutralStroke1);
+  padding-top: 0;
+  padding-bottom: 0;
+
+  &::after {
+    content: '';
+    display: block;
+    border-bottom: 1px solid var(--colorNeutralStroke1);
+  }
 }
 
 .chatContainer {
@@ -183,39 +170,100 @@
 }
 
 .inputArea {
-  padding: 1rem 0 1.5rem;
-  border-top: 1px solid var(--colorNeutralStroke1);
+  padding: 0.75rem 0 0;
 }
 
 .inputWrapper {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  border: 1px solid var(--colorNeutralStroke1);
-  border-radius: 8px;
-  padding: 0.25rem 0.5rem;
+  position: relative;
   background: var(--colorNeutralBackground1);
+  border: 1px solid var(--colorNeutralStroke1);
+  border-radius: 24px;
+  padding: 0;
+  overflow: hidden;
+
+  &:focus-within {
+    border-color: var(--colorNeutralStrokeAccessible);
+  }
 }
 
 .inputField {
-  flex: 1;
-  border: none !important;
-  box-shadow: none !important;
-  outline: none !important;
+  display: block;
+  width: 100%;
+
+  // Override Fluent Textarea root <span>
+  &:global(.fui-Textarea) {
+    display: flex !important;
+    border: none !important;
+    background: transparent !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+
+    &::after,
+    &::before {
+      display: none !important;
+    }
+  }
+
+  :global(.fui-Textarea__textarea) {
+    padding: 14px 56px 14px 20px !important;
+    font-size: var(--fontSizeBase300);
+    line-height: var(--lineHeightBase300);
+    resize: none !important;
+    max-height: 240px;
+    overflow-y: auto !important;
+    background: transparent !important;
+    border: none !important;
+    outline: none !important;
+  }
 }
 
 .sendBtn {
-  flex-shrink: 0;
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  border-radius: var(--borderRadiusCircular);
+  color: var(--colorNeutralForeground4);
+  background: transparent;
+  transition: background-color var(--durationNormal) var(--curveEasyEase),
+              color var(--durationNormal) var(--curveEasyEase),
+              transform var(--durationFast) var(--curveDecelerateMid);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+
+  &:disabled {
+    color: var(--colorNeutralForeground4);
+    background: transparent;
+  }
+}
+
+.sendBtnActive {
+  background-color: var(--colorBrandBackground);
+  color: var(--colorNeutralForegroundOnBrand);
+
+  &:hover {
+    background-color: var(--colorBrandBackgroundHover);
+    color: var(--colorNeutralForegroundOnBrand);
+  }
+
+  &:active {
+    background-color: var(--colorBrandBackgroundPressed);
+    transform: scale(0.95);
+  }
 }
 
 .disclaimer {
   margin: 0.5rem 0 0;
   text-align: center;
-  font-size: 0.7rem;
+  font-size: 0.6875rem;
   color: var(--colorNeutralForeground3);
 }
 
 .documentationTab {
-  padding: 2rem 32px;
-  max-width: 800px;
+  padding: 2rem 0;
 }

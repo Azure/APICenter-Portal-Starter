@@ -1,16 +1,14 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { Button, Input, Spinner, Tab, TabList, Badge } from '@fluentui/react-components';
+import { Button, Textarea, Spinner, Tab, TabList, Badge } from '@fluentui/react-components';
 import {
-  Send24Regular,
+  ArrowRight24Regular,
   Bot24Regular,
   ThumbLike20Regular,
   ThumbDislike20Regular,
-  Share24Regular,
-  Open24Regular,
   DocumentRegular,
   ChatRegular,
 } from '@fluentui/react-icons';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { LocationsService } from '@/services/LocationsService';
 import { useApi } from '@/hooks/useApi';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
@@ -107,7 +105,15 @@ export const AgentChat: React.FC = () => {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const navigate = useNavigate();
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const autoGrow = useCallback(() => {
+    const el = textareaRef.current;
+    if (el) {
+      el.style.height = 'auto';
+      el.style.height = `${Math.min(el.scrollHeight, 240)}px`;
+    }
+  }, []);
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -183,27 +189,19 @@ export const AgentChat: React.FC = () => {
   const agentTitle = api.data?.title || name || 'Agent';
   const agentSummary = api.data?.summary || api.data?.description;
   const agentKind = api.data?.kind;
-  const lastUpdated = api.data?.lastUpdated ? new Date(api.data.lastUpdated).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' }) : undefined;
 
   return (
     <div className={styles.agentPage}>
+      <section className={styles.headerBar}>
+        <Link to="/" className={styles.backLink}>&lt; Back to registry</Link>
+      </section>
       <section className={styles.agentHeader}>
-        <div className={styles.headerLeft}>
-          <h1>{agentTitle}</h1>
-          <div className={styles.badges}>
-            {agentKind && <Badge appearance="filled" color="brand">{agentKind.toUpperCase()}</Badge>}
-            {api.data?.lifecycleStage && <Badge appearance="outline">{api.data.lifecycleStage.toUpperCase()}</Badge>}
-          </div>
-          {agentSummary && <p className={styles.summary}>{agentSummary}</p>}
-          <div className={styles.meta}>
-            {api.data?.customProperties?.['version'] && <span><strong>VERSION</strong><br />{String(api.data.customProperties['version'])}</span>}
-            {api.data?.contacts?.[0]?.name && <span><strong>AUTHOR</strong><br />{api.data.contacts[0].name}</span>}
-            {lastUpdated && <span><strong>LAST UPDATED</strong><br />{lastUpdated}</span>}
-          </div>
-        </div>
-        <div className={styles.headerActions}>
-          <Button appearance="secondary" icon={<Share24Regular />}>Share</Button>
-          <Button appearance="primary" icon={<Open24Regular />}>Open in VS Code</Button>
+        <h1>{agentTitle}</h1>
+        {agentSummary && <p className={styles.summary}>{agentSummary}</p>}
+        <div className={styles.metadata}>
+          {agentKind && <Badge appearance="filled" color="brand" shape="circular">{agentKind.toUpperCase()}</Badge>}
+          {api.data?.lifecycleStage && <Badge appearance="tint" color="brand" shape="circular">{api.data.lifecycleStage}</Badge>}
+          {api.data?.lastUpdated && <span>Last updated {new Date(api.data.lastUpdated).toLocaleDateString()}</span>}
         </div>
       </section>
 
@@ -265,18 +263,20 @@ export const AgentChat: React.FC = () => {
 
           <div className={styles.inputArea}>
             <div className={styles.inputWrapper}>
-              <Input
+              <Textarea
                 className={styles.inputField}
+                textarea={{ ref: textareaRef }}
                 value={input}
-                onChange={(_, data) => setInput(data.value)}
+                onChange={(_, data) => { setInput(data.value); autoGrow(); }}
                 onKeyDown={handleKeyDown}
-                placeholder="Ask the agent something..."
+                placeholder="Send a message..."
                 disabled={isLoading}
+                resize="none"
               />
               <Button
-                className={styles.sendBtn}
+                className={`${styles.sendBtn} ${input.trim() ? styles.sendBtnActive : ''}`}
                 appearance="transparent"
-                icon={<Send24Regular />}
+                icon={<ArrowRight24Regular />}
                 onClick={() => void sendMessage()}
                 disabled={!input.trim() || isLoading}
               />

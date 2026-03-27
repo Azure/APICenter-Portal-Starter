@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Button, MessageBar, MessageBarBody, Spinner } from '@fluentui/react-components';
 import { EmptyStateMessage } from '@/components/EmptyStateMessage/EmptyStateMessage';
 import styles from './DetailPageLayout.module.scss';
@@ -69,6 +70,9 @@ export const DetailPageLayout: React.FC<DetailPageLayoutProps> = ({
 
   return (
     <div className={styles.detailPage}>
+      <section className={styles.headerBar}>
+        <Link to="/" className={styles.backLink}>&lt; Back to registry</Link>
+      </section>
       <section className={styles.header}>
         <div className={styles.headerContent}>
           <div className={styles.headerText}>

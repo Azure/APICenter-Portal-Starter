@@ -24,7 +24,7 @@ function getNavigationTarget(api: ApiMetadata): { to: string; state?: HomeLocati
   }
 
   if (kind === 'languagemodel') {
-    return { to: LocationsService.getModelPlaygroundUrl(api.name) };
+    return { to: LocationsService.getModelDetailUrl(api.name) };
   }
 
   return {

@@ -2,6 +2,22 @@
   display: flex;
   flex-direction: column;
 
+  .headerBar {
+    padding-top: 0.75rem;
+    padding-bottom: 0;
+  }
+
+  .backLink {
+    color: var(--colorBrandForeground1);
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
   .spinner {
     position: fixed;
     top: 50%;
@@ -10,12 +26,19 @@
   }
 
   .tabBar {
-    padding: 0;
-    border-bottom: 1px solid var(--colorNeutralStroke1);
+    padding-top: 0;
+    padding-bottom: 0;
+
+    &::after {
+      content: '';
+      display: block;
+      border-bottom: 1px solid var(--colorNeutralStroke1);
+    }
   }
 
   .header {
-    padding: 1rem 0 1.5rem;
+    padding-top: 1rem;
+    padding-bottom: 1.5rem;
 
     h1 {
       margin: 0 0 0.5rem;
@@ -26,6 +49,14 @@
       color: var(--colorNeutralForeground2);
       font-size: 0.875rem;
       line-height: 1.5;
+    }
+
+    .metadata {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 0.5rem;
     }
   }
 

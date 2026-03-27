@@ -52,14 +52,6 @@ export const ModelInfo: React.FC<Props> = ({ name }) => {
 
     return (
       <>
-        <Button
-          appearance="secondary"
-          icon={<OpenRegular />}
-          onClick={() => navigate(LocationsService.getModelPlaygroundUrl(model.data!.name))}
-        >
-          Open in playground
-        </Button>
-
         {model.data.modelProvider && (
           <div className={styles.section}>
             <dl className={styles.detailsGrid}>

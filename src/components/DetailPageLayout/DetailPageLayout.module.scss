@@ -4,6 +4,22 @@
   display: flex;
   flex-direction: column;
 
+  .headerBar {
+    padding-top: 0.75rem;
+    padding-bottom: 0;
+  }
+
+  .backLink {
+    color: var(--colorBrandForeground1);
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
   .spinner {
     position: fixed;
     top: 50%;
@@ -12,7 +28,8 @@
   }
 
   .header {
-    padding: 1.5rem 0 1rem;
+    padding-top: 1.5rem;
+    padding-bottom: 1rem;
 
     .headerContent {
       display: flex;
@@ -53,8 +70,6 @@
     }
 
     .headerActions {
-      display: flex;
-      gap: 8px;
       flex-shrink: 0;
     }
   }
@@ -72,8 +87,14 @@
   }
 
   .tabBar {
-    padding: 0;
-    border-bottom: 1px solid var(--colorNeutralStroke1);
+    padding-top: 0;
+    padding-bottom: 0;
+
+    &::after {
+      content: '';
+      display: block;
+      border-bottom: 1px solid var(--colorNeutralStroke1);
+    }
   }
 
   .content {
@@ -90,6 +111,7 @@
   .main {
     flex: 1;
     min-width: 0;
+    overflow: hidden;
     line-height: 1.6;
   }
 

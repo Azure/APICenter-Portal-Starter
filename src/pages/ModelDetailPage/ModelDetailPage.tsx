@@ -1,17 +1,15 @@
 import React from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Badge, Button, Link, Subtitle2 } from '@fluentui/react-components';
-import { OpenRegular } from '@fluentui/react-icons';
+import { useParams } from 'react-router-dom';
+import { Badge, Link, Subtitle2 } from '@fluentui/react-components';
 import { useLanguageModel } from '@/hooks/useLanguageModel';
 import { setDocumentTitle } from '@/utils/dom';
-import { LocationsService } from '@/services/LocationsService';
 import { DetailPageLayout } from '@/components/DetailPageLayout/DetailPageLayout';
+
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import styles from './ModelDetailPage.module.scss';
 
 export const ModelDetailPage: React.FC = () => {
   const { apiName } = useParams<{ apiName: string }>();
-  const navigate = useNavigate();
   const model = useLanguageModel(apiName);
 
   setDocumentTitle(`Model${model.data?.title ? ` - ${model.data.title}` : ''}`);
@@ -22,25 +20,17 @@ export const ModelDetailPage: React.FC = () => {
       summary={model.data?.summary}
       metadata={
         <>
-          {model.data?.lastUpdated && <span>Last updated {new Date(model.data.lastUpdated).toLocaleDateString()}</span>}
+          <Badge appearance="filled" color="brand" shape="circular">Model</Badge>
           {model.data?.lifecycleStage && (
-            <Badge appearance="tint" color="informative" shape="rounded">
+            <Badge appearance="tint" color="brand" shape="circular">
               {model.data.lifecycleStage}
             </Badge>
           )}
+          {model.data?.lastUpdated && <span>Last updated {new Date(model.data.lastUpdated).toLocaleDateString()}</span>}
         </>
       }
-      headerActions={
-        model.data ? (
-          <Button
-            appearance="primary"
-            icon={<OpenRegular />}
-            onClick={() => navigate(LocationsService.getModelPlaygroundUrl(model.data!.name))}
-          >
-            Open in playground
-          </Button>
-        ) : undefined
-      }
+      headerActions={undefined}
+
       isLoading={model.isLoading}
       error={model.isError ? 'Failed to load model details. Please check your connection and try again.' : undefined}
       onRetry={() => model.refetch()}

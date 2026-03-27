@@ -4,7 +4,8 @@
 }
 
 .headerBar {
-  padding: 0.75rem 32px;
+  padding-top: 0.75rem;
+  padding-bottom: 0;
 }
 
 .backLink {
@@ -19,62 +20,42 @@
 }
 
 .agentHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  padding: 1.5rem 0;
-  gap: 2rem;
-}
+  padding-top: 1.5rem;
+  padding-bottom: 1rem;
 
-.headerLeft {
   h1 {
     margin: 0 0 0.5rem;
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: var(--colorNeutralForeground1);
   }
-}
-
-.badges {
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 0.75rem;
 }
 
 .summary {
-  margin: 0 0 1rem;
+  margin: 0 0 0.5rem;
   color: var(--colorNeutralForeground2);
   font-size: 0.875rem;
   line-height: 1.5;
-  max-width: 600px;
 }
 
-.meta {
+.metadata {
   display: flex;
-  gap: 2.5rem;
-  font-size: 0.75rem;
-  color: var(--colorNeutralForeground2);
-
-  span {
-    strong {
-      display: block;
-      margin-bottom: 0.25rem;
-      color: var(--colorNeutralForeground3);
-      font-size: 0.6875rem;
-      letter-spacing: 0.05em;
-    }
-  }
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+  color: var(--colorNeutralForeground3);
+  font-size: 0.8125rem;
 }
 
-.headerActions {
-  display: flex;
-  gap: 0.5rem;
-  flex-shrink: 0;
-}
+
 
 .tabBar {
-  padding: 0;
-  border-bottom: 1px solid var(--colorNeutralStroke1);
+  padding-top: 0;
+  padding-bottom: 0;
+
+  &::after {
+    content: '';
+    display: block;
+    border-bottom: 1px solid var(--colorNeutralStroke1);
+  }
 }
 
 // --- Chat area ---
@@ -252,39 +233,91 @@
 
 .inputArea {
   padding: 0.75rem 0 0;
-  border-top: 1px solid var(--colorNeutralStroke1);
 }
 
 .inputWrapper {
-  display: flex;
-  align-items: center;
-  background: var(--colorNeutralBackground3);
+  position: relative;
+  background: var(--colorNeutralBackground1);
   border: 1px solid var(--colorNeutralStroke1);
-  border-radius: 8px;
-  padding: 0 0.25rem 0 0;
+  border-radius: 24px;
+  padding: 0;
   overflow: hidden;
+
+  &:focus-within {
+    border-color: var(--colorNeutralStrokeAccessible);
+  }
 }
 
 .inputField {
-  flex: 1;
-  border: none !important;
-  background: transparent !important;
+  display: block;
+  width: 100%;
 
-  &::after {
-    display: none !important;
+  // Override Fluent Textarea root <span>
+  &:global(.fui-Textarea) {
+    display: flex !important;
+    border: none !important;
+    background: transparent !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+
+    // Remove Fluent's focus indicator underline
+    &::after,
+    &::before {
+      display: none !important;
+    }
+  }
+
+  // Target the actual <textarea> element inside Fluent's wrapper
+  :global(.fui-Textarea__textarea) {
+    padding: 14px 56px 14px 20px !important;
+    font-size: var(--fontSizeBase300);
+    line-height: var(--lineHeightBase300);
+    resize: none !important;
+    max-height: 240px;
+    overflow-y: auto !important;
+    background: transparent !important;
+    border: none !important;
+    outline: none !important;
   }
 }
 
 .sendBtn {
-  color: var(--colorBrandForeground1);
-  flex-shrink: 0;
-
-  &:hover {
-    color: var(--colorBrandForeground1Pressed);
-  }
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  border-radius: var(--borderRadiusCircular);
+  color: var(--colorNeutralForeground4);
+  background: transparent;
+  transition: background-color var(--durationNormal) var(--curveEasyEase),
+              color var(--durationNormal) var(--curveEasyEase),
+              transform var(--durationFast) var(--curveDecelerateMid);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
 
   &:disabled {
     color: var(--colorNeutralForeground4);
+    background: transparent;
+  }
+}
+
+.sendBtnActive {
+  background-color: var(--colorBrandBackground);
+  color: var(--colorNeutralForegroundOnBrand);
+
+  &:hover {
+    background-color: var(--colorBrandBackgroundHover);
+    color: var(--colorNeutralForegroundOnBrand);
+  }
+
+  &:active {
+    background-color: var(--colorBrandBackgroundPressed);
+    transform: scale(0.95);
   }
 }
 
@@ -298,5 +331,5 @@
 // --- Documentation tab ---
 
 .documentationTab {
-  padding: 2rem 32px 32px;
+  padding: 2rem 0;
 }

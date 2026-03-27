@@ -1,6 +1,6 @@
 @use '@/styles/screen';
 
-.skillInstall {
+.mcpInstall {
   h3 {
     display: flex;
     align-items: center;
@@ -30,13 +30,6 @@
 
   p {
     color: var(--colorNeutralForeground4);
-
-    code {
-      background-color: var(--colorNeutralBackground3);
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-size: 0.85em;
-    }
 
     &.buttonGroup {
       display: flex;

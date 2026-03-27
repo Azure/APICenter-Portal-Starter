@@ -14,7 +14,6 @@ import MarkdownRenderer from '@/components/MarkdownRenderer';
 import CopyLink from '@/components/CopyLink';
 import { configAtom } from '@/atoms/configAtom';
 import { useServer } from '@/hooks/useServer';
-import { SkillInstallButton } from '@/experiences/SkillInstallButton';
 import styles from './ApiInfoOptions.module.scss';
 
 /**
@@ -30,6 +29,8 @@ interface Props {
   apiDefinition?: ApiDefinition;
   apiDeployment?: ApiDeployment;
   isLoading?: boolean;
+  /** When true, suppresses MCP Installation and Skill Installation sections (rendered in sidebar instead). */
+  hideInstallation?: boolean;
 }
 
 enum VsCodeTypes {
@@ -38,7 +39,7 @@ enum VsCodeTypes {
 
 const DEFAULT_INSTRUCTIONS = 'Gain comprehensive insights into the API.';
 
-export const ApiInfoOptions: React.FC<Props> = ({ api, apiVersion, apiDefinition, apiDeployment, isLoading }) => {
+export const ApiInfoOptions: React.FC<Props> = ({ api, apiVersion, apiDefinition, apiDeployment, isLoading, hideInstallation }) => {
   const config = useRecoilValue(configAtom);
 
   const definitionId = useMemo(
@@ -156,16 +157,7 @@ export const ApiInfoOptions: React.FC<Props> = ({ api, apiVersion, apiDefinition
               </span>
             )}
 
-            {api.kind?.toLowerCase() === 'languagemodel' && (
-              <span className={styles.linkGroup}>
-                <Link
-                  className={styles.link}
-                  href={LocationsService.getModelPlaygroundUrl(api.name)}
-                >
-                  Open in playground <OpenRegular />
-                </Link>
-              </span>
-            )}
+
           </h3>
 
           <p>This file defines how to use the API, including the endpoints, policies, authentication, and responses.</p>
@@ -205,7 +197,7 @@ export const ApiInfoOptions: React.FC<Props> = ({ api, apiVersion, apiDefinition
           </div>
         )}
 
-        {hasMcpInstallableContent && (
+        {!hideInstallation && hasMcpInstallableContent && (
           <div className={styles.section}>
             <h3>
               <span className={styles.panelLabel}>
@@ -246,12 +238,6 @@ export const ApiInfoOptions: React.FC<Props> = ({ api, apiVersion, apiDefinition
                 </Button>
               )}
             </p>
-          </div>
-        )}
-
-        {api.kind === 'skill' && skillSourceUrl && (
-          <div className={styles.section}>
-            <SkillInstallButton skillName={api.name} sourceUrl={skillSourceUrl} />
           </div>
         )}
 

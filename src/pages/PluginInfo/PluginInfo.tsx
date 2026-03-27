@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { Badge, Spinner, Tab, TabList } from '@fluentui/react-components';
+import { Badge, Tab, TabList } from '@fluentui/react-components';
 import {
   FlashRegular,
   BotRegular,
@@ -12,8 +12,7 @@ import { setDocumentTitle } from '@/utils/dom';
 import { formatKindDisplay } from '@/utils/formatKind';
 import { LocationsService } from '@/services/LocationsService';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
-import { EmptyStateMessage } from '@/components/EmptyStateMessage/EmptyStateMessage';
-import { PluginResource } from '@/types/plugin';
+import { DetailPageLayout } from '@/components/DetailPageLayout/DetailPageLayout';
 import { HomeLocationState } from '@/types/homeDrawer';
 import styles from './PluginInfo.module.scss';
 
@@ -39,7 +38,7 @@ function getResourceNavigation(name: string, kind?: string): { to: string; state
   if (k === 'agent') return { to: LocationsService.getAgentChatUrl(name) };
   if (k === 'skill') return { to: LocationsService.getSkillInfoUrl(name) };
   if (k === 'languagemodel') {
-    return { to: LocationsService.getModelPlaygroundUrl(name) };
+    return { to: LocationsService.getModelDetailUrl(name) };
   }
   return {
     to: LocationsService.getHomeUrl(true),
@@ -84,91 +83,63 @@ export const PluginInfo: React.FC = () => {
 
   setDocumentTitle(`Plugin${plugin.data?.title ? ` - ${plugin.data.title}` : ''}`);
 
-  if (plugin.isLoading) {
-    return (
-      <div className={styles.pluginInfo}>
-        <Spinner className={styles.spinner} size="large" label="Loading..." labelPosition="below" />
-      </div>
-    );
-  }
-
-  if (!plugin.data) {
-    return (
-      <div className={styles.pluginInfo}>
-        <section>
-          <EmptyStateMessage>The specified plugin does not exist.</EmptyStateMessage>
-        </section>
-      </div>
-    );
-  }
+  const tabs = (
+    <TabList defaultSelectedValue="documentation">
+      <Tab icon={<DocumentRegular />} value="documentation">Documentation</Tab>
+    </TabList>
+  );
 
   return (
-    <div className={styles.pluginInfo}>
-      <section className={styles.header}>
-        <h1>{plugin.data.title}</h1>
-        {plugin.data.description && (
-          <p className={styles.summary}>{plugin.data.description}</p>
-        )}
-      </section>
+    <DetailPageLayout
+      title={plugin.data?.title}
+      summary={plugin.data?.description}
+      tabs={tabs}
+      isLoading={plugin.isLoading}
+      emptyMessage={!plugin.data ? 'The specified plugin does not exist.' : undefined}
+    >
+      {plugin.data?.description ? (
+        <MarkdownRenderer markdown={plugin.data.description} />
+      ) : null}
 
-      <section className={styles.tabBar}>
-        <TabList defaultSelectedValue="documentation">
-          <Tab icon={<DocumentRegular />} value="documentation">Documentation</Tab>
-        </TabList>
-      </section>
-
-      <section>
-        <div className={styles.content}>
-            {plugin.data.description ? (
-              <MarkdownRenderer markdown={plugin.data.description} />
-            ) : (
-              <EmptyStateMessage>No description available for this plugin.</EmptyStateMessage>
-            )}
-
-            {hasResources && (
-              <div className={styles.resourcesSection}>
-                {Object.entries(groupedResources).map(([category, items]) => (
-                    <div key={category}>
-                      <h3 className={styles.categoryHeading}>
-                        {getCategoryLabel(category)}
-                      </h3>
-                      <div className={styles.resourceList}>
-                        {items.map((resource) => (
-                          (() => {
-                            const navigation = getResourceNavigation(resource.name, resource.kind);
-                            return (
-                          <Link
-                            key={resource.name}
-                            to={navigation.to}
-                            state={navigation.state}
-                            className={styles.resourceItem}
-                          >
-                            <span className={styles.resourceIcon}>
-                              {KIND_ICONS[resource.kind?.toLowerCase() ?? ''] ?? <PlugConnectedRegular />}
-                            </span>
-                            <span className={styles.resourceTitle}>{resource.title}</span>
-                            <Badge
-                              className={styles.resourceBadge}
-                              appearance="tint"
-                              color="informative"
-                              shape="rounded"
-                              size="small"
-                            >
-                              {formatKindDisplay(resource.kind ?? 'API')}
-                            </Badge>
-                          </Link>
-                            );
-                          })()
-                        ))}
-                      </div>
-                    </div>
-                  ))
-                }
+      {hasResources && (
+        <div className={styles.resourcesSection}>
+          {Object.entries(groupedResources).map(([category, items]) => (
+            <div key={category}>
+              <h3 className={styles.categoryHeading}>
+                {getCategoryLabel(category)}
+              </h3>
+              <div className={styles.resourceList}>
+                {items.map((resource) => {
+                  const navigation = getResourceNavigation(resource.name, resource.kind);
+                  return (
+                    <Link
+                      key={resource.name}
+                      to={navigation.to}
+                      state={navigation.state}
+                      className={styles.resourceItem}
+                    >
+                      <span className={styles.resourceIcon}>
+                        {KIND_ICONS[resource.kind?.toLowerCase() ?? ''] ?? <PlugConnectedRegular />}
+                      </span>
+                      <span className={styles.resourceTitle}>{resource.title}</span>
+                      <Badge
+                        className={styles.resourceBadge}
+                        appearance="filled"
+                        color="brand"
+                        shape="circular"
+                        size="small"
+                      >
+                        {formatKindDisplay(resource.kind ?? 'API')}
+                      </Badge>
+                    </Link>
+                  );
+                })}
               </div>
-            )}
+            </div>
+          ))}
         </div>
-      </section>
-    </div>
+      )}
+    </DetailPageLayout>
   );
 };
 
