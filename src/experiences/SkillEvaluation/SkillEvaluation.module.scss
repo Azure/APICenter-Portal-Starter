@@ -1,0 +1,205 @@
+/* ── Score badge (header metadata area) ── */
+
+.scoreBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.scoreBadgePill {
+  font-weight: 600;
+}
+
+.scoreBadgeMax {
+  font-weight: 400;
+  opacity: 0.8;
+}
+
+.scoreBadgeLabel {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--colorNeutralForeground1);
+}
+
+/* ── Evaluation details (tab content) ── */
+
+.evalDetails {
+  max-width: 100%;
+}
+
+.evalHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.evalHeaderBadge {
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 4px 12px;
+}
+
+.evalHeaderTitle {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.evalUpdated {
+  margin: 0 0 24px;
+  color: var(--colorNeutralForeground3);
+  font-size: 0.8125rem;
+}
+
+.evalSection {
+  margin-bottom: 32px;
+}
+
+.evalSectionTitle {
+  margin: 0 0 16px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--colorNeutralForeground2);
+}
+
+.evalContentLayout {
+  display: flex;
+  gap: 32px;
+  align-items: flex-start;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
+}
+
+/* ── Score bar ── */
+
+.scoreBarList {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  flex: 1;
+  min-width: 0;
+}
+
+.radarContainer {
+  flex: 0 0 320px;
+  min-height: 280px;
+
+  @media (max-width: 768px) {
+    flex: none;
+    width: 100%;
+  }
+}
+
+.scoreBarItem {
+  padding-left: 0;
+  border-left: none;
+}
+
+.scoreBarHeader {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.scoreBarLabel {
+  font-weight: 600;
+  font-size: 0.9375rem;
+}
+
+.scoreBarValue {
+  font-weight: 600;
+  font-size: 0.9375rem;
+  color: var(--colorNeutralForeground2);
+}
+
+.scoreBarTrack {
+  height: 8px;
+  border-radius: 4px;
+  background-color: var(--colorNeutralBackground3);
+  overflow: hidden;
+}
+
+.scoreBarFill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.4s ease;
+}
+
+.scoreBarReasoning {
+  margin: 8px 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--colorNeutralForeground3);
+}
+
+/* ── Assertion list ── */
+
+.assertionSection {
+  margin-top: 32px;
+  margin-bottom: 24px;
+}
+
+.assertionHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.assertionTitle {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--colorNeutralForeground2);
+}
+
+.assertionList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.assertionItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+
+.assertionIconPass {
+  color: var(--colorPaletteGreenForeground1);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.assertionIconFail {
+  color: var(--colorPaletteRedForeground1);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.assertionName {
+  font-weight: 600;
+}
+
+.assertionMessage {
+  color: var(--colorNeutralForeground3);
+}
+
+.assertionDescription {
+  margin: 4px 0 0;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--colorNeutralForeground4);
+}

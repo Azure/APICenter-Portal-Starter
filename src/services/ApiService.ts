@@ -12,6 +12,7 @@ import { IApiService, PaginatedResult } from '@/types/services/IApiService';
 import { Server, ServerResponse } from '@/types/server';
 import { MetadataSchema } from '@/types/metadataSchema';
 import { PluginDetails } from '@/types/plugin';
+import { SkillEvaluationResult } from '@/types/skillEvaluation';
 import { DEFAULT_PAGE_SIZE } from '@/constants';
 
 export const ApiService: IApiService = {
@@ -131,5 +132,11 @@ export const ApiService: IApiService = {
   async getMetadataSchemas(): Promise<MetadataSchema[]> {
     const response = await HttpService.get<MetadataSchema[]>(`/metadataSchemas?$top=${DEFAULT_PAGE_SIZE}`, { skipWorkspacePrefix: true });
     return response || [];
+  },
+
+  async getSkillEvaluationResult(skillName: string): Promise<SkillEvaluationResult | undefined> {
+    return await HttpService.getOptional<SkillEvaluationResult>(
+      `/skills/${skillName}/evaluationResults/default`
+    );
   },
 };
