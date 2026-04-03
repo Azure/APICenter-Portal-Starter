@@ -23,7 +23,7 @@ const categories: CategoryDef[] = [
   { label: 'APIs', kindValue: 'rest', icon: <PlugConnectedRegular /> },
   // { label: 'Agents', kindValue: 'agent', icon: <BotRegular /> },
   { label: 'MCP servers', kindValue: 'mcp', icon: <LinkMultipleRegular /> },
-  { label: 'Models', kindValue: 'languagemodel', icon: <BrainCircuitRegular /> },
+  // { label: 'Models', kindValue: 'languagemodel', icon: <BrainCircuitRegular /> },
   { label: 'Plugins', kindValue: 'plugin', icon: <PuzzlePieceRegular /> },
   { label: 'Skills', kindValue: 'skill', icon: <FlashRegular /> },
 ];
