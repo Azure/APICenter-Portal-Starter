@@ -168,8 +168,6 @@ export const ApiSearchBox: React.FC = () => {
           />
         </div>
       )}
-
-      {isSemanticSearchAvailable && <SemanticSearchInfo isSemanticSearchEnabled={isSemanticSearchEnabled} />}
     </form>
   );
 };

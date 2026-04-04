@@ -1,6 +1,7 @@
 .apiSearchBox {
   flex: 1;
   min-width: 0;
+  z-index: 100;
 
   .input {
     width: 100%;

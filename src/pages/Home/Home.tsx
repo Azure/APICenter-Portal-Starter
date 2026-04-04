@@ -45,7 +45,7 @@ export const Home: React.FC = () => {
   return (
     <div className={styles.home}>
       <div className={styles.searchPanel}>
-        <h1>Tools registry</h1>
+        <h1>API Center portal</h1>
 
         <div className={styles.searchRow}>
           <ApiSearchBox />

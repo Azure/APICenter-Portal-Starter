@@ -20,6 +20,7 @@
 - Prefer spacing tokens, shared variables, or consistent numeric scales where available.
 - Avoid hard-coded dimensions unless the component genuinely requires a fixed size.
 - Design for responsive behavior from the start, especially for cards, toolbars, forms, and tables.
+- Avoid `calc()` when the same result can be achieved with flex/grid layout, gap, padding, or CSS variables. Reserve `calc()` for cases where arithmetic across different units (e.g., `100% - 16px`) is genuinely required and cannot be expressed any other way.
 
 ## Visual Consistency
 
