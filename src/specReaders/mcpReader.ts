@@ -72,13 +72,13 @@ export async function mcpReader(specStr: string): Promise<ApiSpecReader> {
             type: 'application/json',
             schema: {
               typeLabel: 'object',
-              properties: Object.entries(metadata.inputSchema.properties).map(([name, schema]) => ({
+              properties: Object.entries(metadata.inputSchema.properties ?? {}).map(([name, schema]) => ({
                 name,
                 in: 'arguments',
                 type: schemaToTypeLabel(schema),
                 fieldType: schemaToFieldType(schema),
                 description: schema.description,
-                required: metadata.inputSchema.required.includes(name),
+                required: metadata.inputSchema.required?.includes(name) ?? false,
               })),
               rawSchema: {
                 schema: JSON.stringify(metadata.inputSchema, null, 2),
