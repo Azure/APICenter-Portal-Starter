@@ -15,4 +15,5 @@ export enum QueryKeys {
   MetadataSchemas = 'MetadataSchemas',
   Plugin = 'Plugin',
   LanguageModel = 'LanguageModel',
+  SkillEvaluationResult = 'SkillEvaluationResult',
 }

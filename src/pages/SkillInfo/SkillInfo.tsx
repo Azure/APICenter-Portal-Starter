@@ -3,9 +3,11 @@ import { useParams } from 'react-router-dom';
 import { Badge, Button, Tab, TabList } from '@fluentui/react-components';
 import { DocumentRegular } from '@fluentui/react-icons';
 import { useApi } from '@/hooks/useApi';
+import { useSkillEvaluationResult } from '@/hooks/useSkillEvaluationResult';
 import { setDocumentTitle } from '@/utils/dom';
 import { DetailPageLayout } from '@/components/DetailPageLayout/DetailPageLayout';
 import { HeaderActions } from '@/experiences/HeaderActions';
+import { EvalScoreBadge, SkillEvaluationDetails } from '@/experiences/SkillEvaluation';
 import { buildSkillDeeplink } from '@/utils/skillDeeplink';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import CustomMetadata from '@/components/CustomMetadata';
@@ -18,6 +20,7 @@ const SKILL_SOURCE_URL = 'https://github.com/vercel-labs/agent-skills/tree/main/
 export const SkillInfo: React.FC = () => {
   const { name } = useParams<{ name: string }>();
   const api = useApi(name);
+  const evalResult = useSkillEvaluationResult(name);
   const [selectedTab, setSelectedTab] = useState<string>('documentation');
 
   setDocumentTitle(`Skill${api.data?.title ? ` - ${api.data.title}` : ''}`);
@@ -42,12 +45,14 @@ export const SkillInfo: React.FC = () => {
       metadata={
         <>
           <Badge appearance="filled" color="brand" shape="circular">Skill</Badge>
+          <EvalScoreBadge evalResult={evalResult.data} />
           {api.data?.lastUpdated && <span>Last updated {new Date(api.data.lastUpdated).toLocaleDateString()}</span>}
         </>
       }
       tabs={
         <TabList selectedValue={selectedTab} onTabSelect={(_, d) => setSelectedTab(d.value as string)}>
           <Tab icon={<DocumentRegular />} value="documentation">Documentation</Tab>
+          {evalResult.data && <Tab value="assessment">Assessment</Tab>}
           {hasCustomProps && <Tab value="properties">Additional properties</Tab>}
         </TabList>
       }
@@ -74,6 +79,9 @@ export const SkillInfo: React.FC = () => {
         ) : (
           <EmptyStateMessage>No description available for this skill.</EmptyStateMessage>
         )
+      )}
+      {selectedTab === 'assessment' && (
+        <SkillEvaluationDetails evalResult={evalResult.data} isLoading={evalResult.isLoading} />
       )}
       {api.data && selectedTab === 'properties' && (
         <CustomMetadata value={api.data.customProperties} />
