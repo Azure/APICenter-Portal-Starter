@@ -52,7 +52,7 @@ export const SkillInfo: React.FC = () => {
       tabs={
         <TabList selectedValue={selectedTab} onTabSelect={(_, d) => setSelectedTab(d.value as string)}>
           <Tab icon={<DocumentRegular />} value="documentation">Documentation</Tab>
-          {evalResult.data && <Tab value="evaluation">Evaluation</Tab>}
+          {evalResult.data && <Tab value="assessment">Assessment</Tab>}
           {hasCustomProps && <Tab value="properties">Additional properties</Tab>}
         </TabList>
       }
@@ -80,7 +80,7 @@ export const SkillInfo: React.FC = () => {
           <EmptyStateMessage>No description available for this skill.</EmptyStateMessage>
         )
       )}
-      {selectedTab === 'evaluation' && (
+      {selectedTab === 'assessment' && (
         <SkillEvaluationDetails evalResult={evalResult.data} isLoading={evalResult.isLoading} />
       )}
       {api.data && selectedTab === 'properties' && (

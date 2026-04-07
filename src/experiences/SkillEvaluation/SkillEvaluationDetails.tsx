@@ -16,7 +16,7 @@ export const SkillEvaluationDetails: React.FC<SkillEvaluationDetailsProps> = ({
   isLoading,
 }) => {
   if (isLoading) {
-    return <Spinner size="small" label="Loading evaluation results..." labelPosition="below" />;
+    return <Spinner size="small" label="Loading assessment results..." labelPosition="below" />;
   }
 
   if (!evalResult) return null;
@@ -58,14 +58,14 @@ export const SkillEvaluationDetails: React.FC<SkillEvaluationDetailsProps> = ({
 
       {evalResult.updatedOn && (
         <p className={styles.evalUpdated}>
-          Evaluated on {new Date(evalResult.updatedOn).toLocaleDateString()}
+          Assessed on {new Date(evalResult.updatedOn).toLocaleDateString()}
         </p>
       )}
 
       {/* Quality assessment scores + radar chart */}
       {scores.length > 0 && (
         <div className={styles.evalSection}>
-          <h4 className={styles.evalSectionTitle}>Evaluation</h4>
+          <h4 className={styles.evalSectionTitle}>Assessment</h4>
           <div className={styles.evalContentLayout}>
             <div className={styles.scoreBarList}>
               {scores.map((s) => (
