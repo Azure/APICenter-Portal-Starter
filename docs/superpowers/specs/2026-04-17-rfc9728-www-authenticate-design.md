@@ -39,16 +39,19 @@ class McpAuthService {
   static discoverOAuthCredentials(serverUri: string): Promise<Oauth2Credentials | undefined>
 
   // RFC 9728: parses WWW-Authenticate header, follows resource_metadata chain
-  static discoverFromWwwAuthenticate(wwwAuthHeader: string): Promise<Oauth2Credentials | undefined>
+  static discoverFromWwwAuthenticate(wwwAuthHeader: string, serverUri: string): Promise<Oauth2Credentials | undefined>
 }
 ```
 
 **Internal methods:**
 
-- `parseWwwAuthenticate(header: string): string | undefined` — Extracts `resource_metadata` URL from `Bearer resource_metadata="<url>"` pattern
-- `fetchResourceMetadata(url: string): Promise<McpProtectedResourceMetadata>` — Fetches protected resource metadata JSON
-- `fetchAuthServerMetadata(url: string): Promise<McpServerAuthMetadata>` — Fetches OAuth authorization server metadata
-- `registerClient(metadata: McpServerAuthMetadata): Promise<Oauth2Credentials | undefined>` — Performs dynamic client registration
+- `parseWwwAuthenticate(header: string): string | undefined` — Extracts `resource_metadata` URL from `Bearer resource_metadata="<url>"` pattern. Must handle multiple challenges, case-insensitive scheme/param names, and commas inside quoted values.
+- `validateMetadataUrl(url: string): boolean` — Validates the URL is HTTPS, not localhost/private IP, no fragments/userinfo.
+- `fetchResourceMetadata(url: string): Promise<McpProtectedResourceMetadata>` — Fetches protected resource metadata JSON.
+- `validateResourceMetadata(metadata: McpProtectedResourceMetadata, serverUri: string): boolean` — Validates the `resource` field matches the MCP server URI being accessed (prevents redirection to unrelated metadata).
+- `deriveAuthServerMetadataUrl(issuer: string): string` — Derives the OAuth authorization server metadata URL from an issuer identifier per RFC 8414 (e.g., `{issuer}/.well-known/oauth-authorization-server`). Note: `authorization_servers` contains issuer identifiers, not direct metadata document URLs.
+- `fetchAuthServerMetadata(issuer: string): Promise<McpServerAuthMetadata>` — Derives the metadata URL from the issuer, then fetches OAuth authorization server metadata.
+- `registerClient(metadata: McpServerAuthMetadata): Promise<Oauth2Credentials | undefined>` — Performs dynamic client registration. Uses `token_endpoint_auth_method: 'none'` for SPA/public client (fixes existing mismatch where `'client_secret_basic'` was specified but PKCE flow doesn't use a client secret).
 
 ### Enhanced Error: `McpUnauthorizedError`
 
@@ -67,6 +70,19 @@ export class McpUnauthorizedError extends Error {
 
 `McpService.ts` extracts the header on 401 responses (both `initializeStreamableHttp` and `sendStreamableRequest`).
 
+### MCP Service Cache Fix
+
+The existing `getMcpService()` function caches by URI and throws if the same URI is reused with different credentials. This breaks the unauthenticated → authenticated retry flow.
+
+**Fix:** When credentials change for the same URI, close the old instance and create a new one (instead of throwing):
+
+```typescript
+if (currentInstance && currentInstance.authCredentials !== authCredentials) {
+  currentInstance.closeConnection();
+  currentInstance = new McpService(serverUri, authCredentials);
+}
+```
+
 ### Updated Orchestration in `McpSpecPage`
 
 ```
@@ -76,10 +92,15 @@ export class McpUnauthorizedError extends Error {
        ├─ Found → API_ACCESS_FLOW (existing ApiAccessAuthForm)
        └─ Not found → Set AUTHORIZED, attempt MCP connection
            └─ On McpUnauthorizedError with wwwAuthenticate:
-               → McpAuthService.discoverFromWwwAuthenticate(wwwAuthenticate)
+               → McpAuthService.discoverFromWwwAuthenticate(wwwAuthenticate, serverUri)
                ├─ Found → DYNAMIC_REGISTRATION_FLOW with discovered credentials
                └─ Not found → Show generic error
 ```
+
+When transitioning from `AUTHORIZED` back to `DYNAMIC_REGISTRATION_FLOW` after a 401, clear:
+- existing `apiSpec`
+- existing error
+- existing MCP connection/session (via `closeConnection()`)
 
 ### New Type: `McpProtectedResourceMetadata`
 
@@ -99,20 +120,29 @@ export interface McpProtectedResourceMetadata {
 
 - Remove `getMcpServerOAuthCredentials()` from `src/utils/mcp.ts`
 - Update imports in `McpSpecPage` to use `McpAuthService` instead
+- Remove hardcoded endpoint fallback in `.well-known` discovery — if the endpoint fails, return `undefined` instead of fabricating `/authorize`, `/token`, `/register` URLs
 
 ## Files Changed
 
 | File | Change |
 |------|--------|
 | `src/services/McpAuthService.ts` | **New** — consolidated MCP auth discovery service |
-| `src/services/McpService.ts` | Enhance `McpUnauthorizedError` to carry `wwwAuthenticate`; extract header on 401 |
+| `src/services/McpService.ts` | Enhance `McpUnauthorizedError` to carry `wwwAuthenticate`; extract header on 401; fix cache to allow credential changes |
 | `src/types/mcp.ts` | Add `McpProtectedResourceMetadata` interface |
-| `src/pages/ApiSpec/McpSpecPage/McpSpecPage.tsx` | Update auth flow to use `McpAuthService` and handle RFC 9728 fallback |
+| `src/pages/ApiSpec/McpSpecPage/McpSpecPage.tsx` | Update auth flow to use `McpAuthService` and handle RFC 9728 fallback; clear state on auth retry |
 | `src/utils/mcp.ts` | Remove `getMcpServerOAuthCredentials()` (moved to `McpAuthService`) |
+
+## Security
+
+- **URL validation:** `resource_metadata` and derived auth server metadata URLs must be HTTPS, not localhost/private IPs, and contain no fragments or userinfo
+- **Resource validation:** The `resource` field in protected resource metadata must match the MCP server URI being accessed
+- **Registration model:** Use `token_endpoint_auth_method: 'none'` for public client (SPA) — consistent with the PKCE flow used by `OAuthService`
 
 ## Error Handling
 
 - If `WWW-Authenticate` header is absent or doesn't contain `resource_metadata`, the RFC 9728 flow is skipped
+- If resource metadata URL fails validation, skip RFC 9728 flow
+- If resource metadata `resource` field doesn't match the server URI, skip RFC 9728 flow
 - If resource metadata fetch fails, fall through to generic error
 - If authorization server metadata fetch fails, fall through to generic error
 - If dynamic client registration fails, return `undefined` (same as existing behavior)
@@ -125,6 +155,9 @@ export interface McpProtectedResourceMetadata {
 - Fetching and following the RFC 9728 metadata chain
 - Dynamic client registration with discovered metadata
 - Consolidating existing `.well-known` discovery into the new service
+- Fixing MCP service cache to support credential changes
+- Removing dangerous hardcoded endpoint fallback
+- Fixing registration to use public client model
 
 **Out of scope:**
 - Token caching or refresh
