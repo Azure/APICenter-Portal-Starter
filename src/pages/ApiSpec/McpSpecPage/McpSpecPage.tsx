@@ -11,7 +11,7 @@ import { ApiAuthCredentials, Oauth2Credentials } from '@/types/apiAuth';
 import ApiSpecPageLayout from '../ApiSpecPageLayout';
 import pageStyles from '../ApiSpec.module.scss';
 import { useApiService } from '@/hooks/useApiService';
-import { getMcpServerOAuthCredentials } from '@/utils/mcp';
+import { McpAuthService } from '@/services/McpAuthService';
 import McpMetadataBasedAuthForm from './McpMetadataBasedAuthForm';
 import styles from './McpSpecPage.module.scss';
 
@@ -47,7 +47,7 @@ export const McpSpecPage: React.FC<Props> = ({ definitionId, deployment, sidebar
     }
 
     // Use dynamic registration flow if the server has this feature
-    const mcpServerCredentials = await getMcpServerOAuthCredentials(deployment.server.runtimeUri[0]);
+    const mcpServerCredentials = await McpAuthService.discoverOAuthCredentials(deployment.server.runtimeUri[0]);
     if (mcpServerCredentials) {
       setMcpOAuthCredentials(mcpServerCredentials);
       setAuthState(McpServerAuthState.DYNAMIC_REGISTRATION_FLOW);
@@ -96,7 +96,23 @@ export const McpSpecPage: React.FC<Props> = ({ definitionId, deployment, sidebar
       });
       setApiSpec(reader);
     } catch (err) {
-      if (err instanceof McpUnauthorizedError) {
+      if (err instanceof McpUnauthorizedError && err.wwwAuthenticate) {
+        // Attempt RFC 9728 discovery from WWW-Authenticate header
+        const serverUri = deployment.server.runtimeUri[0];
+        const credentials = await McpAuthService.discoverFromWwwAuthenticate(err.wwwAuthenticate, serverUri);
+
+        if (credentials) {
+          // Clear existing state and switch to dynamic registration flow
+          setApiSpec(undefined);
+          setError(undefined);
+          mcpService.closeConnection();
+          setMcpOAuthCredentials(credentials);
+          setAuthState(McpServerAuthState.DYNAMIC_REGISTRATION_FLOW);
+          return;
+        }
+
+        setError('The MCP server requires authentication, but required configuration cannot be determined automatically.');
+      } else if (err instanceof McpUnauthorizedError) {
         setError('The MCP server requires authentication, but required configuration cannot be determined automatically.');
       } else {
         setError('Failed to connect to the MCP server. Please try again later.');
@@ -104,7 +120,7 @@ export const McpSpecPage: React.FC<Props> = ({ definitionId, deployment, sidebar
     } finally {
       setIsSpecLoading(false);
     }
-  }, [definition.data, isAuthorized, mcpService]);
+  }, [definition.data, deployment, isAuthorized, mcpService]);
 
   useEffect(() => {
     void makeApiSpec();
