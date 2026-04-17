@@ -111,9 +111,13 @@ export const McpSpecPage: React.FC<Props> = ({ definitionId, deployment, sidebar
           return;
         }
 
-        setError('The MCP server requires authentication, but required configuration cannot be determined automatically.');
+        setError(
+          'The MCP server requires authentication, but required configuration cannot be determined automatically.'
+        );
       } else if (err instanceof McpUnauthorizedError) {
-        setError('The MCP server requires authentication, but required configuration cannot be determined automatically.');
+        setError(
+          'The MCP server requires authentication, but required configuration cannot be determined automatically.'
+        );
       } else {
         setError('Failed to connect to the MCP server. Please try again later.');
       }
@@ -161,7 +165,14 @@ export const McpSpecPage: React.FC<Props> = ({ definitionId, deployment, sidebar
     return <div className={styles.authPanel}>{error}</div>;
   }
 
-  return <ApiSpecPageLayout definitionId={definitionId} deployment={deployment} apiSpec={apiSpec} sidebarExtra={sidebarExtra} />;
+  return (
+    <ApiSpecPageLayout
+      definitionId={definitionId}
+      deployment={deployment}
+      apiSpec={apiSpec}
+      sidebarExtra={sidebarExtra}
+    />
+  );
 };
 
 export default React.memo(McpSpecPage);

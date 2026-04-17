@@ -81,10 +81,7 @@ export function validateMetadataUrl(url: string): boolean {
  * Validates that the resource field in protected resource metadata
  * matches the MCP server URI being accessed.
  */
-export function validateResourceMetadata(
-  metadata: McpProtectedResourceMetadata,
-  serverUri: string
-): boolean {
+export function validateResourceMetadata(metadata: McpProtectedResourceMetadata, serverUri: string): boolean {
   try {
     const resourceUrl = new URL(metadata.resource);
     const serverUrl = new URL(serverUri);
@@ -209,10 +206,7 @@ export const McpAuthService = {
    * RFC 9728 discovery: parses WWW-Authenticate header, fetches resource metadata,
    * follows authorization_servers link, fetches auth server metadata, registers client.
    */
-  async discoverFromWwwAuthenticate(
-    wwwAuthHeader: string,
-    serverUri: string
-  ): Promise<Oauth2Credentials | undefined> {
+  async discoverFromWwwAuthenticate(wwwAuthHeader: string, serverUri: string): Promise<Oauth2Credentials | undefined> {
     try {
       // 1. Parse resource_metadata URL from WWW-Authenticate header
       const resourceMetadataUrl = parseWwwAuthenticate(wwwAuthHeader);
