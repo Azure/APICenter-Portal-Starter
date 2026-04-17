@@ -133,7 +133,7 @@ export const ApiList: React.FC = () => {
 
   return (
     <>
-      <InfoTable columnLabels={['Name', 'Summary', 'Lifecycle stage', 'Type']}>
+      <InfoTable columnLabels={['Name', 'Summary', 'Score', 'Lifecycle stage', 'Type']}>
         {adaptedApiList.map((api) => (
           <InfoTable.Row key={api.name}>
             <InfoTable.Cell>
@@ -141,6 +141,17 @@ export const ApiList: React.FC = () => {
             </InfoTable.Cell>
             <InfoTable.Cell>
               <MarkdownRenderer markdown={api.description} maxLength={120} />
+            </InfoTable.Cell>
+            <InfoTable.Cell>
+              {api.evalScore != null && api.evalMaxScore != null && api.evalMaxScore > 0 && (
+                <Badge
+                  appearance="tint"
+                  color={api.evalScore / api.evalMaxScore >= 0.8 ? 'success' : api.evalScore / api.evalMaxScore >= 0.6 ? 'warning' : 'danger'}
+                  shape="circular"
+                >
+                  {(api.evalScore / api.evalMaxScore * 5).toFixed(1)}/5
+                </Badge>
+              )}
             </InfoTable.Cell>
             <InfoTable.Cell>
               {!!api.lifecycleStage && (

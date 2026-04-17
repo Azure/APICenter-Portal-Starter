@@ -9,6 +9,8 @@ export interface ApiCardApi {
   description: string;
   type?: string;
   lifecycleStage?: string;
+  evalScore?: number;
+  evalMaxScore?: number;
 }
 
 interface Props {
@@ -26,25 +28,49 @@ function getCategoryLabel(type?: string): string {
   return 'API';
 }
 
-export const ApiCard: React.FC<Props> = ({ api, showType, linkProps }) => (
-  <a
-    {...linkProps}
-    className={styles.apiCard}
-    title={api.displayName}
-  >
-    <div className={styles.cardContent}>
-      {showType && (
-        <div className={styles.tags}>
-          <Badge appearance="filled" color="brand" shape="circular">{getCategoryLabel(api.type)}</Badge>
-          {!!api.type && !STANDALONE_KINDS.includes(api.type.toLowerCase()) && (
-            <Badge appearance="tint" color="brand" shape="circular">{formatKindDisplay(api.type)}</Badge>
-          )}
-        </div>
-      )}
-      <h4 className={styles.title}>{api.displayName}</h4>
-      {api.description && <p className={styles.description}>{api.description}</p>}
-    </div>
-  </a>
-);
+type BadgeColor = 'success' | 'warning' | 'danger';
+
+function scoreBadgeColor(ratio: number): BadgeColor {
+  if (ratio >= 0.8) return 'success';
+  if (ratio >= 0.6) return 'warning';
+  return 'danger';
+}
+
+export const ApiCard: React.FC<Props> = ({ api, showType, linkProps }) => {
+  const hasScore = api.evalScore != null && api.evalMaxScore != null && api.evalMaxScore > 0;
+  const scoreRatio = hasScore ? api.evalScore! / api.evalMaxScore! : 0;
+  const scoreDisplay = hasScore ? (scoreRatio * 5).toFixed(1) : null;
+
+  return (
+    <a
+      {...linkProps}
+      className={styles.apiCard}
+      title={api.displayName}
+    >
+      <div className={styles.cardContent}>
+        {showType && (
+          <div className={styles.tags}>
+            <Badge appearance="filled" color="brand" shape="circular">{getCategoryLabel(api.type)}</Badge>
+            {!!api.type && !STANDALONE_KINDS.includes(api.type.toLowerCase()) && (
+              <Badge appearance="tint" color="brand" shape="circular">{formatKindDisplay(api.type)}</Badge>
+            )}
+            {hasScore && (
+              <Badge
+                appearance="tint"
+                color={scoreBadgeColor(scoreRatio)}
+                shape="circular"
+                className={styles.scoreBadge}
+              >
+                {scoreDisplay}/5
+              </Badge>
+            )}
+          </div>
+        )}
+        <h4 className={styles.title}>{api.displayName}</h4>
+        {api.description && <p className={styles.description}>{api.description}</p>}
+      </div>
+    </a>
+  );
+};
 
 export default React.memo(ApiCard);
