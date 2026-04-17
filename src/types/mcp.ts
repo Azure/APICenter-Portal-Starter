@@ -82,3 +82,11 @@ export interface McpSpec {
   [McpCapabilityTypes.RESOURCES]: McpResource[];
   [McpCapabilityTypes.TOOLS]: McpTool[];
 }
+
+export interface McpProtectedResourceMetadata {
+  resource: string;
+  authorization_servers: string[];
+  scopes_supported?: string[];
+  bearer_methods_supported?: string[];
+  resource_documentation?: string;
+}
