@@ -66,8 +66,14 @@ export function validateMetadataUrl(url: string): boolean {
       return false;
     }
 
-    // Reject private IP ranges
+    // Reject private IPv4 ranges
     if (/^10\./.test(hostname) || /^172\.(1[6-9]|2\d|3[01])\./.test(hostname) || /^192\.168\./.test(hostname)) {
+      return false;
+    }
+
+    // Reject private IPv6 ranges (unique local fc00::/7 and link-local fe80::/10)
+    const bare = hostname.replace(/^\[|\]$/g, '');
+    if (/^fe80:/i.test(bare) || /^f[cd][0-9a-f]{2}:/i.test(bare)) {
       return false;
     }
 
@@ -121,6 +127,11 @@ async function fetchResourceMetadata(url: string): Promise<McpProtectedResourceM
 
 async function fetchAuthServerMetadata(issuer: string): Promise<McpServerAuthMetadata | undefined> {
   try {
+    if (!validateMetadataUrl(issuer)) {
+      console.warn(`Issuer URL failed validation: ${issuer}`);
+      return undefined;
+    }
+
     const metadataUrl = deriveAuthServerMetadataUrl(issuer);
 
     if (!validateMetadataUrl(metadataUrl)) {

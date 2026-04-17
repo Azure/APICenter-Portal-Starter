@@ -405,9 +405,7 @@ export function getMcpService(uri?: string, authCredentials?: ApiAuthCredentials
   if (currentInstance?.serverUri !== serverUri) {
     currentInstance?.closeConnection();
     currentInstance = new McpService(serverUri, authCredentials);
-  }
-
-  if (currentInstance && currentInstance.authCredentials !== authCredentials) {
+  } else if (currentInstance && currentInstance.authCredentials !== authCredentials) {
     currentInstance.closeConnection();
     currentInstance = new McpService(serverUri, authCredentials);
   }
