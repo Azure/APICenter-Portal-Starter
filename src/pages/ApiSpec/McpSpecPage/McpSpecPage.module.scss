@@ -6,3 +6,31 @@
   border-radius: var(--radius-m);
   box-shadow: 3px 3px 5px var(--colorNeutralBackground3);
 }
+
+.consentButton {
+  margin-top: 16px;
+  padding: 8px 16px;
+  background-color: var(--colorBrandBackground);
+  color: var(--colorNeutralForegroundOnBrand);
+  border: none;
+  border-radius: var(--radius-m);
+  cursor: pointer;
+  font-size: 14px;
+
+  &:hover {
+    background-color: var(--colorBrandBackgroundHover);
+  }
+}
+
+.scopesList {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--colorNeutralForeground3);
+  word-break: break-all;
+}
+
+.authError {
+  margin-top: 12px;
+  color: var(--colorPaletteRedForeground1);
+  font-size: 13px;
+}

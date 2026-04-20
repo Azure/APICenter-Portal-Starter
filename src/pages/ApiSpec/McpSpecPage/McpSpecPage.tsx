@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Spinner } from '@fluentui/react-components';
+import { getRecoil } from 'recoil-nexus';
 import ApiAccessAuthForm from '@/experiences/ApiAccessAuthForm';
 import { ApiDefinitionId } from '@/types/apiDefinition';
 import { ApiDeployment } from '@/types/apiDeployment';
@@ -12,13 +13,17 @@ import ApiSpecPageLayout from '../ApiSpecPageLayout';
 import pageStyles from '../ApiSpec.module.scss';
 import { useApiService } from '@/hooks/useApiService';
 import { McpAuthService } from '@/services/McpAuthService';
-import McpMetadataBasedAuthForm from './McpMetadataBasedAuthForm';
+import { McpDiscoveredAuth } from '@/types/mcp';
+import { McpMsalAuthService } from '@/services/McpMsalAuthService';
+import { configAtom } from '@/atoms/configAtom';
 import styles from './McpSpecPage.module.scss';
+import McpMetadataBasedAuthForm from './McpMetadataBasedAuthForm';
 
 enum McpServerAuthState {
   NOT_AUTHORIZED,
   DYNAMIC_REGISTRATION_FLOW,
   API_ACCESS_FLOW,
+  MSAL_CONSENT_NEEDED,
   AUTHORIZED,
 }
 
@@ -35,6 +40,7 @@ export const McpSpecPage: React.FC<Props> = ({ definitionId, deployment, sidebar
   const [apiSpec, setApiSpec] = useState<ApiSpecReader>();
   const [isSpecLoading, setIsSpecLoading] = useState(false);
   const [error, setError] = useState<string | undefined>();
+  const [msalDiscoveredAuth, setMsalDiscoveredAuth] = useState<McpDiscoveredAuth | undefined>();
 
   const ApiService = useApiService();
   const definition = useApiDefinition(definitionId);
@@ -97,30 +103,74 @@ export const McpSpecPage: React.FC<Props> = ({ definitionId, deployment, sidebar
       setApiSpec(reader);
     } catch (err) {
       if (err instanceof McpUnauthorizedError && err.wwwAuthenticate) {
-        // Attempt RFC 9728 discovery from WWW-Authenticate header
         const serverUri = deployment.server.runtimeUri[0];
-        const credentials = await McpAuthService.discoverFromWwwAuthenticate(err.wwwAuthenticate, serverUri);
+        const discoveryResult = await McpAuthService.discoverFromWwwAuthenticate(err.wwwAuthenticate, serverUri);
 
-        if (credentials) {
-          // Clear existing state and switch to dynamic registration flow
+        // Check if this is an MSAL/Entra ID discovery result
+        if (discoveryResult && 'type' in discoveryResult && discoveryResult.type === 'msal') {
+          const config = getRecoil(configAtom);
+          if (!config.mcp?.enableEntraIdAuth) {
+            setError(
+              'The MCP server requires Entra ID authentication. ' +
+                'Enable it in config.json: { "mcp": { "enableEntraIdAuth": true } }'
+            );
+            return;
+          }
+
+          mcpService.closeConnection();
+
+          try {
+            const token = await McpMsalAuthService.acquireToken(discoveryResult.scopes, discoveryResult.authority);
+            if (token) {
+              setApiSpec(undefined);
+              setError(undefined);
+              setAuthCredentials({
+                name: 'Authorization',
+                value: `Bearer ${token}`,
+                in: 'header',
+                createdAt: new Date(),
+              });
+              setAuthState(McpServerAuthState.AUTHORIZED);
+              return;
+            }
+
+            // Silent returned undefined — needs user interaction
+            setMsalDiscoveredAuth(discoveryResult);
+            setAuthState(McpServerAuthState.MSAL_CONSENT_NEEDED);
+          } catch (msalErr) {
+            const message = msalErr instanceof Error ? msalErr.message : 'Unknown error';
+            setError(`Authentication failed: ${message}`);
+          }
+          return;
+        }
+
+        // Dynamic registration flow (Oauth2Credentials)
+        if (discoveryResult) {
           setApiSpec(undefined);
           setError(undefined);
           mcpService.closeConnection();
-          setMcpOAuthCredentials(credentials);
+          setMcpOAuthCredentials(discoveryResult as Oauth2Credentials);
           setAuthState(McpServerAuthState.DYNAMIC_REGISTRATION_FLOW);
           return;
         }
 
         setError(
-          'The MCP server requires authentication, but required configuration cannot be determined automatically.'
+          'The MCP server requires authentication. ' +
+            'OAuth discovery was attempted but failed — the authorization metadata endpoint may not be reachable from this origin.'
         );
       } else if (err instanceof McpUnauthorizedError) {
-        setError(
-          'The MCP server requires authentication, but required configuration cannot be determined automatically.'
-        );
+        setError('The MCP server requires authentication, but the server did not provide discovery information.');
       } else {
-        const message = err instanceof Error ? err.message : 'Unknown error';
-        setError(`Failed to connect to the MCP server: ${message}`);
+        const isCorsError = err instanceof TypeError && err.message === 'Failed to fetch';
+        if (isCorsError) {
+          setError(
+            'The MCP server blocked the request due to CORS policy. ' +
+              'The server does not allow requests from this origin.'
+          );
+        } else {
+          const message = err instanceof Error ? err.message : 'Unknown error';
+          setError(`Failed to connect to the MCP server: ${message}`);
+        }
       }
     } finally {
       setIsSpecLoading(false);
@@ -138,6 +188,29 @@ export const McpSpecPage: React.FC<Props> = ({ definitionId, deployment, sidebar
     }
   }, []);
 
+  const handleMsalConsent = useCallback(async () => {
+    if (!msalDiscoveredAuth) {
+      return;
+    }
+
+    try {
+      setError(undefined);
+      const token = await McpMsalAuthService.acquireTokenInteractive(
+        msalDiscoveredAuth.scopes,
+        msalDiscoveredAuth.authority
+      );
+      setAuthCredentials({
+        name: 'Authorization',
+        value: `Bearer ${token}`,
+        in: 'header',
+        createdAt: new Date(),
+      });
+      setAuthState(McpServerAuthState.AUTHORIZED);
+    } catch (e) {
+      setError(`Authentication failed: ${e instanceof Error ? e.message : 'Unknown error'}`);
+    }
+  }, [msalDiscoveredAuth]);
+
   if (authState === McpServerAuthState.NOT_AUTHORIZED || definition.isLoading || isSpecLoading) {
     return <Spinner className={pageStyles.spinner} />;
   }
@@ -154,6 +227,19 @@ export const McpSpecPage: React.FC<Props> = ({ definitionId, deployment, sidebar
     return (
       <div className={styles.authPanel}>
         <McpMetadataBasedAuthForm credentials={mcpOAuthCredentials} onChange={handleAuthCredentialsChange} />
+      </div>
+    );
+  }
+
+  if (authState === McpServerAuthState.MSAL_CONSENT_NEEDED && msalDiscoveredAuth) {
+    return (
+      <div className={styles.authPanel}>
+        <p>This MCP server requires additional permissions.</p>
+        <p className={styles.scopesList}>Scopes: {msalDiscoveredAuth.scopes.join(', ')}</p>
+        <button className={styles.consentButton} onClick={handleMsalConsent}>
+          Sign in to grant access
+        </button>
+        {error && <p className={styles.authError}>{error}</p>}
       </div>
     );
   }

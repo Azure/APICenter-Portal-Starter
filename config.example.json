@@ -6,5 +6,9 @@
       "tenantId": "<tenant ID>",
       "scopes": ["https://azure-apicenter.net/Data.Read.All"],
       "authority": "https://login.microsoftonline.com/"
+  },
+  "mcp": {
+      "useCorsProxy": false,
+      "enableEntraIdAuth": false
   }
 }
