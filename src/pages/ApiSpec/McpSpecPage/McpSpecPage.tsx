@@ -119,8 +119,16 @@ export const McpSpecPage: React.FC<Props> = ({ definitionId, deployment, sidebar
           'The MCP server requires authentication, but required configuration cannot be determined automatically.'
         );
       } else {
-        const message = err instanceof Error ? err.message : 'Unknown error';
-        setError(`Failed to connect to the MCP server: ${message}`);
+        const isCorsError = err instanceof TypeError && err.message === 'Failed to fetch';
+        if (isCorsError) {
+          setError(
+            'The MCP server blocked the request due to CORS policy. ' +
+              'The server does not allow requests from this origin.'
+          );
+        } else {
+          const message = err instanceof Error ? err.message : 'Unknown error';
+          setError(`Failed to connect to the MCP server: ${message}`);
+        }
       }
     } finally {
       setIsSpecLoading(false);
