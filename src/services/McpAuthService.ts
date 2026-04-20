@@ -99,16 +99,17 @@ export function validateResourceMetadata(metadata: McpProtectedResourceMetadata,
 
 /**
  * Derives the OAuth authorization server metadata URL from an issuer identifier
- * per RFC 8414: {issuer}/.well-known/oauth-authorization-server
+ * per RFC 8414 Section 3.
+ *
+ * For issuers without a path: {origin}/.well-known/oauth-authorization-server
+ * For issuers with a path:    {issuer}/.well-known/oauth-authorization-server
+ *
+ * Example: "https://login.microsoftonline.com/organizations/v2.0"
+ *       -> "https://login.microsoftonline.com/organizations/v2.0/.well-known/oauth-authorization-server"
  */
 function deriveAuthServerMetadataUrl(issuer: string): string {
-  const url = new URL(issuer);
-  // Per RFC 8414, if issuer has a path component, the well-known is inserted
-  // after the host: {scheme}://{host}/.well-known/oauth-authorization-server{path}
-  if (url.pathname && url.pathname !== '/') {
-    return `${url.origin}/.well-known/oauth-authorization-server${url.pathname}`;
-  }
-  return `${url.origin}/.well-known/oauth-authorization-server`;
+  const normalized = issuer.endsWith('/') ? issuer.slice(0, -1) : issuer;
+  return `${normalized}/.well-known/oauth-authorization-server`;
 }
 
 async function fetchResourceMetadata(url: string): Promise<McpProtectedResourceMetadata | undefined> {
