@@ -25,6 +25,14 @@ export interface Config {
   authentication?: MsalSettings;
 
   /**
+   * MCP-specific settings.
+   */
+  mcp?: {
+    /** Whether to use the CORS proxy for MCP server calls. Defaults to false. */
+    useCorsProxy?: boolean;
+  };
+
+  /**
    * The scoping filter. If provided, only APIs with the specified metadata properties will be shown.
    */
   scopingFilter: string;

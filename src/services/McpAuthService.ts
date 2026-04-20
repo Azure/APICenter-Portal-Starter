@@ -1,10 +1,10 @@
 import { McpServerAuthMetadata, McpProtectedResourceMetadata } from '@/types/mcp';
 import { Oauth2Credentials } from '@/types/apiAuth';
 import { apimFetchProxy } from '@/utils/apimProxy';
-import { useCorsProxy } from '@/constants';
+import { getMcpCorsProxyEnabled } from '@/constants';
 
 function mcpFetch(url: string, requestInit?: RequestInit): ReturnType<typeof fetch> {
-  if (!useCorsProxy) {
+  if (!getMcpCorsProxyEnabled()) {
     return fetch(url, requestInit);
   }
   return apimFetchProxy(url, requestInit);
