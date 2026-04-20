@@ -4,14 +4,11 @@ import styles from './SkillEvaluation.module.scss';
 
 interface EvalScoreBarProps {
   score: EvalJudgeScore;
+  isHighlighted?: boolean;
+  onHoverCriterion?: (name: string | null) => void;
 }
 
-function scoreColor(score: number, maxScore: number): string {
-  const ratio = maxScore > 0 ? score / maxScore : 0;
-  if (ratio >= 0.8) return 'var(--colorPaletteGreenBackground3)';
-  if (ratio >= 0.6) return 'var(--colorPaletteYellowBackground3)';
-  return 'var(--colorPaletteRedBackground3)';
-}
+const THRESHOLD = 4.0;
 
 function formatLabel(name: string): string {
   return name
@@ -19,24 +16,30 @@ function formatLabel(name: string): string {
     .replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-export const EvalScoreBar: React.FC<EvalScoreBarProps> = ({ score }) => {
+export const EvalScoreBar: React.FC<EvalScoreBarProps> = ({ score, isHighlighted, onHoverCriterion }) => {
   const pct = score.maxScore > 0 ? (score.score / score.maxScore) * 100 : 0;
-  const color = scoreColor(score.score, score.maxScore);
+  const isPassing = score.score >= THRESHOLD;
 
   return (
-    <div className={styles.scoreBarItem}>
-      <div className={styles.scoreBarHeader}>
-        <span className={styles.scoreBarLabel}>{formatLabel(score.name)}</span>
-        <span className={styles.scoreBarValue}>{score.score.toFixed(1)}</span>
+    <div
+      className={`${styles.criterionCard} ${isHighlighted ? styles.criterionHighlighted : ''}`}
+      onMouseEnter={() => onHoverCriterion?.(score.name)}
+      onMouseLeave={() => onHoverCriterion?.(null)}
+    >
+      <div className={styles.criterionCardHeader}>
+        <span className={styles.criterionName}>{formatLabel(score.name)}</span>
+        <span className={`${styles.criterionScore} ${isPassing ? styles.criterionScorePass : styles.criterionScoreFail}`}>
+          {score.score.toFixed(1)}
+        </span>
       </div>
-      <div className={styles.scoreBarTrack}>
+      <div className={styles.criterionBarTrack}>
         <div
-          className={styles.scoreBarFill}
-          style={{ width: `${pct}%`, backgroundColor: color }}
+          className={`${styles.criterionBarFill} ${isPassing ? styles.criterionBarFillPass : styles.criterionBarFillFail}`}
+          style={{ width: `${pct}%` }}
         />
       </div>
       {score.reasoning && (
-        <p className={styles.scoreBarReasoning}>{score.reasoning}</p>
+        <p className={styles.criterionReasoning}>{score.reasoning}</p>
       )}
     </div>
   );

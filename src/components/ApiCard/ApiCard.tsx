@@ -56,7 +56,7 @@ export const ApiCard: React.FC<Props> = ({ api, showType, linkProps }) => {
             )}
             {hasScore && (
               <Badge
-                appearance="tint"
+                appearance="filled"
                 color={scoreBadgeColor(scoreRatio)}
                 shape="circular"
                 className={styles.scoreBadge}

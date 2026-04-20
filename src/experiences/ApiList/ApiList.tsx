@@ -145,7 +145,7 @@ export const ApiList: React.FC = () => {
             <InfoTable.Cell>
               {api.evalScore != null && api.evalMaxScore != null && api.evalMaxScore > 0 && (
                 <Badge
-                  appearance="tint"
+                  appearance="filled"
                   color={api.evalScore / api.evalMaxScore >= 0.8 ? 'success' : api.evalScore / api.evalMaxScore >= 0.6 ? 'warning' : 'danger'}
                   shape="circular"
                 >
