@@ -148,6 +148,11 @@ async function fetchAuthServerMetadata(issuer: string): Promise<McpServerAuthMet
 
 async function registerClient(metadata: McpServerAuthMetadata): Promise<Oauth2Credentials | undefined> {
   try {
+    if (!metadata.registration_endpoint) {
+      console.warn('Auth server does not support dynamic client registration (no registration_endpoint).');
+      return undefined;
+    }
+
     const registrationResponse = await mcpFetch(metadata.registration_endpoint, {
       method: 'POST',
       headers: {
