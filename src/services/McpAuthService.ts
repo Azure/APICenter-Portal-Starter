@@ -1,10 +1,10 @@
-import { McpServerAuthMetadata, McpProtectedResourceMetadata } from '@/types/mcp';
+import { McpServerAuthMetadata, McpProtectedResourceMetadata, McpDiscoveredAuth } from '@/types/mcp';
 import { Oauth2Credentials } from '@/types/apiAuth';
 import { apimFetchProxy } from '@/utils/apimProxy';
-import { useCorsProxy } from '@/constants';
+import { getMcpCorsProxyEnabled } from '@/constants';
 
 function mcpFetch(url: string, requestInit?: RequestInit): ReturnType<typeof fetch> {
-  if (!useCorsProxy) {
+  if (!getMcpCorsProxyEnabled()) {
     return fetch(url, requestInit);
   }
   return apimFetchProxy(url, requestInit);
@@ -97,21 +97,6 @@ export function validateResourceMetadata(metadata: McpProtectedResourceMetadata,
   }
 }
 
-/**
- * Derives the OAuth authorization server metadata URL from an issuer identifier
- * per RFC 8414 Section 3.
- *
- * For issuers without a path: {origin}/.well-known/oauth-authorization-server
- * For issuers with a path:    {issuer}/.well-known/oauth-authorization-server
- *
- * Example: "https://login.microsoftonline.com/organizations/v2.0"
- *       -> "https://login.microsoftonline.com/organizations/v2.0/.well-known/oauth-authorization-server"
- */
-function deriveAuthServerMetadataUrl(issuer: string): string {
-  const normalized = issuer.endsWith('/') ? issuer.slice(0, -1) : issuer;
-  return `${normalized}/.well-known/oauth-authorization-server`;
-}
-
 async function fetchResourceMetadata(url: string): Promise<McpProtectedResourceMetadata | undefined> {
   try {
     const response = await mcpFetch(url, { method: 'GET' });
@@ -133,19 +118,28 @@ async function fetchAuthServerMetadata(issuer: string): Promise<McpServerAuthMet
       return undefined;
     }
 
-    const metadataUrl = deriveAuthServerMetadataUrl(issuer);
+    const normalized = issuer.endsWith('/') ? issuer.slice(0, -1) : issuer;
 
-    if (!validateMetadataUrl(metadataUrl)) {
-      console.warn(`Auth server metadata URL failed validation: ${metadataUrl}`);
-      return undefined;
+    // Try RFC 8414 first, then fall back to OpenID Connect discovery
+    // (e.g., Microsoft Entra ID uses openid-configuration instead of oauth-authorization-server)
+    const candidates = [
+      `${normalized}/.well-known/oauth-authorization-server`,
+      `${normalized}/.well-known/openid-configuration`,
+    ];
+
+    for (const metadataUrl of candidates) {
+      if (!validateMetadataUrl(metadataUrl)) {
+        continue;
+      }
+
+      const response = await mcpFetch(metadataUrl, { method: 'GET' });
+      if (response.ok) {
+        return await response.json();
+      }
     }
 
-    const response = await mcpFetch(metadataUrl, { method: 'GET' });
-    if (!response.ok) {
-      console.warn(`Failed to fetch auth server metadata from ${metadataUrl}: ${response.status}`);
-      return undefined;
-    }
-    return await response.json();
+    console.warn(`Failed to fetch auth server metadata for issuer: ${issuer}`);
+    return undefined;
   } catch (err) {
     console.warn('Failed to fetch auth server metadata:', err);
     return undefined;
@@ -154,6 +148,11 @@ async function fetchAuthServerMetadata(issuer: string): Promise<McpServerAuthMet
 
 async function registerClient(metadata: McpServerAuthMetadata): Promise<Oauth2Credentials | undefined> {
   try {
+    if (!metadata.registration_endpoint) {
+      console.warn('Auth server does not support dynamic client registration (no registration_endpoint).');
+      return undefined;
+    }
+
     const registrationResponse = await mcpFetch(metadata.registration_endpoint, {
       method: 'POST',
       headers: {
@@ -218,7 +217,10 @@ export const McpAuthService = {
    * RFC 9728 discovery: parses WWW-Authenticate header, fetches resource metadata,
    * follows authorization_servers link, fetches auth server metadata, registers client.
    */
-  async discoverFromWwwAuthenticate(wwwAuthHeader: string, serverUri: string): Promise<Oauth2Credentials | undefined> {
+  async discoverFromWwwAuthenticate(
+    wwwAuthHeader: string,
+    serverUri: string
+  ): Promise<Oauth2Credentials | McpDiscoveredAuth | undefined> {
     try {
       // 1. Parse resource_metadata URL from WWW-Authenticate header
       const resourceMetadataUrl = parseWwwAuthenticate(wwwAuthHeader);
@@ -260,8 +262,24 @@ export const McpAuthService = {
         return undefined;
       }
 
-      // 7. Register client
-      return registerClient(authServerMetadata);
+      // 7. Try dynamic client registration; fall back to MSAL discovery
+      const registered = await registerClient(authServerMetadata);
+      if (registered) {
+        return registered;
+      }
+
+      // No dynamic registration — return discovered auth for MSAL flow
+      const scopes = resourceMetadata.scopes_supported ?? [];
+      if (scopes.length === 0) {
+        console.warn('No scopes_supported in resource metadata for MSAL fallback');
+        return undefined;
+      }
+
+      return {
+        type: 'msal',
+        authority: issuer,
+        scopes,
+      };
     } catch (err) {
       console.warn('RFC 9728 discovery failed:', err);
       return undefined;

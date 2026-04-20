@@ -3,7 +3,7 @@ import { DeferredPromise, makeDeferredPromise } from '@/utils/promise';
 import { McpCapabilityTypes, McpInitData, McpOperation, McpResource, McpSpec } from '@/types/mcp';
 import { ApiAuthCredentials } from '@/types/apiAuth';
 import { apimFetchProxy } from '@/utils/apimProxy';
-import { useCorsProxy, mcpTransport, McpTransport } from '@/constants';
+import { getMcpCorsProxyEnabled, mcpTransport, McpTransport } from '@/constants';
 
 interface MessagePayload {
   id?: number;
@@ -54,7 +54,7 @@ export class McpService {
     this.pendingMessages.set(INIT_ID, makeDeferredPromise());
 
     if (mcpTransport === McpTransport.SSE) {
-      const sseUrl = useCorsProxy ? `${this.serverUri}/sse` : this.serverUri;
+      const sseUrl = getMcpCorsProxyEnabled() ? `${this.serverUri}/sse` : this.serverUri;
       this.sse = new EventSource(sseUrl, { fetch: this.fetchProxy });
 
       this.sse.addEventListener('endpoint', this.handleEndpointReceived);
@@ -269,7 +269,7 @@ export class McpService {
       headers[this.authCredentials.name] = this.authCredentials.value;
     }
 
-    if (!useCorsProxy) {
+    if (!getMcpCorsProxyEnabled()) {
       return fetch(url, {
         ...requestInit,
         headers,
