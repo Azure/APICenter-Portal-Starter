@@ -14,9 +14,12 @@ interface MessagePayload {
 const INIT_ID = 1;
 
 export class McpUnauthorizedError extends Error {
-  constructor(message = 'MCP server returned 401 Unauthorized. Please check your credentials.') {
-    super(message);
+  public readonly wwwAuthenticate?: string;
+
+  constructor(message?: string, wwwAuthenticate?: string) {
+    super(message || 'MCP server returned 401 Unauthorized. Please check your credentials.');
     this.name = 'McpUnauthorizedError';
+    this.wwwAuthenticate = wwwAuthenticate;
   }
 }
 
@@ -38,6 +41,10 @@ export class McpService {
     this.authCredentials = authCredentials;
 
     this.serverUri = serverUri;
+
+    // Prevent unhandled promise rejection if init fails before a consumer awaits.
+    // Actual errors are still caught when makeApiSpec() calls ensureInitialized().
+    this.initDeferredPromise.promise.catch(() => {});
 
     this.fetchProxy = this.fetchProxy.bind(this);
     this.handleEndpointReceived = this.handleEndpointReceived.bind(this);
@@ -172,7 +179,8 @@ export class McpService {
       });
 
       if (response.status === 401) {
-        this.initDeferredPromise.reject(new McpUnauthorizedError());
+        const wwwAuth = response.headers.get('www-authenticate') || undefined;
+        this.initDeferredPromise.reject(new McpUnauthorizedError(undefined, wwwAuth));
         return;
       }
 
@@ -306,7 +314,8 @@ export class McpService {
     })
       .then(async (response) => {
         if (response.status === 401) {
-          deferred.reject(new McpUnauthorizedError());
+          const wwwAuth = response.headers.get('www-authenticate') || undefined;
+          deferred.reject(new McpUnauthorizedError(undefined, wwwAuth));
           return;
         }
 
@@ -400,11 +409,9 @@ export function getMcpService(uri?: string, authCredentials?: ApiAuthCredentials
   if (currentInstance?.serverUri !== serverUri) {
     currentInstance?.closeConnection();
     currentInstance = new McpService(serverUri, authCredentials);
-  }
-
-  if (currentInstance && currentInstance.authCredentials !== authCredentials) {
-    // We should avoid such situations as they may lead to unexpected behavior
-    throw new Error('MCP service is already initialized at provided URL with different credentials');
+  } else if (currentInstance && currentInstance.authCredentials !== authCredentials) {
+    currentInstance.closeConnection();
+    currentInstance = new McpService(serverUri, authCredentials);
   }
 
   return currentInstance;
