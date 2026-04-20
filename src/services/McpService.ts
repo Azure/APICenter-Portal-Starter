@@ -42,6 +42,10 @@ export class McpService {
 
     this.serverUri = serverUri;
 
+    // Prevent unhandled promise rejection if init fails before a consumer awaits.
+    // Actual errors are still caught when makeApiSpec() calls ensureInitialized().
+    this.initDeferredPromise.promise.catch(() => {});
+
     this.fetchProxy = this.fetchProxy.bind(this);
     this.handleEndpointReceived = this.handleEndpointReceived.bind(this);
     this.handleErrorReceived = this.handleErrorReceived.bind(this);

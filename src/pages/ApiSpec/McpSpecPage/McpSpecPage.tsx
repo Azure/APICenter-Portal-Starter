@@ -119,7 +119,8 @@ export const McpSpecPage: React.FC<Props> = ({ definitionId, deployment, sidebar
           'The MCP server requires authentication, but required configuration cannot be determined automatically.'
         );
       } else {
-        setError('Failed to connect to the MCP server. Please try again later.');
+        const message = err instanceof Error ? err.message : 'Unknown error';
+        setError(`Failed to connect to the MCP server: ${message}`);
       }
     } finally {
       setIsSpecLoading(false);
