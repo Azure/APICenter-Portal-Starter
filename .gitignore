@@ -360,5 +360,3 @@ config.json
 # Design playground (local-only prototype tooling)
 playground/
 .env.local
-
-docs/superpowers/
