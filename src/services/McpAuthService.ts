@@ -1,4 +1,4 @@
-import { McpServerAuthMetadata, McpProtectedResourceMetadata } from '@/types/mcp';
+import { McpServerAuthMetadata, McpProtectedResourceMetadata, McpDiscoveredAuth } from '@/types/mcp';
 import { Oauth2Credentials } from '@/types/apiAuth';
 import { apimFetchProxy } from '@/utils/apimProxy';
 import { getMcpCorsProxyEnabled } from '@/constants';
@@ -217,7 +217,10 @@ export const McpAuthService = {
    * RFC 9728 discovery: parses WWW-Authenticate header, fetches resource metadata,
    * follows authorization_servers link, fetches auth server metadata, registers client.
    */
-  async discoverFromWwwAuthenticate(wwwAuthHeader: string, serverUri: string): Promise<Oauth2Credentials | undefined> {
+  async discoverFromWwwAuthenticate(
+    wwwAuthHeader: string,
+    serverUri: string,
+  ): Promise<Oauth2Credentials | McpDiscoveredAuth | undefined> {
     try {
       // 1. Parse resource_metadata URL from WWW-Authenticate header
       const resourceMetadataUrl = parseWwwAuthenticate(wwwAuthHeader);
@@ -259,8 +262,24 @@ export const McpAuthService = {
         return undefined;
       }
 
-      // 7. Register client
-      return registerClient(authServerMetadata);
+      // 7. Try dynamic client registration; fall back to MSAL discovery
+      const registered = await registerClient(authServerMetadata);
+      if (registered) {
+        return registered;
+      }
+
+      // No dynamic registration — return discovered auth for MSAL flow
+      const scopes = resourceMetadata.scopes_supported ?? [];
+      if (scopes.length === 0) {
+        console.warn('No scopes_supported in resource metadata for MSAL fallback');
+        return undefined;
+      }
+
+      return {
+        type: 'msal',
+        authority: issuer,
+        scopes,
+      };
     } catch (err) {
       console.warn('RFC 9728 discovery failed:', err);
       return undefined;
