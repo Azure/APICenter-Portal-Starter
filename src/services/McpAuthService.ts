@@ -97,21 +97,6 @@ export function validateResourceMetadata(metadata: McpProtectedResourceMetadata,
   }
 }
 
-/**
- * Derives the OAuth authorization server metadata URL from an issuer identifier
- * per RFC 8414 Section 3.
- *
- * For issuers without a path: {origin}/.well-known/oauth-authorization-server
- * For issuers with a path:    {issuer}/.well-known/oauth-authorization-server
- *
- * Example: "https://login.microsoftonline.com/organizations/v2.0"
- *       -> "https://login.microsoftonline.com/organizations/v2.0/.well-known/oauth-authorization-server"
- */
-function deriveAuthServerMetadataUrl(issuer: string): string {
-  const normalized = issuer.endsWith('/') ? issuer.slice(0, -1) : issuer;
-  return `${normalized}/.well-known/oauth-authorization-server`;
-}
-
 async function fetchResourceMetadata(url: string): Promise<McpProtectedResourceMetadata | undefined> {
   try {
     const response = await mcpFetch(url, { method: 'GET' });
@@ -133,19 +118,28 @@ async function fetchAuthServerMetadata(issuer: string): Promise<McpServerAuthMet
       return undefined;
     }
 
-    const metadataUrl = deriveAuthServerMetadataUrl(issuer);
+    const normalized = issuer.endsWith('/') ? issuer.slice(0, -1) : issuer;
 
-    if (!validateMetadataUrl(metadataUrl)) {
-      console.warn(`Auth server metadata URL failed validation: ${metadataUrl}`);
-      return undefined;
+    // Try RFC 8414 first, then fall back to OpenID Connect discovery
+    // (e.g., Microsoft Entra ID uses openid-configuration instead of oauth-authorization-server)
+    const candidates = [
+      `${normalized}/.well-known/oauth-authorization-server`,
+      `${normalized}/.well-known/openid-configuration`,
+    ];
+
+    for (const metadataUrl of candidates) {
+      if (!validateMetadataUrl(metadataUrl)) {
+        continue;
+      }
+
+      const response = await mcpFetch(metadataUrl, { method: 'GET' });
+      if (response.ok) {
+        return await response.json();
+      }
     }
 
-    const response = await mcpFetch(metadataUrl, { method: 'GET' });
-    if (!response.ok) {
-      console.warn(`Failed to fetch auth server metadata from ${metadataUrl}: ${response.status}`);
-      return undefined;
-    }
-    return await response.json();
+    console.warn(`Failed to fetch auth server metadata for issuer: ${issuer}`);
+    return undefined;
   } catch (err) {
     console.warn('Failed to fetch auth server metadata:', err);
     return undefined;
