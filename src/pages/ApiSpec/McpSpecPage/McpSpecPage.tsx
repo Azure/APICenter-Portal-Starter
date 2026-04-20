@@ -112,12 +112,11 @@ export const McpSpecPage: React.FC<Props> = ({ definitionId, deployment, sidebar
         }
 
         setError(
-          'The MCP server requires authentication, but required configuration cannot be determined automatically.'
+          'The MCP server requires authentication. ' +
+            'OAuth discovery was attempted but failed — the authorization metadata endpoint may not be reachable from this origin.'
         );
       } else if (err instanceof McpUnauthorizedError) {
-        setError(
-          'The MCP server requires authentication, but required configuration cannot be determined automatically.'
-        );
+        setError('The MCP server requires authentication, but the server did not provide discovery information.');
       } else {
         const isCorsError = err instanceof TypeError && err.message === 'Failed to fetch';
         if (isCorsError) {
