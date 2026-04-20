@@ -10,6 +10,7 @@ import { InfoTable } from '@/components/InfoTable';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import { formatKindDisplay } from '@/utils/formatKind';
 import { apiAdapter } from '@/experiences/ApiList/apiAdapter';
+import { ENABLE_LIST_EVAL_BADGES } from '@/constants/featureFlags';
 import { ContributeCard } from '@/experiences/ContributeCard';
 import { ApiMetadata } from '@/types/api';
 import { AppCapabilities } from '@/types/config';
@@ -133,7 +134,7 @@ export const ApiList: React.FC = () => {
 
   return (
     <>
-      <InfoTable columnLabels={['Name', 'Summary', 'Score', 'Lifecycle stage', 'Type']}>
+      <InfoTable columnLabels={['Name', 'Summary', ...(ENABLE_LIST_EVAL_BADGES ? ['Score'] : []), 'Lifecycle stage', 'Type']}>
         {adaptedApiList.map((api) => (
           <InfoTable.Row key={api.name}>
             <InfoTable.Cell>
@@ -142,17 +143,19 @@ export const ApiList: React.FC = () => {
             <InfoTable.Cell>
               <MarkdownRenderer markdown={api.description} maxLength={120} />
             </InfoTable.Cell>
-            <InfoTable.Cell>
-              {api.evalScore != null && api.evalMaxScore != null && api.evalMaxScore > 0 && (
-                <Badge
-                  appearance="filled"
-                  color={api.evalScore / api.evalMaxScore >= 0.8 ? 'success' : api.evalScore / api.evalMaxScore >= 0.6 ? 'warning' : 'danger'}
-                  shape="circular"
-                >
-                  {(api.evalScore / api.evalMaxScore * 5).toFixed(1)}/5
-                </Badge>
-              )}
-            </InfoTable.Cell>
+            {ENABLE_LIST_EVAL_BADGES && (
+              <InfoTable.Cell>
+                {api.evalScore != null && api.evalMaxScore != null && api.evalMaxScore > 0 && (
+                  <Badge
+                    appearance="filled"
+                    color={api.evalScore / api.evalMaxScore >= 0.8 ? 'success' : api.evalScore / api.evalMaxScore >= 0.6 ? 'warning' : 'danger'}
+                    shape="circular"
+                  >
+                    {(api.evalScore / api.evalMaxScore * 5).toFixed(1)}/5
+                  </Badge>
+                )}
+              </InfoTable.Cell>
+            )}
             <InfoTable.Cell>
               {!!api.lifecycleStage && (
                 <Badge appearance="tint" color="informative" shape="rounded">
