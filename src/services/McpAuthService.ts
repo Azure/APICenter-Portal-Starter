@@ -219,7 +219,7 @@ export const McpAuthService = {
    */
   async discoverFromWwwAuthenticate(
     wwwAuthHeader: string,
-    serverUri: string,
+    serverUri: string
   ): Promise<Oauth2Credentials | McpDiscoveredAuth | undefined> {
     try {
       // 1. Parse resource_metadata URL from WWW-Authenticate header
