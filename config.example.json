@@ -8,6 +8,7 @@
       "authority": "https://login.microsoftonline.com/"
   },
   "mcp": {
-      "useCorsProxy": false
+      "useCorsProxy": false,
+      "enableEntraIdAuth": false
   }
 }

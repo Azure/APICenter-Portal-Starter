@@ -90,3 +90,9 @@ export interface McpProtectedResourceMetadata {
   bearer_methods_supported?: string[];
   resource_documentation?: string;
 }
+
+export interface McpDiscoveredAuth {
+  type: 'msal';
+  authority: string;
+  scopes: string[];
+}

@@ -30,6 +30,8 @@ export interface Config {
   mcp?: {
     /** Whether to use the CORS proxy for MCP server calls. Defaults to false. */
     useCorsProxy?: boolean;
+    /** Whether to enable Entra ID authentication for MCP servers. Defaults to false. */
+    enableEntraIdAuth?: boolean;
   };
 
   /**
