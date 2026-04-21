@@ -30,10 +30,9 @@ enum McpServerAuthState {
 interface Props {
   definitionId: ApiDefinitionId;
   deployment: ApiDeployment;
-  sidebarExtra?: React.ReactNode;
 }
 
-export const McpSpecPage: React.FC<Props> = ({ definitionId, deployment, sidebarExtra }) => {
+export const McpSpecPage: React.FC<Props> = ({ definitionId, deployment }) => {
   const [authState, setAuthState] = useState<McpServerAuthState>(McpServerAuthState.NOT_AUTHORIZED);
   const [mcpOAuthCredentials, setMcpOAuthCredentials] = useState<Oauth2Credentials | undefined>();
   const [authCredentials, setAuthCredentials] = useState<ApiAuthCredentials | undefined>();
@@ -257,7 +256,6 @@ export const McpSpecPage: React.FC<Props> = ({ definitionId, deployment, sidebar
       definitionId={definitionId}
       deployment={deployment}
       apiSpec={apiSpec}
-      sidebarExtra={sidebarExtra}
     />
   );
 };

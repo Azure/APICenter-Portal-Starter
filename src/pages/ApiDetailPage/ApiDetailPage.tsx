@@ -1,19 +1,20 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Accordion, AccordionHeader, AccordionItem, AccordionPanel, Badge, Button, Link, Spinner, Tab, TabList } from '@fluentui/react-components';
-import { Open16Regular } from '@fluentui/react-icons';
-import { DocumentRegular } from '@fluentui/react-icons';
+import { Badge, Button, Dropdown, Link, Option, Spinner, Tab, TabList } from '@fluentui/react-components';
+import { ArrowDownloadRegular, DocumentRegular, ListRegular } from '@fluentui/react-icons';
 import { useApi } from '@/hooks/useApi';
 import { useServer } from '@/hooks/useServer';
 import { kindToResourceType, ApiDefinitionId } from '@/types/apiDefinition';
 import { setDocumentTitle } from '@/utils/dom';
 import { DetailPageLayout } from '@/components/DetailPageLayout/DetailPageLayout';
 import ApiDefinitionSelect, { ApiDefinitionSelection } from '@/experiences/ApiDefinitionSelect';
-import CustomMetadata from '@/components/CustomMetadata';
+import ApiAdditionalInfo from '@/experiences/ApiAdditionalInfo';
 import { HeaderActions } from '@/experiences/HeaderActions';
 import { formatKindDisplay } from '@/utils/formatKind';
 import { buildSkillDeeplink } from '@/utils/skillDeeplink';
 import { useApiSpec } from '@/hooks/useApiSpec';
+import { useApiSpecUrl } from '@/hooks/useApiSpecUrl';
+import { useApiDefinitions } from '@/hooks/useApiDefinitions';
 import ApiSpecPageLayout from '@/pages/ApiSpec/ApiSpecPageLayout';
 import McpSpecPage from '@/pages/ApiSpec/McpSpecPage';
 import EmptyStateMessage from '@/components/EmptyStateMessage';
@@ -34,7 +35,7 @@ export const ApiDetailPage: React.FC = () => {
 
   const hiddenSelects = ['mcp', 'skill', 'plugin'].includes(kind ?? '')
     ? (['definition', 'deployment'] as Array<keyof ApiDefinitionSelection>)
-    : [];
+    : (['definition'] as Array<keyof ApiDefinitionSelection>);
 
   const server = useServer(kind === 'mcp' ? apiName : undefined);
 
@@ -112,60 +113,9 @@ export const ApiDetailPage: React.FC = () => {
   const isMcp = kind === 'mcp';
 
   const hasCustomProps = !!Object.keys(api.data?.customProperties || {}).length;
-
-  // Left sidebar: only external docs and contacts (no properties — those go in a tab)
-  const sidebarExtra = useMemo(() => {
-    if (!api.data) return undefined;
-    const hasExternalDocs = !!api.data.externalDocumentation?.length;
-    const hasContacts = !!api.data.contacts?.length;
-    if (!hasExternalDocs && !hasContacts) return undefined;
-
-    const sections: string[] = [];
-    if (hasExternalDocs) sections.push('docs');
-    if (hasContacts) sections.push('contacts');
-
-    return (
-      <Accordion multiple defaultOpenItems={sections}>
-        {hasExternalDocs && (
-          <AccordionItem value="docs">
-            <AccordionHeader as="h4" size="large">
-              <strong>External documentation</strong>
-            </AccordionHeader>
-            <AccordionPanel>
-              {api.data.externalDocumentation!.filter(d => !!d.title && d.url).map(doc => (
-                <Link key={doc.title} href={doc.url.startsWith('http') ? doc.url : `https://${doc.url}`} target="_blank" style={{ display: 'block' }}>
-                  {doc.title} <Open16Regular />
-                </Link>
-              ))}
-            </AccordionPanel>
-          </AccordionItem>
-        )}
-        {hasContacts && (
-          <AccordionItem value="contacts">
-            <AccordionHeader as="h4" size="large">
-              <strong>Contact information</strong>
-            </AccordionHeader>
-            <AccordionPanel>
-              {api.data.contacts!.map(contact => (
-                <React.Fragment key={contact.name}>
-                  {contact.url && (
-                    <Link href={contact.url.startsWith('http') ? contact.url : `https://${contact.url}`} target="_blank" style={{ display: 'block' }}>
-                      {contact.name} <Open16Regular />
-                    </Link>
-                  )}
-                  {!contact.url && !!contact.email && (
-                    <Link href={`mailto:${contact.email}`} target="_blank" style={{ display: 'block' }}>
-                      {contact.name} <Open16Regular />
-                    </Link>
-                  )}
-                </React.Fragment>
-              ))}
-            </AccordionPanel>
-          </AccordionItem>
-        )}
-      </Accordion>
-    );
-  }, [api.data]);
+  const hasExternalDocs = !!api.data?.externalDocumentation?.filter(d => !!d.title && d.url).length;
+  const hasContacts = !!api.data?.contacts?.length;
+  const hasAdditionalInfo = hasCustomProps || hasExternalDocs || hasContacts;
 
   const definitionId = useMemo<ApiDefinitionId | undefined>(() => {
     if (!apiName || !definitionSelection?.version?.name || !definitionSelection?.definition?.name) return undefined;
@@ -179,6 +129,36 @@ export const ApiDetailPage: React.FC = () => {
 
   const apiSpec = useApiSpec(definitionId ?? { apiName: '', versionName: '', definitionName: '' });
 
+  // Download definition — fetch available definitions and spec URL
+  const apiDefinitions = useApiDefinitions(apiName, definitionSelection?.version?.name, kindToResourceType(api.data?.kind));
+  const apiSpecUrl = useApiSpecUrl(definitionId ?? { apiName: '', versionName: '', definitionName: '' });
+  const DOWNLOAD_EXCLUDED_KINDS = ['mcp', 'skill', 'plugin', 'languagemodel'];
+  const showDownloadDefinition = kind && !DOWNLOAD_EXCLUDED_KINDS.includes(kind.toLowerCase()) && !!definitionSelection?.definition;
+
+  const [downloadDefinitionName, setDownloadDefinitionName] = useState<string | undefined>();
+
+  const handleDownloadDefinitionSelect = useCallback<React.ComponentProps<typeof Dropdown>['onOptionSelect']>(
+    (_, data) => {
+      setDownloadDefinitionName(data.selectedOptions[0]);
+    },
+    []
+  );
+
+  // Build download URL for selected definition type
+  const downloadDefinitionId = useMemo<ApiDefinitionId | undefined>(() => {
+    if (!apiName || !definitionSelection?.version?.name) return undefined;
+    const defName = downloadDefinitionName || definitionSelection?.definition?.name;
+    if (!defName) return undefined;
+    return {
+      apiName,
+      versionName: definitionSelection.version.name,
+      definitionName: defName,
+      resourceType: kindToResourceType(api.data?.kind),
+    };
+  }, [apiName, definitionSelection?.version?.name, downloadDefinitionName, definitionSelection?.definition?.name, api.data?.kind]);
+
+  const downloadSpecUrl = useApiSpecUrl(downloadDefinitionId ?? { apiName: '', versionName: '', definitionName: '' });
+
   function renderDocumentation() {
     if (!definitionId) return null;
 
@@ -190,7 +170,6 @@ export const ApiDetailPage: React.FC = () => {
         <McpSpecPage
           definitionId={definitionId}
           deployment={definitionSelection.deployment}
-          sidebarExtra={sidebarExtra}
         />
       );
     }
@@ -208,7 +187,6 @@ export const ApiDetailPage: React.FC = () => {
         definitionId={definitionId}
         deployment={definitionSelection?.deployment}
         apiSpec={apiSpec.data}
-        sidebarExtra={sidebarExtra}
       />
     );
   }
@@ -243,18 +221,55 @@ export const ApiDetailPage: React.FC = () => {
       tabs={
         <TabList selectedValue={selectedTab} onTabSelect={(_, d) => setSelectedTab(d.value as string)}>
           <Tab icon={<DocumentRegular />} value="documentation">Documentation</Tab>
-          {hasCustomProps && <Tab value="properties">Additional properties</Tab>}
+          {hasAdditionalInfo && <Tab icon={<ListRegular />} value="properties">Additional properties</Tab>}
         </TabList>
       }
       selector={
         apiName && api.data ? (
-          <ApiDefinitionSelect
-            apiId={apiName}
-            resourceType={kindToResourceType(api.data.kind)}
-            hiddenSelects={hiddenSelects}
-            isInline
-            onSelectionChange={setDefinitionSelection}
-          />
+          <div style={{ display: 'flex', alignItems: 'flex-end', gap: '24px', flexWrap: 'wrap' }}>
+            <ApiDefinitionSelect
+              apiId={apiName}
+              resourceType={kindToResourceType(api.data.kind)}
+              hiddenSelects={hiddenSelects}
+              isInline
+              onSelectionChange={setDefinitionSelection}
+            />
+            {showDownloadDefinition && (
+              <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px' }}>
+                <div>
+                  <label htmlFor="download-definition-select" style={{ display: 'block', fontSize: '12px', marginBottom: '4px' }}>Download definition</label>
+                  <Dropdown
+                    id="download-definition-select"
+                    size="small"
+                    placeholder="Select definition type"
+                    value={
+                      (downloadDefinitionName
+                        ? apiDefinitions.data?.find(d => d.name === downloadDefinitionName)?.title
+                        : definitionSelection?.definition?.title) || 'Select definition type'
+                    }
+                    selectedOptions={[downloadDefinitionName || definitionSelection?.definition?.name]}
+                    disabled={!apiDefinitions.data?.length}
+                    onOptionSelect={handleDownloadDefinitionSelect}
+                    style={{ minWidth: '160px' }}
+                  >
+                    {apiDefinitions.data?.map((def) => (
+                      <Option key={def.name} value={def.name}>
+                        {def.title}
+                      </Option>
+                    ))}
+                  </Dropdown>
+                </div>
+                <Link
+                  href={downloadSpecUrl.data || '#'}
+                  target="_blank"
+                  disabled={!downloadSpecUrl.data}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', paddingBottom: '6px' }}
+                >
+                  <ArrowDownloadRegular /> Download
+                </Link>
+              </div>
+            )}
+          </div>
         ) : undefined
       }
       headerActions={
@@ -289,7 +304,7 @@ export const ApiDetailPage: React.FC = () => {
     >
       {api.data && selectedTab === 'documentation' && renderDocumentation()}
       {api.data && selectedTab === 'properties' && (
-        <CustomMetadata value={api.data.customProperties} />
+        <ApiAdditionalInfo api={api.data} />
       )}
     </DetailPageLayout>
   );
