@@ -1,7 +1,6 @@
 import React from 'react';
-import { Badge } from '@fluentui/react-components';
+import { Badge, Card, CardHeader, Text, makeStyles, tokens, shorthands } from '@fluentui/react-components';
 import { formatKindDisplay } from '@/utils/formatKind';
-import styles from './ApiCard.module.scss';
 
 export interface ApiCardApi {
   name: string;
@@ -13,7 +12,7 @@ export interface ApiCardApi {
 
 interface Props {
   api: ApiCardApi;
-  linkProps?: React.HTMLProps<HTMLAnchorElement>;
+  onClick?: (e: React.MouseEvent) => void;
   showType?: boolean;
 }
 
@@ -26,25 +25,56 @@ function getCategoryLabel(type?: string): string {
   return 'API';
 }
 
-export const ApiCard: React.FC<Props> = ({ api, showType, linkProps }) => (
-  <a
-    {...linkProps}
-    className={styles.apiCard}
-    title={api.displayName}
-  >
-    <div className={styles.cardContent}>
+const useStyles = makeStyles({
+  card: {
+    minHeight: '200px',
+    height: '100%',
+    boxSizing: 'border-box',
+    cursor: 'pointer',
+    boxShadow: tokens.shadow8,
+  },
+  tags: {
+    display: 'flex',
+    gap: tokens.spacingHorizontalS,
+  },
+  description: {
+    display: '-webkit-box',
+    WebkitLineClamp: 4,
+    WebkitBoxOrient: 'vertical',
+    overflow: 'hidden',
+  },
+});
+
+export const ApiCard: React.FC<Props> = ({ api, showType, onClick }) => {
+  const classes = useStyles();
+
+  return (
+    <Card
+      className={classes.card}
+      focusMode="tab-exit"
+      onClick={onClick}
+      aria-label={api.displayName}
+    >
       {showType && (
-        <div className={styles.tags}>
+        <div className={classes.tags}>
           <Badge appearance="filled" color="brand" shape="circular">{getCategoryLabel(api.type)}</Badge>
           {!!api.type && !STANDALONE_KINDS.includes(api.type.toLowerCase()) && (
             <Badge appearance="tint" color="brand" shape="circular">{formatKindDisplay(api.type)}</Badge>
           )}
         </div>
       )}
-      <h4 className={styles.title}>{api.displayName}</h4>
-      {api.description && <p className={styles.description}>{api.description}</p>}
-    </div>
-  </a>
-);
+      <CardHeader
+        header={<Text weight="semibold" size={400}>{api.displayName}</Text>}
+        description={
+          api.description ? (
+            <Text className={classes.description} size={300}>
+              {api.description}
+            </Text>
+          ) : undefined
+        }
+      />
+    </Card>
+  );
+};
 
 export default React.memo(ApiCard);

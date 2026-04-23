@@ -45,35 +45,30 @@ export const ApiList: React.FC = () => {
     return adapted;
   }, [apis.data]);
 
-  const apiLinkPropsProvider = useCallback(
+  const getApiUrl = useCallback(
     (api: ApiCardApi) => {
-      const typedApi = api as ApiCardApi & { type?: string };
-      const kind = typedApi.type?.toLowerCase();
-      let url: string;
-      if (kind === 'agent') {
-        url = LocationsService.getAgentChatUrl(api.name);
-      } else if (kind === 'skill') {
-        url = LocationsService.getSkillInfoUrl(api.name);
-      } else if (kind === 'plugin') {
-        url = LocationsService.getPluginInfoUrl(api.name);
-      } else if (kind === 'languagemodel') {
-        url = LocationsService.getModelPlaygroundUrl(api.name);
-      } else {
-        url = LocationsService.getApiDetailUrl(api.name);
-      }
+      const kind = (api as ApiCardApi & { type?: string }).type?.toLowerCase();
+      if (kind === 'agent') return LocationsService.getAgentChatUrl(api.name);
+      if (kind === 'skill') return LocationsService.getSkillInfoUrl(api.name);
+      if (kind === 'plugin') return LocationsService.getPluginInfoUrl(api.name);
+      if (kind === 'languagemodel') return LocationsService.getModelPlaygroundUrl(api.name);
+      return LocationsService.getApiDetailUrl(api.name);
+    },
+    []
+  );
 
-      return {
-        href: url,
-        onClick: (e: React.MouseEvent) => {
-          if (e.ctrlKey || e.button !== 0) {
-            return;
-          }
-          e.preventDefault();
-          navigate(url);
-        },
+  const apiClickHandler = useCallback(
+    (api: ApiCardApi) => {
+      return (e: React.MouseEvent) => {
+        const url = getApiUrl(api);
+        if (e.ctrlKey || e.metaKey || e.button !== 0) {
+          window.open(url, '_blank');
+          return;
+        }
+        navigate(url);
       };
     },
-    [navigate]
+    [navigate, getApiUrl]
   );
 
   const handleLoadMore = useCallback(
@@ -123,7 +118,7 @@ export const ApiList: React.FC = () => {
             <ContributeCard url={config.contributions!.gitRepositoryUrl} />
           )}
           {adaptedApiList.map((api) => (
-            <ApiCard key={api.name} api={api} linkProps={apiLinkPropsProvider(api)} showType />
+            <ApiCard key={api.name} api={api} onClick={apiClickHandler(api)} showType />
           ))}
         </div>
         {renderLoadMore()}
@@ -137,7 +132,7 @@ export const ApiList: React.FC = () => {
         {adaptedApiList.map((api) => (
           <InfoTable.Row key={api.name}>
             <InfoTable.Cell>
-              <Link {...apiLinkPropsProvider(api)}>{api.title}</Link>
+              <Link href={getApiUrl(api)} onClick={(e) => { e.preventDefault(); navigate(getApiUrl(api)); }}>{api.title}</Link>
             </InfoTable.Cell>
             <InfoTable.Cell>
               <MarkdownRenderer markdown={api.description} maxLength={120} />
