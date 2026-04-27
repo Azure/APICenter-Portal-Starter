@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from './ContributeCard.module.scss';
+import { Card, Text, makeStyles, tokens, shorthands } from '@fluentui/react-components';
 
 interface Props {
   url: string;
@@ -11,17 +11,39 @@ const GitHubIcon: React.FC<{ className?: string }> = ({ className }) => (
   </svg>
 );
 
-export const ContributeCard: React.FC<Props> = ({ url }) => (
-  <a
-    className={styles.contributeCard}
-    href={url}
-    target="_blank"
-    rel="noopener noreferrer"
-  >
-    <GitHubIcon className={styles.icon} />
-    <h3 className={styles.title}>+ Contribute</h3>
-    <p className={styles.subtitle}>Share plugins, skills, and agents</p>
-  </a>
-);
+const useStyles = makeStyles({
+  card: {
+    minHeight: '200px',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: tokens.spacingVerticalM,
+    cursor: 'pointer',
+    boxShadow: tokens.shadow8,
+  },
+  icon: {
+    width: '48px',
+    height: '48px',
+    color: tokens.colorNeutralForeground2,
+  },
+});
+
+export const ContributeCard: React.FC<Props> = ({ url }) => {
+  const classes = useStyles();
+
+  return (
+    <Card
+      className={classes.card}
+      focusMode="tab-exit"
+      onClick={() => window.open(url, '_blank', 'noopener,noreferrer')}
+      aria-label="Contribute — Share plugins, skills, and agents"
+    >
+      <GitHubIcon className={classes.icon} />
+      <Text weight="semibold" size={400}>+ Contribute</Text>
+      <Text size={300} align="center">Share plugins, skills, and agents</Text>
+    </Card>
+  );
+};
 
 export default React.memo(ContributeCard);
