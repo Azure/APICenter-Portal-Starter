@@ -1,5 +1,5 @@
 import React from 'react';
-import { Badge, Card, CardHeader, Text, makeStyles, tokens, shorthands } from '@fluentui/react-components';
+import { Badge, Card, CardHeader, Text, makeStyles, tokens } from '@fluentui/react-components';
 import { formatKindDisplay } from '@/utils/formatKind';
 
 export interface ApiCardApi {
