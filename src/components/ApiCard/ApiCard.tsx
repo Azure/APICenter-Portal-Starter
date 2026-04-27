@@ -1,5 +1,5 @@
 import React from 'react';
-import { Badge, Card, CardHeader, Text, makeStyles, tokens, shorthands } from '@fluentui/react-components';
+import { Badge, Card, CardHeader, Text, makeStyles, tokens } from '@fluentui/react-components';
 import { formatKindDisplay } from '@/utils/formatKind';
 
 export interface ApiCardApi {
@@ -8,6 +8,8 @@ export interface ApiCardApi {
   description: string;
   type?: string;
   lifecycleStage?: string;
+  evalScore?: number;
+  evalMaxScore?: number;
 }
 
 interface Props {
@@ -23,6 +25,14 @@ function getCategoryLabel(type?: string): string {
     return formatKindDisplay(type);
   }
   return 'API';
+}
+
+type BadgeColor = 'success' | 'warning' | 'danger';
+
+function scoreBadgeColor(ratio: number): BadgeColor {
+  if (ratio >= 0.8) return 'success';
+  if (ratio >= 0.6) return 'warning';
+  return 'danger';
 }
 
 const useStyles = makeStyles({
@@ -47,6 +57,9 @@ const useStyles = makeStyles({
 
 export const ApiCard: React.FC<Props> = ({ api, showType, onClick }) => {
   const classes = useStyles();
+  const hasScore = api.evalScore != null && api.evalMaxScore != null && api.evalMaxScore > 0;
+  const scoreRatio = hasScore ? api.evalScore! / api.evalMaxScore! : 0;
+  const scoreDisplay = hasScore ? (scoreRatio * 5).toFixed(1) : null;
 
   return (
     <Card
@@ -60,6 +73,15 @@ export const ApiCard: React.FC<Props> = ({ api, showType, onClick }) => {
           <Badge appearance="filled" color="brand" shape="circular">{getCategoryLabel(api.type)}</Badge>
           {!!api.type && !STANDALONE_KINDS.includes(api.type.toLowerCase()) && (
             <Badge appearance="tint" color="brand" shape="circular">{formatKindDisplay(api.type)}</Badge>
+          )}
+          {hasScore && (
+            <Badge
+              appearance="filled"
+              color={scoreBadgeColor(scoreRatio)}
+              shape="circular"
+            >
+              {scoreDisplay}/5
+            </Badge>
           )}
         </div>
       )}

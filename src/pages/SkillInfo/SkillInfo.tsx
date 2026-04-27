@@ -52,7 +52,25 @@ export const SkillInfo: React.FC = () => {
       tabs={
         <TabList selectedValue={selectedTab} onTabSelect={(_, d) => setSelectedTab(d.value as string)}>
           <Tab icon={<DocumentRegular />} value="documentation">Documentation</Tab>
-          {evalResult.data && <Tab value="assessment">Assessment</Tab>}
+          {evalResult.data && (
+            <Tab value="assessment">
+              Assessment
+              {evalResult.data.maxScore > 0 && (
+                <Badge
+                  appearance="filled"
+                  color={
+                    (evalResult.data.overallScore / evalResult.data.maxScore) >= 0.8 ? 'success'
+                    : (evalResult.data.overallScore / evalResult.data.maxScore) >= 0.6 ? 'warning'
+                    : 'danger'
+                  }
+                  shape="circular"
+                  style={{ marginLeft: 8 }}
+                >
+                  {((evalResult.data.overallScore / evalResult.data.maxScore) * 5).toFixed(1)}/5
+                </Badge>
+              )}
+            </Tab>
+          )}
           {hasCustomProps && <Tab value="properties">Additional properties</Tab>}
         </TabList>
       }

@@ -30,6 +30,12 @@
   display: flex;
   gap: 0.5rem;
   margin-bottom: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.scoreBadge {
+  font-weight: 600;
 }
 
 .title {

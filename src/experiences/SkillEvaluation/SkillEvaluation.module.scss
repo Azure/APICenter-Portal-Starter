@@ -45,10 +45,27 @@
   font-size: 1.25rem;
 }
 
+.thresholdBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
 .evalUpdated {
-  margin: 0 0 24px;
+  margin: 4px 0 12px;
   color: var(--colorNeutralForeground3);
   font-size: 0.8125rem;
+  letter-spacing: 0.01em;
+}
+
+.aiSummary {
+  margin: 0 0 28px;
+  padding: 16px 20px;
+  background: var(--colorNeutralBackground3);
+  border-radius: 8px;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--colorNeutralForeground2);
 }
 
 .evalSection {
@@ -66,7 +83,7 @@
 
 .evalContentLayout {
   display: flex;
-  gap: 32px;
+  gap: 40px;
   align-items: flex-start;
 
   @media (max-width: 768px) {
@@ -74,19 +91,97 @@
   }
 }
 
-/* ── Score bar ── */
+/* ── Criteria cards (left column) ── */
 
-.scoreBarList {
+.criteriaList {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 0;
   flex: 1;
   min-width: 0;
 }
 
+.criterionCard {
+  padding: 14px 12px;
+  cursor: default;
+  border-radius: var(--borderRadiusMedium);
+  transition: background-color 0.15s ease;
+  position: relative;
+
+  & + & {
+    border-top: 1px solid var(--colorNeutralStroke2);
+  }
+}
+
+.criterionHighlighted {
+  background-color: var(--colorNeutralBackground3);
+}
+
+.criterionCardHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.criterionName {
+  font-weight: 600;
+  font-size: 0.875rem;
+  flex: 1;
+}
+
+.criterionScore {
+  font-weight: 600;
+  font-size: 0.875rem;
+  flex-shrink: 0;
+}
+
+.criterionScorePass {
+  color: var(--colorPaletteGreenForeground1);
+}
+
+.criterionScoreFail {
+  color: var(--colorPaletteRedForeground1);
+}
+
+.criterionBarTrack {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--colorNeutralStroke2);
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.criterionBarFill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+
+.criterionBarFillPass {
+  background: var(--colorPaletteGreenBackground3);
+}
+
+.criterionBarFillFail {
+  background: var(--colorPaletteRedBackground3);
+}
+
+.criterionReasoning {
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--colorNeutralForeground3);
+  margin: 0;
+}
+
+/* ── Radar chart (right column) ── */
+
 .radarContainer {
-  flex: 0 0 320px;
-  min-height: 280px;
+  flex: 1;
+  min-height: 450px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 
   @media (max-width: 768px) {
     flex: none;
@@ -94,76 +189,244 @@
   }
 }
 
-.scoreBarItem {
-  padding-left: 0;
-  border-left: none;
+.radarSvg {
+  width: 420px;
+  height: 400px;
+
+  @media (max-width: 480px) {
+    width: 320px;
+    height: 300px;
+  }
 }
 
-.scoreBarHeader {
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
-  margin-bottom: 6px;
+.radarGrid {
+  fill: none;
+  stroke: var(--colorNeutralStroke2);
+  stroke-width: 0.75;
 }
 
-.scoreBarLabel {
+.radarAxis {
+  stroke: var(--colorNeutralStroke2);
+  stroke-width: 0.5;
+}
+
+.radarThresholdRing {
+  fill: none;
+  stroke: var(--colorPaletteRedForeground1);
+  stroke-width: 1;
+  stroke-dasharray: 4 3;
+  opacity: 0.35;
+}
+
+.radarArea {
+  fill: rgba(15, 108, 189, 0.08);
+  stroke: var(--colorBrandForeground1);
+  stroke-width: 1.5;
+}
+
+.radarDotGroup {
+  cursor: pointer;
+  transition: filter 0.2s ease;
+}
+
+.dotBg {
+  transition: r 0.2s ease, filter 0.2s ease;
+}
+
+.radarDotPass .dotBg {
+  fill: var(--colorPaletteGreenBackground3);
+  opacity: 0.85;
+}
+
+.radarDotFail .dotBg {
+  fill: var(--colorPaletteRedBackground3);
+  opacity: 0.85;
+}
+
+.dotLabel {
+  fill: #fff;
   font-weight: 600;
-  font-size: 0.9375rem;
+  font-size: 10px;
+  text-anchor: middle;
+  dominant-baseline: central;
+  pointer-events: none;
 }
 
-.scoreBarValue {
-  font-weight: 600;
-  font-size: 0.9375rem;
-  color: var(--colorNeutralForeground2);
+.dotRing {
+  fill: none;
+  stroke: var(--colorBrandForeground1);
+  stroke-width: 2;
+  opacity: 0;
+  transition: opacity 0.2s ease;
 }
 
-.scoreBarTrack {
+.radarDotHighlighted .dotBg {
+  filter: drop-shadow(0 0 4px rgba(15, 108, 189, 0.35));
+}
+
+.radarDotHighlighted .dotRing {
+  opacity: 1;
+}
+
+.radarCriterionLabel {
+  font-size: 11px;
+  fill: var(--colorNeutralForeground3);
+  font-weight: 400;
+}
+
+.radarLegend {
+  font-size: 0.75rem;
+  color: var(--colorNeutralForeground4);
+  text-align: center;
+  margin-top: 12px;
+}
+
+.radarLegendDot {
+  display: inline-block;
+  width: 8px;
   height: 8px;
+  border-radius: 50%;
+  vertical-align: middle;
+  margin-right: 4px;
+}
+
+/* ── Recommendations ── */
+
+.recCard {
+  display: flex;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--colorNeutralStroke2);
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.recSeverity {
+  width: 3px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.recSeverityHigh {
+  background: var(--colorPaletteRedBackground3);
+}
+
+.recSeverityMedium {
+  background: var(--colorPaletteYellowBackground3);
+}
+
+.recContent {
+  h4 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin: 0 0 2px;
+  }
+
+  p {
+    font-size: 0.8125rem;
+    color: var(--colorNeutralForeground3);
+    line-height: 1.5;
+    margin: 0;
+  }
+}
+
+.impactTag {
+  display: inline-block;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  padding: 1px 6px;
   border-radius: 4px;
-  background-color: var(--colorNeutralBackground3);
-  overflow: hidden;
+  margin-left: 6px;
+  vertical-align: middle;
 }
 
-.scoreBarFill {
-  height: 100%;
-  border-radius: 4px;
-  transition: width 0.4s ease;
+.impactTagHigh {
+  background: var(--colorPaletteRedBackground1);
+  color: var(--colorPaletteRedForeground1);
 }
 
-.scoreBarReasoning {
-  margin: 8px 0 0;
-  font-size: 0.8125rem;
-  line-height: 1.5;
-  color: var(--colorNeutralForeground3);
+.impactTagMedium {
+  background: var(--colorPaletteYellowBackground1);
+  color: var(--colorPaletteYellowForeground1);
 }
 
-/* ── Assertion list ── */
+/* ── Assertion list — native <details>/<summary> accordion ── */
 
 .assertionSection {
-  margin-top: 32px;
-  margin-bottom: 24px;
+  margin-top: 0;
+  border-bottom: 1px solid var(--colorNeutralStroke2);
+
+  &:first-of-type {
+    border-top: 1px solid var(--colorNeutralStroke2);
+    margin-top: 32px;
+  }
+
+  summary {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 4px;
+    cursor: pointer;
+    list-style: none;
+    border-radius: var(--borderRadiusMedium);
+    transition: background-color 0.15s ease;
+
+    &:hover {
+      background-color: var(--colorNeutralBackground3);
+    }
+
+    &::-webkit-details-marker {
+      display: none;
+    }
+
+    &::marker {
+      content: '';
+    }
+  }
 }
 
-.assertionHeader {
-  display: flex;
+.assertionChevron {
+  display: inline-flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 8px;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  color: var(--colorNeutralForeground3);
+  transition: transform 0.15s ease;
+
+  details[open] > summary > & {
+    transform: rotate(90deg);
+  }
 }
 
 .assertionTitle {
   margin: 0;
   font-size: 0.875rem;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--colorNeutralForeground2);
+  color: var(--colorNeutralForeground1);
+  flex: 1;
+}
+
+.assertionCount {
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.assertionCountPass {
+  color: var(--colorPaletteGreenForeground1);
+}
+
+.assertionCountFail {
+  color: var(--colorPaletteRedForeground1);
 }
 
 .assertionList {
   list-style: none;
   margin: 0;
-  padding: 0;
+  padding: 4px 4px 14px 34px;
   display: flex;
   flex-direction: column;
   gap: 8px;
