@@ -89,7 +89,7 @@ export const ApiDetailPage: React.FC = () => {
     } else if (hasLocalInstall) {
       const [pkg] = server.data!.packages!;
       if (!pkg) return;
-      const runtimeArgs = pkg.runtimeArguments.map((arg: { value?: string }) => arg.value).filter(Boolean);
+      const runtimeArgs = (pkg.runtimeArguments ?? []).map((arg: { value?: string }) => arg.value).filter(Boolean);
       const packageRef = pkg.version ? `${pkg.identifier}@${pkg.version}` : pkg.identifier;
       const args = pkg.runtimeHint === 'npx' ? ['-y', packageRef, ...runtimeArgs] : runtimeArgs;
       const payload = {
