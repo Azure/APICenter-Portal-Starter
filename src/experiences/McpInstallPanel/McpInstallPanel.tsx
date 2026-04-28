@@ -35,7 +35,8 @@ export const McpInstallPanel: React.FC<McpInstallPanelProps> = ({ apiName, apiTi
         if (!pkg) return;
 
         const runtimeArgs = pkg.runtimeArguments.map((arg) => arg.value);
-        const args = pkg.runtimeHint === 'npx' ? ['-y', pkg.identifier, ...runtimeArgs] : runtimeArgs;
+        const packageRef = pkg.version ? `${pkg.identifier}@${pkg.version}` : pkg.identifier;
+        const args = pkg.runtimeHint === 'npx' ? ['-y', packageRef, ...runtimeArgs] : runtimeArgs;
 
         payload = {
           name: apiTitle || pkg.identifier.split('/').pop() || pkg.identifier,

@@ -90,7 +90,8 @@ export const ApiDetailPage: React.FC = () => {
       const [pkg] = server.data!.packages!;
       if (!pkg) return;
       const runtimeArgs = pkg.runtimeArguments.map((arg: { value?: string }) => arg.value).filter(Boolean);
-      const args = pkg.runtimeHint === 'npx' ? ['-y', pkg.identifier, ...runtimeArgs] : runtimeArgs;
+      const packageRef = pkg.version ? `${pkg.identifier}@${pkg.version}` : pkg.identifier;
+      const args = pkg.runtimeHint === 'npx' ? ['-y', packageRef, ...runtimeArgs] : runtimeArgs;
       const payload = {
         name: api.data?.title || pkg.identifier.split('/').pop() || pkg.identifier,
         type: pkg.transport?.type || 'stdio',
