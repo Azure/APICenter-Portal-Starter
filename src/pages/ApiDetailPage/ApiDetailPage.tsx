@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Badge, Button, Dropdown, Link, Option, Spinner, Tab, TabList } from '@fluentui/react-components';
+import { Badge, Button, Dropdown, Link, Menu, MenuItem, MenuList, MenuPopover, MenuTrigger, Option, SplitButton, Spinner, Tab, TabList } from '@fluentui/react-components';
 import { ArrowDownloadRegular, DocumentRegular, ListRegular } from '@fluentui/react-icons';
 import { useApi } from '@/hooks/useApi';
 import { useServer } from '@/hooks/useServer';
@@ -72,16 +72,17 @@ export const ApiDetailPage: React.FC = () => {
   const hasLocalInstall = kind === 'mcp' && !!server.data?.packages;
   const hasMcpInstall = hasRemoteInstall || hasLocalInstall;
 
-  const handleMcpInstall = useCallback(() => {
-    const preferRemote = hasRemoteInstall;
+  const handleMcpInstall = useCallback((target?: 'remote' | 'local') => {
+    const useRemote = target ? target === 'remote' : hasRemoteInstall;
+    const baseName = api.data?.title || apiName || '';
 
-    if (preferRemote) {
+    if (useRemote && hasRemoteInstall) {
       const runtimeUri = definitionSelection?.deployment?.server.runtimeUri[0];
       if (!runtimeUri) return;
       const matchingRemote = server.data?.remotes?.find((r) => r.url === runtimeUri);
       const transportType = matchingRemote?.transport_type || 'sse';
       const payload = {
-        name: api.data?.title || apiName || '',
+        name: hasLocalInstall ? `${baseName} (remote)` : baseName,
         type: transportType,
         url: runtimeUri,
       };
@@ -92,8 +93,9 @@ export const ApiDetailPage: React.FC = () => {
       const runtimeArgs = (pkg.runtimeArguments ?? []).map((arg: { value?: string }) => arg.value).filter(Boolean);
       const packageRef = pkg.version ? `${pkg.identifier}@${pkg.version}` : pkg.identifier;
       const args = pkg.runtimeHint === 'npx' ? ['-y', packageRef, ...runtimeArgs] : runtimeArgs;
+      const localBase = baseName || pkg.identifier.split('/').pop() || pkg.identifier;
       const payload = {
-        name: api.data?.title || pkg.identifier.split('/').pop() || pkg.identifier,
+        name: hasRemoteInstall ? `${localBase} (local)` : localBase,
         type: pkg.transport?.type || 'stdio',
         command: pkg.runtimeHint,
         args,
@@ -277,13 +279,36 @@ export const ApiDetailPage: React.FC = () => {
         hasInstall ? (
           <HeaderActions showExtensionHint>
             {hasMcpInstall && (
-              <Button
-                size="medium"
-                icon={<img height={18} src={VsCodeLogo} alt="VS Code" />}
-                onClick={handleMcpInstall}
-              >
-                Install in VS Code
-              </Button>
+              hasRemoteInstall && hasLocalInstall ? (
+                <Menu positioning="below-end">
+                  <MenuTrigger disableButtonEnhancement>
+                    {(triggerProps) => (
+                      <SplitButton
+                        size="medium"
+                        icon={<img height={18} src={VsCodeLogo} alt="VS Code" />}
+                        menuButton={triggerProps}
+                        primaryActionButton={{ onClick: () => handleMcpInstall('remote') }}
+                      >
+                        Install in VS Code
+                      </SplitButton>
+                    )}
+                  </MenuTrigger>
+                  <MenuPopover>
+                    <MenuList>
+                      <MenuItem onClick={() => handleMcpInstall('remote')}>Install remote server</MenuItem>
+                      <MenuItem onClick={() => handleMcpInstall('local')}>Install local server</MenuItem>
+                    </MenuList>
+                  </MenuPopover>
+                </Menu>
+              ) : (
+                <Button
+                  size="medium"
+                  icon={<img height={18} src={VsCodeLogo} alt="VS Code" />}
+                  onClick={() => handleMcpInstall()}
+                >
+                  Install in VS Code
+                </Button>
+              )
             )}
             {kind === 'skill' && skillSourceUrl && (
               <Button
