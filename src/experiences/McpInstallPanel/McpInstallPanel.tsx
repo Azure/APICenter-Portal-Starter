@@ -38,8 +38,9 @@ export const McpInstallPanel: React.FC<McpInstallPanelProps> = ({ apiName, apiTi
         const packageRef = pkg.version ? `${pkg.identifier}@${pkg.version}` : pkg.identifier;
         const args = pkg.runtimeHint === 'npx' ? ['-y', packageRef, ...runtimeArgs] : runtimeArgs;
 
+        const baseName = apiTitle || pkg.identifier.split('/').pop() || pkg.identifier;
         payload = {
-          name: apiTitle || pkg.identifier.split('/').pop() || pkg.identifier,
+          name: hasRemoteInstall ? `${baseName} (local)` : baseName,
           type: pkg.transport?.type || 'stdio',
           command: pkg.runtimeHint,
           args,
@@ -51,8 +52,9 @@ export const McpInstallPanel: React.FC<McpInstallPanelProps> = ({ apiName, apiTi
         const matchingRemote = server.data?.remotes?.find((r) => r.url === runtimeUri);
         const transportType = matchingRemote?.transport_type || 'sse';
 
+        const baseName = apiTitle || apiName;
         payload = {
-          name: apiTitle || apiName,
+          name: hasLocalInstall ? `${baseName} (remote)` : baseName,
           type: transportType,
           url: runtimeUri,
         };
@@ -60,7 +62,7 @@ export const McpInstallPanel: React.FC<McpInstallPanelProps> = ({ apiName, apiTi
 
       window.open(`${vsCodeType}:mcp/install?${encodeURIComponent(JSON.stringify(payload))}`);
     },
-    [apiName, apiTitle, deployment?.server.runtimeUri, server.data]
+    [apiName, apiTitle, deployment?.server.runtimeUri, server.data, hasRemoteInstall, hasLocalInstall]
   );
 
   if (!hasMcpContent) return null;
