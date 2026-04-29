@@ -12,6 +12,7 @@ import { buildSkillDeeplink } from '@/utils/skillDeeplink';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import CustomMetadata from '@/components/CustomMetadata';
 import { EmptyStateMessage } from '@/components/EmptyStateMessage/EmptyStateMessage';
+import { ConnectPanel } from '@/components/ConnectPanel';
 import VsCodeLogo from '@/assets/vsCodeLogo.svg';
 
 /** Hardcoded source URL for skill installation deeplinks. */
@@ -75,15 +76,12 @@ export const SkillInfo: React.FC = () => {
         </TabList>
       }
       headerActions={
-        <HeaderActions showExtensionHint>
-          <Button
-            size="medium"
-            icon={<img height={18} src={VsCodeLogo} alt="VS Code" />}
-            onClick={handleSkillInstall}
-          >
-            Install in VS Code
-          </Button>
-        </HeaderActions>
+        <ConnectPanel
+          endpointUrl={skillSourceUrl}
+          assetName={api.data?.name || name}
+          onVsCodeInstall={handleSkillInstall}
+          hasVsCodeInstall
+        />
       }
       isLoading={api.isLoading}
       error={api.isError ? 'Failed to load skill details. Please check your connection and try again.' : undefined}

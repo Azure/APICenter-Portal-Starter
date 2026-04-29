@@ -79,12 +79,11 @@ export const DetailPageLayout: React.FC<DetailPageLayoutProps> = ({
             {title && <h1>{title}</h1>}
             {summary && <p className={styles.summary}>{summary}</p>}
             {metadata && <div className={styles.metadata}>{metadata}</div>}
+            {selector && <div className={styles.selectorInline}>{selector}</div>}
           </div>
           {headerActions && <div className={styles.headerActions}>{headerActions}</div>}
         </div>
       </section>
-
-      {selector && <section className={styles.selector}>{selector}</section>}
 
       {tabs && <section className={styles.tabBar}>{tabs}</section>}
 

@@ -29,7 +29,7 @@
 
   .header {
     padding-top: 1.5rem;
-    padding-bottom: 1rem;
+    padding-bottom: 0;
 
     .headerContent {
       display: flex;
@@ -69,13 +69,17 @@
       font-size: 0.8125rem;
     }
 
+    .selectorInline {
+      margin-top: 0.75rem;
+    }
+
     .headerActions {
       flex-shrink: 0;
     }
   }
 
   .selector {
-    padding-bottom: 1rem;
+    padding-bottom: 0.75rem;
   }
 
   .errorState {

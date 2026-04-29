@@ -1,0 +1,109 @@
+@use '@/styles/screen';
+
+.connectPanel {
+  display: flex;
+  flex-direction: column;
+  width: 320px;
+
+  @include screen.small-to-medium {
+    width: 100%;
+  }
+
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--colorNeutralForeground1);
+  }
+
+  .tabList {
+    border-bottom: none;
+  }
+
+  .tabContent {
+    padding: 16px 0 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-height: 80px;
+  }
+
+  .codeBlock {
+    display: flex;
+    align-items: flex-start;
+    background: var(--colorNeutralBackground3);
+    border: 1px solid var(--colorNeutralStroke2);
+    border-radius: var(--borderRadiusMedium);
+    overflow: hidden;
+    position: relative;
+
+    .code {
+      flex: 1;
+      min-width: 0;
+      padding: 10px 14px;
+      font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+      font-size: 0.8125rem;
+      color: var(--colorNeutralForeground1);
+      white-space: pre-wrap;
+      word-break: break-all;
+      user-select: all;
+      line-height: 1.5;
+      max-height: calc(1.5em * 2 + 20px);
+      overflow-y: auto;
+    }
+
+    // Remove fade when content fits within 3 lines
+    .codeShort {
+      mask-image: none;
+      -webkit-mask-image: none;
+    }
+
+    .copyBtn {
+      flex-shrink: 0;
+      border: none;
+      border-left: 1px solid var(--colorNeutralStroke2);
+      border-radius: 0;
+      min-width: 40px;
+      align-self: flex-start;
+      margin-top: 4px;
+
+      &:hover {
+        background: var(--colorNeutralBackground3Hover);
+      }
+    }
+  }
+
+  .installBtn {
+    align-self: flex-start;
+  }
+
+  .hint {
+    font-size: 0.75rem;
+    color: var(--colorNeutralForeground4);
+    line-height: 1.4;
+
+    a {
+      color: var(--colorBrandForeground1);
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+
+    code {
+      font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+      font-size: 0.7rem;
+      background: var(--colorNeutralBackground3);
+      padding: 1px 5px;
+      border-radius: var(--borderRadiusSmall);
+    }
+  }
+}

@@ -18,6 +18,7 @@ import { useApiDefinitions } from '@/hooks/useApiDefinitions';
 import ApiSpecPageLayout from '@/pages/ApiSpec/ApiSpecPageLayout';
 import McpSpecPage from '@/pages/ApiSpec/McpSpecPage';
 import EmptyStateMessage from '@/components/EmptyStateMessage';
+import { ConnectPanel } from '@/components/ConnectPanel';
 import VsCodeLogo from '@/assets/vsCodeLogo.svg';
 
 export const ApiDetailPage: React.FC = () => {
@@ -112,6 +113,23 @@ export const ApiDetailPage: React.FC = () => {
   }, [skillSourceUrl, api.data?.name]);
 
   const hasInstall = hasMcpInstall || (kind === 'skill' && !!skillSourceUrl);
+
+  // Copyable endpoint URL for devs to use in CLI / other tools
+  const endpointUrl = useMemo(() => {
+    // MCP: prefer deployment runtimeUri, fall back to server remotes
+    if (kind === 'mcp') {
+      const deploymentUri = definitionSelection?.deployment?.server.runtimeUri[0];
+      if (deploymentUri) return deploymentUri;
+      const remoteUrl = server.data?.remotes?.[0]?.url;
+      if (remoteUrl) return remoteUrl;
+    }
+    // Skill: sourceUrl from custom properties
+    if (kind === 'skill' && skillSourceUrl) return skillSourceUrl;
+    // General APIs: runtimeUri from deployment
+    const deploymentUri = definitionSelection?.deployment?.server.runtimeUri[0];
+    if (deploymentUri) return deploymentUri;
+    return undefined;
+  }, [kind, definitionSelection?.deployment?.server.runtimeUri, server.data?.remotes, skillSourceUrl]);
 
   const isMcp = kind === 'mcp';
 
@@ -276,50 +294,13 @@ export const ApiDetailPage: React.FC = () => {
         ) : undefined
       }
       headerActions={
-        hasInstall ? (
-          <HeaderActions showExtensionHint>
-            {hasMcpInstall && (
-              hasRemoteInstall && hasLocalInstall ? (
-                <Menu positioning="below-end">
-                  <MenuTrigger disableButtonEnhancement>
-                    {(triggerProps) => (
-                      <SplitButton
-                        size="medium"
-                        icon={<img height={18} src={VsCodeLogo} alt="VS Code" />}
-                        menuButton={triggerProps}
-                        primaryActionButton={{ onClick: () => handleMcpInstall('remote') }}
-                      >
-                        Install in VS Code
-                      </SplitButton>
-                    )}
-                  </MenuTrigger>
-                  <MenuPopover>
-                    <MenuList>
-                      <MenuItem onClick={() => handleMcpInstall('remote')}>Install remote server</MenuItem>
-                      <MenuItem onClick={() => handleMcpInstall('local')}>Install local server</MenuItem>
-                    </MenuList>
-                  </MenuPopover>
-                </Menu>
-              ) : (
-                <Button
-                  size="medium"
-                  icon={<img height={18} src={VsCodeLogo} alt="VS Code" />}
-                  onClick={() => handleMcpInstall()}
-                >
-                  Install in VS Code
-                </Button>
-              )
-            )}
-            {kind === 'skill' && skillSourceUrl && (
-              <Button
-                size="medium"
-                icon={<img height={18} src={VsCodeLogo} alt="VS Code" />}
-                onClick={handleSkillInstall}
-              >
-                Install in VS Code
-              </Button>
-            )}
-          </HeaderActions>
+        (hasInstall || endpointUrl) ? (
+          <ConnectPanel
+            endpointUrl={endpointUrl}
+            assetName={api.data?.name || apiName}
+            onVsCodeInstall={hasMcpInstall ? () => handleMcpInstall() : (kind === 'skill' && skillSourceUrl ? handleSkillInstall : undefined)}
+            hasVsCodeInstall={hasInstall}
+          />
         ) : undefined
       }
       isLoading={api.isLoading}
