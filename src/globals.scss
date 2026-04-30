@@ -17,10 +17,10 @@ body {
 .app-root {
   display: flex;
   flex-direction: column;
-  height: 100%;
-  background: transparent !important;
+  min-height: 100vh;
+  background: var(--colorNeutralBackground1);
 
-  > main {
+  main {
     display: flex;
     flex: 1;
 
@@ -90,4 +90,83 @@ button {
   color: inherit;
   font: inherit;
   cursor: pointer;
+}
+
+// Dark mode overrides for api-docs-ui hardcoded light colors
+// These components use #f5f5f5, #ebebeb, #f3f2f1 instead of Fluent tokens
+[class*="_infoPanel_"] {
+  border-color: var(--colorNeutralStroke1) !important;
+
+  [class*="_title_"] {
+    background-color: var(--colorNeutralBackground3) !important;
+    color: var(--colorNeutralForeground1) !important;
+  }
+
+  [class*="_content_"] {
+    color: var(--colorNeutralForeground1) !important;
+  }
+}
+
+[class*="_testConsolePanel_"] {
+  border-color: var(--colorNeutralStroke1) !important;
+
+  [class*="_header_"] {
+    background-color: var(--colorNeutralBackground3) !important;
+    color: var(--colorNeutralForeground1) !important;
+  }
+}
+
+[class*="_operation_"][class*="_isSelected_"] {
+  background-color: var(--colorNeutralBackground3) !important;
+  color: var(--colorNeutralForeground1) !important;
+}
+
+[class*="_operation_"]:hover {
+  background-color: var(--colorNeutralBackground2) !important;
+}
+
+[class*="_example_"] {
+  background: var(--colorNeutralBackground3) !important;
+  color: var(--colorNeutralForeground1) !important;
+}
+
+// Fix Prism.js code blocks — hardcoded light colors and text-shadow
+code[class*="language-"],
+pre[class*="language-"] {
+  color: var(--colorNeutralForeground1) !important;
+  text-shadow: none !important;
+  background: none !important;
+}
+
+pre[class*="language-"],
+:not(pre) > code[class*="language-"] {
+  background: var(--colorNeutralBackground3) !important;
+}
+
+// Inline code in markdown
+code {
+  color: var(--colorNeutralForeground1);
+  background: var(--colorNeutralBackground3);
+  text-shadow: none;
+}
+
+// Fix hyperlink visibility in dark mode
+a {
+  color: var(--colorBrandForeground1);
+}
+
+// Fix API operation method colors for dark mode contrast
+[class*="_apiOperationMethod_"] {
+  &[class*="_get_"] {
+    color: var(--colorPaletteGreenForeground1) !important;
+  }
+  &[class*="_post_"] {
+    color: var(--colorBrandForeground1) !important;
+  }
+  &[class*="_delete_"] {
+    color: var(--colorPaletteRedForeground1) !important;
+  }
+  &[class*="_put_"] {
+    color: var(--colorPaletteBerryForeground1) !important;
+  }
 }
