@@ -333,11 +333,11 @@ export const ApiDetailPage: React.FC = () => {
       {api.data && selectedTab === 'documentation' && (
         isMcp ? (
           <>
-            {api.data.description && !api.data.description.startsWith(api.data.summary || '') && (
+            {api.data.description && api.data.description !== api.data.summary && (
               <MarkdownRenderer markdown={api.data.description} />
             )}
             <ApiAdditionalInfo api={api.data} />
-            {(!api.data.description || api.data.description.startsWith(api.data.summary || '')) && !hasAdditionalInfo && (
+            {(!api.data.description || api.data.description === api.data.summary) && !hasAdditionalInfo && (
               <EmptyStateMessage>No documentation available for this MCP server.</EmptyStateMessage>
             )}
           </>
