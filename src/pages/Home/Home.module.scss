@@ -42,6 +42,51 @@
         padding: 0 16px;
       }
     }
+
+    // Variation C: inline endpoint below search in hero
+    .inlineEndpoint {
+      max-width: 580px;
+      margin: 16px auto 0;
+      padding: 0 32px;
+      text-align: left;
+
+      // Override CopyableEndpoint label color for hero context
+      :global(.copyableEndpoint) .label,
+      span {
+        color: rgba(255, 255, 255, 0.7);
+      }
+    }
+  }
+
+  // Variation B: endpoint bar between hero and content
+  .endpointBarWrapper {
+    padding: 16px 32px;
+    max-width: 1140px;
+    margin: 0 auto;
+    box-sizing: border-box;
+
+    @include screen.small-to-medium {
+      padding: 12px 16px;
+    }
+  }
+
+  // Variation A: search row moved below hero into content area
+  .searchRowBelow {
+    display: flex;
+    align-items: stretch;
+    gap: 0.75rem;
+    box-sizing: border-box;
+    width: 100%;
+    padding: 16px 0 8px;
+
+    > * {
+      height: 48px;
+      box-sizing: border-box;
+    }
+
+    @include screen.small-to-medium {
+      flex-direction: column;
+    }
   }
 
   .content {
@@ -80,6 +125,51 @@
       .activeFilters {
         margin-bottom: 16px;
       }
+    }
+  }
+
+  // Variation toggle (floating bottom-right)
+  .variationToggle {
+    position: fixed;
+    bottom: 16px;
+    right: 16px;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background: var(--colorNeutralBackground1);
+    border: 2px solid var(--colorBrandStroke1);
+    border-radius: var(--borderRadiusLarge);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    font-size: 0.75rem;
+  }
+
+  .variationLabel {
+    font-weight: 600;
+    color: var(--colorNeutralForeground1);
+    white-space: nowrap;
+  }
+
+  .varBtn {
+    padding: 4px 10px;
+    border: 1px solid var(--colorNeutralStroke2);
+    border-radius: var(--borderRadiusMedium);
+    background: var(--colorNeutralBackground3);
+    color: var(--colorNeutralForeground2);
+    font-size: 0.75rem;
+    cursor: pointer;
+    white-space: nowrap;
+
+    &:hover {
+      background: var(--colorNeutralBackground3Hover);
+    }
+
+    &.active {
+      background: var(--colorBrandBackground);
+      color: var(--colorNeutralForegroundOnBrand);
+      border-color: var(--colorBrandStroke1);
+      font-weight: 600;
     }
   }
 }

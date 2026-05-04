@@ -13,6 +13,7 @@ import MarkdownRenderer from '@/components/MarkdownRenderer';
 import CustomMetadata from '@/components/CustomMetadata';
 import { EmptyStateMessage } from '@/components/EmptyStateMessage/EmptyStateMessage';
 import { ConnectPanel } from '@/components/ConnectPanel';
+import { InstallationBlock } from '@/components/InstallationBlock';
 import VsCodeLogo from '@/assets/vsCodeLogo.svg';
 
 /** Hardcoded source URL for skill installation deeplinks. */
@@ -75,14 +76,7 @@ export const SkillInfo: React.FC = () => {
           {hasCustomProps && <Tab value="properties">Additional properties</Tab>}
         </TabList>
       }
-      headerActions={
-        <ConnectPanel
-          endpointUrl={skillSourceUrl}
-          assetName={api.data?.name || name}
-          onVsCodeInstall={handleSkillInstall}
-          hasVsCodeInstall
-        />
-      }
+      headerActions={undefined}
       isLoading={api.isLoading}
       error={api.isError ? 'Failed to load skill details. Please check your connection and try again.' : undefined}
       onRetry={() => api.refetch()}
@@ -90,11 +84,19 @@ export const SkillInfo: React.FC = () => {
       sidebar={undefined}
     >
       {api.data && selectedTab === 'documentation' && (
-        (api.data.description || api.data.summary) ? (
-          <MarkdownRenderer markdown={(api.data.description || api.data.summary)!} />
-        ) : (
-          <EmptyStateMessage>No description available for this skill.</EmptyStateMessage>
-        )
+        <>
+          <InstallationBlock
+            assetType="skill"
+            assetName={api.data?.name || name || 'skill'}
+            serviceName="myapicenter"
+            region="eastus"
+          />
+          {(api.data.description || api.data.summary) ? (
+            <MarkdownRenderer markdown={(api.data.description || api.data.summary)!} />
+          ) : (
+            <EmptyStateMessage>No description available for this skill.</EmptyStateMessage>
+          )}
+        </>
       )}
       {selectedTab === 'assessment' && (
         <SkillEvaluationDetails evalResult={evalResult.data} isLoading={evalResult.isLoading} />

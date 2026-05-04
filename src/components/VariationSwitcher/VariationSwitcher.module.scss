@@ -1,0 +1,49 @@
+.switcher {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--colorNeutralBackground1);
+  border: 2px solid var(--colorBrandStroke1);
+  border-radius: var(--borderRadiusLarge);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  font-size: 0.75rem;
+
+  .label {
+    font-weight: 600;
+    color: var(--colorNeutralForeground1);
+    white-space: nowrap;
+  }
+
+  .buttons {
+    display: flex;
+    gap: 4px;
+  }
+
+  .btn {
+    padding: 4px 10px;
+    border: 1px solid var(--colorNeutralStroke2);
+    border-radius: var(--borderRadiusMedium);
+    background: var(--colorNeutralBackground3);
+    color: var(--colorNeutralForeground2);
+    font-size: 0.75rem;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s ease;
+
+    &:hover {
+      background: var(--colorNeutralBackground3Hover);
+    }
+
+    &.active {
+      background: var(--colorBrandBackground);
+      color: var(--colorNeutralForegroundOnBrand);
+      border-color: var(--colorBrandStroke1);
+      font-weight: 600;
+    }
+  }
+}

@@ -28,6 +28,12 @@
         text-overflow: ellipsis;
         white-space: nowrap;
       }
+
+      // Match copy button size to InstallationBlock / CopyableEndpoint
+      button {
+        min-width: 40px;
+        min-height: 32px;
+      }
     }
   }
 }

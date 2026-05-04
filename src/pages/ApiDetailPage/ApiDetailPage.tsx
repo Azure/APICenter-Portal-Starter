@@ -20,6 +20,7 @@ import McpSpecPage from '@/pages/ApiSpec/McpSpecPage';
 import EmptyStateMessage from '@/components/EmptyStateMessage';
 import { ConnectPanel } from '@/components/ConnectPanel';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
+import { InstallationBlock } from '@/components/InstallationBlock';
 import VsCodeLogo from '@/assets/vsCodeLogo.svg';
 
 export const ApiDetailPage: React.FC = () => {
@@ -181,6 +182,39 @@ export const ApiDetailPage: React.FC = () => {
 
   const downloadSpecUrl = useApiSpecUrl(downloadDefinitionId ?? { apiName: '', versionName: '', definitionName: '' });
 
+  function renderInstallationBlock() {
+    if (kind === 'mcp' && endpointUrl) {
+      return (
+        <InstallationBlock
+          assetType="mcp"
+          endpointUrl={endpointUrl}
+          assetName={api.data?.name || apiName || 'mcp-server'}
+        />
+      );
+    }
+    if (kind === 'plugin') {
+      return (
+        <InstallationBlock
+          assetType="plugin"
+          assetName={api.data?.name || apiName || 'plugin'}
+          serviceName="myapicenter"
+          region="eastus"
+        />
+      );
+    }
+    if (kind === 'skill') {
+      return (
+        <InstallationBlock
+          assetType="skill"
+          assetName={api.data?.name || apiName || 'skill'}
+          serviceName="myapicenter"
+          region="eastus"
+        />
+      );
+    }
+    return null;
+  }
+
   function renderDocumentation() {
     if (!definitionId) return null;
 
@@ -295,16 +329,7 @@ export const ApiDetailPage: React.FC = () => {
           </div>
         ) : undefined
       }
-      headerActions={
-        (hasInstall || endpointUrl) ? (
-          <ConnectPanel
-            endpointUrl={endpointUrl}
-            assetName={api.data?.name || apiName}
-            onVsCodeInstall={hasMcpInstall ? () => handleMcpInstall() : (kind === 'skill' && skillSourceUrl ? handleSkillInstall : undefined)}
-            hasVsCodeInstall={hasInstall}
-          />
-        ) : undefined
-      }
+      headerActions={undefined}
       isLoading={api.isLoading}
       error={api.isError ? 'Failed to load API details. Please check your connection and try again.' : undefined}
       onRetry={() => api.refetch()}
@@ -314,6 +339,7 @@ export const ApiDetailPage: React.FC = () => {
       {api.data && selectedTab === 'documentation' && (
         isMcp ? (
           <>
+            {renderInstallationBlock()}
             {api.data.description && api.data.description !== api.data.summary && (
               <MarkdownRenderer markdown={api.data.description} />
             )}
@@ -322,7 +348,12 @@ export const ApiDetailPage: React.FC = () => {
               <EmptyStateMessage>No documentation available for this MCP server.</EmptyStateMessage>
             )}
           </>
-        ) : renderDocumentation()
+        ) : (
+          <>
+            {renderInstallationBlock()}
+            {renderDocumentation()}
+          </>
+        )
       )}
       {api.data && selectedTab === 'testconsole' && isMcp && renderDocumentation()}
       {api.data && selectedTab === 'properties' && (
