@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Badge, Button, Dropdown, Link, Menu, MenuItem, MenuList, MenuPopover, MenuTrigger, Option, SplitButton, Spinner, Tab, TabList } from '@fluentui/react-components';
-import { ArrowDownloadRegular, DocumentRegular, ListRegular } from '@fluentui/react-icons';
+import { ArrowDownloadRegular, DocumentRegular, ListRegular, WindowConsoleRegular } from '@fluentui/react-icons';
 import { useApi } from '@/hooks/useApi';
 import { useServer } from '@/hooks/useServer';
 import { kindToResourceType, ApiDefinitionId } from '@/types/apiDefinition';
@@ -19,6 +19,7 @@ import ApiSpecPageLayout from '@/pages/ApiSpec/ApiSpecPageLayout';
 import McpSpecPage from '@/pages/ApiSpec/McpSpecPage';
 import EmptyStateMessage from '@/components/EmptyStateMessage';
 import { ConnectPanel } from '@/components/ConnectPanel';
+import MarkdownRenderer from '@/components/MarkdownRenderer';
 import VsCodeLogo from '@/assets/vsCodeLogo.svg';
 
 export const ApiDetailPage: React.FC = () => {
@@ -242,7 +243,8 @@ export const ApiDetailPage: React.FC = () => {
       tabs={
         <TabList selectedValue={selectedTab} onTabSelect={(_, d) => setSelectedTab(d.value as string)}>
           <Tab icon={<DocumentRegular />} value="documentation">Documentation</Tab>
-          {hasAdditionalInfo && <Tab icon={<ListRegular />} value="properties">Additional properties</Tab>}
+          {isMcp && <Tab icon={<WindowConsoleRegular />} value="testconsole">Test console</Tab>}
+          {!isMcp && hasAdditionalInfo && <Tab icon={<ListRegular />} value="properties">Additional properties</Tab>}
         </TabList>
       }
       selector={
@@ -309,7 +311,20 @@ export const ApiDetailPage: React.FC = () => {
       emptyMessage={!api.isLoading && !api.isError && !api.data ? 'The specified API does not exist.' : undefined}
       sidebar={undefined}
     >
-      {api.data && selectedTab === 'documentation' && renderDocumentation()}
+      {api.data && selectedTab === 'documentation' && (
+        isMcp ? (
+          <>
+            {api.data.description && api.data.description !== api.data.summary && (
+              <MarkdownRenderer markdown={api.data.description} />
+            )}
+            <ApiAdditionalInfo api={api.data} />
+            {(!api.data.description || api.data.description === api.data.summary) && !hasAdditionalInfo && (
+              <EmptyStateMessage>No documentation available for this MCP server.</EmptyStateMessage>
+            )}
+          </>
+        ) : renderDocumentation()
+      )}
+      {api.data && selectedTab === 'testconsole' && isMcp && renderDocumentation()}
       {api.data && selectedTab === 'properties' && (
         <ApiAdditionalInfo api={api.data} />
       )}
