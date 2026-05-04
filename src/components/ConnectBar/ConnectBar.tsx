@@ -3,18 +3,21 @@ import { Button, Tab, TabList, Tooltip } from '@fluentui/react-components';
 import { CopyRegular, CheckmarkRegular, ChevronDownRegular, ChevronUpRegular } from '@fluentui/react-icons';
 import styles from './ConnectBar.module.scss';
 
+/** Escape HTML special chars so angle brackets in placeholders don't get stripped */
+function escapeHtml(text: string): string {
+  return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
 /** Simple JSON syntax highlighter — colors keys, strings, and punctuation */
 function highlightJson(json: string): string {
   return json.replace(
     /("(?:\\.|[^"\\])*")\s*(:)?|(\btrue\b|\bfalse\b|\bnull\b)|(\d+)/g,
     (match, str, colon, keyword, num) => {
       if (str && colon) {
-        // Key
-        return `<span class="${styles.jsonKey}">${str}</span>:`;
+        return `<span class="${styles.jsonKey}">${escapeHtml(str)}</span>:`;
       }
       if (str) {
-        // String value
-        return `<span class="${styles.jsonString}">${str}</span>`;
+        return `<span class="${styles.jsonString}">${escapeHtml(str)}</span>`;
       }
       if (keyword) {
         return `<span class="${styles.jsonKeyword}">${keyword}</span>`;
@@ -22,7 +25,7 @@ function highlightJson(json: string): string {
       if (num) {
         return `<span class="${styles.jsonNumber}">${num}</span>`;
       }
-      return match;
+      return escapeHtml(match);
     }
   );
 }
