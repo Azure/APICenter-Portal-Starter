@@ -111,12 +111,26 @@
   }
 
   .codeBlock {
+    position: relative;
     display: flex;
     margin: 0;
     padding: 14px 16px;
     background: #f5f5f5;
     border-radius: var(--borderRadiusMedium);
     overflow-x: auto;
+  }
+
+  .codeBlockCopyBtn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    min-width: 32px;
+    z-index: 1;
+    color: var(--colorNeutralForeground3);
+
+    &:hover {
+      color: var(--colorNeutralForeground1);
+    }
   }
 
   .lineNumbers {

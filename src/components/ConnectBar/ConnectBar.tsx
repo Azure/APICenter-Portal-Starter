@@ -115,8 +115,8 @@ export const ConnectBar: React.FC<ConnectBarProps> = ({
 
           {tab === 'vscode' && (
             <div className={styles.tabContent}>
-              <div className={styles.configHeader}>
-                <span className={styles.hint}>Add to your VS Code settings.json under <code>mcp</code></span>
+              <span className={styles.hint}>Add to your VS Code settings.json under <code>mcp</code></span>
+              <div className={styles.codeBlock}>
                 <Tooltip content={copiedField === 'config' ? 'Copied!' : 'Copy config'} relationship="label">
                   <Button
                     appearance="subtle"
@@ -124,11 +124,9 @@ export const ConnectBar: React.FC<ConnectBarProps> = ({
                     icon={copiedField === 'config' ? <CheckmarkRegular /> : <CopyRegular />}
                     onClick={() => handleCopy(mcpConfig, 'config')}
                     aria-label="Copy config"
-                    className={styles.copyBtn}
+                    className={styles.codeBlockCopyBtn}
                   />
                 </Tooltip>
-              </div>
-              <div className={styles.codeBlock}>
                 <div className={styles.lineNumbers}>
                   {mcpConfig.split('\n').map((_, i) => (
                     <span key={i}>{i + 1}</span>
