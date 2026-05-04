@@ -183,7 +183,8 @@ export const ApiDetailPage: React.FC = () => {
   const downloadSpecUrl = useApiSpecUrl(downloadDefinitionId ?? { apiName: '', versionName: '', definitionName: '' });
 
   function renderInstallationBlock() {
-    if (kind === 'mcp' && endpointUrl) {
+    const kindLower = kind?.toLowerCase();
+    if (kindLower === 'mcp' && endpointUrl) {
       return (
         <InstallationBlock
           assetType="mcp"
@@ -192,7 +193,7 @@ export const ApiDetailPage: React.FC = () => {
         />
       );
     }
-    if (kind === 'plugin') {
+    if (kindLower === 'plugin') {
       return (
         <InstallationBlock
           assetType="plugin"
@@ -202,7 +203,7 @@ export const ApiDetailPage: React.FC = () => {
         />
       );
     }
-    if (kind === 'skill') {
+    if (kindLower === 'skill') {
       return (
         <InstallationBlock
           assetType="skill"

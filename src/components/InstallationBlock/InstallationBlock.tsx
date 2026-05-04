@@ -49,12 +49,12 @@ export const InstallationBlock: React.FC<InstallationBlockProps> = ({
       { label: 'Verify connection', command: '/mcp show' },
     ];
   } else if (assetType === 'plugin') {
-    title = 'Install this plugin';
-    hint = 'Run these commands inside a copilot or claude session.';
+    title = 'Plugin marketplace';
+    hint = 'Discover and install plugins from your organization\'s marketplace.';
     docsUrl = 'https://learn.microsoft.com/en-us/azure/api-center/enable-api-center-plugin-marketplace';
     steps = [
       { label: 'Add the marketplace (one-time setup)', command: `/plugin marketplace add ${marketplaceEndpoint}` },
-      { label: 'Install this plugin', command: `/plugin install ${assetName}@${serviceName}` },
+      { label: 'Browse plugins', command: `/plugin marketplace browse ${serviceName}` },
     ];
   } else if (assetType === 'skill') {
     title = 'Discover this skill';
