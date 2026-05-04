@@ -73,10 +73,10 @@ export const Home: React.FC = () => {
 
       <div className={styles.endpointBarWrapper}>
         {variation === 'v1' && (
-          <EndpointBar serviceName="myapicenter" region="eastus" />
+          <EndpointBar serviceName="<your-service-name>" region="<region>" />
         )}
         {variation === 'v2' && (
-          <ConnectBar serviceName="myapicenter" region="eastus" />
+          <ConnectBar serviceName="<your-service-name>" region="<region>" />
         )}
       </div>
 

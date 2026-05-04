@@ -104,8 +104,8 @@ export const PluginInfo: React.FC = () => {
       <InstallationBlock
         assetType="plugin"
         assetName={plugin.data?.name || name || 'plugin'}
-        serviceName="myapicenter"
-        region="eastus"
+        serviceName="<your-service-name>"
+        region="<region>"
       />
 
       {plugin.data?.description ? (

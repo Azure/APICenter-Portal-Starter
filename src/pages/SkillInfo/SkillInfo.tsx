@@ -88,8 +88,8 @@ export const SkillInfo: React.FC = () => {
           <InstallationBlock
             assetType="skill"
             assetName={api.data?.name || name || 'skill'}
-            serviceName="myapicenter"
-            region="eastus"
+            serviceName="<your-service-name>"
+            region="<region>"
           />
           {(api.data.description || api.data.summary) ? (
             <MarkdownRenderer markdown={(api.data.description || api.data.summary)!} />

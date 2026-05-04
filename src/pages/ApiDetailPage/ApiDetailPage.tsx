@@ -198,8 +198,8 @@ export const ApiDetailPage: React.FC = () => {
         <InstallationBlock
           assetType="plugin"
           assetName={api.data?.name || apiName || 'plugin'}
-          serviceName="myapicenter"
-          region="eastus"
+          serviceName="<your-service-name>"
+          region="<region>"
         />
       );
     }
@@ -208,8 +208,8 @@ export const ApiDetailPage: React.FC = () => {
         <InstallationBlock
           assetType="skill"
           assetName={api.data?.name || apiName || 'skill'}
-          serviceName="myapicenter"
-          region="eastus"
+          serviceName="<your-service-name>"
+          region="<region>"
         />
       );
     }
