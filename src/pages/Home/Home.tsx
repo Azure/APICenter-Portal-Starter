@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useRecoilValue } from 'recoil';
 import ApiList from '@/experiences/ApiList';
 import AccessDeniedSvg from '@/assets/accessDenied.svg';
@@ -11,28 +11,12 @@ import ApiListLayoutSwitch from '@/experiences/ApiListLayoutSwitch';
 import ApiListSortingSelect from '@/experiences/ApiListSortingSelect';
 import { ActiveFiltersBadges } from '@/experiences/ActiveFiltersBadges/ActiveFiltersBadges';
 import { setDocumentTitle } from '@/utils/dom';
-import { EndpointBar } from '@/components/EndpointBar';
 import { ConnectBar } from '@/components/ConnectBar';
 import styles from './Home.module.scss';
-
-type HomepageVariation = 'v1' | 'v2';
-
-const VariationToggle: React.FC<{ current: HomepageVariation; onChange: (v: HomepageVariation) => void }> = ({ current, onChange }) => (
-  <div className={styles.variationToggle}>
-    <span className={styles.variationLabel}>Variation:</span>
-    <button className={`${styles.varBtn} ${current === 'v1' ? styles.active : ''}`} onClick={() => onChange('v1')}>
-      v1: Detailed
-    </button>
-    <button className={`${styles.varBtn} ${current === 'v2' ? styles.active : ''}`} onClick={() => onChange('v2')}>
-      v2: Simplified
-    </button>
-  </div>
-);
 
 export const Home: React.FC = () => {
   const isAuthenticated = useRecoilValue(isAuthenticatedAtom);
   const isAccessDenied = useRecoilValue(isAccessDeniedAtom);
-  const [variation, setVariation] = useState<HomepageVariation>('v2');
 
   setDocumentTitle('API portal (preview)');
 
@@ -72,12 +56,7 @@ export const Home: React.FC = () => {
       </div>
 
       <div className={styles.endpointBarWrapper}>
-        {variation === 'v1' && (
-          <EndpointBar serviceName="<your-service-name>" region="<region>" />
-        )}
-        {variation === 'v2' && (
-          <ConnectBar serviceName="<your-service-name>" region="<region>" />
-        )}
+        <ConnectBar />
       </div>
 
       <section className={styles.content}>
@@ -91,8 +70,6 @@ export const Home: React.FC = () => {
           <div className={styles.results}>{renderApiList()}</div>
         </div>
       </section>
-
-      <VariationToggle current={variation} onChange={setVariation} />
     </div>
   );
 };
