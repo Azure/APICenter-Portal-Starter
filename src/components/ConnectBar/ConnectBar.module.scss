@@ -1,6 +1,6 @@
 .connectBar {
   width: 100%;
-  border: 1px solid var(--colorNeutralStroke3);
+  border: 1px solid var(--colorNeutralStroke2);
   border-radius: var(--borderRadiusMedium);
   background: var(--colorNeutralBackground2);
   overflow: hidden;
@@ -74,7 +74,7 @@
   }
 
   .expandedContent {
-    border-top: 1px solid var(--colorNeutralStroke3);
+    border-top: 1px solid var(--colorNeutralStroke2);
     padding: 12px 16px 16px;
     display: flex;
     flex-direction: column;
@@ -115,7 +115,7 @@
     display: flex;
     margin: 0;
     padding: 14px 16px;
-    background: #f5f5f5;
+    background: var(--colorNeutralBackground4);
     border-radius: var(--borderRadiusMedium);
     overflow-x: auto;
   }
@@ -137,7 +137,7 @@
     display: flex;
     flex-direction: column;
     padding-right: 16px;
-    border-right: 1px solid #ddd;
+    border-right: 1px solid var(--colorNeutralStroke2);
     margin-right: 16px;
     user-select: none;
 
@@ -145,7 +145,7 @@
       font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
       font-size: 0.8125rem;
       line-height: 1.6;
-      color: #999;
+      color: var(--colorNeutralForeground4);
       text-align: right;
       min-width: 1.5em;
     }
@@ -160,7 +160,7 @@
       font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
       font-size: 0.8125rem;
       line-height: 1.6;
-      color: #333;
+      color: var(--colorNeutralForeground1);
       background: transparent;
     }
   }
@@ -174,7 +174,7 @@
   .commandRow {
     display: flex;
     align-items: center;
-    background: #f5f5f5;
+    background: var(--colorNeutralBackground4);
     border-radius: var(--borderRadiusMedium);
     overflow: hidden;
   }
@@ -204,13 +204,6 @@
   .connectBar {
     .url { color: #4caf50; }
     .command { color: #4caf50; }
-    .codeBlock { background: #1e1e1e; }
-    .commandRow { background: #1e1e1e; }
-    .lineNumbers {
-      border-color: #333;
-      span { color: #555; }
-    }
-    .codeContent code { color: #d4d4d4; }
     .jsonKey { color: #9cdcfe; }
     .jsonString { color: #ce9178; }
     .jsonKeyword { color: #569cd6; }

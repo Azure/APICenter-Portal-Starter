@@ -7,7 +7,7 @@
 
 .endpointBar {
   width: 100%;
-  border: 1px solid var(--colorNeutralStroke3);
+  border: 1px solid var(--colorNeutralStroke2);
   border-radius: var(--borderRadiusMedium);
   background: var(--colorNeutralBackground2);
   overflow: hidden;
@@ -81,7 +81,7 @@
   }
 
   .expandedContent {
-    border-top: 1px solid var(--colorNeutralStroke3);
+    border-top: 1px solid var(--colorNeutralStroke2);
     padding: 12px 16px 16px;
     display: flex;
     flex-direction: column;
@@ -115,7 +115,7 @@
   .configBlock {
     margin: 0;
     padding: 16px;
-    background: #f5f5f5;
+    background: var(--colorNeutralBackground4);
     border-radius: var(--borderRadiusMedium);
     overflow-x: auto;
 
@@ -151,7 +151,7 @@
   .commandRow {
     display: flex;
     align-items: center;
-    background: #f5f5f5;
+    background: var(--colorNeutralBackground4);
     border-radius: var(--borderRadiusMedium);
     overflow: hidden;
   }
@@ -181,10 +181,6 @@
   .endpointBar {
     .url { color: #4caf50; }
     .command { color: #4caf50; }
-    .configBlock {
-      background: #1e1e1e;
-      code { color: #4caf50; }
-    }
-    .commandRow { background: #1e1e1e; }
+    .configBlock code { color: #4caf50; }
   }
 }
