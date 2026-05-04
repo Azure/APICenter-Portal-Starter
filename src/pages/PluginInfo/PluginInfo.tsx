@@ -13,6 +13,7 @@ import { formatKindDisplay } from '@/utils/formatKind';
 import { LocationsService } from '@/services/LocationsService';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import { DetailPageLayout } from '@/components/DetailPageLayout/DetailPageLayout';
+import { InstallationBlock } from '@/components/InstallationBlock';
 import { HomeLocationState } from '@/types/homeDrawer';
 import styles from './PluginInfo.module.scss';
 
@@ -93,10 +94,20 @@ export const PluginInfo: React.FC = () => {
     <DetailPageLayout
       title={plugin.data?.title}
       summary={plugin.data?.description}
+      metadata={
+        <Badge appearance="filled" color="brand" shape="circular">Plugin</Badge>
+      }
       tabs={tabs}
       isLoading={plugin.isLoading}
       emptyMessage={!plugin.data ? 'The specified plugin does not exist.' : undefined}
     >
+      <InstallationBlock
+        assetType="plugin"
+        assetName={plugin.data?.name || name || 'plugin'}
+        serviceName="myapicenter"
+        region="eastus"
+      />
+
       {plugin.data?.description ? (
         <MarkdownRenderer markdown={plugin.data.description} />
       ) : null}
