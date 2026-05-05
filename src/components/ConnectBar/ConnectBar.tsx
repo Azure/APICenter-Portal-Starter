@@ -43,7 +43,7 @@ export const ConnectBar: React.FC<ConnectBarProps> = ({
   const [tab, setTab] = useState<'vscode' | 'cli'>('vscode');
   const [copiedField, setCopiedField] = useState<string | null>(null);
 
-  const mcpEndpoint = dataApiHostName ? `${dataApiHostName}/mcp` : '';
+  const mcpEndpoint = dataApiHostName ? `https://${dataApiHostName}/mcp` : '';
 
   const handleCopy = (text: string, field: string) => {
     void navigator.clipboard.writeText(text);

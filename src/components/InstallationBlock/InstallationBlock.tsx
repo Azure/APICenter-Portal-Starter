@@ -32,7 +32,7 @@ export const InstallationBlock: React.FC<InstallationBlockProps> = ({
 
   const serviceName = dataApiHostName?.split('.')[0] ?? '<your-service-name>';
   const marketplaceEndpoint = dataApiHostName
-    ? `${dataApiHostName}/workspaces/default/plugins/marketplace.git`
+    ? `https://${dataApiHostName}/workspaces/default/plugins/marketplace.git`
     : '';
 
   let title = 'Install';
