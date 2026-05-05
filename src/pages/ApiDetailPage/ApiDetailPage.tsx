@@ -2,8 +2,10 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Badge, Button, Dropdown, Link, Menu, MenuItem, MenuList, MenuPopover, MenuTrigger, Option, SplitButton, Spinner, Tab, TabList } from '@fluentui/react-components';
 import { ArrowDownloadRegular, DocumentRegular, ListRegular, WindowConsoleRegular } from '@fluentui/react-icons';
+import { useRecoilValue } from 'recoil';
 import { useApi } from '@/hooks/useApi';
 import { useServer } from '@/hooks/useServer';
+import { configAtom } from '@/atoms/configAtom';
 import { kindToResourceType, ApiDefinitionId } from '@/types/apiDefinition';
 import { setDocumentTitle } from '@/utils/dom';
 import { DetailPageLayout } from '@/components/DetailPageLayout/DetailPageLayout';
@@ -26,6 +28,7 @@ import VsCodeLogo from '@/assets/vsCodeLogo.svg';
 export const ApiDetailPage: React.FC = () => {
   const { apiName } = useParams<{ apiName: string }>();
   const api = useApi(apiName);
+  const config = useRecoilValue(configAtom);
   const [definitionSelection, setDefinitionSelection] = useState<ApiDefinitionSelection | undefined>();
   const [selectedTab, setSelectedTab] = useState<string>('documentation');
 
@@ -198,8 +201,7 @@ export const ApiDetailPage: React.FC = () => {
         <InstallationBlock
           assetType="plugin"
           assetName={api.data?.name || apiName || 'plugin'}
-          serviceName="<your-service-name>"
-          region="<region>"
+          dataApiHostName={config.dataApiHostName}
         />
       );
     }
@@ -208,8 +210,7 @@ export const ApiDetailPage: React.FC = () => {
         <InstallationBlock
           assetType="skill"
           assetName={api.data?.name || apiName || 'skill'}
-          serviceName="<your-service-name>"
-          region="<region>"
+          dataApiHostName={config.dataApiHostName}
         />
       );
     }
@@ -330,7 +331,19 @@ export const ApiDetailPage: React.FC = () => {
           </div>
         ) : undefined
       }
-      headerActions={undefined}
+      headerActions={
+        hasInstall ? (
+          <HeaderActions showExtensionHint>
+            <Button
+              appearance="primary"
+              icon={<ArrowDownloadRegular />}
+              onClick={hasMcpInstall ? () => handleMcpInstall() : handleSkillInstall}
+            >
+              Install in VS Code
+            </Button>
+          </HeaderActions>
+        ) : undefined
+      }
       isLoading={api.isLoading}
       error={api.isError ? 'Failed to load API details. Please check your connection and try again.' : undefined}
       onRetry={() => api.refetch()}
@@ -345,9 +358,6 @@ export const ApiDetailPage: React.FC = () => {
               <MarkdownRenderer markdown={api.data.description} />
             )}
             <ApiAdditionalInfo api={api.data} />
-            {(!api.data.description || api.data.description === api.data.summary) && !hasAdditionalInfo && (
-              <EmptyStateMessage>No documentation available for this MCP server.</EmptyStateMessage>
-            )}
           </>
         ) : (
           <>

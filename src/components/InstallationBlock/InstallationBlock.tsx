@@ -7,8 +7,7 @@ interface InstallationBlockProps {
   assetType: 'mcp' | 'plugin' | 'skill';
   endpointUrl?: string;
   assetName?: string;
-  serviceName?: string;
-  region?: string;
+  dataApiHostName?: string;
 }
 
 interface Step {
@@ -19,9 +18,8 @@ interface Step {
 export const InstallationBlock: React.FC<InstallationBlockProps> = ({
   assetType,
   endpointUrl,
-  assetName = '<asset-name>',
-  serviceName = '<your-service-name>',
-  region = '<region>',
+  assetName: _assetName = '<asset-name>',
+  dataApiHostName,
 }) => {
   const [expanded, setExpanded] = useState(false);
   const [copiedField, setCopiedField] = useState<string | null>(null);
@@ -32,7 +30,10 @@ export const InstallationBlock: React.FC<InstallationBlockProps> = ({
     setTimeout(() => setCopiedField(null), 2000);
   };
 
-  const marketplaceEndpoint = `https://${serviceName}.data.${region}.azure-apicenter.ms/workspaces/default/plugins/marketplace.git`;
+  const serviceName = dataApiHostName?.split('.')[0] ?? '<your-service-name>';
+  const marketplaceEndpoint = dataApiHostName
+    ? `${dataApiHostName}/workspaces/default/plugins/marketplace.git`
+    : '';
 
   let title = 'Install';
   let hint = '';

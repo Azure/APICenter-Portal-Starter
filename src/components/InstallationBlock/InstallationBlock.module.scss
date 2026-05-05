@@ -1,3 +1,5 @@
+@use '@/styles/screen';
+
 .installationBlock {
   margin-bottom: 20px;
   border: 1px solid var(--colorNeutralStroke2);
@@ -19,6 +21,12 @@
     padding: 10px 16px;
     cursor: pointer;
     user-select: none;
+    min-width: 0;
+
+    @include screen.small-to-medium {
+      flex-wrap: wrap;
+      gap: 6px 12px;
+    }
 
     &:hover {
       background: var(--colorNeutralBackground2Hover);
@@ -43,9 +51,12 @@
     color: #2e7d32;
     white-space: nowrap;
     overflow-x: auto;
-    user-select: text;
     line-height: 1.4;
     scrollbar-width: none;
+
+    @include screen.small-to-medium {
+      flex-basis: 100%;
+    }
 
     &::-webkit-scrollbar {
       display: none;
@@ -97,6 +108,12 @@
     align-items: baseline;
     gap: 12px;
     padding: 12px 14px;
+    min-width: 0;
+
+    @include screen.small-to-medium {
+      flex-wrap: wrap;
+      gap: 6px 12px;
+    }
 
     & + .step {
       border-top: 1px solid var(--colorNeutralStroke2);
@@ -140,6 +157,10 @@
     user-select: text;
     line-height: 1.4;
     scrollbar-width: none;
+
+    @include screen.small-to-medium {
+      flex-basis: 100%;
+    }
 
     &::-webkit-scrollbar {
       display: none;

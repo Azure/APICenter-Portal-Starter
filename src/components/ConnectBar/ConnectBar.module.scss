@@ -1,3 +1,5 @@
+@use '@/styles/screen';
+
 .connectBar {
   width: 100%;
   border: 1px solid var(--colorNeutralStroke2);
@@ -12,6 +14,11 @@
     padding: 10px 16px;
     cursor: pointer;
     user-select: none;
+
+    @include screen.small-to-medium {
+      flex-wrap: wrap;
+      gap: 6px 10px;
+    }
 
     &:hover {
       background: var(--colorNeutralBackground2Hover);
@@ -45,6 +52,11 @@
     flex: 1;
     line-height: 1.4;
     scrollbar-width: none;
+
+    @include screen.small-to-medium {
+      flex-basis: 100%;
+      order: 3;
+    }
 
     &::-webkit-scrollbar {
       display: none;

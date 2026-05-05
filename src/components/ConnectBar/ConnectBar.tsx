@@ -31,21 +31,19 @@ function highlightJson(json: string): string {
 }
 
 interface ConnectBarProps {
-  serviceName?: string;
-  region?: string;
+  dataApiHostName?: string;
   docsUrl?: string;
 }
 
 export const ConnectBar: React.FC<ConnectBarProps> = ({
-  serviceName = '<your-service-name>',
-  region = '<region>',
+  dataApiHostName,
   docsUrl = 'https://learn.microsoft.com/en-us/azure/api-center/',
 }) => {
   const [expanded, setExpanded] = useState(false);
   const [tab, setTab] = useState<'vscode' | 'cli'>('vscode');
   const [copiedField, setCopiedField] = useState<string | null>(null);
 
-  const mcpEndpoint = `https://${serviceName}.data.${region}.azure-apicenter.ms/mcp`;
+  const mcpEndpoint = dataApiHostName ? `${dataApiHostName}/mcp` : '';
 
   const handleCopy = (text: string, field: string) => {
     void navigator.clipboard.writeText(text);
@@ -69,7 +67,7 @@ export const ConnectBar: React.FC<ConnectBarProps> = ({
     <div className={styles.connectBar}>
       <div className={styles.collapsed} onClick={() => setExpanded(!expanded)}>
         <span className={styles.statusDot} />
-        <span className={styles.title}>Connect to API Center</span>
+        <span className={styles.title}>Connect to API Center MCP</span>
         <code className={styles.url}>{mcpEndpoint}</code>
         <Tooltip content={copiedField === 'url' ? 'Copied!' : 'Copy endpoint'} relationship="label">
           <Button

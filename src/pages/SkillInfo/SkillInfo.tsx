@@ -1,9 +1,11 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Badge, Button, Tab, TabList } from '@fluentui/react-components';
-import { DocumentRegular } from '@fluentui/react-icons';
+import { ArrowDownloadRegular, DocumentRegular } from '@fluentui/react-icons';
+import { useRecoilValue } from 'recoil';
 import { useApi } from '@/hooks/useApi';
 import { useSkillEvaluationResult } from '@/hooks/useSkillEvaluationResult';
+import { configAtom } from '@/atoms/configAtom';
 import { setDocumentTitle } from '@/utils/dom';
 import { DetailPageLayout } from '@/components/DetailPageLayout/DetailPageLayout';
 import { HeaderActions } from '@/experiences/HeaderActions';
@@ -22,6 +24,7 @@ const SKILL_SOURCE_URL = 'https://github.com/vercel-labs/agent-skills/tree/main/
 export const SkillInfo: React.FC = () => {
   const { name } = useParams<{ name: string }>();
   const api = useApi(name);
+  const config = useRecoilValue(configAtom);
   const evalResult = useSkillEvaluationResult(name);
   const [selectedTab, setSelectedTab] = useState<string>('documentation');
 
@@ -76,7 +79,19 @@ export const SkillInfo: React.FC = () => {
           {hasCustomProps && <Tab value="properties">Additional properties</Tab>}
         </TabList>
       }
-      headerActions={undefined}
+      headerActions={
+        skillSourceUrl ? (
+          <HeaderActions showExtensionHint>
+            <Button
+              appearance="primary"
+              icon={<ArrowDownloadRegular />}
+              onClick={handleSkillInstall}
+            >
+              Install in VS Code
+            </Button>
+          </HeaderActions>
+        ) : undefined
+      }
       isLoading={api.isLoading}
       error={api.isError ? 'Failed to load skill details. Please check your connection and try again.' : undefined}
       onRetry={() => api.refetch()}
@@ -88,8 +103,7 @@ export const SkillInfo: React.FC = () => {
           <InstallationBlock
             assetType="skill"
             assetName={api.data?.name || name || 'skill'}
-            serviceName="<your-service-name>"
-            region="<region>"
+            dataApiHostName={config.dataApiHostName}
           />
           {(api.data.description || api.data.summary) ? (
             <MarkdownRenderer markdown={(api.data.description || api.data.summary)!} />

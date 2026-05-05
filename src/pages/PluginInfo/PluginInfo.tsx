@@ -7,7 +7,9 @@ import {
   PlugConnectedRegular,
   DocumentRegular,
 } from '@fluentui/react-icons';
+import { useRecoilValue } from 'recoil';
 import { usePlugin } from '@/hooks/usePlugin';
+import { configAtom } from '@/atoms/configAtom';
 import { setDocumentTitle } from '@/utils/dom';
 import { formatKindDisplay } from '@/utils/formatKind';
 import { LocationsService } from '@/services/LocationsService';
@@ -57,6 +59,7 @@ interface ResolvedResource {
 export const PluginInfo: React.FC = () => {
   const { name } = useParams<{ name: string }>();
   const plugin = usePlugin(name);
+  const config = useRecoilValue(configAtom);
 
   const groupedResources = useMemo(() => {
     const resources = plugin.data?.resources;
@@ -104,8 +107,7 @@ export const PluginInfo: React.FC = () => {
       <InstallationBlock
         assetType="plugin"
         assetName={plugin.data?.name || name || 'plugin'}
-        serviceName="<your-service-name>"
-        region="<region>"
+        dataApiHostName={config.dataApiHostName}
       />
 
       {plugin.data?.description ? (

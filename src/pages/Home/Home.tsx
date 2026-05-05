@@ -4,6 +4,7 @@ import ApiList from '@/experiences/ApiList';
 import AccessDeniedSvg from '@/assets/accessDenied.svg';
 import { isAuthenticatedAtom } from '@/atoms/isAuthenticatedAtom';
 import { isAccessDeniedAtom } from '@/atoms/isAccessDeniedAtom';
+import { configAtom } from '@/atoms/configAtom';
 import ApiSearchBox from '@/experiences/ApiSearchBox';
 import CategoryPills from '@/experiences/CategoryPills';
 import AddFilterDropdown from '@/experiences/AddFilterDropdown';
@@ -17,6 +18,7 @@ import styles from './Home.module.scss';
 export const Home: React.FC = () => {
   const isAuthenticated = useRecoilValue(isAuthenticatedAtom);
   const isAccessDenied = useRecoilValue(isAccessDeniedAtom);
+  const config = useRecoilValue(configAtom);
 
   setDocumentTitle('API portal (preview)');
 
@@ -56,7 +58,7 @@ export const Home: React.FC = () => {
       </div>
 
       <div className={styles.endpointBarWrapper}>
-        <ConnectBar />
+        <ConnectBar dataApiHostName={config.dataApiHostName} />
       </div>
 
       <section className={styles.content}>

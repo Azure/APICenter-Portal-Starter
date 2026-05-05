@@ -91,8 +91,9 @@
   }
 
   .tabBar {
-    padding-top: 0;
+    padding-top: 0.5rem;
     padding-bottom: 0;
+    margin-top: 24px;
 
     &::after {
       content: '';
@@ -115,7 +116,7 @@
   .main {
     flex: 1;
     min-width: 0;
-    overflow: hidden;
+    overflow-x: hidden;
     line-height: 1.6;
   }
 
