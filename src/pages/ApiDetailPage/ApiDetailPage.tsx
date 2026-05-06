@@ -335,8 +335,7 @@ export const ApiDetailPage: React.FC = () => {
         hasInstall ? (
           <HeaderActions showExtensionHint>
             <Button
-              appearance="primary"
-              icon={<ArrowDownloadRegular />}
+              icon={<img height={18} src={VsCodeLogo} alt="VS Code" />}
               onClick={hasMcpInstall ? () => handleMcpInstall() : handleSkillInstall}
             >
               Install in VS Code
