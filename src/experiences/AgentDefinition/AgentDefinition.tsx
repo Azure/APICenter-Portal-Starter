@@ -1,15 +1,14 @@
-import React, { useCallback, useMemo } from 'react';
-import { Button, MessageBar, MessageBarBody, Spinner } from '@fluentui/react-components';
-import { ArrowDownloadRegular } from '@fluentui/react-icons';
+import React, { useMemo } from 'react';
+import { MessageBar, MessageBarBody, Spinner } from '@fluentui/react-components';
 import * as yaml from 'yaml';
+import { UseQueryResult } from '@tanstack/react-query';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import { EmptyStateMessage } from '@/components/EmptyStateMessage/EmptyStateMessage';
-import { useAgentDefinition } from '@/hooks/useAgentDefinition';
 import styles from './AgentDefinition.module.scss';
 
 interface Props {
-  agentName: string;
-  versionName?: string;
+  definition: UseQueryResult<string | undefined>;
+  hasVersion: boolean;
 }
 
 const FRONTMATTER_REGEX = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?/;
@@ -80,70 +79,42 @@ function renderFrontmatterTable(data: Record<string, unknown>): React.ReactNode 
   );
 }
 
-export const AgentDefinition: React.FC<Props> = ({ agentName, versionName }) => {
-  const definition = useAgentDefinition(agentName, versionName);
-
-  const handleDownload = useCallback(() => {
-    if (!versionName || !definition.data) return;
-    const blob = new Blob([definition.data], { type: 'text/markdown' });
-    const url = URL.createObjectURL(blob);
-    try {
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `${agentName}-${versionName}-definition.md`;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-    } finally {
-      // Defer revoke so the click is processed first.
-      setTimeout(() => URL.revokeObjectURL(url), 0);
-    }
-  }, [agentName, versionName, definition.data]);
-
+export const AgentDefinition: React.FC<Props> = ({ definition, hasVersion }) => {
   const parsed = useMemo<ParsedDefinition | undefined>(
     () => (definition.data ? parseDefinition(definition.data) : undefined),
     [definition.data]
   );
 
-  if (!versionName) {
+  if (!hasVersion) {
     return <EmptyStateMessage>No definition available for this agent.</EmptyStateMessage>;
+  }
+
+  if (definition.isLoading) {
+    return <Spinner size="small" label="Loading definition..." />;
+  }
+
+  if (definition.isError) {
+    return (
+      <MessageBar intent="error" className={styles.errorBar}>
+        <MessageBarBody>Failed to load the agent definition.</MessageBarBody>
+      </MessageBar>
+    );
+  }
+
+  if (!parsed) {
+    return <EmptyStateMessage>This version has no definition.</EmptyStateMessage>;
   }
 
   return (
     <div className={styles.container}>
-      <div className={styles.toolbar}>
-        <div className={styles.spacer} />
-        <Button
-          icon={<ArrowDownloadRegular />}
-          disabled={!definition.data || definition.isLoading}
-          onClick={handleDownload}
-        >
-          Download
-        </Button>
-      </div>
-
-      {definition.isLoading && <Spinner size="small" label="Loading definition..." />}
-
-      {definition.isError && (
-        <MessageBar intent="error" className={styles.errorBar}>
-          <MessageBarBody>Failed to load the agent definition.</MessageBarBody>
-        </MessageBar>
+      {parsed.frontmatter && renderFrontmatterTable(parsed.frontmatter)}
+      {parsed.body.trim() ? (
+        <div className={styles.markdown}>
+          <MarkdownRenderer markdown={parsed.body} />
+        </div>
+      ) : (
+        !parsed.frontmatter && <EmptyStateMessage>This version has no definition.</EmptyStateMessage>
       )}
-
-      {!definition.isLoading &&
-        !definition.isError &&
-        (parsed ? (
-          <>
-            {parsed.frontmatter && renderFrontmatterTable(parsed.frontmatter)}
-            {parsed.body.trim() ? (
-              <MarkdownRenderer markdown={parsed.body} />
-            ) : (
-              !parsed.frontmatter && <EmptyStateMessage>This version has no definition.</EmptyStateMessage>
-            )}
-          </>
-        ) : (
-          <EmptyStateMessage>This version has no definition.</EmptyStateMessage>
-        ))}
     </div>
   );
 };
