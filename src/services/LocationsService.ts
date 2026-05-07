@@ -47,11 +47,20 @@ export const LocationsService = {
     return `/agents/${name}`;
   },
 
+  getAgentInfoUrl(name: string): string {
+    return `/agents/${name}`;
+  },
+
   getModelPlaygroundUrl(name: string): string {
     return `/languageModels/${name}/playground`;
   },
 
-  getApiSchemaExplorerUrl(api: string, version: string, definition: string, resourceType: ResourceType = 'apis'): string {
+  getApiSchemaExplorerUrl(
+    api: string,
+    version: string,
+    definition: string,
+    resourceType: ResourceType = 'apis'
+  ): string {
     return `/${resourceType}/${api}/versions/${version}/definitions/${definition}`;
   },
 
