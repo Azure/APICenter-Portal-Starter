@@ -1,15 +1,15 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Button, Dropdown, MessageBar, MessageBarBody, Option, Spinner } from '@fluentui/react-components';
+import React, { useCallback, useMemo } from 'react';
+import { Button, MessageBar, MessageBarBody, Spinner } from '@fluentui/react-components';
 import { ArrowDownloadRegular } from '@fluentui/react-icons';
 import * as yaml from 'yaml';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import { EmptyStateMessage } from '@/components/EmptyStateMessage/EmptyStateMessage';
-import { useAgentVersions } from '@/hooks/useAgentVersions';
 import { useAgentDefinition } from '@/hooks/useAgentDefinition';
 import styles from './AgentDefinition.module.scss';
 
 interface Props {
   agentName: string;
+  versionName?: string;
 }
 
 const FRONTMATTER_REGEX = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?/;
@@ -80,32 +80,17 @@ function renderFrontmatterTable(data: Record<string, unknown>): React.ReactNode 
   );
 }
 
-export const AgentDefinition: React.FC<Props> = ({ agentName }) => {
-  const versions = useAgentVersions(agentName);
-  const [selectedVersion, setSelectedVersion] = useState<string | undefined>();
-
-  // Auto-select the first version once versions load.
-  useEffect(() => {
-    if (!selectedVersion && versions.data && versions.data.length > 0) {
-      setSelectedVersion(versions.data[0].name);
-    }
-  }, [versions.data, selectedVersion]);
-
-  const definition = useAgentDefinition(agentName, selectedVersion);
-
-  const handleVersionChange = useCallback<React.ComponentProps<typeof Dropdown>['onOptionSelect']>((_, data) => {
-    const next = data.optionValue ?? data.selectedOptions[0];
-    if (next) setSelectedVersion(next);
-  }, []);
+export const AgentDefinition: React.FC<Props> = ({ agentName, versionName }) => {
+  const definition = useAgentDefinition(agentName, versionName);
 
   const handleDownload = useCallback(() => {
-    if (!selectedVersion || !definition.data) return;
+    if (!versionName || !definition.data) return;
     const blob = new Blob([definition.data], { type: 'text/markdown' });
     const url = URL.createObjectURL(blob);
     try {
       const link = document.createElement('a');
       link.href = url;
-      link.download = `${agentName}-${selectedVersion}-definition.md`;
+      link.download = `${agentName}-${versionName}-definition.md`;
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -113,51 +98,20 @@ export const AgentDefinition: React.FC<Props> = ({ agentName }) => {
       // Defer revoke so the click is processed first.
       setTimeout(() => URL.revokeObjectURL(url), 0);
     }
-  }, [agentName, selectedVersion, definition.data]);
-
-  const versionOptions = useMemo(() => versions.data ?? [], [versions.data]);
-  const selectedTitle = useMemo(
-    () => versionOptions.find((v) => v.name === selectedVersion)?.title ?? selectedVersion ?? '',
-    [versionOptions, selectedVersion]
-  );
+  }, [agentName, versionName, definition.data]);
 
   const parsed = useMemo<ParsedDefinition | undefined>(
     () => (definition.data ? parseDefinition(definition.data) : undefined),
     [definition.data]
   );
 
-  if (versions.isLoading) {
-    return <Spinner size="small" label="Loading versions..." />;
-  }
-
-  if (versions.isError) {
-    return (
-      <MessageBar intent="error" className={styles.errorBar}>
-        <MessageBarBody>Failed to load agent versions.</MessageBarBody>
-      </MessageBar>
-    );
-  }
-
-  if (!versionOptions.length) {
+  if (!versionName) {
     return <EmptyStateMessage>No definition available for this agent.</EmptyStateMessage>;
   }
 
   return (
     <div className={styles.container}>
       <div className={styles.toolbar}>
-        <Dropdown
-          className={styles.versionSelect}
-          aria-label="Agent version"
-          value={selectedTitle}
-          selectedOptions={selectedVersion ? [selectedVersion] : []}
-          onOptionSelect={handleVersionChange}
-        >
-          {versionOptions.map((v) => (
-            <Option key={v.name} value={v.name} text={v.title ?? v.name}>
-              {v.title ?? v.name}
-            </Option>
-          ))}
-        </Dropdown>
         <div className={styles.spacer} />
         <Button
           icon={<ArrowDownloadRegular />}

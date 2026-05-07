@@ -1,4 +1,19 @@
-/* Page-specific styles for AgentInfo. Currently relies on DetailPageLayout. */
+/* Page-specific styles for AgentInfo. */
 .placeholder {
   display: none;
+}
+
+.versionSelector {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.versionLabel {
+  color: var(--colorNeutralForeground3);
+  font-weight: 600;
+}
+
+.versionDropdown {
+  min-width: 200px;
 }

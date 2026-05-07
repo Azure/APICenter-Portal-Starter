@@ -1,25 +1,67 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Badge, Tab, TabList } from '@fluentui/react-components';
+import { Badge, Dropdown, Option, Tab, TabList } from '@fluentui/react-components';
 import { CodeRegular, DocumentRegular } from '@fluentui/react-icons';
 import { useApi } from '@/hooks/useApi';
+import { useAgentVersions } from '@/hooks/useAgentVersions';
 import { setDocumentTitle } from '@/utils/dom';
 import { DetailPageLayout } from '@/components/DetailPageLayout/DetailPageLayout';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import CustomMetadata from '@/components/CustomMetadata';
 import { EmptyStateMessage } from '@/components/EmptyStateMessage/EmptyStateMessage';
 import { AgentDefinition } from '@/experiences/AgentDefinition';
+import styles from './AgentInfo.module.scss';
 
 type AgentTab = 'documentation' | 'definition' | 'properties';
 
 export const AgentInfo: React.FC = () => {
   const { name } = useParams<{ name: string }>();
   const api = useApi(name);
+  const versions = useAgentVersions(api.data?.name);
+  const [selectedVersion, setSelectedVersion] = useState<string | undefined>();
   const [selectedTab, setSelectedTab] = useState<AgentTab>('definition');
 
   setDocumentTitle(`Agent${api.data?.title ? ` - ${api.data.title}` : ''}`);
 
+  // Auto-select the first version once versions load.
+  useEffect(() => {
+    if (!selectedVersion && versions.data && versions.data.length > 0) {
+      setSelectedVersion(versions.data[0].name);
+    }
+  }, [versions.data, selectedVersion]);
+
+  const handleVersionChange = useCallback<React.ComponentProps<typeof Dropdown>['onOptionSelect']>((_, data) => {
+    const next = data.optionValue ?? data.selectedOptions[0];
+    if (next) setSelectedVersion(next);
+  }, []);
+
+  const versionOptions = useMemo(() => versions.data ?? [], [versions.data]);
+  const selectedVersionTitle = useMemo(
+    () => versionOptions.find((v) => v.name === selectedVersion)?.title ?? selectedVersion ?? '',
+    [versionOptions, selectedVersion]
+  );
+
   const hasCustomProps = !!Object.keys(api.data?.customProperties || {}).length;
+
+  const versionSelector =
+    versionOptions.length > 0 ? (
+      <div className={styles.versionSelector}>
+        <span className={styles.versionLabel}>Version</span>
+        <Dropdown
+          className={styles.versionDropdown}
+          aria-label="Agent version"
+          value={selectedVersionTitle}
+          selectedOptions={selectedVersion ? [selectedVersion] : []}
+          onOptionSelect={handleVersionChange}
+        >
+          {versionOptions.map((v) => (
+            <Option key={v.name} value={v.name} text={v.title ?? v.name}>
+              {v.title ?? v.name}
+            </Option>
+          ))}
+        </Dropdown>
+      </div>
+    ) : undefined;
 
   return (
     <DetailPageLayout
@@ -38,6 +80,7 @@ export const AgentInfo: React.FC = () => {
           {api.data?.lastUpdated && <span>Last updated {new Date(api.data.lastUpdated).toLocaleDateString()}</span>}
         </>
       }
+      selector={versionSelector}
       tabs={
         <TabList selectedValue={selectedTab} onTabSelect={(_, d) => setSelectedTab(d.value as AgentTab)}>
           <Tab icon={<CodeRegular />} value="definition">
@@ -63,7 +106,9 @@ export const AgentInfo: React.FC = () => {
           <EmptyStateMessage>No description available for this agent.</EmptyStateMessage>
         ))}
 
-      {api.data && selectedTab === 'definition' && <AgentDefinition agentName={api.data.name} />}
+      {api.data && selectedTab === 'definition' && (
+        <AgentDefinition agentName={api.data.name} versionName={selectedVersion} />
+      )}
 
       {api.data && selectedTab === 'properties' && hasCustomProps && (
         <CustomMetadata value={api.data.customProperties} />
