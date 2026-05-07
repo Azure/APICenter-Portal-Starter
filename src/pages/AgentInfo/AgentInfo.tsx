@@ -15,7 +15,7 @@ type AgentTab = 'documentation' | 'definition' | 'properties';
 export const AgentInfo: React.FC = () => {
   const { name } = useParams<{ name: string }>();
   const api = useApi(name);
-  const [selectedTab, setSelectedTab] = useState<AgentTab>('documentation');
+  const [selectedTab, setSelectedTab] = useState<AgentTab>('definition');
 
   setDocumentTitle(`Agent${api.data?.title ? ` - ${api.data.title}` : ''}`);
 
@@ -40,11 +40,11 @@ export const AgentInfo: React.FC = () => {
       }
       tabs={
         <TabList selectedValue={selectedTab} onTabSelect={(_, d) => setSelectedTab(d.value as AgentTab)}>
-          <Tab icon={<DocumentRegular />} value="documentation">
-            Documentation
-          </Tab>
           <Tab icon={<CodeRegular />} value="definition">
             Definition
+          </Tab>
+          <Tab icon={<DocumentRegular />} value="documentation">
+            Documentation
           </Tab>
           {hasCustomProps && <Tab value="properties">Additional properties</Tab>}
         </TabList>

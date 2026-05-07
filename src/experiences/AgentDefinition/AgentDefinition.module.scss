@@ -22,3 +22,66 @@
 .errorBar {
   margin-bottom: 8px;
 }
+
+.frontmatterTable {
+  width: 100%;
+  margin-bottom: 16px;
+  overflow: hidden;
+  border-spacing: 0;
+  border: 1px solid var(--colorNeutralStroke2);
+  border-radius: 6px;
+
+  th,
+  td {
+    padding: 6px 13px;
+    border-top: 1px solid var(--colorNeutralStroke2);
+    text-align: left;
+    vertical-align: top;
+  }
+
+  th {
+    width: 1%;
+    background-color: var(--colorNeutralBackground2);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  tr:first-child {
+    th,
+    td {
+      border-top: none;
+    }
+  }
+
+  tr:nth-child(even) td {
+    background-color: var(--colorNeutralBackground2);
+  }
+}
+
+.tagList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.tag {
+  padding: 2px 6px;
+  border-radius: 4px;
+  background-color: var(--colorNeutralBackground3);
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 0.85em;
+}
+
+.codeBlock {
+  margin: 0;
+  padding: 8px;
+  overflow-x: auto;
+  border-radius: 4px;
+  background-color: var(--colorNeutralBackground3);
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 0.85em;
+}
+
+.emptyValue {
+  color: var(--colorNeutralForeground3);
+}

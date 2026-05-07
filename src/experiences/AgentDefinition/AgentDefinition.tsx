@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Button, Dropdown, MessageBar, MessageBarBody, Option, Spinner } from '@fluentui/react-components';
 import { ArrowDownloadRegular } from '@fluentui/react-icons';
+import * as yaml from 'yaml';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import { EmptyStateMessage } from '@/components/EmptyStateMessage/EmptyStateMessage';
 import { useAgentVersions } from '@/hooks/useAgentVersions';
@@ -9,6 +10,74 @@ import styles from './AgentDefinition.module.scss';
 
 interface Props {
   agentName: string;
+}
+
+const FRONTMATTER_REGEX = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?/;
+
+interface ParsedDefinition {
+  frontmatter?: Record<string, unknown>;
+  body: string;
+}
+
+function parseDefinition(markdown: string): ParsedDefinition {
+  const match = markdown.match(FRONTMATTER_REGEX);
+  if (!match) {
+    return { body: markdown };
+  }
+
+  try {
+    const parsed = yaml.parse(match[1]);
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+      return { frontmatter: parsed as Record<string, unknown>, body: markdown.slice(match[0].length) };
+    }
+  } catch {
+    // Fall through and render the original markdown as-is.
+  }
+
+  return { body: markdown };
+}
+
+function formatFrontmatterValue(value: unknown): React.ReactNode {
+  if (value === null || value === undefined) {
+    return <span className={styles.emptyValue}>—</span>;
+  }
+  if (Array.isArray(value)) {
+    if (!value.length) return <span className={styles.emptyValue}>—</span>;
+    return (
+      <div className={styles.tagList}>
+        {value.map((item, i) => (
+          <code key={i} className={styles.tag}>
+            {typeof item === 'string' ? item : JSON.stringify(item)}
+          </code>
+        ))}
+      </div>
+    );
+  }
+  if (typeof value === 'object') {
+    return <pre className={styles.codeBlock}>{JSON.stringify(value, null, 2)}</pre>;
+  }
+  if (typeof value === 'boolean' || typeof value === 'number') {
+    return <code className={styles.tag}>{String(value)}</code>;
+  }
+  return String(value);
+}
+
+function renderFrontmatterTable(data: Record<string, unknown>): React.ReactNode {
+  const entries = Object.entries(data);
+  if (!entries.length) return null;
+
+  return (
+    <table className={styles.frontmatterTable}>
+      <tbody>
+        {entries.map(([key, value]) => (
+          <tr key={key}>
+            <th scope="row">{key}</th>
+            <td>{formatFrontmatterValue(value)}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
 }
 
 export const AgentDefinition: React.FC<Props> = ({ agentName }) => {
@@ -50,6 +119,11 @@ export const AgentDefinition: React.FC<Props> = ({ agentName }) => {
   const selectedTitle = useMemo(
     () => versionOptions.find((v) => v.name === selectedVersion)?.title ?? selectedVersion ?? '',
     [versionOptions, selectedVersion]
+  );
+
+  const parsed = useMemo<ParsedDefinition | undefined>(
+    () => (definition.data ? parseDefinition(definition.data) : undefined),
+    [definition.data]
   );
 
   if (versions.isLoading) {
@@ -104,8 +178,15 @@ export const AgentDefinition: React.FC<Props> = ({ agentName }) => {
 
       {!definition.isLoading &&
         !definition.isError &&
-        (definition.data ? (
-          <MarkdownRenderer markdown={definition.data} />
+        (parsed ? (
+          <>
+            {parsed.frontmatter && renderFrontmatterTable(parsed.frontmatter)}
+            {parsed.body.trim() ? (
+              <MarkdownRenderer markdown={parsed.body} />
+            ) : (
+              !parsed.frontmatter && <EmptyStateMessage>This version has no definition.</EmptyStateMessage>
+            )}
+          </>
         ) : (
           <EmptyStateMessage>This version has no definition.</EmptyStateMessage>
         ))}
