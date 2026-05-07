@@ -170,8 +170,4 @@ export const ApiService: IApiService = {
       `/agents/${encodeURIComponent(agentName)}/versions/${encodeURIComponent(versionName)}/artifacts/definition/download`
     );
   },
-
-  getAgentDefinitionDownloadPath(agentName: string, versionName: string): string {
-    return `/agents/${encodeURIComponent(agentName)}/versions/${encodeURIComponent(versionName)}/artifacts/definition/download`;
-  },
 };

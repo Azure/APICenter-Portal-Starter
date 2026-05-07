@@ -39,5 +39,4 @@ export interface IApiService {
   getSkillEvaluationResult(skillName: string): Promise<SkillEvaluationResult | undefined>;
   getAgentVersions(agentName: string): Promise<AgentVersion[]>;
   getAgentDefinition(agentName: string, versionName: string): Promise<string | undefined>;
-  getAgentDefinitionDownloadPath(agentName: string, versionName: string): string;
 }
