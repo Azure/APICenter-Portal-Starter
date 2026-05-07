@@ -9,6 +9,7 @@ import { Server } from '@/types/server';
 import { MetadataSchema } from '@/types/metadataSchema';
 import { PluginDetails } from '@/types/plugin';
 import { SkillEvaluationResult } from '@/types/skillEvaluation';
+import { AgentVersion } from '@/types/agent';
 
 export interface PaginatedResult<T> {
   value: T[];
@@ -16,7 +17,11 @@ export interface PaginatedResult<T> {
 }
 
 export interface IApiService {
-  getApis(search: string, filters?: ActiveFilterData[], isSemanticSearch?: boolean): Promise<PaginatedResult<ApiMetadata>>;
+  getApis(
+    search: string,
+    filters?: ActiveFilterData[],
+    isSemanticSearch?: boolean
+  ): Promise<PaginatedResult<ApiMetadata>>;
   getApisByNextLink(nextLink: string): Promise<PaginatedResult<ApiMetadata>>;
   getApi(id: string, resourceType?: ResourceType): Promise<ApiMetadata>;
   getServer(name: string): Promise<Server | undefined>;
@@ -32,4 +37,7 @@ export interface IApiService {
   getMetadataSchemas(): Promise<MetadataSchema[]>;
   getPlugin(name: string): Promise<PluginDetails>;
   getSkillEvaluationResult(skillName: string): Promise<SkillEvaluationResult | undefined>;
+  getAgentVersions(agentName: string): Promise<AgentVersion[]>;
+  getAgentDefinition(agentName: string, versionName: string): Promise<string | undefined>;
+  getAgentDefinitionDownloadPath(agentName: string, versionName: string): string;
 }

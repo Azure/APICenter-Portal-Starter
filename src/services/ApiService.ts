@@ -13,10 +13,15 @@ import { Server, ServerResponse } from '@/types/server';
 import { MetadataSchema } from '@/types/metadataSchema';
 import { PluginDetails } from '@/types/plugin';
 import { SkillEvaluationResult } from '@/types/skillEvaluation';
+import { AgentVersion } from '@/types/agent';
 import { DEFAULT_PAGE_SIZE } from '@/constants';
 
 export const ApiService: IApiService = {
-  async getApis(search: string, filters: ActiveFilterData[] = [], isSemanticSearch?: boolean): Promise<PaginatedResult<ApiMetadata>> {
+  async getApis(
+    search: string,
+    filters: ActiveFilterData[] = [],
+    isSemanticSearch?: boolean
+  ): Promise<PaginatedResult<ApiMetadata>> {
     const searchParams = new URLSearchParams();
     searchParams.set('$top', String(DEFAULT_PAGE_SIZE));
     if (search.length && !isSemanticSearch) {
@@ -41,14 +46,19 @@ export const ApiService: IApiService = {
     }
 
     if (search.length && isSemanticSearch) {
-      const response = await HttpService.post<{ value: ApiMetadata[]; nextLink?: string }>(`:search?${searchParams.toString()}`, {
-        query: search,
-        searchType: 'vector',
-      });
+      const response = await HttpService.post<{ value: ApiMetadata[]; nextLink?: string }>(
+        `:search?${searchParams.toString()}`,
+        {
+          query: search,
+          searchType: 'vector',
+        }
+      );
       return { value: response.value || [], nextLink: response.nextLink };
     }
 
-    const response = await HttpService.get<{ value: ApiMetadata[]; nextLink?: string }>(`/apis?${searchParams.toString()}`);
+    const response = await HttpService.get<{ value: ApiMetadata[]; nextLink?: string }>(
+      `/apis?${searchParams.toString()}`
+    );
     return { value: response.value || [], nextLink: response.nextLink };
   },
 
@@ -67,16 +77,24 @@ export const ApiService: IApiService = {
   },
 
   async getVersions(apiName: string, _resourceType: ResourceType = 'apis'): Promise<ApiVersion[]> {
-    const response = await HttpService.get<{ value: ApiVersion[] }>(`/apis/${apiName}/versions?$top=${DEFAULT_PAGE_SIZE}`);
+    const response = await HttpService.get<{ value: ApiVersion[] }>(
+      `/apis/${apiName}/versions?$top=${DEFAULT_PAGE_SIZE}`
+    );
     return response.value || [];
   },
 
   async getDeployments(apiName: string, _resourceType: ResourceType = 'apis'): Promise<ApiDeployment[]> {
-    const response = await HttpService.get<{ value: ApiDeployment[] }>(`/apis/${apiName}/deployments?$top=${DEFAULT_PAGE_SIZE}`);
+    const response = await HttpService.get<{ value: ApiDeployment[] }>(
+      `/apis/${apiName}/deployments?$top=${DEFAULT_PAGE_SIZE}`
+    );
     return response.value || [];
   },
 
-  async getDefinitions(apiName: string, version: string, _resourceType: ResourceType = 'apis'): Promise<ApiDefinition[]> {
+  async getDefinitions(
+    apiName: string,
+    version: string,
+    _resourceType: ResourceType = 'apis'
+  ): Promise<ApiDefinition[]> {
     const response = await HttpService.get<{ value: ApiDefinition[] }>(
       `/apis/${apiName}/versions/${version}/definitions?$top=${DEFAULT_PAGE_SIZE}`
     );
@@ -130,13 +148,30 @@ export const ApiService: IApiService = {
   },
 
   async getMetadataSchemas(): Promise<MetadataSchema[]> {
-    const response = await HttpService.get<MetadataSchema[]>(`/metadataSchemas?$top=${DEFAULT_PAGE_SIZE}`, { skipWorkspacePrefix: true });
+    const response = await HttpService.get<MetadataSchema[]>(`/metadataSchemas?$top=${DEFAULT_PAGE_SIZE}`, {
+      skipWorkspacePrefix: true,
+    });
     return response || [];
   },
 
   async getSkillEvaluationResult(skillName: string): Promise<SkillEvaluationResult | undefined> {
-    return await HttpService.getOptional<SkillEvaluationResult>(
-      `/skills/${skillName}/evaluationResults/default`
+    return await HttpService.getOptional<SkillEvaluationResult>(`/skills/${skillName}/evaluationResults/default`);
+  },
+
+  async getAgentVersions(agentName: string): Promise<AgentVersion[]> {
+    const response = await HttpService.get<{ value: AgentVersion[] }>(
+      `/agents/${encodeURIComponent(agentName)}/versions?$top=${DEFAULT_PAGE_SIZE}`
     );
+    return response?.value || [];
+  },
+
+  async getAgentDefinition(agentName: string, versionName: string): Promise<string | undefined> {
+    return await HttpService.getText(
+      `/agents/${encodeURIComponent(agentName)}/versions/${encodeURIComponent(versionName)}/artifacts/definition/download`
+    );
+  },
+
+  getAgentDefinitionDownloadPath(agentName: string, versionName: string): string {
+    return `/agents/${encodeURIComponent(agentName)}/versions/${encodeURIComponent(versionName)}/artifacts/definition/download`;
   },
 };
