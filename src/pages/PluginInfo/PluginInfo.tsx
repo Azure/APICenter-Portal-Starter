@@ -38,7 +38,7 @@ function getCategoryLabel(kind: string): string {
 
 function getResourceNavigation(name: string, kind?: string): { to: string; state?: HomeLocationState } {
   const k = kind?.toLowerCase();
-  if (k === 'agent') return { to: LocationsService.getAgentChatUrl(name) };
+  if (k === 'agent') return { to: LocationsService.getAgentInfoUrl(name) };
   if (k === 'skill') return { to: LocationsService.getSkillInfoUrl(name) };
   if (k === 'languagemodel') {
     return { to: LocationsService.getModelDetailUrl(name) };

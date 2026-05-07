@@ -49,7 +49,7 @@ export const ApiList: React.FC = () => {
   const getApiUrl = useCallback(
     (api: ApiCardApi) => {
       const kind = (api as ApiCardApi & { type?: string }).type?.toLowerCase();
-      if (kind === 'agent') return LocationsService.getAgentChatUrl(api.name);
+      if (kind === 'agent') return LocationsService.getAgentInfoUrl(api.name);
       if (kind === 'skill') return LocationsService.getSkillInfoUrl(api.name);
       if (kind === 'plugin') return LocationsService.getPluginInfoUrl(api.name);
       if (kind === 'languagemodel') return LocationsService.getModelPlaygroundUrl(api.name);

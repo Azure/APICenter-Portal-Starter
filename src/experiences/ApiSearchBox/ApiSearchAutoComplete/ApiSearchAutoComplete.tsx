@@ -16,7 +16,7 @@ function getNavigationTarget(api: ApiMetadata): { to: string; state?: HomeLocati
   }
 
   if (kind === 'agent') {
-    return { to: LocationsService.getAgentChatUrl(api.name) };
+    return { to: LocationsService.getAgentInfoUrl(api.name) };
   }
 
   if (kind === 'plugin') {
