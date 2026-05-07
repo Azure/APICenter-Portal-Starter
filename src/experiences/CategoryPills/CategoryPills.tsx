@@ -21,7 +21,7 @@ interface CategoryDef {
 const categories: CategoryDef[] = [
   { label: 'All assets' },
   { label: 'APIs', kindValue: 'rest', icon: <PlugConnectedRegular /> },
-  // { label: 'Agents', kindValue: 'agent', icon: <BotRegular /> },
+  { label: 'Agents', kindValue: 'agent', icon: <BotRegular /> },
   { label: 'MCP servers', kindValue: 'mcp', icon: <LinkMultipleRegular /> },
   // { label: 'Models', kindValue: 'languagemodel', icon: <BrainCircuitRegular /> },
   { label: 'Plugins', kindValue: 'plugin', icon: <PuzzlePieceRegular /> },
