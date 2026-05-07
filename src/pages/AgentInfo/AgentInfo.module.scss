@@ -10,19 +10,6 @@
   gap: 24px;
 }
 
-.selectionDropdown {
-  label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 600;
-  }
-
-  .dropdown {
-    min-width: 175px;
-    background: var(--colorNeutralBackground1);
-  }
-}
-
 .downloadLink {
   display: inline-flex;
   align-items: center;

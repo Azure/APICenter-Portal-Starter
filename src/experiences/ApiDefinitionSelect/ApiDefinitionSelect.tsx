@@ -8,6 +8,7 @@ import { ApiDeployment } from '@/types/apiDeployment';
 import { useApiVersions } from '@/hooks/useApiVersions';
 import { useApiDefinitions } from '@/hooks/useApiDefinitions';
 import { useApiDeployments } from '@/hooks/useApiDeployments';
+import { VersionSelect } from '@/experiences/VersionSelect';
 import styles from './ApiDefinitionSelect.module.scss';
 
 export interface ApiDefinitionSelection {
@@ -29,7 +30,6 @@ interface Props {
   onSelectionChange: (selection: ApiDefinitionSelection) => void;
 }
 
-const NO_VERSION_LABEL = "Version isn't available";
 const NO_DEFINITION_LABEL = "Definition isn't available";
 const NO_DEPLOYMENT_LABEL = "Deployment isn't available";
 
@@ -86,12 +86,12 @@ export const ApiDefinitionSelect: React.FC<Props> = ({
     onSelectionChange({ version, definition, deployment });
   }, [definition, deployment, onSelectionChange, version]);
 
-  const handleVersionSelect = useCallback<React.ComponentProps<typeof Dropdown>['onOptionSelect']>(
-    (_, data) => {
+  const handleVersionSelect = useCallback(
+    (versionName: string) => {
       // Only reset definition when the user changes version.
       // Avoids wiping the definition that gets initialized from cached query results.
       setDefinition(undefined);
-      setVersion(apiVersions.data?.find((version) => version.name === data.selectedOptions[0]));
+      setVersion(apiVersions.data?.find((v) => v.name === versionName));
     },
     [apiVersions.data]
   );
@@ -116,26 +116,14 @@ export const ApiDefinitionSelect: React.FC<Props> = ({
       onMouseDown={(e) => e.preventDefault()}
     >
       {!hiddenSelects.includes('version') && (
-        <div className={styles.selectionDropdown}>
-          <label htmlFor="version-select">Version</label>
-
-          <Dropdown
-            id="version-select"
-            className={styles.dropdown}
-            placeholder="Select API version"
-            size={dropdownSize}
-            value={version?.title || NO_VERSION_LABEL}
-            selectedOptions={[version?.name]}
-            disabled={!apiVersions.data?.length}
-            onOptionSelect={handleVersionSelect}
-          >
-            {apiVersions.data?.map((version) => (
-              <Option key={version.name} value={version.name}>
-                {version.title || version.name}
-              </Option>
-            ))}
-          </Dropdown>
-        </div>
+        <VersionSelect
+          id="version-select"
+          versions={apiVersions.data ?? []}
+          selectedName={version?.name}
+          isInline={isInline}
+          placeholder="Select API version"
+          onChange={handleVersionSelect}
+        />
       )}
 
       {!hiddenSelects.includes('definition') && (
