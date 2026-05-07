@@ -1,0 +1,24 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.versionSelect {
+  min-width: 200px;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.errorBar {
+  margin-bottom: 8px;
+}
