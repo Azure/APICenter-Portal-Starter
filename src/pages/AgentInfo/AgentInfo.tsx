@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Badge, Link, Tab, TabList } from '@fluentui/react-components';
+import { Badge, Button, Tab, TabList } from '@fluentui/react-components';
 import { ArrowDownloadRegular, CodeRegular, DocumentRegular } from '@fluentui/react-icons';
 import { useApi } from '@/hooks/useApi';
 import { useAgentVersions } from '@/hooks/useAgentVersions';
@@ -10,6 +10,7 @@ import { DetailPageLayout } from '@/components/DetailPageLayout/DetailPageLayout
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import CustomMetadata from '@/components/CustomMetadata';
 import { EmptyStateMessage } from '@/components/EmptyStateMessage/EmptyStateMessage';
+import { HeaderActions } from '@/experiences/HeaderActions';
 import { VersionSelect } from '@/experiences/VersionSelect';
 import { AgentDefinition } from '@/experiences/AgentDefinition';
 import styles from './AgentInfo.module.scss';
@@ -34,26 +35,22 @@ export const AgentInfo: React.FC = () => {
 
   const definition = useAgentDefinition(api.data?.name, selectedVersion);
 
-  const handleDownload = useCallback(
-    (e: React.MouseEvent) => {
-      e.preventDefault();
-      if (!api.data?.name || !selectedVersion || !definition.data) return;
-      const blob = new Blob([definition.data], { type: 'text/markdown' });
-      const url = URL.createObjectURL(blob);
-      try {
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `${api.data.name}-${selectedVersion}-definition.md`;
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-      } finally {
-        // Defer revoke so the click is processed first.
-        setTimeout(() => URL.revokeObjectURL(url), 0);
-      }
-    },
-    [api.data?.name, selectedVersion, definition.data]
-  );
+  const handleDownload = useCallback(() => {
+    if (!api.data?.name || !selectedVersion || !definition.data) return;
+    const blob = new Blob([definition.data], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    try {
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${api.data.name}-${selectedVersion}-definition.md`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } finally {
+      // Defer revoke so the click is processed first.
+      setTimeout(() => URL.revokeObjectURL(url), 0);
+    }
+  }, [api.data?.name, selectedVersion, definition.data]);
 
   const versionOptions = useMemo(() => versions.data ?? [], [versions.data]);
   const hasCustomProps = !!Object.keys(api.data?.customProperties || {}).length;
@@ -61,21 +58,14 @@ export const AgentInfo: React.FC = () => {
 
   const headerSelector =
     versionOptions.length > 0 ? (
-      <div className={styles.headerSelector}>
-        <VersionSelect
-          id="agent-version-select"
-          versions={versionOptions}
-          selectedName={selectedVersion}
-          placeholder="Select agent version"
-          isInline
-          onChange={setSelectedVersion}
-        />
-        {hasDefinition && (
-          <Link className={styles.downloadLink} href="#" onClick={handleDownload}>
-            <ArrowDownloadRegular /> Download definition
-          </Link>
-        )}
-      </div>
+      <VersionSelect
+        id="agent-version-select"
+        versions={versionOptions}
+        selectedName={selectedVersion}
+        placeholder="Select agent version"
+        isInline
+        onChange={setSelectedVersion}
+      />
     ) : undefined;
 
   return (
@@ -96,6 +86,15 @@ export const AgentInfo: React.FC = () => {
         </>
       }
       selector={headerSelector}
+      headerActions={
+        hasDefinition ? (
+          <HeaderActions>
+            <Button appearance="primary" icon={<ArrowDownloadRegular />} onClick={handleDownload}>
+              Download definition
+            </Button>
+          </HeaderActions>
+        ) : undefined
+      }
       tabs={
         <TabList selectedValue={selectedTab} onTabSelect={(_, d) => setSelectedTab(d.value as AgentTab)}>
           <Tab icon={<CodeRegular />} value="definition">
