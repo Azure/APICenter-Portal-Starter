@@ -5,7 +5,7 @@ import Home from '@/pages/Home';
 import ApiSpec from '@/pages/ApiSpec';
 import SkillInfo from '@/pages/SkillInfo';
 import PluginInfo from '@/pages/PluginInfo';
-import AgentChat from '@/pages/AgentChat';
+import AgentInfo from '@/pages/AgentInfo';
 import ApiDetailPage from '@/pages/ApiDetailPage';
 import ModelDetailPage from '@/pages/ModelDetailPage';
 import { ModelPlayground } from '@/pages/ModelPlayground';
@@ -59,7 +59,7 @@ const App: React.FC = () => {
           },
           {
             path: 'agents/:name',
-            element: <AgentChat />,
+            element: <AgentInfo />,
           },
 
         ],
