@@ -57,9 +57,11 @@ export const Home: React.FC = () => {
         </div>
       </div>
 
+      {/* TODO: Re-enable endpoint bar once documentation and auth model are ready
       <div className={styles.endpointBarWrapper}>
         <ConnectBar dataApiHostName={config.dataApiHostName} />
       </div>
+      */}
 
       <section className={styles.content}>
         <div className={styles.pillsRow}>
