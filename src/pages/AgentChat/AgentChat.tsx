@@ -194,7 +194,13 @@ export const AgentChat: React.FC = () => {
   return (
     <div className={styles.agentPage}>
       <section className={styles.headerBar}>
-        <Link to="/" className={styles.backLink}>&lt; Back to registry</Link>
+        <nav className={styles.breadcrumb}>
+          <a href="/" className={styles.breadcrumbLink}>Home</a>
+          <span className={styles.breadcrumbSep}>/</span>
+          <a href="/?kind=agent" className={styles.breadcrumbLink}>Agents</a>
+          <span className={styles.breadcrumbSep}>/</span>
+          <span className={styles.breadcrumbCurrent}>{agentTitle}</span>
+        </nav>
       </section>
       <section className={styles.agentHeader}>
         <h1>{agentTitle}</h1>
