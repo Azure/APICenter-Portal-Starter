@@ -3,12 +3,10 @@ import { Badge, Button, Textarea, Spinner, Tab, TabList } from '@fluentui/react-
 import {
   ArrowRight24Regular,
   Bot24Regular,
-  ThumbLike20Regular,
-  ThumbDislike20Regular,
   DocumentRegular,
   ChatRegular,
 } from '@fluentui/react-icons';
-import { Link, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useApiDeployments } from '@/hooks/useApiDeployments';
 import { LocationsService } from '@/services/LocationsService';
 import { useLanguageModel } from '@/hooks/useLanguageModel';
@@ -202,7 +200,13 @@ export const ModelPlayground: React.FC = () => {
   return (
     <div className={styles.modelPlayground}>
       <section className={styles.headerBar}>
-        <Link to="/" className={styles.backLink}>&lt; Back to registry</Link>
+        <nav className={styles.breadcrumb}>
+          <a href="/" className={styles.breadcrumbLink}>Home</a>
+          <span className={styles.breadcrumbSep}>/</span>
+          <a href="/?kind=languagemodel" className={styles.breadcrumbLink}>Models</a>
+          <span className={styles.breadcrumbSep}>/</span>
+          <span className={styles.breadcrumbCurrent}>{modelTitle}</span>
+        </nav>
       </section>
       <section className={styles.modelHeader}>
         <h1>{modelTitle}</h1>
@@ -247,12 +251,6 @@ export const ModelPlayground: React.FC = () => {
                     <div className={styles.messageContent}>
                       {msg.role === 'assistant' ? <MarkdownRenderer markdown={msg.content} /> : msg.content}
                     </div>
-                    {msg.role === 'assistant' && msg.content && (
-                      <div className={styles.feedback}>
-                        <button className={styles.feedbackBtn} title="Helpful"><ThumbLike20Regular /></button>
-                        <button className={styles.feedbackBtn} title="Not helpful"><ThumbDislike20Regular /></button>
-                      </div>
-                    )}
                   </div>
                 </div>
               )

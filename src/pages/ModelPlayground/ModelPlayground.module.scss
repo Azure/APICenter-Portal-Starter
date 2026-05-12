@@ -1,23 +1,39 @@
 .modelPlayground {
   display: grid;
-  grid-template-rows: auto auto 1fr;
+  grid-template-rows: auto auto auto 1fr;
   overflow: hidden;
 }
 
 .headerBar {
-  padding-top: 0.75rem;
+  padding-top: 1.5rem;
   padding-bottom: 0;
 }
 
-.backLink {
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.875rem;
+}
+
+.breadcrumbLink {
   color: var(--colorBrandForeground1);
   text-decoration: none;
-  font-size: 0.875rem;
   font-weight: 500;
 
   &:hover {
     text-decoration: underline;
   }
+}
+
+.breadcrumbSep {
+  color: var(--colorNeutralForeground3);
+  font-weight: 400;
+}
+
+.breadcrumbCurrent {
+  color: var(--colorNeutralForeground1);
+  font-weight: 500;
 }
 
 .modelHeader {
@@ -258,12 +274,16 @@
 }
 
 .disclaimer {
-  margin: 0.5rem 0 0;
+  margin: 0.5rem 0 1.5rem;
   text-align: center;
   font-size: 0.6875rem;
   color: var(--colorNeutralForeground3);
 }
 
 .documentationTab {
-  padding: 2rem 0;
+  padding: 1.25rem 0 2rem;
+
+  > :first-child {
+    margin-top: 0;
+  }
 }
