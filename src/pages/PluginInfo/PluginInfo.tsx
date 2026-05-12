@@ -14,7 +14,7 @@ import { setDocumentTitle } from '@/utils/dom';
 import { formatKindDisplay } from '@/utils/formatKind';
 import { LocationsService } from '@/services/LocationsService';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
-import { DetailPageLayout } from '@/components/DetailPageLayout/DetailPageLayout';
+import { DetailPageLayout, BreadcrumbItem } from '@/components/DetailPageLayout/DetailPageLayout';
 import { InstallationBlock } from '@/components/InstallationBlock';
 import { HomeLocationState } from '@/types/homeDrawer';
 import styles from './PluginInfo.module.scss';
@@ -87,6 +87,11 @@ export const PluginInfo: React.FC = () => {
 
   setDocumentTitle(`Plugin${plugin.data?.title ? ` - ${plugin.data.title}` : ''}`);
 
+  const breadcrumbs = useMemo<BreadcrumbItem[]>(() => [
+    { label: 'Home', href: '/' },
+    { label: 'Plugins', href: '/?kind=plugin' },
+    { label: plugin.data?.title || name || '...' },
+  ], [plugin.data?.title, name]);
   const tabs = (
     <TabList defaultSelectedValue="documentation">
       <Tab icon={<DocumentRegular />} value="documentation">Documentation</Tab>
@@ -97,6 +102,7 @@ export const PluginInfo: React.FC = () => {
     <DetailPageLayout
       title={plugin.data?.title}
       summary={plugin.data?.description}
+      breadcrumbs={breadcrumbs}
       metadata={
         <Badge appearance="filled" color="brand" shape="circular">Plugin</Badge>
       }

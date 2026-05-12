@@ -8,7 +8,7 @@ import { useServer } from '@/hooks/useServer';
 import { configAtom } from '@/atoms/configAtom';
 import { kindToResourceType, ApiDefinitionId } from '@/types/apiDefinition';
 import { setDocumentTitle } from '@/utils/dom';
-import { DetailPageLayout } from '@/components/DetailPageLayout/DetailPageLayout';
+import { DetailPageLayout, BreadcrumbItem } from '@/components/DetailPageLayout/DetailPageLayout';
 import ApiDefinitionSelect, { ApiDefinitionSelection } from '@/experiences/ApiDefinitionSelect';
 import ApiAdditionalInfo from '@/experiences/ApiAdditionalInfo';
 import { HeaderActions } from '@/experiences/HeaderActions';
@@ -39,6 +39,19 @@ export const ApiDetailPage: React.FC = () => {
   const STANDALONE_KINDS = ['skill', 'a2a', 'mcp', 'plugin', 'agent', 'languagemodel'];
   const isStandaloneKind = kind ? STANDALONE_KINDS.includes(kind.toLowerCase()) : false;
   const categoryLabel = isStandaloneKind ? formatKindDisplay(kind!) : 'API';
+
+  const CATEGORY_PLURALS: Record<string, string> = {
+    mcp: 'MCP servers', rest: 'APIs', graphql: 'APIs', grpc: 'APIs', soap: 'APIs',
+    skill: 'Skills', plugin: 'Plugins', agent: 'Agents', a2a: 'Agents', languagemodel: 'Models',
+  };
+  const breadcrumbs = useMemo<BreadcrumbItem[]>(() => {
+    const categoryPlural = CATEGORY_PLURALS[kind?.toLowerCase() ?? ''] ?? 'APIs';
+    return [
+      { label: 'Home', href: '/' },
+      { label: categoryPlural, href: `/?kind=${kind?.toLowerCase() ?? ''}` },
+      { label: api.data?.title || apiName || '...' },
+    ];
+  }, [kind, api.data?.title, apiName]);
 
   const hiddenSelects = ['mcp', 'skill', 'plugin'].includes(kind ?? '')
     ? (['definition', 'deployment'] as Array<keyof ApiDefinitionSelection>)
@@ -254,6 +267,7 @@ export const ApiDetailPage: React.FC = () => {
     <DetailPageLayout
       title={api.data?.title}
       summary={api.data?.summary}
+      breadcrumbs={breadcrumbs}
       metadata={
         <>
           <Badge appearance="filled" color="brand" shape="circular">

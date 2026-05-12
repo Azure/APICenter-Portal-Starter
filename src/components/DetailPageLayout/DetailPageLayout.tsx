@@ -4,6 +4,11 @@ import { Button, MessageBar, MessageBarBody, Spinner } from '@fluentui/react-com
 import { EmptyStateMessage } from '@/components/EmptyStateMessage/EmptyStateMessage';
 import styles from './DetailPageLayout.module.scss';
 
+export interface BreadcrumbItem {
+  label: string;
+  href?: string;
+}
+
 interface DetailPageLayoutProps {
   title?: string;
   summary?: string;
@@ -17,6 +22,7 @@ interface DetailPageLayoutProps {
   emptyMessage?: string;
   error?: string;
   onRetry?: () => void;
+  breadcrumbs?: BreadcrumbItem[];
 }
 
 export const DetailPageLayout: React.FC<DetailPageLayoutProps> = ({
@@ -27,6 +33,7 @@ export const DetailPageLayout: React.FC<DetailPageLayoutProps> = ({
   selector,
   tabs,
   sidebar,
+  breadcrumbs,
   children,
   isLoading,
   emptyMessage,
@@ -71,7 +78,22 @@ export const DetailPageLayout: React.FC<DetailPageLayoutProps> = ({
   return (
     <div className={styles.detailPage}>
       <section className={styles.headerBar}>
-        <Link to="/" className={styles.backLink}>&lt; Back to registry</Link>
+        <nav className={styles.breadcrumb}>
+          {breadcrumbs?.length ? (
+            breadcrumbs.map((crumb, i) => (
+              <React.Fragment key={i}>
+                {i > 0 && <span className={styles.breadcrumbSep}>/</span>}
+                {crumb.href ? (
+                  <a href={crumb.href} className={styles.breadcrumbLink}>{crumb.label}</a>
+                ) : (
+                  <span className={styles.breadcrumbCurrent}>{crumb.label}</span>
+                )}
+              </React.Fragment>
+            ))
+          ) : (
+            <Link to="/" className={styles.breadcrumbLink}>&lt; Back to registry</Link>
+          )}
+        </nav>
       </section>
       <section className={styles.header}>
         <div className={styles.headerContent}>

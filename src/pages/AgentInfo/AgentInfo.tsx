@@ -7,7 +7,7 @@ import { useAgentVersions } from '@/hooks/useAgentVersions';
 import { useAgentDefinition } from '@/hooks/useAgentDefinition';
 import { setDocumentTitle } from '@/utils/dom';
 import { getLifecycleBadgeColor } from '@/utils/badgeSystem';
-import { DetailPageLayout } from '@/components/DetailPageLayout/DetailPageLayout';
+import { DetailPageLayout, BreadcrumbItem } from '@/components/DetailPageLayout/DetailPageLayout';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import CustomMetadata from '@/components/CustomMetadata';
 import { EmptyStateMessage } from '@/components/EmptyStateMessage/EmptyStateMessage';
@@ -27,6 +27,11 @@ export const AgentInfo: React.FC = () => {
 
   setDocumentTitle(`Agent${api.data?.title ? ` - ${api.data.title}` : ''}`);
 
+  const breadcrumbs = useMemo<BreadcrumbItem[]>(() => [
+    { label: 'Home', href: '/' },
+    { label: 'Agents', href: '/?kind=agent' },
+    { label: api.data?.title || name || '...' },
+  ], [api.data?.title, name]);
   // Auto-select the first version once versions load.
   useEffect(() => {
     if (!selectedVersion && versions.data && versions.data.length > 0) {
@@ -73,6 +78,7 @@ export const AgentInfo: React.FC = () => {
     <DetailPageLayout
       title={api.data?.title}
       summary={api.data?.summary}
+      breadcrumbs={breadcrumbs}
       metadata={
         <>
           <Badge appearance="filled" color="brand" shape="circular">

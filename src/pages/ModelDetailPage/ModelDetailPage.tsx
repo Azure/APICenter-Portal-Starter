@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { Badge, Link, Subtitle2 } from '@fluentui/react-components';
 import { useLanguageModel } from '@/hooks/useLanguageModel';
 import { getLifecycleBadgeColor } from '@/utils/badgeSystem';
 import { setDocumentTitle } from '@/utils/dom';
-import { DetailPageLayout } from '@/components/DetailPageLayout/DetailPageLayout';
+import { DetailPageLayout, BreadcrumbItem } from '@/components/DetailPageLayout/DetailPageLayout';
 
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import styles from './ModelDetailPage.module.scss';
@@ -15,10 +15,16 @@ export const ModelDetailPage: React.FC = () => {
 
   setDocumentTitle(`Model${model.data?.title ? ` - ${model.data.title}` : ''}`);
 
+  const breadcrumbs = useMemo<BreadcrumbItem[]>(() => [
+    { label: 'Home', href: '/' },
+    { label: 'Models', href: '/?kind=languagemodel' },
+    { label: model.data?.title || apiName || '...' },
+  ], [model.data?.title, apiName]);
   return (
     <DetailPageLayout
       title={model.data?.title}
       summary={model.data?.summary}
+      breadcrumbs={breadcrumbs}
       metadata={
         <>
           <Badge appearance="filled" color="brand" shape="circular">Model</Badge>

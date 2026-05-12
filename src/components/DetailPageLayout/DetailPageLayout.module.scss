@@ -5,19 +5,35 @@
   flex-direction: column;
 
   .headerBar {
-    padding-top: 0.75rem;
+    padding-top: 1.5rem;
     padding-bottom: 0;
   }
 
-  .backLink {
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.875rem;
+  }
+
+  .breadcrumbLink {
     color: var(--colorBrandForeground1);
     text-decoration: none;
-    font-size: 0.875rem;
     font-weight: 500;
 
     &:hover {
       text-decoration: underline;
     }
+  }
+
+  .breadcrumbSep {
+    color: var(--colorNeutralForeground3);
+    font-weight: 400;
+  }
+
+  .breadcrumbCurrent {
+    color: var(--colorNeutralForeground1);
+    font-weight: 500;
   }
 
   .spinner {

@@ -7,7 +7,7 @@ import { useApi } from '@/hooks/useApi';
 import { useSkillEvaluationResult } from '@/hooks/useSkillEvaluationResult';
 import { configAtom } from '@/atoms/configAtom';
 import { setDocumentTitle } from '@/utils/dom';
-import { DetailPageLayout } from '@/components/DetailPageLayout/DetailPageLayout';
+import { DetailPageLayout, BreadcrumbItem } from '@/components/DetailPageLayout/DetailPageLayout';
 import { HeaderActions } from '@/experiences/HeaderActions';
 import { SkillEvaluationDetails } from '@/experiences/SkillEvaluation';
 import { buildSkillDeeplink } from '@/utils/skillDeeplink';
@@ -30,6 +30,11 @@ export const SkillInfo: React.FC = () => {
 
   setDocumentTitle(`Skill${api.data?.title ? ` - ${api.data.title}` : ''}`);
 
+  const breadcrumbs = useMemo<BreadcrumbItem[]>(() => [
+    { label: 'Home', href: '/' },
+    { label: 'Skills', href: '/?kind=skill' },
+    { label: api.data?.title || name || '...' },
+  ], [api.data?.title, name]);
   const skillSourceUrl = useMemo(
     () => (api.data?.customProperties?.['sourceUrl'] as string | undefined) ?? SKILL_SOURCE_URL,
     [api.data]
@@ -47,6 +52,7 @@ export const SkillInfo: React.FC = () => {
     <DetailPageLayout
       title={api.data?.title}
       summary={api.data?.summary}
+      breadcrumbs={breadcrumbs}
       metadata={
         <>
           <Badge appearance="filled" color="brand" shape="circular">Skill</Badge>
