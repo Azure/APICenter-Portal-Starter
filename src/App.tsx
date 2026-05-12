@@ -51,10 +51,6 @@ const App: React.FC = () => {
             element: <ApiSpec />,
           },
           {
-            path: 'languageModels/:apiName/versions/:versionName/definitions/:definitionName',
-            element: <ApiSpec />,
-          },
-          {
             path: 'skills/:name',
             element: <SkillInfo />,
           },
