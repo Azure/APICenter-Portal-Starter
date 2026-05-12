@@ -99,7 +99,7 @@ export const ModelPlayground: React.FC = () => {
     if (!base) return undefined;
     return base.replace(/\/$/, '') + CHAT_PATH;
   })();
-  const [activeTab, setActiveTab] = useState<PlaygroundTabs>(PlaygroundTabs.PLAYGROUND);
+  const [activeTab, setActiveTab] = useState<PlaygroundTabs>(PlaygroundTabs.DOCUMENTATION);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -220,12 +220,12 @@ export const ModelPlayground: React.FC = () => {
 
       <section className={styles.tabBar}>
         <TabList selectedValue={activeTab} onTabSelect={(_, data) => setActiveTab(data.value as PlaygroundTabs)}>
-          <Tab icon={<ChatRegular />} value={PlaygroundTabs.PLAYGROUND}>Model playground</Tab>
           <Tab icon={<DocumentRegular />} value={PlaygroundTabs.DOCUMENTATION}>Documentation</Tab>
+          {runtimeUrl && <Tab icon={<ChatRegular />} value={PlaygroundTabs.PLAYGROUND}>Model playground</Tab>}
         </TabList>
       </section>
 
-      {activeTab === PlaygroundTabs.PLAYGROUND && (
+      {activeTab === PlaygroundTabs.PLAYGROUND && runtimeUrl && (
         <section className={styles.chatContainer}>
           <div className={styles.messages}>
             {messages.length === 0 && (
