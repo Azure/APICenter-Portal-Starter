@@ -11,6 +11,8 @@ The application uses **React Router DOM v6** (`createBrowserRouter`) for client-
 | Path | Component | Parent | Purpose |
 |------|-----------|--------|---------|
 | `/` | `Home` | `Layout` | Landing page with search, filters, and API/model catalog |
+| `/apis/:apiName` | `ApiDetailPage` | `Layout` | Detail page for APIs (REST, GraphQL, gRPC, SOAP, plugin/skill/agent/model render via their own pages or detail layout) |
+| `/servers/:apiName` | `McpServerDetailPage` | `Layout` | Detail page for MCP servers |
 | `/apis/:apiName/versions/:versionName/definitions/:definitionName` | `ApiSpec` | `Layout` | Spec explorer for regular APIs |
 | `/languageModels/:apiName/versions/:versionName/definitions/:definitionName` | `ApiSpec` | `Layout` | Spec explorer for language models |
 | `/skills/:name` | `SkillInfo` | `Layout` | Skill detail page |
@@ -23,6 +25,8 @@ The application uses **React Router DOM v6** (`createBrowserRouter`) for client-
 ```
 Layout
 ├── / ............................................. Home (catalog + search)
+├── /apis/:apiName ................................ ApiDetailPage
+├── /servers/:apiName ............................. McpServerDetailPage
 ├── /apis/:apiName/versions/:versionName/definitions/:definitionName .... ApiSpec
 ├── /languageModels/:apiName/versions/:versionName/definitions/:definitionName .... ApiSpec
 ├── /skills/:name ................................ SkillInfo
@@ -98,6 +102,13 @@ Layout
 - **Purpose**: Conversational chat UI for an agent-type API.
 - **Route param**: `:name`
 
+### McpServerDetailPage (`/servers/:apiName`)
+
+- **Component**: `src/pages/McpServerDetailPage/McpServerDetailPage.tsx`
+- **Purpose**: Full-page detail view for an MCP server, including local/remote install actions and a test console tab.
+- **Route param**: `:apiName`
+- **Nuance**: MCP servers no longer share the `/apis/:apiName` route; cards on the catalog navigate here via `getMcpServerUrl(name)`.
+
 ### ModelPlayground (`/models/:name`)
 
 - **Component**: `src/pages/ModelPlayground/ModelPlayground.tsx`
@@ -117,6 +128,7 @@ All internal URL construction is centralized in `src/services/LocationsService.t
 | `getSkillInfoUrl(name)` | `/skills/{name}` | |
 | `getPluginInfoUrl(name)` | `/plugins/{name}` | |
 | `getAgentChatUrl(name)` | `/agents/{name}` | |
+| `getMcpServerUrl(name)` | `/servers/{name}` | |
 | `getModelPlaygroundUrl(name)` | `/models/{name}` | |
 | `getApiSchemaExplorerUrl(api, version, definition, resourceType?)` | `/{resourceType}/{api}/versions/{version}/definitions/{definition}` | Uses the asset-type route segment for browser navigation |
 | `getAiSearchInfoUrl()` | External docs link | |
@@ -155,6 +167,7 @@ Clicking an item in the API list navigates based on its `kind` (via `apiAdapter`
 | `'agent'` | `/agents/{name}` | `getAgentChatUrl` |
 | `'skill'` | `/skills/{name}` | `getSkillInfoUrl` |
 | `'plugin'` | `/plugins/{name}` | `getPluginInfoUrl` |
+| `'mcp'` | `/servers/{name}` | `getMcpServerUrl` |
 | `'languageModel'` | Home drawer for `{name}` | Home navigation state |
 | anything else | Home drawer for `{name}` | Home navigation state |
 

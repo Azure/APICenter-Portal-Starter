@@ -1,11 +1,8 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Badge, Button, Dropdown, Link, Menu, MenuItem, MenuList, MenuPopover, MenuTrigger, Option, SplitButton, Spinner, Tab, TabList } from '@fluentui/react-components';
-import { ArrowDownloadRegular, DocumentRegular, ListRegular, TagRegular, WindowConsoleRegular } from '@fluentui/react-icons';
-import { useRecoilValue } from 'recoil';
+import { Badge, Button, Dropdown, Link, Option, Tab, TabList } from '@fluentui/react-components';
+import { ArrowDownloadRegular, DocumentRegular, ListRegular, TagRegular } from '@fluentui/react-icons';
 import { useApi } from '@/hooks/useApi';
-import { useServer } from '@/hooks/useServer';
-import { configAtom } from '@/atoms/configAtom';
 import { kindToResourceType, ApiDefinitionId } from '@/types/apiDefinition';
 import { setDocumentTitle } from '@/utils/dom';
 import { DetailPageLayout, BreadcrumbItem } from '@/components/DetailPageLayout/DetailPageLayout';
@@ -19,11 +16,11 @@ import { useApiSpec } from '@/hooks/useApiSpec';
 import { useApiSpecUrl } from '@/hooks/useApiSpecUrl';
 import { useApiDefinitions } from '@/hooks/useApiDefinitions';
 import ApiSpecPageLayout from '@/pages/ApiSpec/ApiSpecPageLayout';
-import McpSpecPage from '@/pages/ApiSpec/McpSpecPage';
 import EmptyStateMessage from '@/components/EmptyStateMessage';
-import { ConnectPanel } from '@/components/ConnectPanel';
-import MarkdownRenderer from '@/components/MarkdownRenderer';
+import { useRecoilValue } from 'recoil';
+import { configAtom } from '@/atoms/configAtom';
 import { InstallationBlock } from '@/components/InstallationBlock';
+import { Spinner } from '@fluentui/react-components';
 import VsCodeLogo from '@/assets/vsCodeLogo.svg';
 
 export const ApiDetailPage: React.FC = () => {
@@ -36,12 +33,12 @@ export const ApiDetailPage: React.FC = () => {
   setDocumentTitle(`API${api.data?.title ? ` - ${api.data.title}` : ''}`);
 
   const kind = api.data?.kind;
-  const STANDALONE_KINDS = ['skill', 'a2a', 'mcp', 'plugin', 'agent', 'languagemodel'];
+  const STANDALONE_KINDS = ['skill', 'a2a', 'plugin', 'agent', 'languagemodel'];
   const isStandaloneKind = kind ? STANDALONE_KINDS.includes(kind.toLowerCase()) : false;
   const categoryLabel = isStandaloneKind ? formatKindDisplay(kind!) : 'API';
 
   const CATEGORY_PLURALS: Record<string, string> = {
-    mcp: 'MCP servers', rest: 'APIs', graphql: 'APIs', grpc: 'APIs', soap: 'APIs',
+    rest: 'APIs', graphql: 'APIs', grpc: 'APIs', soap: 'APIs',
     skill: 'Skills', plugin: 'Plugins', agent: 'Agents', a2a: 'Agents', languagemodel: 'Models',
   };
   const breadcrumbs = useMemo<BreadcrumbItem[]>(() => {
@@ -53,11 +50,9 @@ export const ApiDetailPage: React.FC = () => {
     ];
   }, [kind, api.data?.title, apiName]);
 
-  const hiddenSelects = ['mcp', 'skill', 'plugin'].includes(kind ?? '')
+  const hiddenSelects = ['skill', 'plugin'].includes(kind ?? '')
     ? (['definition', 'deployment'] as Array<keyof ApiDefinitionSelection>)
     : (['definition'] as Array<keyof ApiDefinitionSelection>);
-
-  const server = useServer(kind === 'mcp' ? apiName : undefined);
 
   const skillSourceUrl = useMemo(
     () => api.data?.customProperties?.['sourceUrl'] as string | undefined,
@@ -87,43 +82,6 @@ export const ApiDetailPage: React.FC = () => {
     return tags;
   }, [api.data?.customProperties]);
 
-  // MCP install
-  const hasRemoteInstall = kind === 'mcp' && !!definitionSelection?.deployment?.server.runtimeUri.length;
-  const hasLocalInstall = kind === 'mcp' && !!server.data?.packages;
-  const hasMcpInstall = hasRemoteInstall || hasLocalInstall;
-
-  const handleMcpInstall = useCallback((target?: 'remote' | 'local') => {
-    const useRemote = target ? target === 'remote' : hasRemoteInstall;
-    const baseName = api.data?.title || apiName || '';
-
-    if (useRemote && hasRemoteInstall) {
-      const runtimeUri = definitionSelection?.deployment?.server.runtimeUri[0];
-      if (!runtimeUri) return;
-      const matchingRemote = server.data?.remotes?.find((r) => r.url === runtimeUri);
-      const transportType = matchingRemote?.transport_type || 'sse';
-      const payload = {
-        name: hasLocalInstall ? `${baseName} (remote)` : baseName,
-        type: transportType,
-        url: runtimeUri,
-      };
-      window.open(`vscode:mcp/install?${encodeURIComponent(JSON.stringify(payload))}`);
-    } else if (hasLocalInstall) {
-      const [pkg] = server.data!.packages!;
-      if (!pkg) return;
-      const runtimeArgs = (pkg.runtimeArguments ?? []).map((arg: { value?: string }) => arg.value).filter(Boolean);
-      const packageRef = pkg.version ? `${pkg.identifier}@${pkg.version}` : pkg.identifier;
-      const args = pkg.runtimeHint === 'npx' ? ['-y', packageRef, ...runtimeArgs] : runtimeArgs;
-      const localBase = baseName || pkg.identifier.split('/').pop() || pkg.identifier;
-      const payload = {
-        name: hasRemoteInstall ? `${localBase} (local)` : localBase,
-        type: pkg.transport?.type || 'stdio',
-        command: pkg.runtimeHint,
-        args,
-      };
-      window.open(`vscode:mcp/install?${encodeURIComponent(JSON.stringify(payload))}`);
-    }
-  }, [api.data?.title, apiName, definitionSelection?.deployment?.server.runtimeUri, server.data, hasRemoteInstall, hasLocalInstall]);
-
   // Skill install
   const handleSkillInstall = useCallback(() => {
     if (!skillSourceUrl || !api.data?.name) return;
@@ -131,26 +89,17 @@ export const ApiDetailPage: React.FC = () => {
     window.open(deeplink);
   }, [skillSourceUrl, api.data?.name]);
 
-  const hasInstall = hasMcpInstall || (kind === 'skill' && !!skillSourceUrl);
+  const hasInstall = kind === 'skill' && !!skillSourceUrl;
 
   // Copyable endpoint URL for devs to use in CLI / other tools
   const endpointUrl = useMemo(() => {
-    // MCP: prefer deployment runtimeUri, fall back to server remotes
-    if (kind === 'mcp') {
-      const deploymentUri = definitionSelection?.deployment?.server.runtimeUri[0];
-      if (deploymentUri) return deploymentUri;
-      const remoteUrl = server.data?.remotes?.[0]?.url;
-      if (remoteUrl) return remoteUrl;
-    }
     // Skill: sourceUrl from custom properties
     if (kind === 'skill' && skillSourceUrl) return skillSourceUrl;
     // General APIs: runtimeUri from deployment
     const deploymentUri = definitionSelection?.deployment?.server.runtimeUri[0];
     if (deploymentUri) return deploymentUri;
     return undefined;
-  }, [kind, definitionSelection?.deployment?.server.runtimeUri, server.data?.remotes, skillSourceUrl]);
-
-  const isMcp = kind === 'mcp';
+  }, [kind, definitionSelection?.deployment?.server.runtimeUri, skillSourceUrl]);
 
   const hasCustomProps = !!Object.keys(api.data?.customProperties || {}).length;
   const hasExternalDocs = !!api.data?.externalDocumentation?.filter(d => !!d.title && d.url).length;
@@ -201,15 +150,6 @@ export const ApiDetailPage: React.FC = () => {
 
   function renderInstallationBlock() {
     const kindLower = kind?.toLowerCase();
-    if (kindLower === 'mcp' && endpointUrl) {
-      return (
-        <InstallationBlock
-          assetType="mcp"
-          endpointUrl={endpointUrl}
-          assetName={api.data?.name || apiName || 'mcp-server'}
-        />
-      );
-    }
     if (kindLower === 'plugin') {
       return (
         <InstallationBlock
@@ -233,18 +173,6 @@ export const ApiDetailPage: React.FC = () => {
 
   function renderDocumentation() {
     if (!definitionId) return null;
-
-    if (isMcp) {
-      if (!definitionSelection?.deployment) {
-        return <Spinner size="small" label="Loading documentation..." labelPosition="below" />;
-      }
-      return (
-        <McpSpecPage
-          definitionId={definitionId}
-          deployment={definitionSelection.deployment}
-        />
-      );
-    }
 
     if (apiSpec.isLoading) {
       return <Spinner size="small" label="Loading documentation..." labelPosition="below" />;
@@ -278,15 +206,6 @@ export const ApiDetailPage: React.FC = () => {
               {formatKindDisplay(kind)}
             </Badge>
           )}
-          {isMcp && hasLocalInstall && hasRemoteInstall && (
-            <Badge appearance="tint" color="brand" shape="circular">Local + Remote</Badge>
-          )}
-          {isMcp && hasLocalInstall && !hasRemoteInstall && (
-            <Badge appearance="tint" color="brand" shape="circular">Local</Badge>
-          )}
-          {isMcp && !hasLocalInstall && hasRemoteInstall && (
-            <Badge appearance="tint" color="brand" shape="circular">Remote</Badge>
-          )}
           {api.data?.lifecycleStage && (
             <Badge appearance="tint" color={getLifecycleBadgeColor(api.data.lifecycleStage)} shape="circular">
               {api.data.lifecycleStage}
@@ -308,8 +227,7 @@ export const ApiDetailPage: React.FC = () => {
       tabs={
         <TabList selectedValue={selectedTab} onTabSelect={(_, d) => setSelectedTab(d.value as string)}>
           <Tab icon={<DocumentRegular />} value="documentation">Documentation</Tab>
-          {isMcp && hasRemoteInstall && <Tab icon={<WindowConsoleRegular />} value="testconsole">Test console</Tab>}
-          {!isMcp && hasAdditionalInfo && <Tab icon={<ListRegular />} value="properties">Additional properties</Tab>}
+          {hasAdditionalInfo && <Tab icon={<ListRegular />} value="properties">Additional properties</Tab>}
         </TabList>
       }
       selector={
@@ -365,7 +283,7 @@ export const ApiDetailPage: React.FC = () => {
           <HeaderActions showExtensionHint>
             <Button
               icon={<img height={18} src={VsCodeLogo} alt="VS Code" />}
-              onClick={hasMcpInstall ? () => handleMcpInstall() : handleSkillInstall}
+              onClick={handleSkillInstall}
             >
               Install in VS Code
             </Button>
@@ -379,22 +297,11 @@ export const ApiDetailPage: React.FC = () => {
       sidebar={undefined}
     >
       {api.data && selectedTab === 'documentation' && (
-        isMcp ? (
-          <>
-            {renderInstallationBlock()}
-            {api.data.description && api.data.description !== api.data.summary && (
-              <MarkdownRenderer markdown={api.data.description} />
-            )}
-            <ApiAdditionalInfo api={api.data} />
-          </>
-        ) : (
-          <>
-            {renderInstallationBlock()}
-            {renderDocumentation()}
-          </>
-        )
+        <>
+          {renderInstallationBlock()}
+          {renderDocumentation()}
+        </>
       )}
-      {api.data && selectedTab === 'testconsole' && isMcp && hasRemoteInstall && renderDocumentation()}
       {api.data && selectedTab === 'properties' && (
         <ApiAdditionalInfo api={api.data} />
       )}

@@ -7,6 +7,7 @@ import SkillInfo from '@/pages/SkillInfo';
 import PluginInfo from '@/pages/PluginInfo';
 import AgentInfo from '@/pages/AgentInfo';
 import ApiDetailPage from '@/pages/ApiDetailPage';
+import McpServerDetailPage from '@/pages/McpServerDetailPage';
 import ModelDetailPage from '@/pages/ModelDetailPage';
 import { ModelPlayground } from '@/pages/ModelPlayground';
 import { configAtom } from '@/atoms/configAtom';
@@ -32,6 +33,10 @@ const App: React.FC = () => {
           {
             path: 'apis/:apiName',
             element: <ApiDetailPage />,
+          },
+          {
+            path: 'servers/:apiName',
+            element: <McpServerDetailPage />,
           },
           {
             path: 'languageModels/:apiName',

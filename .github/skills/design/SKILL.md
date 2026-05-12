@@ -14,7 +14,7 @@ description: "Design rules and conventions for the API Center Portal. Use when e
 
 ## Navigation
 
-- **All cards navigate to full pages.** API cards go to `/apis/:name`, MCP cards go to `/apis/:name`, model cards go to `/languageModels/:name`. Never open a side panel/drawer from a card click.
+- **All cards navigate to full pages.** API cards go to `/apis/:name`, MCP cards go to `/servers/:name`, model cards go to `/languageModels/:name`. Never open a side panel/drawer from a card click.
 - **No playground routes.** The model playground feature is removed. Do not add "Open in playground" buttons or links, and do not route to `/languageModels/:name/playground`.
 - The `useDesignVariation` hook should NOT be used to toggle between drawer and full-page navigation — full pages are always used.
 

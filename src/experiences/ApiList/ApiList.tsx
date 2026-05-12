@@ -53,6 +53,7 @@ export const ApiList: React.FC = () => {
       if (kind === 'agent') return LocationsService.getAgentInfoUrl(api.name);
       if (kind === 'skill') return LocationsService.getSkillInfoUrl(api.name);
       if (kind === 'plugin') return LocationsService.getPluginInfoUrl(api.name);
+      if (kind === 'mcp') return LocationsService.getMcpServerUrl(api.name);
       if (kind === 'languagemodel') return LocationsService.getModelPlaygroundUrl(api.name);
       return LocationsService.getApiDetailUrl(api.name);
     },
