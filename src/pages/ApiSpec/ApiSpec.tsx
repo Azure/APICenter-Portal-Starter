@@ -3,6 +3,7 @@ import { useNavigate, useParams, useLocation, Link } from 'react-router-dom';
 import { Badge, Spinner, Tab, TabList } from '@fluentui/react-components';
 import { DocumentRegular } from '@fluentui/react-icons';
 import { formatKindDisplay } from '@/utils/formatKind';
+import { getLifecycleBadgeColor } from '@/utils/badgeSystem';
 import { ApiDefinitionId, ResourceType } from '@/types/apiDefinition';
 import { useApi } from '@/hooks/useApi';
 import { setDocumentTitle } from '@/utils/dom';
@@ -73,7 +74,7 @@ export const ApiSpec: React.FC = () => {
         {(api.data.kind || api.data.lifecycleStage) && (
           <div className={styles.badges}>
             {api.data.kind && <Badge appearance="filled" color="brand" shape="circular">{formatKindDisplay(api.data.kind)}</Badge>}
-            {api.data.lifecycleStage && <Badge appearance="outline">{api.data.lifecycleStage}</Badge>}
+            {api.data.lifecycleStage && <Badge appearance="tint" color={getLifecycleBadgeColor(api.data.lifecycleStage)} shape="circular">{api.data.lifecycleStage}</Badge>}
           </div>
         )}
         {api.data.summary && <p className={styles.summary}>{api.data.summary}</p>}

@@ -136,7 +136,7 @@ export const ParamSchemaDefinition: React.FC<Props> = ({
       return (
         <>
           Type:
-          <Badge className={styles.badge} appearance="tint" color="informative" shape="rounded">
+          <Badge className={styles.badge} appearance="tint" color="informative" shape="circular">
             {schema.typeLabel}
           </Badge>
         </>

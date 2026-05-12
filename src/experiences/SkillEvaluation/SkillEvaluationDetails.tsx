@@ -149,9 +149,15 @@ export const SkillEvaluationDetails: React.FC<SkillEvaluationDetailsProps> = ({
               <div className={styles.recContent}>
                 <h4>
                   {rec.title}
-                  <span className={`${styles.impactTag} ${rec.impact === 'high' ? styles.impactTagHigh : styles.impactTagMedium}`}>
+                  <Badge
+                    appearance="filled"
+                    color={rec.impact === 'high' ? 'danger' : 'warning'}
+                    shape="circular"
+                    size="small"
+                    style={{ marginLeft: 6, verticalAlign: 'middle' }}
+                  >
                     {rec.impact === 'high' ? 'High Impact' : 'Medium'}
-                  </span>
+                  </Badge>
                 </h4>
                 <p>{rec.description}</p>
               </div>

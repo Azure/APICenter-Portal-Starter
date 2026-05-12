@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Badge, Button, Tab, TabList } from '@fluentui/react-components';
-import { ArrowDownloadRegular, DocumentRegular } from '@fluentui/react-icons';
+import { DocumentRegular } from '@fluentui/react-icons';
 import { useRecoilValue } from 'recoil';
 import { useApi } from '@/hooks/useApi';
 import { useSkillEvaluationResult } from '@/hooks/useSkillEvaluationResult';
@@ -9,7 +9,7 @@ import { configAtom } from '@/atoms/configAtom';
 import { setDocumentTitle } from '@/utils/dom';
 import { DetailPageLayout } from '@/components/DetailPageLayout/DetailPageLayout';
 import { HeaderActions } from '@/experiences/HeaderActions';
-import { EvalScoreBadge, SkillEvaluationDetails } from '@/experiences/SkillEvaluation';
+import { SkillEvaluationDetails } from '@/experiences/SkillEvaluation';
 import { buildSkillDeeplink } from '@/utils/skillDeeplink';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import CustomMetadata from '@/components/CustomMetadata';
@@ -50,7 +50,6 @@ export const SkillInfo: React.FC = () => {
       metadata={
         <>
           <Badge appearance="filled" color="brand" shape="circular">Skill</Badge>
-          <EvalScoreBadge evalResult={evalResult.data} />
           {api.data?.lastUpdated && <span>Last updated {new Date(api.data.lastUpdated).toLocaleDateString()}</span>}
         </>
       }
@@ -83,8 +82,7 @@ export const SkillInfo: React.FC = () => {
         skillSourceUrl ? (
           <HeaderActions showExtensionHint>
             <Button
-              appearance="primary"
-              icon={<ArrowDownloadRegular />}
+              icon={<img height={18} src={VsCodeLogo} alt="VS Code" />}
               onClick={handleSkillInstall}
             >
               Install in VS Code

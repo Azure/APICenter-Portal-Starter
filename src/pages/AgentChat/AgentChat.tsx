@@ -11,6 +11,7 @@ import {
 import { Link, useParams } from 'react-router-dom';
 import { LocationsService } from '@/services/LocationsService';
 import { useApi } from '@/hooks/useApi';
+import { getLifecycleBadgeColor } from '@/utils/badgeSystem';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import styles from './AgentChat.module.scss';
 
@@ -200,7 +201,7 @@ export const AgentChat: React.FC = () => {
         {agentSummary && <p className={styles.summary}>{agentSummary}</p>}
         <div className={styles.metadata}>
           {agentKind && <Badge appearance="filled" color="brand" shape="circular">{agentKind.toUpperCase()}</Badge>}
-          {api.data?.lifecycleStage && <Badge appearance="tint" color="brand" shape="circular">{api.data.lifecycleStage}</Badge>}
+          {api.data?.lifecycleStage && <Badge appearance="tint" color={getLifecycleBadgeColor(api.data.lifecycleStage)} shape="circular">{api.data.lifecycleStage}</Badge>}
           {api.data?.lastUpdated && <span>Last updated {new Date(api.data.lastUpdated).toLocaleDateString()}</span>}
         </div>
       </section>

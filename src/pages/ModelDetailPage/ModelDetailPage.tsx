@@ -2,6 +2,7 @@ import React from 'react';
 import { useParams } from 'react-router-dom';
 import { Badge, Link, Subtitle2 } from '@fluentui/react-components';
 import { useLanguageModel } from '@/hooks/useLanguageModel';
+import { getLifecycleBadgeColor } from '@/utils/badgeSystem';
 import { setDocumentTitle } from '@/utils/dom';
 import { DetailPageLayout } from '@/components/DetailPageLayout/DetailPageLayout';
 
@@ -22,7 +23,7 @@ export const ModelDetailPage: React.FC = () => {
         <>
           <Badge appearance="filled" color="brand" shape="circular">Model</Badge>
           {model.data?.lifecycleStage && (
-            <Badge appearance="tint" color="brand" shape="circular">
+            <Badge appearance="tint" color={getLifecycleBadgeColor(model.data.lifecycleStage)} shape="circular">
               {model.data.lifecycleStage}
             </Badge>
           )}
@@ -119,7 +120,7 @@ export const ModelDetailPage: React.FC = () => {
               <Subtitle2>Task types</Subtitle2>
               <div className={styles.badges}>
                 {model.data.taskTypes.map((t) => (
-                  <Badge key={t} appearance="tint" color="informative" shape="rounded">
+                  <Badge key={t} appearance="tint" color="informative" shape="circular">
                     {t}
                   </Badge>
                 ))}
@@ -132,7 +133,7 @@ export const ModelDetailPage: React.FC = () => {
               <Subtitle2>Input types</Subtitle2>
               <div className={styles.badges}>
                 {model.data.inputTypes.map((t) => (
-                  <Badge key={t} appearance="tint" color="informative" shape="rounded">
+                  <Badge key={t} appearance="tint" color="informative" shape="circular">
                     {t}
                   </Badge>
                 ))}
@@ -145,7 +146,7 @@ export const ModelDetailPage: React.FC = () => {
               <Subtitle2>Output types</Subtitle2>
               <div className={styles.badges}>
                 {model.data.outputTypes.map((t) => (
-                  <Badge key={t} appearance="tint" color="informative" shape="rounded">
+                  <Badge key={t} appearance="tint" color="informative" shape="circular">
                     {t}
                   </Badge>
                 ))}

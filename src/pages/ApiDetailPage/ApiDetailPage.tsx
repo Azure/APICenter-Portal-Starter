@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Badge, Button, Dropdown, Link, Menu, MenuItem, MenuList, MenuPopover, MenuTrigger, Option, SplitButton, Spinner, Tab, TabList } from '@fluentui/react-components';
-import { ArrowDownloadRegular, DocumentRegular, ListRegular, WindowConsoleRegular } from '@fluentui/react-icons';
+import { ArrowDownloadRegular, DocumentRegular, ListRegular, TagRegular, WindowConsoleRegular } from '@fluentui/react-icons';
 import { useRecoilValue } from 'recoil';
 import { useApi } from '@/hooks/useApi';
 import { useServer } from '@/hooks/useServer';
@@ -13,6 +13,7 @@ import ApiDefinitionSelect, { ApiDefinitionSelection } from '@/experiences/ApiDe
 import ApiAdditionalInfo from '@/experiences/ApiAdditionalInfo';
 import { HeaderActions } from '@/experiences/HeaderActions';
 import { formatKindDisplay } from '@/utils/formatKind';
+import { getLifecycleBadgeColor } from '@/utils/badgeSystem';
 import { buildSkillDeeplink } from '@/utils/skillDeeplink';
 import { useApiSpec } from '@/hooks/useApiSpec';
 import { useApiSpecUrl } from '@/hooks/useApiSpecUrl';
@@ -263,23 +264,37 @@ export const ApiDetailPage: React.FC = () => {
               {formatKindDisplay(kind)}
             </Badge>
           )}
+          {isMcp && hasLocalInstall && hasRemoteInstall && (
+            <Badge appearance="tint" color="brand" shape="circular">Local + Remote</Badge>
+          )}
+          {isMcp && hasLocalInstall && !hasRemoteInstall && (
+            <Badge appearance="tint" color="brand" shape="circular">Local</Badge>
+          )}
+          {isMcp && !hasLocalInstall && hasRemoteInstall && (
+            <Badge appearance="tint" color="brand" shape="circular">Remote</Badge>
+          )}
           {api.data?.lifecycleStage && (
-            <Badge appearance="tint" color="brand" shape="circular">
+            <Badge appearance="tint" color={getLifecycleBadgeColor(api.data.lifecycleStage)} shape="circular">
               {api.data.lifecycleStage}
             </Badge>
           )}
-          {customPropertyTags.map(tag => (
-            <Badge key={tag} appearance="tint" color="brand" shape="circular">
-              {tag}
-            </Badge>
-          ))}
+          {customPropertyTags.length > 0 && (
+            <>
+              <TagRegular style={{ fontSize: 16, color: 'var(--colorNeutralForeground3)', flexShrink: 0 }} />
+              {customPropertyTags.map(tag => (
+                <Badge key={tag} appearance="tint" color="informative" shape="circular">
+                  {tag}
+                </Badge>
+              ))}
+            </>
+          )}
           {api.data?.lastUpdated && <span>Last updated {new Date(api.data.lastUpdated).toLocaleDateString()}</span>}
         </>
       }
       tabs={
         <TabList selectedValue={selectedTab} onTabSelect={(_, d) => setSelectedTab(d.value as string)}>
           <Tab icon={<DocumentRegular />} value="documentation">Documentation</Tab>
-          {isMcp && <Tab icon={<WindowConsoleRegular />} value="testconsole">Test console</Tab>}
+          {isMcp && hasRemoteInstall && <Tab icon={<WindowConsoleRegular />} value="testconsole">Test console</Tab>}
           {!isMcp && hasAdditionalInfo && <Tab icon={<ListRegular />} value="properties">Additional properties</Tab>}
         </TabList>
       }
@@ -365,7 +380,7 @@ export const ApiDetailPage: React.FC = () => {
           </>
         )
       )}
-      {api.data && selectedTab === 'testconsole' && isMcp && renderDocumentation()}
+      {api.data && selectedTab === 'testconsole' && isMcp && hasRemoteInstall && renderDocumentation()}
       {api.data && selectedTab === 'properties' && (
         <ApiAdditionalInfo api={api.data} />
       )}
