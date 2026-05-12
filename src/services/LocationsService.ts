@@ -52,7 +52,7 @@ export const LocationsService = {
   },
 
   getModelPlaygroundUrl(name: string): string {
-    return `/languageModels/${name}/playground`;
+    return `/models/${name}`;
   },
 
   getApiSchemaExplorerUrl(

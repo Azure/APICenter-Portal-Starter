@@ -16,7 +16,7 @@ The application uses **React Router DOM v6** (`createBrowserRouter`) for client-
 | `/skills/:name` | `SkillInfo` | `Layout` | Skill detail page |
 | `/plugins/:name` | `PluginInfo` | `Layout` | Plugin detail page |
 | `/agents/:name` | `AgentChat` | `Layout` | Agent conversational UI |
-| `/languageModels/:name/playground` | `ModelPlayground` | `Layout` | Interactive model playground |
+| `/models/:name` | `ModelPlayground` | `Layout` | Interactive model test console |
 
 ### Route Hierarchy (tree view)
 
@@ -28,7 +28,7 @@ Layout
 ├── /skills/:name ................................ SkillInfo
 ├── /plugins/:name ............................... PluginInfo
 ├── /agents/:name ................................ AgentChat
-└── /languageModels/:name/playground ............. ModelPlayground
+└── /models/:name ................................ ModelPlayground
 ```
 
 ---
@@ -56,7 +56,7 @@ Layout
 - **Component**: `src/pages/ModelInfo/ModelInfo.tsx`
 - **Purpose**: Side drawer showing language model details — provider, model name, context window, task/input/output types, playground link, contacts, and documentation.
 - **Asset identifier**: `name` — language model name
-- **Nuances**: Same nested-drawer pattern as `ApiInfo`. The playground button navigates to `/languageModels/:name/playground`. Does not show version/definition selectors.
+- **Nuances**: Same nested-drawer pattern as `ApiInfo`. The test console button navigates to `/models/:name`. Does not show version/definition selectors.
 
 ### ApiSpec — APIs (`/apis/:apiName/versions/:versionName/definitions/:definitionName`)
 
@@ -98,10 +98,10 @@ Layout
 - **Purpose**: Conversational chat UI for an agent-type API.
 - **Route param**: `:name`
 
-### ModelPlayground (`/languageModels/:name/playground`)
+### ModelPlayground (`/models/:name`)
 
 - **Component**: `src/pages/ModelPlayground/ModelPlayground.tsx`
-- **Purpose**: Interactive playground for sending messages to a language model and viewing responses.
+- **Purpose**: Interactive test console for sending messages to a language model and viewing responses.
 - **Route param**: `:name`
 
 ---
@@ -117,7 +117,7 @@ All internal URL construction is centralized in `src/services/LocationsService.t
 | `getSkillInfoUrl(name)` | `/skills/{name}` | |
 | `getPluginInfoUrl(name)` | `/plugins/{name}` | |
 | `getAgentChatUrl(name)` | `/agents/{name}` | |
-| `getModelPlaygroundUrl(name)` | `/languageModels/{name}/playground` | |
+| `getModelPlaygroundUrl(name)` | `/models/{name}` | |
 | `getApiSchemaExplorerUrl(api, version, definition, resourceType?)` | `/{resourceType}/{api}/versions/{version}/definitions/{definition}` | Uses the asset-type route segment for browser navigation |
 | `getAiSearchInfoUrl()` | External docs link | |
 | `getHelpUrl()` | External docs link | |
@@ -140,7 +140,7 @@ This applies to the related model endpoints as well:
 
 - UI spec route: `/languageModels/chat-gpt/versions/{version}/definitions/{definition}`
 - Data API spec request: `/apis/chat-gpt/versions/{version}/definitions/{definition}`
-- UI playground route: `/languageModels/chat-gpt/playground`
+- UI test console route: `/models/chat-gpt`
 
 ---
 

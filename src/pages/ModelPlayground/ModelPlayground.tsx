@@ -221,7 +221,7 @@ export const ModelPlayground: React.FC = () => {
       <section className={styles.tabBar}>
         <TabList selectedValue={activeTab} onTabSelect={(_, data) => setActiveTab(data.value as PlaygroundTabs)}>
           <Tab icon={<DocumentRegular />} value={PlaygroundTabs.DOCUMENTATION}>Documentation</Tab>
-          {runtimeUrl && <Tab icon={<ChatRegular />} value={PlaygroundTabs.PLAYGROUND}>Model playground</Tab>}
+          {runtimeUrl && <Tab icon={<ChatRegular />} value={PlaygroundTabs.PLAYGROUND}>Test console</Tab>}
         </TabList>
       </section>
 

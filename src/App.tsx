@@ -38,7 +38,7 @@ const App: React.FC = () => {
             element: <ModelDetailPage />,
           },
           {
-            path: 'languageModels/:name/playground',
+            path: 'models/:name',
             element: <ModelPlayground />,
           },
           {
