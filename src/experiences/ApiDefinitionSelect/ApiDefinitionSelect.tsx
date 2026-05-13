@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Dropdown, Option } from '@fluentui/react-components';
+import { Dropdown, Field, Option } from '@fluentui/react-components';
 import { find, isUndefined } from 'lodash';
 import classNames from 'classnames';
 import { ApiVersion } from '@/types/apiVersion';
@@ -128,45 +128,47 @@ export const ApiDefinitionSelect: React.FC<Props> = ({
 
       {!hiddenSelects.includes('definition') && (
         <div className={styles.selectionDropdown}>
-          <label htmlFor="definition-select">Definition format</label>
-          <Dropdown
-            id="definition-select"
-            className={styles.dropdown}
-            placeholder="Select API definition"
-            size={dropdownSize}
-            value={definition?.title || NO_DEFINITION_LABEL}
-            selectedOptions={[definition?.name]}
-            disabled={!apiDefinitions.data?.length}
-            onOptionSelect={handleDefinitionSelect}
-          >
-            {apiDefinitions.data?.map((definition) => (
-              <Option key={definition.name} value={definition.name}>
-                {definition.title}
-              </Option>
-            ))}
-          </Dropdown>
+          <Field label="Definition format" size={dropdownSize}>
+            <Dropdown
+              id="definition-select"
+              className={styles.dropdown}
+              placeholder="Select API definition"
+              size={dropdownSize}
+              value={definition?.title || NO_DEFINITION_LABEL}
+              selectedOptions={[definition?.name]}
+              disabled={!apiDefinitions.data?.length}
+              onOptionSelect={handleDefinitionSelect}
+            >
+              {apiDefinitions.data?.map((definition) => (
+                <Option key={definition.name} value={definition.name}>
+                  {definition.title}
+                </Option>
+              ))}
+            </Dropdown>
+          </Field>
         </div>
       )}
 
       {!hiddenSelects.includes('deployment') && (
         <div className={styles.selectionDropdown}>
-          <label htmlFor="deployment-select">Deployment</label>
-          <Dropdown
-            id="deployment-select"
-            className={styles.dropdown}
-            placeholder="Select deployment"
-            size={dropdownSize}
-            value={deployment?.title || NO_DEPLOYMENT_LABEL}
-            selectedOptions={[deployment?.name]}
-            disabled={!apiDeployments.data?.length}
-            onOptionSelect={handleDeploymentSelect}
-          >
-            {apiDeployments.data?.map((deployment) => (
-              <Option key={deployment.name} value={deployment.name}>
-                {deployment.title}
-              </Option>
-            ))}
-          </Dropdown>
+          <Field label="Deployment" size={dropdownSize}>
+            <Dropdown
+              id="deployment-select"
+              className={styles.dropdown}
+              placeholder="Select deployment"
+              size={dropdownSize}
+              value={deployment?.title || NO_DEPLOYMENT_LABEL}
+              selectedOptions={[deployment?.name]}
+              disabled={!apiDeployments.data?.length}
+              onOptionSelect={handleDeploymentSelect}
+            >
+              {apiDeployments.data?.map((deployment) => (
+                <Option key={deployment.name} value={deployment.name}>
+                  {deployment.title}
+                </Option>
+              ))}
+            </Dropdown>
+          </Field>
         </div>
       )}
     </div>

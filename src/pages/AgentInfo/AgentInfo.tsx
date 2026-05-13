@@ -89,14 +89,14 @@ export const AgentInfo: React.FC = () => {
               {api.data.lifecycleStage}
             </Badge>
           )}
-          {api.data?.lastUpdated && <span>Last updated {new Date(api.data.lastUpdated).toLocaleDateString()}</span>}
         </>
       }
+      lastUpdated={api.data?.lastUpdated}
       selector={headerSelector}
       headerActions={
         hasDefinition ? (
           <HeaderActions>
-            <Button appearance="primary" icon={<ArrowDownloadRegular />} onClick={handleDownload}>
+            <Button icon={<ArrowDownloadRegular />} onClick={handleDownload}>
               Download definition
             </Button>
           </HeaderActions>

@@ -208,8 +208,8 @@ export const AgentChat: React.FC = () => {
         <div className={styles.metadata}>
           {agentKind && <Badge appearance="filled" color="brand" shape="circular">{agentKind.toUpperCase()}</Badge>}
           {api.data?.lifecycleStage && <Badge appearance="tint" color={getLifecycleBadgeColor(api.data.lifecycleStage)} shape="circular">{api.data.lifecycleStage}</Badge>}
-          {api.data?.lastUpdated && <span>Last updated {new Date(api.data.lastUpdated).toLocaleDateString()}</span>}
         </div>
+        {api.data?.lastUpdated && <div className={styles.lastUpdated}>Last updated {new Date(api.data.lastUpdated).toLocaleDateString()}</div>}
       </section>
 
       <section className={styles.tabBar}>

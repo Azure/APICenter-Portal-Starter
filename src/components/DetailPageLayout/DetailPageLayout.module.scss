@@ -66,12 +66,15 @@
 
     h1 {
       margin: 0 0 0.5rem;
+      font-size: 28px;
+      font-weight: 600;
     }
 
     .summary {
       margin: 0 0 0.5rem;
-      color: var(--colorNeutralForeground2);
-      font-size: 0.875rem;
+      color: var(--colorNeutralForeground1);
+      font-size: 14px;
+      font-weight: 400;
       line-height: 1.5;
     }
 
@@ -83,6 +86,12 @@
       margin-top: 0.5rem;
       color: var(--colorNeutralForeground3);
       font-size: 0.8125rem;
+    }
+
+    .lastUpdated {
+      margin-top: 0.5rem;
+      color: var(--colorNeutralForeground3);
+      font-size: 12px;
     }
 
     .selectorInline {
@@ -132,7 +141,7 @@
   .main {
     flex: 1;
     min-width: 0;
-    overflow-x: hidden;
+    overflow-x: auto;
     line-height: 1.6;
   }
 

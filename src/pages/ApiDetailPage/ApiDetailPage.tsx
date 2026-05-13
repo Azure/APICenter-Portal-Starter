@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Badge, Button, Dropdown, Link, Option, Tab, TabList } from '@fluentui/react-components';
+import { Badge, Button, Dropdown, Field, Link, Option, Tab, TabList } from '@fluentui/react-components';
 import { ArrowDownloadRegular, DocumentRegular, ListRegular, TagRegular } from '@fluentui/react-icons';
 import { useApi } from '@/hooks/useApi';
 import { kindToResourceType, ApiDefinitionId } from '@/types/apiDefinition';
@@ -221,9 +221,9 @@ export const ApiDetailPage: React.FC = () => {
               ))}
             </>
           )}
-          {api.data?.lastUpdated && <span>Last updated {new Date(api.data.lastUpdated).toLocaleDateString()}</span>}
         </>
       }
+      lastUpdated={api.data?.lastUpdated}
       tabs={
         <TabList selectedValue={selectedTab} onTabSelect={(_, d) => setSelectedTab(d.value as string)}>
           <Tab icon={<DocumentRegular />} value="documentation">Documentation</Tab>
@@ -232,7 +232,7 @@ export const ApiDetailPage: React.FC = () => {
       }
       selector={
         apiName && api.data ? (
-          <div style={{ display: 'flex', alignItems: 'flex-end', gap: '24px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-end', gap: '32px', flexWrap: 'wrap' }}>
             <ApiDefinitionSelect
               apiId={apiName}
               resourceType={kindToResourceType(api.data.kind)}
@@ -242,8 +242,7 @@ export const ApiDetailPage: React.FC = () => {
             />
             {showDownloadDefinition && (
               <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px' }}>
-                <div>
-                  <label htmlFor="download-definition-select" style={{ display: 'block', fontSize: '12px', marginBottom: '4px' }}>Download definition</label>
+                <Field label="Download definition" size="small">
                   <Dropdown
                     id="download-definition-select"
                     size="small"
@@ -256,7 +255,7 @@ export const ApiDetailPage: React.FC = () => {
                     selectedOptions={[downloadDefinitionName || definitionSelection?.definition?.name]}
                     disabled={!apiDefinitions.data?.length}
                     onOptionSelect={handleDownloadDefinitionSelect}
-                    style={{ minWidth: '160px' }}
+                    style={{ minWidth: '175px' }}
                   >
                     {apiDefinitions.data?.map((def) => (
                       <Option key={def.name} value={def.name}>
@@ -264,7 +263,7 @@ export const ApiDetailPage: React.FC = () => {
                       </Option>
                     ))}
                   </Dropdown>
-                </div>
+                </Field>
                 <Link
                   href={downloadSpecUrl.data || '#'}
                   target="_blank"

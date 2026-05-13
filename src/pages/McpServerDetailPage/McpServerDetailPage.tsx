@@ -172,9 +172,9 @@ export const McpServerDetailPage: React.FC = () => {
               ))}
             </>
           )}
-          {api.data?.lastUpdated && <span>Last updated {new Date(api.data.lastUpdated).toLocaleDateString()}</span>}
         </>
       }
+      lastUpdated={api.data?.lastUpdated}
       tabs={
         <TabList selectedValue={selectedTab} onTabSelect={(_, d) => setSelectedTab(d.value as string)}>
           <Tab icon={<DocumentRegular />} value="documentation">Documentation</Tab>

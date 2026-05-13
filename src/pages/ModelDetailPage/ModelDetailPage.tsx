@@ -33,9 +33,9 @@ export const ModelDetailPage: React.FC = () => {
               {model.data.lifecycleStage}
             </Badge>
           )}
-          {model.data?.lastUpdated && <span>Last updated {new Date(model.data.lastUpdated).toLocaleDateString()}</span>}
         </>
       }
+      lastUpdated={model.data?.lastUpdated}
       headerActions={undefined}
 
       isLoading={model.isLoading}

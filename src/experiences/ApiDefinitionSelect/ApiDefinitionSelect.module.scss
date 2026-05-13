@@ -4,12 +4,6 @@
   gap: 24px;
 
   .selectionDropdown {
-    label {
-      display: block;
-      margin-bottom: 5px;
-      font-weight: 600;
-    }
-    
     .dropdown {
       background: var(--colorNeutralBackground1);
     }
@@ -17,13 +11,10 @@
   
   &.isInline {
     flex-direction: row;
-    gap: 32px;
+    flex-wrap: wrap;
+    gap: 24px;
     
     .selectionDropdown {
-      label {
-        margin-bottom: 8px;
-      }
-
       .dropdown {
         min-width: 175px;
       }

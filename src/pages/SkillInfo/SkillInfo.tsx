@@ -54,11 +54,9 @@ export const SkillInfo: React.FC = () => {
       summary={api.data?.summary}
       breadcrumbs={breadcrumbs}
       metadata={
-        <>
-          <Badge appearance="filled" color="brand" shape="circular">Skill</Badge>
-          {api.data?.lastUpdated && <span>Last updated {new Date(api.data.lastUpdated).toLocaleDateString()}</span>}
-        </>
+        <Badge appearance="filled" color="brand" shape="circular">Skill</Badge>
       }
+      lastUpdated={api.data?.lastUpdated}
       tabs={
         <TabList selectedValue={selectedTab} onTabSelect={(_, d) => setSelectedTab(d.value as string)}>
           <Tab icon={<DocumentRegular />} value="documentation">Documentation</Tab>

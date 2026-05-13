@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { Dropdown, Option } from '@fluentui/react-components';
+import { Dropdown, Field, Option } from '@fluentui/react-components';
 import classNames from 'classnames';
 import styles from './VersionSelect.module.scss';
 
@@ -54,23 +54,24 @@ export const VersionSelect: React.FC<Props> = ({
 
   return (
     <div className={classNames(styles.versionSelect, isInline && styles.isInline)}>
-      <label htmlFor={id}>{label}</label>
-      <Dropdown
-        id={id}
-        className={styles.dropdown}
-        placeholder={placeholder}
-        size={isInline ? 'small' : 'medium'}
-        value={valueLabel}
-        selectedOptions={selectedName ? [selectedName] : []}
-        disabled={isDisabled}
-        onOptionSelect={handleSelect}
-      >
-        {versions.map((v) => (
-          <Option key={v.name} value={v.name}>
-            {v.title || v.name}
-          </Option>
-        ))}
-      </Dropdown>
+      <Field label={label} size={isInline ? 'small' : 'medium'}>
+        <Dropdown
+          id={id}
+          className={styles.dropdown}
+          placeholder={placeholder}
+          size={isInline ? 'small' : 'medium'}
+          value={valueLabel}
+          selectedOptions={selectedName ? [selectedName] : []}
+          disabled={isDisabled}
+          onOptionSelect={handleSelect}
+        >
+          {versions.map((v) => (
+            <Option key={v.name} value={v.name}>
+              {v.title || v.name}
+            </Option>
+          ))}
+        </Dropdown>
+      </Field>
     </div>
   );
 };
