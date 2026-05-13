@@ -214,8 +214,8 @@ export const ModelPlayground: React.FC = () => {
         <div className={styles.metadata}>
           <Badge appearance="filled" color="brand" shape="circular">Model</Badge>
           {model.data?.lifecycleStage && <Badge appearance="tint" color={getLifecycleBadgeColor(model.data.lifecycleStage)} shape="circular">{model.data.lifecycleStage}</Badge>}
+          {model.data?.lastUpdated && <span className={styles.lastUpdated}>Last updated {new Date(model.data.lastUpdated).toLocaleDateString()}</span>}
         </div>
-        {model.data?.lastUpdated && <div className={styles.lastUpdated}>Last updated {new Date(model.data.lastUpdated).toLocaleDateString()}</div>}
       </section>
 
       <section className={styles.tabBar}>
