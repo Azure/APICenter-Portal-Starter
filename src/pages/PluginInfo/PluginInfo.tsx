@@ -106,6 +106,7 @@ export const PluginInfo: React.FC = () => {
       metadata={
         <Badge appearance="filled" color="brand" shape="circular">Plugin</Badge>
       }
+      lastUpdated={plugin.data?.lastUpdated}
       tabs={tabs}
       isLoading={plugin.isLoading}
       emptyMessage={!plugin.data ? 'The specified plugin does not exist.' : undefined}
