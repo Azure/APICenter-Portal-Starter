@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Badge, Button, Dropdown, Field, Link, Option, Tab, TabList } from '@fluentui/react-components';
-import { ArrowDownloadRegular, DocumentRegular, ListRegular, TagRegular } from '@fluentui/react-icons';
+import { ArrowDownloadRegular, CodeRegular, DocumentRegular, ListRegular, TagRegular } from '@fluentui/react-icons';
 import { useApi } from '@/hooks/useApi';
 import { kindToResourceType, ApiDefinitionId } from '@/types/apiDefinition';
 import { setDocumentTitle } from '@/utils/dom';
@@ -28,7 +28,7 @@ export const ApiDetailPage: React.FC = () => {
   const api = useApi(apiName);
   const config = useRecoilValue(configAtom);
   const [definitionSelection, setDefinitionSelection] = useState<ApiDefinitionSelection | undefined>();
-  const [selectedTab, setSelectedTab] = useState<string>('documentation');
+  const [selectedTab, setSelectedTab] = useState<string>('properties');
 
   setDocumentTitle(`API${api.data?.title ? ` - ${api.data.title}` : ''}`);
 
@@ -226,8 +226,8 @@ export const ApiDetailPage: React.FC = () => {
       lastUpdated={api.data?.lastUpdated}
       tabs={
         <TabList selectedValue={selectedTab} onTabSelect={(_, d) => setSelectedTab(d.value as string)}>
-          <Tab icon={<DocumentRegular />} value="documentation">Documentation</Tab>
-          {hasAdditionalInfo && <Tab icon={<ListRegular />} value="properties">Additional properties</Tab>}
+          <Tab icon={<DocumentRegular />} value="properties">Documentation</Tab>
+          <Tab icon={<CodeRegular />} value="documentation">API specification</Tab>
         </TabList>
       }
       selector={
@@ -295,14 +295,14 @@ export const ApiDetailPage: React.FC = () => {
       emptyMessage={!api.isLoading && !api.isError && !api.data ? 'The specified API does not exist.' : undefined}
       sidebar={undefined}
     >
+      {api.data && selectedTab === 'properties' && (
+        <ApiAdditionalInfo api={api.data} />
+      )}
       {api.data && selectedTab === 'documentation' && (
         <>
           {renderInstallationBlock()}
           {renderDocumentation()}
         </>
-      )}
-      {api.data && selectedTab === 'properties' && (
-        <ApiAdditionalInfo api={api.data} />
       )}
     </DetailPageLayout>
   );
