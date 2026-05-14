@@ -16,6 +16,7 @@ interface Props {
   api: ApiCardApi;
   onClick?: (e: React.MouseEvent) => void;
   showType?: boolean;
+  transportTags?: string[];
 }
 
 const STANDALONE_KINDS = ['skill', 'a2a', 'mcp', 'plugin', 'agent', 'languagemodel'];
@@ -55,7 +56,7 @@ const useStyles = makeStyles({
   },
 });
 
-export const ApiCard: React.FC<Props> = ({ api, showType, onClick }) => {
+export const ApiCard: React.FC<Props> = ({ api, showType, onClick, transportTags }) => {
   const classes = useStyles();
   const hasScore = api.evalScore != null && api.evalMaxScore != null && api.evalMaxScore > 0;
   const scoreRatio = hasScore ? api.evalScore! / api.evalMaxScore! : 0;
@@ -74,6 +75,9 @@ export const ApiCard: React.FC<Props> = ({ api, showType, onClick }) => {
           {!!api.type && !STANDALONE_KINDS.includes(api.type.toLowerCase()) && (
             <Badge appearance="tint" color="brand" shape="circular">{formatKindDisplay(api.type)}</Badge>
           )}
+          {transportTags?.map((tag) => (
+            <Badge key={tag} appearance="tint" color="brand" shape="circular">{tag}</Badge>
+          ))}
           {hasScore && (
             <Badge
               appearance="filled"

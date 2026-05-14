@@ -11,6 +11,7 @@ import MarkdownRenderer from '@/components/MarkdownRenderer';
 import { formatKindDisplay } from '@/utils/formatKind';
 import { getLifecycleBadgeColor } from '@/utils/badgeSystem';
 import { apiAdapter } from '@/experiences/ApiList/apiAdapter';
+import { useMcpTransportTags } from '@/hooks/useMcpTransportTags';
 import { ENABLE_LIST_EVAL_BADGES } from '@/constants/featureFlags';
 import { ContributeCard } from '@/experiences/ContributeCard';
 import { ApiMetadata } from '@/types/api';
@@ -46,6 +47,12 @@ export const ApiList: React.FC = () => {
     const adapted = apis.data?.map(apiAdapter) ?? [];
     return adapted;
   }, [apis.data]);
+
+  const mcpNames = useMemo(
+    () => adaptedApiList.filter((a) => a.type?.toLowerCase() === 'mcp').map((a) => a.name),
+    [adaptedApiList]
+  );
+  const mcpTransportTags = useMcpTransportTags(mcpNames);
 
   const getApiUrl = useCallback(
     (api: ApiCardApi) => {
@@ -121,7 +128,13 @@ export const ApiList: React.FC = () => {
             <ContributeCard url={config.contributions!.gitRepositoryUrl} />
           )}
           {adaptedApiList.map((api) => (
-            <ApiCard key={api.name} api={api} onClick={apiClickHandler(api)} showType />
+            <ApiCard
+              key={api.name}
+              api={api}
+              onClick={apiClickHandler(api)}
+              showType
+              transportTags={mcpTransportTags[api.name]}
+            />
           ))}
         </div>
         {renderLoadMore()}
@@ -170,6 +183,9 @@ export const ApiList: React.FC = () => {
                     {formatKindDisplay(api.type)}
                   </Badge>
                 )}
+                {mcpTransportTags[api.name]?.map((tag) => (
+                  <Badge key={tag} appearance="tint" color="brand" shape="circular">{tag}</Badge>
+                ))}
               </div>
             </InfoTable.Cell>
           </InfoTable.Row>

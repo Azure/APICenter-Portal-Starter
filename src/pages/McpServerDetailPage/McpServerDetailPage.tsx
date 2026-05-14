@@ -61,6 +61,7 @@ export const McpServerDetailPage: React.FC = () => {
 
   const hasRemoteInstall = !!definitionSelection?.deployment?.server.runtimeUri.length;
   const hasLocalInstall = !!server.data?.packages;
+  const hasRemoteFromServer = !!server.data?.remotes?.length;
   const hasInstall = hasRemoteInstall || hasLocalInstall;
 
   const handleMcpInstall = useCallback((target?: 'remote' | 'local') => {
@@ -148,13 +149,13 @@ export const McpServerDetailPage: React.FC = () => {
           <Badge appearance="filled" color="brand" shape="circular">
             MCP
           </Badge>
-          {hasLocalInstall && hasRemoteInstall && (
-            <Badge appearance="tint" color="brand" shape="circular">Local + Remote</Badge>
+          {hasLocalInstall && (hasRemoteInstall || hasRemoteFromServer) && (
+            <Badge appearance="tint" color="brand" shape="circular">Remote + Local</Badge>
           )}
-          {hasLocalInstall && !hasRemoteInstall && (
+          {hasLocalInstall && !hasRemoteInstall && !hasRemoteFromServer && (
             <Badge appearance="tint" color="brand" shape="circular">Local</Badge>
           )}
-          {!hasLocalInstall && hasRemoteInstall && (
+          {!hasLocalInstall && (hasRemoteInstall || hasRemoteFromServer) && (
             <Badge appearance="tint" color="brand" shape="circular">Remote</Badge>
           )}
           {api.data?.lifecycleStage && (
