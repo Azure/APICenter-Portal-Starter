@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import {
   PlugConnectedRegular,
-  BrainCircuitRegular,
+  BoxMultipleRegular,
 } from '@fluentui/react-icons';
 import classNames from 'classnames';
 import { useSearchFilters } from '@/hooks/useSearchFilters';
@@ -21,6 +21,8 @@ const PluginIcon: React.FC = () => (
   <svg width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor"><path d="M10.723 4H10V1.5C10 1.224 9.776 1 9.5 1C9.224 1 9 1.224 9 1.5V4H7V1.5C7 1.224 6.776 1 6.5 1C6.224 1 6 1.224 6 1.5V4H5.277C4.573 4 4 4.573 4 5.278V8C4 10.036 5.529 11.722 7.5 11.969V14.5C7.5 14.776 7.724 15 8 15C8.276 15 8.5 14.776 8.5 14.5V11.969C10.471 11.722 12 10.037 12 8V5.278C12 4.573 11.427 4 10.723 4ZM11 8C11 9.654 9.654 11 8 11C6.346 11 5 9.654 5 8V5.278C5 5.125 5.124 5 5.277 5H10.722C10.875 5 10.999 5.125 10.999 5.278V8H11Z"/></svg>
 );
 
+
+
 const McpIcon: React.FC = () => (
   <svg width="14" height="14" viewBox="10 14 168 180" fill="none">
     <path d="M25 97.8528L92.8823 29.9706C102.255 20.598 117.451 20.598 126.823 29.9706V29.9706C136.196 39.3431 136.196 54.5391 126.823 63.9117L75.5581 115.177" stroke="currentColor" strokeWidth="12" strokeLinecap="round"/>
@@ -38,9 +40,9 @@ interface CategoryDef {
 const categories: CategoryDef[] = [
   { label: 'All assets' },
   { label: 'APIs', kindValue: 'rest', icon: <PlugConnectedRegular /> },
-  // { label: 'Agents', kindValue: 'agent', icon: <AgentIcon /> },
+  { label: 'Agents', kindValue: 'agent', icon: <AgentIcon /> },
   { label: 'MCP servers', kindValue: 'mcp', icon: <McpIcon /> },
-  // { label: 'Models', kindValue: 'languagemodel', icon: <BrainCircuitRegular /> },
+  { label: 'Models', kindValue: 'languagemodel', icon: <BoxMultipleRegular /> },
   { label: 'Plugins', kindValue: 'plugin', icon: <PluginIcon /> },
   { label: 'Skills', kindValue: 'skill', icon: <SkillIcon /> },
 ];
