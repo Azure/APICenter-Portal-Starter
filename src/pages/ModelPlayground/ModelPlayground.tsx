@@ -10,7 +10,7 @@ import { useParams } from 'react-router-dom';
 import { useApiDeployments } from '@/hooks/useApiDeployments';
 import { LocationsService } from '@/services/LocationsService';
 import { useLanguageModel } from '@/hooks/useLanguageModel';
-import { getLifecycleBadgeColor } from '@/utils/badgeSystem';
+import { getLifecycleBadgeColor, formatLifecycleStage } from '@/utils/badgeSystem';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import styles from './ModelPlayground.module.scss';
 
@@ -213,7 +213,7 @@ export const ModelPlayground: React.FC = () => {
         {modelSummary && <p className={styles.summary}>{modelSummary}</p>}
         <div className={styles.metadata}>
           <Badge appearance="filled" color="brand" shape="circular">Model</Badge>
-          {model.data?.lifecycleStage && <Badge appearance="tint" color={getLifecycleBadgeColor(model.data.lifecycleStage)} shape="circular">{model.data.lifecycleStage}</Badge>}
+          {model.data?.lifecycleStage && <Badge appearance="tint" color={getLifecycleBadgeColor(model.data.lifecycleStage)} shape="circular">{formatLifecycleStage(model.data.lifecycleStage)}</Badge>}
           {model.data?.lastUpdated && <span className={styles.lastUpdated}>Last updated {new Date(model.data.lastUpdated).toLocaleDateString()}</span>}
         </div>
       </section>

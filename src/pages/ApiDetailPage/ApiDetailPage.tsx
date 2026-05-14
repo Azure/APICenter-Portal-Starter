@@ -10,7 +10,7 @@ import ApiDefinitionSelect, { ApiDefinitionSelection } from '@/experiences/ApiDe
 import ApiAdditionalInfo from '@/experiences/ApiAdditionalInfo';
 import { HeaderActions } from '@/experiences/HeaderActions';
 import { formatKindDisplay } from '@/utils/formatKind';
-import { getLifecycleBadgeColor } from '@/utils/badgeSystem';
+import { getLifecycleBadgeColor, formatLifecycleStage } from '@/utils/badgeSystem';
 import { buildSkillDeeplink } from '@/utils/skillDeeplink';
 import { useApiSpec } from '@/hooks/useApiSpec';
 import { useApiSpecUrl } from '@/hooks/useApiSpecUrl';
@@ -208,7 +208,7 @@ export const ApiDetailPage: React.FC = () => {
           )}
           {api.data?.lifecycleStage && (
             <Badge appearance="tint" color={getLifecycleBadgeColor(api.data.lifecycleStage)} shape="circular">
-              {api.data.lifecycleStage}
+              {formatLifecycleStage(api.data.lifecycleStage)}
             </Badge>
           )}
           {customPropertyTags.length > 0 && (

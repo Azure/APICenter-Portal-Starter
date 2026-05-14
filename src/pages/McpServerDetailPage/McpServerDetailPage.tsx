@@ -4,13 +4,14 @@ import { Badge, Button, Spinner, Tab, TabList } from '@fluentui/react-components
 import { DocumentRegular, TagRegular, WindowConsoleRegular } from '@fluentui/react-icons';
 import { useApi } from '@/hooks/useApi';
 import { useServer } from '@/hooks/useServer';
+import { useMcpTransportTags } from '@/hooks/useMcpTransportTags';
 import { kindToResourceType, ApiDefinitionId } from '@/types/apiDefinition';
 import { setDocumentTitle } from '@/utils/dom';
 import { DetailPageLayout, BreadcrumbItem } from '@/components/DetailPageLayout/DetailPageLayout';
 import ApiDefinitionSelect, { ApiDefinitionSelection } from '@/experiences/ApiDefinitionSelect';
 import ApiAdditionalInfo from '@/experiences/ApiAdditionalInfo';
 import { HeaderActions } from '@/experiences/HeaderActions';
-import { getLifecycleBadgeColor } from '@/utils/badgeSystem';
+import { getLifecycleBadgeColor, formatLifecycleStage } from '@/utils/badgeSystem';
 import McpSpecPage from '@/pages/ApiSpec/McpSpecPage';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import { InstallationBlock } from '@/components/InstallationBlock';
@@ -61,8 +62,10 @@ export const McpServerDetailPage: React.FC = () => {
 
   const hasRemoteInstall = !!definitionSelection?.deployment?.server.runtimeUri.length;
   const hasLocalInstall = !!server.data?.packages;
-  const hasRemoteFromServer = !!server.data?.remotes?.length;
   const hasInstall = hasRemoteInstall || hasLocalInstall;
+
+  const transportTags = useMcpTransportTags(apiName ? [apiName] : []);
+  const transportBadge = apiName ? transportTags[apiName]?.[0] : undefined;
 
   const handleMcpInstall = useCallback((target?: 'remote' | 'local') => {
     const useRemote = target ? target === 'remote' : hasRemoteInstall;
@@ -149,18 +152,12 @@ export const McpServerDetailPage: React.FC = () => {
           <Badge appearance="filled" color="brand" shape="circular">
             MCP
           </Badge>
-          {hasLocalInstall && (hasRemoteInstall || hasRemoteFromServer) && (
-            <Badge appearance="tint" color="brand" shape="circular">Remote + Local</Badge>
-          )}
-          {hasLocalInstall && !hasRemoteInstall && !hasRemoteFromServer && (
-            <Badge appearance="tint" color="brand" shape="circular">Local</Badge>
-          )}
-          {!hasLocalInstall && (hasRemoteInstall || hasRemoteFromServer) && (
-            <Badge appearance="tint" color="brand" shape="circular">Remote</Badge>
+          {transportBadge && (
+            <Badge appearance="tint" color="brand" shape="circular">{transportBadge}</Badge>
           )}
           {api.data?.lifecycleStage && (
             <Badge appearance="tint" color={getLifecycleBadgeColor(api.data.lifecycleStage)} shape="circular">
-              {api.data.lifecycleStage}
+              {formatLifecycleStage(api.data.lifecycleStage)}
             </Badge>
           )}
           {customPropertyTags.length > 0 && (

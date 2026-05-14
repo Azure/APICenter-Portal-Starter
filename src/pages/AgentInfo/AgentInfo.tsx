@@ -6,7 +6,7 @@ import { useApi } from '@/hooks/useApi';
 import { useAgentVersions } from '@/hooks/useAgentVersions';
 import { useAgentDefinition } from '@/hooks/useAgentDefinition';
 import { setDocumentTitle } from '@/utils/dom';
-import { getLifecycleBadgeColor } from '@/utils/badgeSystem';
+import { getLifecycleBadgeColor, formatLifecycleStage } from '@/utils/badgeSystem';
 import { DetailPageLayout, BreadcrumbItem } from '@/components/DetailPageLayout/DetailPageLayout';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import CustomMetadata from '@/components/CustomMetadata';
@@ -86,7 +86,7 @@ export const AgentInfo: React.FC = () => {
           </Badge>
           {api.data?.lifecycleStage && (
             <Badge appearance="tint" color={getLifecycleBadgeColor(api.data.lifecycleStage)} shape="circular">
-              {api.data.lifecycleStage}
+              {formatLifecycleStage(api.data.lifecycleStage)}
             </Badge>
           )}
         </>

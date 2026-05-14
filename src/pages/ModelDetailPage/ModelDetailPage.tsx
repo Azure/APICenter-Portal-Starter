@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { Badge, Link, Subtitle2 } from '@fluentui/react-components';
 import { useLanguageModel } from '@/hooks/useLanguageModel';
-import { getLifecycleBadgeColor } from '@/utils/badgeSystem';
+import { getLifecycleBadgeColor, formatLifecycleStage } from '@/utils/badgeSystem';
 import { setDocumentTitle } from '@/utils/dom';
 import { DetailPageLayout, BreadcrumbItem } from '@/components/DetailPageLayout/DetailPageLayout';
 
@@ -30,7 +30,7 @@ export const ModelDetailPage: React.FC = () => {
           <Badge appearance="filled" color="brand" shape="circular">Model</Badge>
           {model.data?.lifecycleStage && (
             <Badge appearance="tint" color={getLifecycleBadgeColor(model.data.lifecycleStage)} shape="circular">
-              {model.data.lifecycleStage}
+              {formatLifecycleStage(model.data.lifecycleStage)}
             </Badge>
           )}
         </>

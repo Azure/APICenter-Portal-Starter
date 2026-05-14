@@ -16,7 +16,7 @@ import {
 import { Dismiss24Regular, OpenRegular } from '@fluentui/react-icons';
 import { useNavigate } from 'react-router-dom';
 import { useLanguageModel } from '@/hooks/useLanguageModel';
-import { getLifecycleBadgeColor } from '@/utils/badgeSystem';
+import { getLifecycleBadgeColor, formatLifecycleStage } from '@/utils/badgeSystem';
 
 import { LocationsService } from '@/services/LocationsService';
 import { EmptyStateMessage } from '@/components/EmptyStateMessage/EmptyStateMessage';
@@ -180,7 +180,7 @@ export const ModelInfo: React.FC<Props> = ({ name }) => {
 
         {model.data.lifecycleStage && (
           <div className={styles.badges}>
-            <Badge appearance="tint" color={getLifecycleBadgeColor(model.data.lifecycleStage)} shape="circular">{model.data.lifecycleStage}</Badge>
+            <Badge appearance="tint" color={getLifecycleBadgeColor(model.data.lifecycleStage)} shape="circular">{formatLifecycleStage(model.data.lifecycleStage)}</Badge>
           </div>
         )}
 

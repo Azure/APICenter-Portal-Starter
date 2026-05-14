@@ -29,3 +29,7 @@ export function getLifecycleBadgeColor(stage?: string): SemanticColor {
   if (!stage) return 'informative';
   return LIFECYCLE_COLORS[stage.toLowerCase()] ?? 'informative';
 }
+
+export function formatLifecycleStage(stage: string): string {
+  return stage.charAt(0).toUpperCase() + stage.slice(1).toLowerCase();
+}

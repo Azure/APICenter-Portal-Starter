@@ -9,7 +9,7 @@ import { ApiCard, type ApiCardApi } from '@/components/ApiCard';
 import { InfoTable } from '@/components/InfoTable';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import { formatKindDisplay } from '@/utils/formatKind';
-import { getLifecycleBadgeColor } from '@/utils/badgeSystem';
+import { getLifecycleBadgeColor, formatLifecycleStage } from '@/utils/badgeSystem';
 import { apiAdapter } from '@/experiences/ApiList/apiAdapter';
 import { useMcpTransportTags } from '@/hooks/useMcpTransportTags';
 import { ENABLE_LIST_EVAL_BADGES } from '@/constants/featureFlags';
@@ -169,7 +169,7 @@ export const ApiList: React.FC = () => {
             <InfoTable.Cell>
               {!!api.lifecycleStage && (
                 <Badge appearance="tint" color={getLifecycleBadgeColor(api.lifecycleStage)} shape="circular">
-                  {api.lifecycleStage}
+                  {formatLifecycleStage(api.lifecycleStage)}
                 </Badge>
               )}
             </InfoTable.Cell>
