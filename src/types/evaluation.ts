@@ -17,7 +17,7 @@ export interface EvalTierResult<T = unknown> {
 export interface EvalAssertion {
   name: string;
   status: EvalStatus;
-  message: string;
+  message?: string;
 }
 
 export interface EvalJudgeScore {
@@ -31,13 +31,22 @@ export interface EvalJudgeScore {
 /** Base evaluation result shared by skill and agent assessments. */
 export interface EvaluationResult {
   status: EvalStatus;
-  overallScore: number;
-  maxScore: number;
-  evaluationConfigurationName: string;
-  updatedOn: string;
+  /** Top-level score; may be absent — fall back to qualityAssessment.weightedScore. */
+  overallScore?: number;
+  /** Top-level max; may be absent — fall back to qualityAssessment.maxWeightedScore. */
+  maxScore?: number;
+  evaluationConfigurationName?: string;
+  updatedOn?: string;
   structuralChecks: EvalTierResult<EvalAssertion>;
   schemaValidation: EvalTierResult<EvalAssertion>;
   qualityAssessment: EvalTierResult<EvalJudgeScore>;
+}
+
+/** Resolve the effective overall score from an evaluation result. */
+export function getEvalScore(r: EvaluationResult): { overallScore: number; maxScore: number } {
+  const overallScore = r.overallScore ?? r.qualityAssessment.weightedScore ?? 0;
+  const maxScore = r.maxScore ?? r.qualityAssessment.maxWeightedScore ?? 0;
+  return { overallScore, maxScore };
 }
 
 /** Skill-specific evaluation result. */

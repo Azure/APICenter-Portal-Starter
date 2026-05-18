@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Badge, Spinner } from '@fluentui/react-components';
 import { Warning20Filled } from '@fluentui/react-icons';
-import { EvaluationResult, EvalJudgeScore } from '@/types/evaluation';
+import { EvaluationResult, EvalJudgeScore, getEvalScore } from '@/types/evaluation';
 import { EvalScoreBar } from './EvalScoreBar';
 import { EvalAssertionList } from './EvalAssertionList';
 import { EvalRadarChart } from './EvalRadarChart';
@@ -61,10 +61,11 @@ export const EvaluationDetails: React.FC<EvaluationDetailsProps> = ({
 
   if (!evalResult) return null;
 
-  const normalized = evalResult.maxScore > 0
-    ? (evalResult.overallScore / evalResult.maxScore) * 5
+  const { overallScore, maxScore } = getEvalScore(evalResult);
+  const normalized = maxScore > 0
+    ? (overallScore / maxScore) * 5
     : 0;
-  const ratio = evalResult.maxScore > 0 ? evalResult.overallScore / evalResult.maxScore : 0;
+  const ratio = maxScore > 0 ? overallScore / maxScore : 0;
 
   function headerBadgeColor(): 'success' | 'warning' | 'danger' {
     if (ratio >= 0.8) return 'success';
