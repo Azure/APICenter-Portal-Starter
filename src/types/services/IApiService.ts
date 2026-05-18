@@ -8,7 +8,7 @@ import { ApiAuthScheme, ApiAuthSchemeMetadata } from '@/types/apiAuth';
 import { Server } from '@/types/server';
 import { MetadataSchema } from '@/types/metadataSchema';
 import { PluginDetails } from '@/types/plugin';
-import { SkillEvaluationResult } from '@/types/skillEvaluation';
+import { SkillEvaluationResult, AgentEvaluationResult } from '@/types/evaluation';
 import { AgentVersion } from '@/types/agent';
 
 export interface PaginatedResult<T> {
@@ -37,6 +37,7 @@ export interface IApiService {
   getMetadataSchemas(): Promise<MetadataSchema[]>;
   getPlugin(name: string): Promise<PluginDetails>;
   getSkillEvaluationResult(skillName: string): Promise<SkillEvaluationResult | undefined>;
+  getAgentEvaluationResult(agentName: string, versionName: string): Promise<AgentEvaluationResult | undefined>;
   getAgentVersions(agentName: string): Promise<AgentVersion[]>;
   getAgentDefinition(agentName: string, versionName: string): Promise<string | undefined>;
 }

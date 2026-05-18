@@ -18,4 +18,5 @@ export enum QueryKeys {
   Plugin = 'Plugin',
   LanguageModel = 'LanguageModel',
   SkillEvaluationResult = 'SkillEvaluationResult',
+  AgentEvaluationResult = 'AgentEvaluationResult',
 }

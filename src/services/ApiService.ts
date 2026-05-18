@@ -12,7 +12,7 @@ import { IApiService, PaginatedResult } from '@/types/services/IApiService';
 import { Server, ServerResponse } from '@/types/server';
 import { MetadataSchema } from '@/types/metadataSchema';
 import { PluginDetails } from '@/types/plugin';
-import { SkillEvaluationResult } from '@/types/skillEvaluation';
+import { SkillEvaluationResult, AgentEvaluationResult } from '@/types/evaluation';
 import { AgentVersion } from '@/types/agent';
 import { DEFAULT_PAGE_SIZE } from '@/constants';
 
@@ -155,7 +155,15 @@ export const ApiService: IApiService = {
   },
 
   async getSkillEvaluationResult(skillName: string): Promise<SkillEvaluationResult | undefined> {
-    return await HttpService.getOptional<SkillEvaluationResult>(`/skills/${skillName}/evaluationResults/default`);
+    return await HttpService.getOptional<SkillEvaluationResult>(
+      `/skills/${encodeURIComponent(skillName)}/evaluationResults/default`
+    );
+  },
+
+  async getAgentEvaluationResult(agentName: string, versionName: string): Promise<AgentEvaluationResult | undefined> {
+    return await HttpService.getOptional<AgentEvaluationResult>(
+      `/agents/${encodeURIComponent(agentName)}/versions/${encodeURIComponent(versionName)}/evaluationResults/default`
+    );
   },
 
   async getAgentVersions(agentName: string): Promise<AgentVersion[]> {
