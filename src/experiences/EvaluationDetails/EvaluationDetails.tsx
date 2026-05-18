@@ -1,22 +1,23 @@
 import React, { useState } from 'react';
 import { Badge, Spinner } from '@fluentui/react-components';
 import { Warning20Filled } from '@fluentui/react-icons';
-import { SkillEvaluationResult, EvalJudgeScore } from '@/types/skillEvaluation';
+import { EvaluationResult, EvalJudgeScore } from '@/types/evaluation';
 import { EvalScoreBar } from './EvalScoreBar';
 import { EvalAssertionList } from './EvalAssertionList';
 import { EvalRadarChart } from './EvalRadarChart';
-import styles from './SkillEvaluation.module.scss';
+import styles from './EvaluationDetails.module.scss';
 
-interface SkillEvaluationDetailsProps {
-  evalResult?: SkillEvaluationResult;
+interface EvaluationDetailsProps {
+  evalResult?: EvaluationResult;
   isLoading?: boolean;
+  assertionDescriptions?: Record<string, string>;
 }
 
 /** Default threshold for passing (normalized to /5 scale). */
 const THRESHOLD = 4.0;
 
 /** Generate a brief AI-style summary based on tier results. */
-function buildSummary(evalResult: SkillEvaluationResult): string {
+function buildSummary(evalResult: EvaluationResult): string {
   const scores = evalResult.qualityAssessment.scores ?? [];
   const low = scores.filter(s => s.score < THRESHOLD);
   const high = scores.filter(s => s.score >= THRESHOLD);
@@ -47,9 +48,10 @@ function buildRecommendations(scores: EvalJudgeScore[]): Array<{ title: string; 
     }));
 }
 
-export const SkillEvaluationDetails: React.FC<SkillEvaluationDetailsProps> = ({
+export const EvaluationDetails: React.FC<EvaluationDetailsProps> = ({
   evalResult,
   isLoading,
+  assertionDescriptions,
 }) => {
   const [highlightedCriterion, setHighlightedCriterion] = useState<string | null>(null);
 
@@ -167,12 +169,12 @@ export const SkillEvaluationDetails: React.FC<SkillEvaluationDetailsProps> = ({
       )}
 
       {/* Structural checks */}
-      <EvalAssertionList title="Structural Checks" tier={evalResult.structuralChecks} />
+      <EvalAssertionList title="Structural Checks" tier={evalResult.structuralChecks} assertionDescriptions={assertionDescriptions} />
 
       {/* Schema validation */}
-      <EvalAssertionList title="Schema Validation" tier={evalResult.schemaValidation} />
+      <EvalAssertionList title="Schema Validation" tier={evalResult.schemaValidation} assertionDescriptions={assertionDescriptions} />
     </div>
   );
 };
 
-export default React.memo(SkillEvaluationDetails);
+export default React.memo(EvaluationDetails);

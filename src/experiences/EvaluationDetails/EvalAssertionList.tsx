@@ -4,26 +4,16 @@ import {
   DismissCircle20Regular,
   ChevronRight20Regular,
 } from '@fluentui/react-icons';
-import { EvalAssertion, EvalTierResult } from '@/types/skillEvaluation';
-import styles from './SkillEvaluation.module.scss';
-
-/** Static descriptions for known L0 / L1 assertion names. */
-const ASSERTION_DESCRIPTIONS: Record<string, string> = {
-  'frontmatter-present': 'Verifies that the SKILL.md file begins with a valid YAML frontmatter block.',
-  'has-name': 'Checks that the frontmatter declares a skill name.',
-  'has-description': 'Checks that the frontmatter includes a description field.',
-  'body-not-empty': 'Ensures the SKILL.md body contains meaningful content beyond the frontmatter.',
-  'has-instructions-section': 'Verifies that the skill file contains an explicit instructions section.',
-  'has-examples-section': 'Checks for an examples section demonstrating usage patterns.',
-  'has-error-handling-section': 'Checks for a section describing error handling and edge cases.',
-};
+import { EvalAssertion, EvalTierResult } from '@/types/evaluation';
+import styles from './EvaluationDetails.module.scss';
 
 interface EvalAssertionListProps {
   title: string;
   tier: EvalTierResult<EvalAssertion>;
+  assertionDescriptions?: Record<string, string>;
 }
 
-export const EvalAssertionList: React.FC<EvalAssertionListProps> = ({ title, tier }) => {
+export const EvalAssertionList: React.FC<EvalAssertionListProps> = ({ title, tier, assertionDescriptions }) => {
   const assertions = tier.assertions ?? [];
 
   return (
@@ -41,7 +31,7 @@ export const EvalAssertionList: React.FC<EvalAssertionListProps> = ({ title, tie
       {assertions.length > 0 && (
         <ul className={styles.assertionList}>
           {assertions.map((a) => {
-            const description = ASSERTION_DESCRIPTIONS[a.name];
+            const description = assertionDescriptions?.[a.name];
             return (
               <li key={a.name} className={styles.assertionItem}>
                 {a.status === 'pass' ? (

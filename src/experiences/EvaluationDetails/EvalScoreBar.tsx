@@ -1,6 +1,6 @@
 import React from 'react';
-import { EvalJudgeScore } from '@/types/skillEvaluation';
-import styles from './SkillEvaluation.module.scss';
+import { EvalJudgeScore } from '@/types/evaluation';
+import styles from './EvaluationDetails.module.scss';
 
 interface EvalScoreBarProps {
   score: EvalJudgeScore;

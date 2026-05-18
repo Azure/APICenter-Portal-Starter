@@ -1,10 +1,10 @@
 import React from 'react';
 import { Badge } from '@fluentui/react-components';
-import { SkillEvaluationResult } from '@/types/skillEvaluation';
-import styles from './SkillEvaluation.module.scss';
+import { EvaluationResult } from '@/types/evaluation';
+import styles from './EvaluationDetails.module.scss';
 
 interface EvalScoreBadgeProps {
-  evalResult?: SkillEvaluationResult;
+  evalResult?: EvaluationResult;
 }
 
 type BadgeColor = 'success' | 'warning' | 'danger';
