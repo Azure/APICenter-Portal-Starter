@@ -9,7 +9,7 @@ import { configAtom } from '@/atoms/configAtom';
 import { setDocumentTitle } from '@/utils/dom';
 import { DetailPageLayout, BreadcrumbItem } from '@/components/DetailPageLayout/DetailPageLayout';
 import { HeaderActions } from '@/experiences/HeaderActions';
-import { SkillEvaluationDetails } from '@/experiences/SkillEvaluation';
+import { EvaluationDetails } from '@/experiences/EvaluationDetails';
 import { buildSkillDeeplink } from '@/utils/skillDeeplink';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import CustomMetadata from '@/components/CustomMetadata';
@@ -20,6 +20,17 @@ import VsCodeLogo from '@/assets/vsCodeLogo.svg';
 
 /** Hardcoded source URL for skill installation deeplinks. */
 const SKILL_SOURCE_URL = 'https://github.com/vercel-labs/agent-skills/tree/main/skills';
+
+/** Skill-specific descriptions for known L0/L1 assertion names. */
+const SKILL_ASSERTION_DESCRIPTIONS: Record<string, string> = {
+  'frontmatter-present': 'Verifies that the SKILL.md file begins with a valid YAML frontmatter block.',
+  'has-name': 'Checks that the frontmatter declares a skill name.',
+  'has-description': 'Checks that the frontmatter includes a description field.',
+  'body-not-empty': 'Ensures the SKILL.md body contains meaningful content beyond the frontmatter.',
+  'has-instructions-section': 'Verifies that the skill file contains an explicit instructions section.',
+  'has-examples-section': 'Checks for an examples section demonstrating usage patterns.',
+  'has-error-handling-section': 'Checks for a section describing error handling and edge cases.',
+};
 
 export const SkillInfo: React.FC = () => {
   const { name } = useParams<{ name: string }>();
@@ -115,7 +126,7 @@ export const SkillInfo: React.FC = () => {
         </>
       )}
       {selectedTab === 'assessment' && (
-        <SkillEvaluationDetails evalResult={evalResult.data} isLoading={evalResult.isLoading} />
+        <EvaluationDetails evalResult={evalResult.data} isLoading={evalResult.isLoading} assertionDescriptions={SKILL_ASSERTION_DESCRIPTIONS} />
       )}
       {api.data && selectedTab === 'properties' && (
         <CustomMetadata value={api.data.customProperties} />
