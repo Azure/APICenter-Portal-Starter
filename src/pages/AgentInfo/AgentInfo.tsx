@@ -29,11 +29,14 @@ export const AgentInfo: React.FC = () => {
 
   setDocumentTitle(`Agent${api.data?.title ? ` - ${api.data.title}` : ''}`);
 
-  const breadcrumbs = useMemo<BreadcrumbItem[]>(() => [
-    { label: 'Home', href: '/' },
-    { label: 'Agents', href: '/?kind=agent' },
-    { label: api.data?.title || name || '...' },
-  ], [api.data?.title, name]);
+  const breadcrumbs = useMemo<BreadcrumbItem[]>(
+    () => [
+      { label: 'Home', href: '/' },
+      { label: 'Agents', href: '/?kind=agent' },
+      { label: api.data?.title || name || '...' },
+    ],
+    [api.data?.title, name]
+  );
   // Auto-select the first version once versions load.
   useEffect(() => {
     if (!selectedVersion && versions.data && versions.data.length > 0) {
@@ -46,20 +49,15 @@ export const AgentInfo: React.FC = () => {
     setSelectedVersion(undefined);
   }, [name]);
 
+  const definition = useAgentDefinition(api.data?.name, selectedVersion);
+  const evalResult = useAgentEvaluationResult(api.data?.name, selectedVersion);
+
   // Fall back to definition tab if assessment data disappears after version change.
   useEffect(() => {
-    if (
-      selectedTab === 'assessment' &&
-      evalResult.isFetched &&
-      !evalResult.isFetching &&
-      !evalResult.data
-    ) {
+    if (selectedTab === 'assessment' && evalResult.isFetched && !evalResult.isFetching && !evalResult.data) {
       setSelectedTab('definition');
     }
   }, [selectedTab, evalResult.isFetched, evalResult.isFetching, evalResult.data]);
-
-  const definition = useAgentDefinition(api.data?.name, selectedVersion);
-  const evalResult = useAgentEvaluationResult(api.data?.name, selectedVersion);
 
   const handleDownload = useCallback(() => {
     if (!api.data?.name || !selectedVersion || !definition.data) return;
@@ -137,9 +135,11 @@ export const AgentInfo: React.FC = () => {
                 <Badge
                   appearance="filled"
                   color={
-                    (evalResult.data.overallScore / evalResult.data.maxScore) >= 0.8 ? 'success'
-                    : (evalResult.data.overallScore / evalResult.data.maxScore) >= 0.6 ? 'warning'
-                    : 'danger'
+                    evalResult.data.overallScore / evalResult.data.maxScore >= 0.8
+                      ? 'success'
+                      : evalResult.data.overallScore / evalResult.data.maxScore >= 0.6
+                        ? 'warning'
+                        : 'danger'
                   }
                   shape="circular"
                   style={{ marginLeft: 8 }}
