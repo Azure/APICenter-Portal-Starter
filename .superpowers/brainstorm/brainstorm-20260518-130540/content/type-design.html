@@ -1,0 +1,82 @@
+<h2>Type System Design</h2>
+<p class="subtitle">Base evaluation types and extensions</p>
+
+<div class="section">
+  <h3>types/evaluation.ts</h3>
+  <div class="mockup">
+    <div class="mockup-header">Base Types (shared)</div>
+    <div class="mockup-body" style="font-family: monospace; font-size: 13px; line-height: 2;">
+<pre style="margin:0; white-space: pre-wrap;">
+<span style="color:#c678dd">interface</span> <span style="color:#e5c07b">EvaluationResult</span> {
+  status: <span style="color:#98c379">'pass' | 'fail'</span>;
+  overallScore: <span style="color:#d19a66">number</span>;
+  maxScore: <span style="color:#d19a66">number</span>;
+  evaluationConfigurationName: <span style="color:#d19a66">string</span>;
+  updatedOn: <span style="color:#d19a66">string</span>;
+  structuralChecks: EvalTierResult&lt;EvalAssertion&gt;;
+  schemaValidation: EvalTierResult&lt;EvalAssertion&gt;;
+  qualityAssessment: EvalTierResult&lt;EvalJudgeScore&gt;;
+}
+
+<span style="color:#c678dd">interface</span> <span style="color:#e5c07b">SkillEvaluationResult</span> <span style="color:#c678dd">extends</span> EvaluationResult {
+  skillName: <span style="color:#d19a66">string</span>;
+}
+
+<span style="color:#c678dd">interface</span> <span style="color:#e5c07b">AgentEvaluationResult</span> <span style="color:#c678dd">extends</span> EvaluationResult {
+  agentName: <span style="color:#d19a66">string</span>;
+  versionName: <span style="color:#d19a66">string</span>;
+}
+</pre>
+    </div>
+  </div>
+  <p style="margin-top: 12px; color: #888; font-size: 13px;">
+    EvalTierResult, EvalAssertion, EvalJudgeScore, EvalStatus — all move here unchanged.<br>
+    UI components accept <code>EvaluationResult</code> (base), not the specific extensions.
+  </p>
+</div>
+
+<div class="section">
+  <h3>API Endpoint Mapping</h3>
+  <div class="split">
+    <div class="mockup" style="flex:1">
+      <div class="mockup-header">Skill (existing)</div>
+      <div class="mockup-body" style="font-size: 13px;">
+        <code>GET /skills/{skillName}/evaluationResults/default</code>
+        <br><br>
+        <strong>Hook:</strong> useSkillEvaluationResult(skillName)
+      </div>
+    </div>
+    <div class="mockup" style="flex:1">
+      <div class="mockup-header" style="background: #2a4a3a;">Agent (new)</div>
+      <div class="mockup-body" style="font-size: 13px;">
+        <code>GET /agents/{agentName}/versions/{versionName}/evaluationResults/default</code>
+        <br><br>
+        <strong>Hook:</strong> useAgentEvaluationResult(agentName, versionName)
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Tab Behavior on AgentInfo Page</h3>
+  <div class="mockup">
+    <div class="mockup-header">Agent Detail Page — Tab Bar</div>
+    <div class="mockup-body">
+      <div style="display: flex; gap: 0; border-bottom: 2px solid #333; padding-bottom: 0;">
+        <div style="padding: 10px 20px; border-bottom: 2px solid #666; font-weight: 600;">Definition</div>
+        <div style="padding: 10px 20px; color: #888;">Documentation</div>
+        <div style="padding: 10px 20px; color: #888;">
+          Assessment
+          <span style="background: #2d7d46; color: white; padding: 1px 8px; border-radius: 12px; font-size: 12px; margin-left: 6px;">4.2/5</span>
+        </div>
+        <div style="padding: 10px 20px; color: #888;">Additional properties</div>
+      </div>
+      <div style="margin-top: 16px; padding: 12px; background: #1a1a2e; border-radius: 6px; font-size: 13px; color: #888;">
+        <div>• Assessment tab <strong>only appears</strong> when evaluation data exists for the selected version</div>
+        <div>• Score badge color follows same thresholds: ≥80% green, ≥60% warning, &lt;60% danger</div>
+        <div>• Changing version re-fetches evaluation data → tab may appear/disappear</div>
+        <div>• If user is on Assessment tab and switches to a version with no data, fall back to Definition tab</div>
+      </div>
+    </div>
+  </div>
+</div>

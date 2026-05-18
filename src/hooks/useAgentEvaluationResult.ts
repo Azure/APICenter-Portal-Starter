@@ -1,27 +1,27 @@
 import { useRecoilValue } from 'recoil';
 import { useQuery } from '@tanstack/react-query';
-import { SkillEvaluationResult } from '@/types/evaluation';
+import { AgentEvaluationResult } from '@/types/evaluation';
 import { isAuthenticatedAtom } from '@/atoms/isAuthenticatedAtom';
 import { useApiService } from '@/hooks/useApiService';
 import { QueryKeys } from '@/constants/QueryKeys';
-import { getMockEvalResult } from '@/mocks/skillEvaluationMocks';
+import { getMockAgentEvalResult } from '@/mocks/agentEvaluationMocks';
 
-export function useSkillEvaluationResult(skillName?: string) {
+export function useAgentEvaluationResult(agentName?: string, versionName?: string) {
   const ApiService = useApiService();
   const isAuthenticated = useRecoilValue(isAuthenticatedAtom);
 
-  return useQuery<SkillEvaluationResult | undefined>({
-    queryKey: [QueryKeys.SkillEvaluationResult, skillName],
+  return useQuery<AgentEvaluationResult | undefined>({
+    queryKey: [QueryKeys.AgentEvaluationResult, agentName, versionName],
     queryFn: async () => {
-      const result = await ApiService.getSkillEvaluationResult(skillName!);
+      const result = await ApiService.getAgentEvaluationResult(agentName!, versionName!);
       // DEV FALLBACK: use mock data when backend returns nothing.
       // Remove this fallback when real evaluation data is available.
       if (!result && import.meta.env.DEV) {
-        return getMockEvalResult(skillName!);
+        return getMockAgentEvalResult(agentName!);
       }
       return result;
     },
     staleTime: Infinity,
-    enabled: Boolean(isAuthenticated && skillName),
+    enabled: Boolean(isAuthenticated && agentName && versionName),
   });
 }

@@ -2,7 +2,7 @@
  * DEV-ONLY mock evaluation results for previewing the Assessment tab UI.
  * Remove this file when the backend returns real evaluation data.
  */
-import { SkillEvaluationResult } from '@/types/skillEvaluation';
+import { SkillEvaluationResult } from '@/types/evaluation';
 
 const MOCK_EVAL_RESULTS: Record<string, SkillEvaluationResult> = {
   'appinsights-instrumentation': {
