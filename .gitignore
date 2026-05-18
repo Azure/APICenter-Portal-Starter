@@ -364,4 +364,4 @@ playground/
 # Dev-only mock data (local testing)
 src/mocks/
 
-.superpowers/
+docs/superpowers/
