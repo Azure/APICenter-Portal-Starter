@@ -74,23 +74,27 @@ export interface AgentEvaluationResult extends EvaluationResult {
 }
 ```
 
-- [ ] **Step 2: Delete `src/types/skillEvaluation.ts`**
+- [ ] **Step 2: Replace `src/types/skillEvaluation.ts` with a re-export shim**
 
-Remove the old file. All consumers will be updated in subsequent tasks.
+Replace the entire content of `src/types/skillEvaluation.ts` with a temporary re-export so existing imports keep working while we migrate:
 
-```bash
-git rm src/types/skillEvaluation.ts
+```ts
+/**
+ * @deprecated Import from '@/types/evaluation' instead.
+ * Temporary re-export shim — will be deleted after all imports are migrated.
+ */
+export * from './evaluation';
 ```
 
 - [ ] **Step 3: Commit**
 
 ```bash
-git add src/types/evaluation.ts
-git commit -m "refactor: extract shared evaluation types from skillEvaluation
+git add src/types/evaluation.ts src/types/skillEvaluation.ts
+git commit -m "refactor: extract shared evaluation types with re-export shim
 
-Move EvalStatus, EvalTierResult, EvalAssertion, EvalJudgeScore into a new
-evaluation.ts with a base EvaluationResult interface. Add SkillEvaluationResult
-and AgentEvaluationResult extensions. Delete old skillEvaluation.ts.
+Create evaluation.ts with base EvaluationResult interface plus Skill and
+Agent extensions. Replace skillEvaluation.ts with a temporary re-export
+shim so existing imports keep building during migration.
 
 Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
 ```
@@ -973,11 +977,18 @@ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
 
 ---
 
-### Task 7: Build verification
+### Task 7: Delete re-export shim and build verification
 
-**Files:** None (verification only)
+**Files:**
+- Delete: `src/types/skillEvaluation.ts`
 
-- [ ] **Step 1: Run the build**
+- [ ] **Step 1: Delete the re-export shim**
+
+```bash
+git rm src/types/skillEvaluation.ts
+```
+
+- [ ] **Step 2: Run the build**
 
 ```bash
 npm run build
@@ -985,18 +996,32 @@ npm run build
 
 Expected: Build succeeds with no TypeScript errors. There should be no remaining references to `@/types/skillEvaluation` or `@/experiences/SkillEvaluation`.
 
-- [ ] **Step 2: Verify no stale imports**
+- [ ] **Step 3: Verify no stale imports**
 
 ```bash
-git grep -r "skillEvaluation\|SkillEvaluation" -- src/
+git grep "types/skillEvaluation" -- src/
+git grep "experiences/SkillEvaluation" -- src/
+git grep "SkillEvaluationDetails" -- src/
+git grep "SkillEvaluation.module.scss" -- src/
 ```
 
-Expected: No matches (all references should be updated).
+Expected: No matches for any of these patterns.
 
-- [ ] **Step 3: Run lint if configured**
+- [ ] **Step 4: Run lint if configured**
 
 ```bash
 npm run lint
 ```
 
 Expected: No new lint errors introduced.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add src/types/skillEvaluation.ts
+git commit -m "chore: remove skillEvaluation.ts re-export shim
+
+All imports migrated to @/types/evaluation. Shim no longer needed.
+
+Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
+```
