@@ -31,18 +31,19 @@ export interface EvalJudgeScore {
 /** Base evaluation result shared by skill and agent assessments. */
 export interface EvaluationResult {
   status: EvalStatus;
-  /** Top-level score; may be absent — fall back to qualityAssessment.weightedScore. */
-  overallScore?: number;
-  /** Top-level max; may be absent — fall back to qualityAssessment.maxWeightedScore. */
-  maxScore?: number;
-  evaluationConfigurationName?: string;
-  updatedOn?: string;
+  overallScore: number;
+  maxScore: number;
+  evaluationConfigurationName: string;
+  updatedOn: string;
   structuralChecks: EvalTierResult<EvalAssertion>;
   schemaValidation: EvalTierResult<EvalAssertion>;
   qualityAssessment: EvalTierResult<EvalJudgeScore>;
 }
 
-/** Resolve the effective overall score from an evaluation result. */
+/**
+ * Resolve the effective overall score from an evaluation result.
+ * Uses top-level fields when present, falls back to qualityAssessment tier scores.
+ */
 export function getEvalScore(r: EvaluationResult): { overallScore: number; maxScore: number } {
   const overallScore = r.overallScore ?? r.qualityAssessment.weightedScore ?? 0;
   const maxScore = r.maxScore ?? r.qualityAssessment.maxWeightedScore ?? 0;
