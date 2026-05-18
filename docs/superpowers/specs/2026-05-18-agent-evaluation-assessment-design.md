@@ -102,7 +102,12 @@ In `SkillInfo.tsx`:
 
 - Assessment shows results for the **currently selected version** in the version dropdown
 - Changing version re-fetches evaluation → tab may appear/disappear
-- If user is on Assessment tab and switches to a version with no eval data, fall back to Definition tab
+- If user is on Assessment tab and switches to a version with no eval data, fall back to Definition tab — but only after the query has settled (`isFetched && !isFetching && !data`), not while loading
+- Reset `selectedVersion` when agent name changes to avoid stale version from a previous agent
+
+## Assertion Descriptions
+
+The existing `EvalAssertionList` has hardcoded skill-specific assertion descriptions (referencing "SKILL.md"). The shared component will accept an optional `assertionDescriptions` map prop, so each consumer can provide context-appropriate descriptions. The default (no prop) shows no extra descriptions.
 
 ## Error Handling
 
