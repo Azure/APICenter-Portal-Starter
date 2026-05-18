@@ -1,9 +1,15 @@
 .versionSelect {
+  max-width: 240px;
+
   .dropdown {
     background: var(--colorNeutralBackground1);
+    min-width: 0;
   }
 
   &.isInline {
+    width: fit-content;
+    max-width: none;
+
     .dropdown {
       min-width: 175px;
     }

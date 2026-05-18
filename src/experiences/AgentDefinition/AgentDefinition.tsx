@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { MessageBar, MessageBarBody, Spinner } from '@fluentui/react-components';
+import { Spinner } from '@fluentui/react-components';
 import * as yaml from 'yaml';
 import { UseQueryResult } from '@tanstack/react-query';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
@@ -94,11 +94,7 @@ export const AgentDefinition: React.FC<Props> = ({ definition, hasVersion }) => 
   }
 
   if (definition.isError) {
-    return (
-      <MessageBar intent="error" className={styles.errorBar}>
-        <MessageBarBody>Failed to load the agent definition.</MessageBarBody>
-      </MessageBar>
-    );
+    return <EmptyStateMessage>No definition has been published for this version yet.</EmptyStateMessage>;
   }
 
   if (!parsed) {
