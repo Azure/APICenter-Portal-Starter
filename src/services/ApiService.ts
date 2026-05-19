@@ -162,20 +162,20 @@ export const ApiService: IApiService = {
 
   async getAgentEvaluationResult(agentName: string, versionName: string): Promise<AgentEvaluationResult | undefined> {
     return await HttpService.getOptional<AgentEvaluationResult>(
-      `/apis/${encodeURIComponent(agentName)}/versions/${encodeURIComponent(versionName)}/evaluationResults/default`
+      `/agents/${encodeURIComponent(agentName)}/versions/${encodeURIComponent(versionName)}/evaluationResults/default`
     );
   },
 
   async getAgentVersions(agentName: string): Promise<AgentVersion[]> {
     const response = await HttpService.get<{ value: AgentVersion[] }>(
-      `/apis/${encodeURIComponent(agentName)}/versions?$top=${DEFAULT_PAGE_SIZE}`
+      `/agents/${encodeURIComponent(agentName)}/versions?$top=${DEFAULT_PAGE_SIZE}`
     );
     return response?.value || [];
   },
 
   async getAgentDefinition(agentName: string, versionName: string): Promise<string | undefined> {
     return await HttpService.getText(
-      `/apis/${encodeURIComponent(agentName)}/versions/${encodeURIComponent(versionName)}/artifacts/definition/download`
+      `/agents/${encodeURIComponent(agentName)}/versions/${encodeURIComponent(versionName)}/artifacts/definition/download`
     );
   },
 };
