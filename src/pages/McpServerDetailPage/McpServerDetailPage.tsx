@@ -1,6 +1,9 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Badge, Button, Spinner, Tab, TabList } from '@fluentui/react-components';
+import {
+  Badge, Button, Spinner, Tab, TabList,
+  Menu, MenuTrigger, MenuPopover, MenuList, MenuItem, MenuButton,
+} from '@fluentui/react-components';
 import { DocumentRegular, TagRegular, WindowConsoleRegular } from '@fluentui/react-icons';
 import { useApi } from '@/hooks/useApi';
 import { useServer } from '@/hooks/useServer';
@@ -60,8 +63,8 @@ export const McpServerDetailPage: React.FC = () => {
     return tags;
   }, [api.data?.customProperties]);
 
-  const hasRemoteInstall = !!definitionSelection?.deployment?.server.runtimeUri.length;
-  const hasLocalInstall = !!server.data?.packages;
+  const hasRemoteInstall = !!definitionSelection?.deployment?.server.runtimeUri.length || !!server.data?.remotes?.length;
+  const hasLocalInstall = !!server.data?.packages?.length;
   const hasInstall = hasRemoteInstall || hasLocalInstall;
 
   const transportTags = useMcpTransportTags(apiName ? [apiName] : []);
@@ -72,7 +75,8 @@ export const McpServerDetailPage: React.FC = () => {
     const baseName = api.data?.title || apiName || '';
 
     if (useRemote && hasRemoteInstall) {
-      const runtimeUri = definitionSelection?.deployment?.server.runtimeUri[0];
+      const runtimeUri = definitionSelection?.deployment?.server.runtimeUri[0]
+        || server.data?.remotes?.[0]?.url;
       if (!runtimeUri) return;
       const matchingRemote = server.data?.remotes?.find((r) => r.url === runtimeUri);
       const transportType = matchingRemote?.transport_type || 'sse';
@@ -195,12 +199,50 @@ export const McpServerDetailPage: React.FC = () => {
       headerActions={
         hasInstall ? (
           <HeaderActions showExtensionHint>
-            <Button
-              icon={<img height={18} src={VsCodeLogo} alt="VS Code" />}
-              onClick={() => handleMcpInstall()}
-            >
-              Install in VS Code
-            </Button>
+            {hasRemoteInstall && hasLocalInstall ? (
+              <Menu positioning="below-end">
+                <MenuTrigger disableButtonEnhancement>
+                  <MenuButton
+                    icon={<img height={18} src={VsCodeLogo} alt="VS Code" />}
+                  >
+                    Install in VS Code
+                  </MenuButton>
+                </MenuTrigger>
+                <MenuPopover>
+                  <MenuList>
+                    <MenuItem
+                      icon={<img height={16} src={VsCodeLogo} alt="" />}
+                      onClick={() => handleMcpInstall('remote')}
+                    >
+                      <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <span>Install remote MCP server</span>
+                        <span style={{ fontSize: '12px', color: 'var(--colorNeutralForeground3)' }}>
+                          Hosted server, no local setup needed
+                        </span>
+                      </div>
+                    </MenuItem>
+                    <MenuItem
+                      icon={<img height={16} src={VsCodeLogo} alt="" />}
+                      onClick={() => handleMcpInstall('local')}
+                    >
+                      <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <span>Install local MCP server</span>
+                        <span style={{ fontSize: '12px', color: 'var(--colorNeutralForeground3)' }}>
+                          Runs on your machine via npx
+                        </span>
+                      </div>
+                    </MenuItem>
+                  </MenuList>
+                </MenuPopover>
+              </Menu>
+            ) : (
+              <Button
+                icon={<img height={18} src={VsCodeLogo} alt="VS Code" />}
+                onClick={() => handleMcpInstall()}
+              >
+                Install in VS Code
+              </Button>
+            )}
           </HeaderActions>
         ) : undefined
       }
