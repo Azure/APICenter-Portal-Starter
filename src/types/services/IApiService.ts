@@ -37,7 +37,11 @@ export interface IApiService {
   getMetadataSchemas(): Promise<MetadataSchema[]>;
   getPlugin(name: string): Promise<PluginDetails>;
   getAIAssetVersions(name: string, resourceType: AIAssetResourceType): Promise<AIAssetVersion[]>;
-  getAIAssetDefinition(name: string, versionName: string, resourceType: AIAssetResourceType): Promise<string | undefined>;
+  getAIAssetDefinition(
+    name: string,
+    versionName: string,
+    resourceType: AIAssetResourceType
+  ): Promise<string | undefined>;
   getAIAssetEvaluationResult(
     name: string,
     versionName: string,

@@ -129,30 +129,31 @@ export const AgentInfo: React.FC = () => {
           <Tab icon={<DocumentRegular />} value="documentation">
             Documentation
           </Tab>
-          {evalResult.data && (() => {
-            const { overallScore, maxScore } = getEvalScore(evalResult.data);
-            return (
-              <Tab value="assessment">
-                Assessment
-                {maxScore > 0 && (
-                  <Badge
-                    appearance="filled"
-                    color={
-                      overallScore / maxScore >= 0.8
-                        ? 'success'
-                        : overallScore / maxScore >= 0.6
-                          ? 'warning'
-                          : 'danger'
-                    }
-                    shape="circular"
-                    style={{ marginLeft: 8 }}
-                  >
-                    {((overallScore / maxScore) * 5).toFixed(1)}/5
-                  </Badge>
-                )}
-              </Tab>
-            );
-          })()}
+          {evalResult.data &&
+            (() => {
+              const { overallScore, maxScore } = getEvalScore(evalResult.data);
+              return (
+                <Tab value="assessment">
+                  Assessment
+                  {maxScore > 0 && (
+                    <Badge
+                      appearance="filled"
+                      color={
+                        overallScore / maxScore >= 0.8
+                          ? 'success'
+                          : overallScore / maxScore >= 0.6
+                            ? 'warning'
+                            : 'danger'
+                      }
+                      shape="circular"
+                      style={{ marginLeft: 8 }}
+                    >
+                      {((overallScore / maxScore) * 5).toFixed(1)}/5
+                    </Badge>
+                  )}
+                </Tab>
+              );
+            })()}
           {hasCustomProps && <Tab value="properties">Additional properties</Tab>}
         </TabList>
       }

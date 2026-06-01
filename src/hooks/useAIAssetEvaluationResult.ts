@@ -23,9 +23,7 @@ export function useAIAssetEvaluationResult(
       // DEV FALLBACK: use mock data when backend returns nothing.
       // Remove this fallback when real evaluation data is available.
       if (!result && import.meta.env.DEV) {
-        return resourceType === 'skills'
-          ? getMockEvalResult(name!)
-          : getMockAgentEvalResult(name!);
+        return resourceType === 'skills' ? getMockEvalResult(name!) : getMockAgentEvalResult(name!);
       }
       return result;
     },

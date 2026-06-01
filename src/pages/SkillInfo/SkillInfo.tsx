@@ -48,11 +48,14 @@ export const SkillInfo: React.FC = () => {
 
   setDocumentTitle(`Skill${api.data?.title ? ` - ${api.data.title}` : ''}`);
 
-  const breadcrumbs = useMemo<BreadcrumbItem[]>(() => [
-    { label: 'Home', href: '/' },
-    { label: 'Skills', href: '/?kind=skill' },
-    { label: api.data?.title || name || '...' },
-  ], [api.data?.title, name]);
+  const breadcrumbs = useMemo<BreadcrumbItem[]>(
+    () => [
+      { label: 'Home', href: '/' },
+      { label: 'Skills', href: '/?kind=skill' },
+      { label: api.data?.title || name || '...' },
+    ],
+    [api.data?.title, name]
+  );
 
   const skillSourceUrl = useMemo(
     () => (api.data?.customProperties?.['sourceUrl'] as string | undefined) ?? SKILL_SOURCE_URL,
@@ -127,36 +130,45 @@ export const SkillInfo: React.FC = () => {
       summary={api.data?.summary}
       breadcrumbs={breadcrumbs}
       metadata={
-        <Badge appearance="filled" color="brand" shape="circular">Skill</Badge>
+        <Badge appearance="filled" color="brand" shape="circular">
+          Skill
+        </Badge>
       }
       lastUpdated={api.data?.lastUpdated}
       selector={headerSelector}
       tabs={
         <TabList selectedValue={selectedTab} onTabSelect={(_, d) => setSelectedTab(d.value as SkillTab)}>
-          <Tab icon={<DocumentRegular />} value="documentation">Documentation</Tab>
-          <Tab icon={<CodeRegular />} value="definition">Definition</Tab>
-          {evalResult.data && (() => {
-            const { overallScore, maxScore } = getEvalScore(evalResult.data);
-            return (
-              <Tab value="assessment">
-                Assessment
-                {maxScore > 0 && (
-                  <Badge
-                    appearance="filled"
-                    color={
-                      (overallScore / maxScore) >= 0.8 ? 'success'
-                      : (overallScore / maxScore) >= 0.6 ? 'warning'
-                      : 'danger'
-                    }
-                    shape="circular"
-                    style={{ marginLeft: 8 }}
-                  >
-                    {((overallScore / maxScore) * 5).toFixed(1)}/5
-                  </Badge>
-                )}
-              </Tab>
-            );
-          })()}
+          <Tab icon={<DocumentRegular />} value="documentation">
+            Documentation
+          </Tab>
+          <Tab icon={<CodeRegular />} value="definition">
+            Definition
+          </Tab>
+          {evalResult.data &&
+            (() => {
+              const { overallScore, maxScore } = getEvalScore(evalResult.data);
+              return (
+                <Tab value="assessment">
+                  Assessment
+                  {maxScore > 0 && (
+                    <Badge
+                      appearance="filled"
+                      color={
+                        overallScore / maxScore >= 0.8
+                          ? 'success'
+                          : overallScore / maxScore >= 0.6
+                            ? 'warning'
+                            : 'danger'
+                      }
+                      shape="circular"
+                      style={{ marginLeft: 8 }}
+                    >
+                      {((overallScore / maxScore) * 5).toFixed(1)}/5
+                    </Badge>
+                  )}
+                </Tab>
+              );
+            })()}
           {hasCustomProps && <Tab value="properties">Additional properties</Tab>}
         </TabList>
       }
@@ -164,10 +176,7 @@ export const SkillInfo: React.FC = () => {
         hasHeaderActions ? (
           <HeaderActions showExtensionHint>
             {canInstall && (
-              <Button
-                icon={<img height={18} src={VsCodeLogo} alt="VS Code" />}
-                onClick={handleSkillInstall}
-              >
+              <Button icon={<img height={18} src={VsCodeLogo} alt="VS Code" />} onClick={handleSkillInstall}>
                 Install in VS Code
               </Button>
             )}
@@ -181,9 +190,9 @@ export const SkillInfo: React.FC = () => {
       }
       isLoading={api.isLoading}
       error={api.isError ? 'Failed to load skill details. Please check your connection and try again.' : undefined}
-      onRetry={() => api.refetch()}
       emptyMessage={!api.isLoading && !api.isError && !api.data ? 'The specified skill does not exist.' : undefined}
       sidebar={undefined}
+      onRetry={() => api.refetch()}
     >
       {api.data && selectedTab === 'documentation' && (
         <>
@@ -192,7 +201,7 @@ export const SkillInfo: React.FC = () => {
             assetName={api.data?.name || name || 'skill'}
             dataApiHostName={config.dataApiHostName}
           />
-          {(api.data.description || api.data.summary) ? (
+          {api.data.description || api.data.summary ? (
             <MarkdownRenderer markdown={(api.data.description || api.data.summary)!} />
           ) : (
             <EmptyStateMessage>No description available for this skill.</EmptyStateMessage>
@@ -205,12 +214,14 @@ export const SkillInfo: React.FC = () => {
       )}
 
       {selectedTab === 'assessment' && (
-        <EvaluationDetails evalResult={evalResult.data} isLoading={evalResult.isLoading} assertionDescriptions={SKILL_ASSERTION_DESCRIPTIONS} />
+        <EvaluationDetails
+          evalResult={evalResult.data}
+          isLoading={evalResult.isLoading}
+          assertionDescriptions={SKILL_ASSERTION_DESCRIPTIONS}
+        />
       )}
 
-      {api.data && selectedTab === 'properties' && (
-        <CustomMetadata value={api.data.customProperties} />
-      )}
+      {api.data && selectedTab === 'properties' && <CustomMetadata value={api.data.customProperties} />}
     </DetailPageLayout>
   );
 };
