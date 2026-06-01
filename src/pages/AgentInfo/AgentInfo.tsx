@@ -14,6 +14,7 @@ import { DetailPageLayout, BreadcrumbItem } from '@/components/DetailPageLayout/
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import CustomMetadata from '@/components/CustomMetadata';
 import { EmptyStateMessage } from '@/components/EmptyStateMessage/EmptyStateMessage';
+import { JsonCodeBlock } from '@/components/JsonCodeBlock';
 import { HeaderActions } from '@/experiences/HeaderActions';
 import { VersionSelect } from '@/experiences/VersionSelect';
 import { AIAssetDefinition } from '@/experiences/AIAssetDefinition';
@@ -195,21 +196,7 @@ export const AgentInfo: React.FC = () => {
         <AIAssetDefinition definition={definition} hasVersion={!!selectedVersion} />
       )}
 
-      {api.data && selectedTab === 'a2a' && a2aArtifact && (
-        <pre
-          style={{
-            padding: 16,
-            borderRadius: 6,
-            backgroundColor: 'var(--colorNeutralBackground3)',
-            overflow: 'auto',
-            fontSize: '0.85em',
-            fontFamily: 'ui-monospace, SFMono-Regular, monospace',
-            lineHeight: 1.5,
-          }}
-        >
-          {JSON.stringify(a2aArtifact, null, 2)}
-        </pre>
-      )}
+      {api.data && selectedTab === 'a2a' && a2aArtifact && <JsonCodeBlock value={a2aArtifact} />}
 
       {selectedTab === 'assessment' && (
         <EvaluationDetails evalResult={evalResult.data} isLoading={evalResult.isLoading} />
