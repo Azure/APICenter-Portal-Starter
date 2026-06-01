@@ -3,9 +3,9 @@ import { useParams } from 'react-router-dom';
 import { Badge, Button, Tab, TabList } from '@fluentui/react-components';
 import { ArrowDownloadRegular, CodeRegular, DocumentRegular } from '@fluentui/react-icons';
 import { useApi } from '@/hooks/useApi';
-import { useAgentVersions } from '@/hooks/useAgentVersions';
-import { useAgentDefinition } from '@/hooks/useAgentDefinition';
-import { useAgentEvaluationResult } from '@/hooks/useAgentEvaluationResult';
+import { useAIAssetVersions } from '@/hooks/useAIAssetVersions';
+import { useAIAssetDefinition } from '@/hooks/useAIAssetDefinition';
+import { useAIAssetEvaluationResult } from '@/hooks/useAIAssetEvaluationResult';
 import { getEvalScore } from '@/types/evaluation';
 import { setDocumentTitle } from '@/utils/dom';
 import { getLifecycleBadgeColor, formatLifecycleStage } from '@/utils/badgeSystem';
@@ -15,7 +15,7 @@ import CustomMetadata from '@/components/CustomMetadata';
 import { EmptyStateMessage } from '@/components/EmptyStateMessage/EmptyStateMessage';
 import { HeaderActions } from '@/experiences/HeaderActions';
 import { VersionSelect } from '@/experiences/VersionSelect';
-import { AgentDefinition } from '@/experiences/AgentDefinition';
+import { AIAssetDefinition } from '@/experiences/AIAssetDefinition';
 import { EvaluationDetails } from '@/experiences/EvaluationDetails';
 import styles from './AgentInfo.module.scss';
 
@@ -24,7 +24,7 @@ type AgentTab = 'documentation' | 'definition' | 'assessment' | 'properties';
 export const AgentInfo: React.FC = () => {
   const { name } = useParams<{ name: string }>();
   const api = useApi(name);
-  const versions = useAgentVersions(api.data?.name);
+  const versions = useAIAssetVersions(api.data?.name, 'agents');
   const [selectedVersion, setSelectedVersion] = useState<string | undefined>();
   const [selectedTab, setSelectedTab] = useState<AgentTab>('definition');
 
@@ -50,8 +50,8 @@ export const AgentInfo: React.FC = () => {
     setSelectedVersion(undefined);
   }, [name]);
 
-  const definition = useAgentDefinition(api.data?.name, selectedVersion);
-  const evalResult = useAgentEvaluationResult(api.data?.name, selectedVersion);
+  const definition = useAIAssetDefinition(api.data?.name, selectedVersion, 'agents');
+  const evalResult = useAIAssetEvaluationResult(api.data?.name, selectedVersion, 'agents');
 
   // Fall back to definition tab if assessment data disappears after version change.
   useEffect(() => {
@@ -173,7 +173,7 @@ export const AgentInfo: React.FC = () => {
         ))}
 
       {api.data && selectedTab === 'definition' && (
-        <AgentDefinition definition={definition} hasVersion={!!selectedVersion} />
+        <AIAssetDefinition definition={definition} hasVersion={!!selectedVersion} />
       )}
 
       {selectedTab === 'assessment' && (
