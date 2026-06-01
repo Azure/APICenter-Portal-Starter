@@ -15,12 +15,7 @@ interface RequestOptions {
   skipWorkspacePrefix?: boolean;
 }
 
-async function makeRequest<T>(
-  endpoint: string,
-  method: string,
-  payload?: any,
-  options?: RequestOptions
-): Promise<T> {
+async function makeRequest<T>(endpoint: string, method: string, payload?: any, options?: RequestOptions): Promise<T> {
   const { AuthService } = getRecoil(appServicesAtom);
   const config = getRecoil(configAtom);
   const accessToken = await AuthService.getAccessToken();
@@ -135,14 +130,14 @@ export const HttpService = {
     }
   },
 
-  /** GET that returns the raw response body as text. Uses the same auth/workspace logic as `get`. */
-  async getText(endpoint: string, options?: RequestOptions): Promise<string | undefined> {
+  /** Returns the raw response body as text. Uses the same auth/workspace logic as `get`. */
+  async getText(endpoint: string, options?: RequestOptions & { method?: 'GET' | 'POST' }): Promise<string | undefined> {
     const { AuthService } = getRecoil(appServicesAtom);
     const config = getRecoil(configAtom);
     const accessToken = await AuthService.getAccessToken();
 
     const init: RequestInit = {
-      method: 'GET',
+      method: options?.method ?? 'GET',
       headers: new Headers({ Accept: 'text/plain, text/markdown, */*' }),
     };
 

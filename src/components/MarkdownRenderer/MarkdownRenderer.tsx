@@ -1,7 +1,7 @@
 import React from 'react';
 import classNames from 'classnames';
 import remarkGfm from 'remark-gfm';
-import rehypeRaw from 'rehype-raw';
+import rehypeSanitize from 'rehype-sanitize';
 import rehypeTruncate from 'rehype-truncate';
 // TODO: upgrade this package and all related ones when https://github.com/hashicorp/next-mdx-remote/issues/403 fixed
 import ReactMarkdown from 'react-markdown';
@@ -17,7 +17,7 @@ export const MarkdownRenderer: React.FC<Props> = ({ markdown, maxLength, shouldT
     <ReactMarkdown
       remarkPlugins={[remarkGfm]}
       rehypePlugins={[
-        rehypeRaw,
+        rehypeSanitize,
         [
           rehypeTruncate,
           {

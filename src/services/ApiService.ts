@@ -13,7 +13,7 @@ import { Server, ServerResponse } from '@/types/server';
 import { MetadataSchema } from '@/types/metadataSchema';
 import { PluginDetails } from '@/types/plugin';
 import { SkillEvaluationResult, AgentEvaluationResult } from '@/types/evaluation';
-import { AgentVersion } from '@/types/agent';
+import { AIAssetResourceType, AIAssetArtifact, AIAssetVersion } from '@/types/aiAsset';
 import { DEFAULT_PAGE_SIZE } from '@/constants';
 
 export const ApiService: IApiService = {
@@ -154,28 +154,42 @@ export const ApiService: IApiService = {
     return response || [];
   },
 
-  async getSkillEvaluationResult(skillName: string): Promise<SkillEvaluationResult | undefined> {
-    return await HttpService.getOptional<SkillEvaluationResult>(
-      `/skills/${encodeURIComponent(skillName)}/evaluationResults/default`
-    );
-  },
-
-  async getAgentEvaluationResult(agentName: string, versionName: string): Promise<AgentEvaluationResult | undefined> {
-    return await HttpService.getOptional<AgentEvaluationResult>(
-      `/agents/${encodeURIComponent(agentName)}/versions/${encodeURIComponent(versionName)}/evaluationResults/default`
-    );
-  },
-
-  async getAgentVersions(agentName: string): Promise<AgentVersion[]> {
-    const response = await HttpService.get<{ value: AgentVersion[] }>(
-      `/agents/${encodeURIComponent(agentName)}/versions?$top=${DEFAULT_PAGE_SIZE}`
+  async getAIAssetVersions(name: string, resourceType: AIAssetResourceType): Promise<AIAssetVersion[]> {
+    const response = await HttpService.get<{ value: AIAssetVersion[] }>(
+      `/${resourceType}/${encodeURIComponent(name)}/versions?$top=${DEFAULT_PAGE_SIZE}`
     );
     return response?.value || [];
   },
 
-  async getAgentDefinition(agentName: string, versionName: string): Promise<string | undefined> {
+  async getAIAssetArtifacts(
+    name: string,
+    versionName: string,
+    resourceType: AIAssetResourceType
+  ): Promise<AIAssetArtifact[]> {
+    const response = await HttpService.get<{ value: AIAssetArtifact[] }>(
+      `/${resourceType}/${encodeURIComponent(name)}/versions/${encodeURIComponent(versionName)}/artifacts?$top=${DEFAULT_PAGE_SIZE}`
+    );
+    return response?.value || [];
+  },
+
+  async getAIAssetDefinition(
+    name: string,
+    versionName: string,
+    resourceType: AIAssetResourceType
+  ): Promise<string | undefined> {
     return await HttpService.getText(
-      `/agents/${encodeURIComponent(agentName)}/versions/${encodeURIComponent(versionName)}/artifacts/definition/download`
+      `/${resourceType}/${encodeURIComponent(name)}/versions/${encodeURIComponent(versionName)}/artifacts/definition/download`,
+      { method: 'POST' }
+    );
+  },
+
+  async getAIAssetEvaluationResult(
+    name: string,
+    versionName: string,
+    resourceType: AIAssetResourceType
+  ): Promise<SkillEvaluationResult | AgentEvaluationResult | undefined> {
+    return await HttpService.getOptional<SkillEvaluationResult | AgentEvaluationResult>(
+      `/${resourceType}/${encodeURIComponent(name)}/versions/${encodeURIComponent(versionName)}/evaluationResults/default`
     );
   },
 };

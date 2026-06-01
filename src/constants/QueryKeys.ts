@@ -1,8 +1,10 @@
 export enum QueryKeys {
   Apis = 'Apis',
   Api = 'Api',
-  AgentVersions = 'AgentVersions',
-  AgentDefinition = 'AgentDefinition',
+  AIAssetVersions = 'AIAssetVersions',
+  AIAssetDefinition = 'AIAssetDefinition',
+  AIAssetArtifacts = 'AIAssetArtifacts',
+  AIAssetEvaluationResult = 'AIAssetEvaluationResult',
   Server = 'Server',
   ApiVersions = 'ApiVersions',
   ApiDefinitions = 'ApiDefinitions',
@@ -17,6 +19,4 @@ export enum QueryKeys {
   MetadataSchemas = 'MetadataSchemas',
   Plugin = 'Plugin',
   LanguageModel = 'LanguageModel',
-  SkillEvaluationResult = 'SkillEvaluationResult',
-  AgentEvaluationResult = 'AgentEvaluationResult',
 }
