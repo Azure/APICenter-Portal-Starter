@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Badge, Button, Tab, TabList } from '@fluentui/react-components';
-import { ArrowDownloadRegular, CodeRegular, DocumentRegular } from '@fluentui/react-icons';
+import { CodeRegular, DocumentRegular } from '@fluentui/react-icons';
 import { useRecoilValue } from 'recoil';
 import { useApi } from '@/hooks/useApi';
 import { useAIAssetVersions } from '@/hooks/useAIAssetVersions';
@@ -90,27 +90,9 @@ export const SkillInfo: React.FC = () => {
     window.open(deeplink);
   }, [skillSourceUrl, api.data?.name]);
 
-  const handleDownload = useCallback(() => {
-    if (!api.data?.name || !selectedVersion || !definition.data) return;
-    const blob = new Blob([definition.data], { type: 'text/markdown' });
-    const url = URL.createObjectURL(blob);
-    try {
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `${api.data.name}-${selectedVersion}-definition.md`;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-    } finally {
-      setTimeout(() => URL.revokeObjectURL(url), 0);
-    }
-  }, [api.data?.name, selectedVersion, definition.data]);
-
   const versionOptions = useMemo(() => versions.data ?? [], [versions.data]);
   const hasCustomProps = !!Object.keys(api.data?.customProperties || {}).length;
-  const hasDefinition = !!definition.data;
   const canInstall = !!skillSourceUrl;
-  const hasHeaderActions = canInstall || hasDefinition;
 
   const headerSelector =
     versionOptions.length > 0 ? (
@@ -173,18 +155,11 @@ export const SkillInfo: React.FC = () => {
         </TabList>
       }
       headerActions={
-        hasHeaderActions ? (
+        canInstall ? (
           <HeaderActions showExtensionHint>
-            {canInstall && (
-              <Button icon={<img height={18} src={VsCodeLogo} alt="VS Code" />} onClick={handleSkillInstall}>
-                Install in VS Code
-              </Button>
-            )}
-            {hasDefinition && (
-              <Button icon={<ArrowDownloadRegular />} onClick={handleDownload}>
-                Download definition
-              </Button>
-            )}
+            <Button icon={<img height={18} src={VsCodeLogo} alt="VS Code" />} onClick={handleSkillInstall}>
+              Install in VS Code
+            </Button>
           </HeaderActions>
         ) : undefined
       }
