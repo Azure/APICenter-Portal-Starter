@@ -167,7 +167,8 @@ export const ApiService: IApiService = {
     resourceType: AIAssetResourceType
   ): Promise<string | undefined> {
     return await HttpService.getText(
-      `/${resourceType}/${encodeURIComponent(name)}/versions/${encodeURIComponent(versionName)}/artifacts/definition/download`
+      `/${resourceType}/${encodeURIComponent(name)}/versions/${encodeURIComponent(versionName)}/artifacts/definition/download`,
+      { method: 'POST' }
     );
   },
 
