@@ -9,7 +9,7 @@ function escapeHtml(text: string): string {
 
 function highlightJson(json: string): string {
   return json.replace(
-    /("(?:\\.|[^"\\])*")\s*(:)?|(\btrue\b|\bfalse\b|\bnull\b)|(-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)/g,
+    /("(?:\\.|[^"\\])*")[ \t]*(:)?|(\btrue\b|\bfalse\b|\bnull\b)|(-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)/g,
     (match, str, colon, keyword, num) => {
       if (str && colon) {
         return `<span class="${styles.jsonKey}">${escapeHtml(str)}</span>:`;
