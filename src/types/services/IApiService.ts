@@ -9,7 +9,6 @@ import { Server } from '@/types/server';
 import { MetadataSchema } from '@/types/metadataSchema';
 import { PluginDetails } from '@/types/plugin';
 import { SkillEvaluationResult, AgentEvaluationResult } from '@/types/evaluation';
-import { AgentVersion } from '@/types/agent';
 import { AIAssetResourceType, AIAssetVersion } from '@/types/aiAsset';
 
 export interface PaginatedResult<T> {
@@ -37,10 +36,6 @@ export interface IApiService {
   getSecurityCredentials(definitionId: ApiDefinitionId, schemeName: string): Promise<ApiAuthScheme>;
   getMetadataSchemas(): Promise<MetadataSchema[]>;
   getPlugin(name: string): Promise<PluginDetails>;
-  getSkillEvaluationResult(skillName: string): Promise<SkillEvaluationResult | undefined>;
-  getAgentEvaluationResult(agentName: string, versionName: string): Promise<AgentEvaluationResult | undefined>;
-  getAgentVersions(agentName: string): Promise<AgentVersion[]>;
-  getAgentDefinition(agentName: string, versionName: string): Promise<string | undefined>;
   getAIAssetVersions(name: string, resourceType: AIAssetResourceType): Promise<AIAssetVersion[]>;
   getAIAssetDefinition(name: string, versionName: string, resourceType: AIAssetResourceType): Promise<string | undefined>;
   getAIAssetEvaluationResult(
