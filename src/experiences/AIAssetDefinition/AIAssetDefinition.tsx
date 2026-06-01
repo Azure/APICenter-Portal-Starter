@@ -2,9 +2,7 @@ import React, { useMemo } from 'react';
 import { Spinner } from '@fluentui/react-components';
 import * as yaml from 'yaml';
 import { UseQueryResult } from '@tanstack/react-query';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import rehypeSanitize from 'rehype-sanitize';
+import MarkdownRenderer from '@/components/MarkdownRenderer';
 import { EmptyStateMessage } from '@/components/EmptyStateMessage/EmptyStateMessage';
 import styles from './AIAssetDefinition.module.scss';
 
@@ -108,9 +106,7 @@ export const AIAssetDefinition: React.FC<Props> = ({ definition, hasVersion }) =
       {parsed.frontmatter && renderFrontmatterTable(parsed.frontmatter)}
       {parsed.body.trim() ? (
         <div className={styles.markdown}>
-          <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSanitize]}>
-            {parsed.body}
-          </ReactMarkdown>
+          <MarkdownRenderer markdown={parsed.body} />
         </div>
       ) : (
         !parsed.frontmatter && <EmptyStateMessage>This version has no definition.</EmptyStateMessage>
