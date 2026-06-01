@@ -1,21 +1,24 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Badge, Button, Tab, TabList } from '@fluentui/react-components';
-import { DocumentRegular } from '@fluentui/react-icons';
+import { ArrowDownloadRegular, CodeRegular, DocumentRegular } from '@fluentui/react-icons';
 import { useRecoilValue } from 'recoil';
 import { useApi } from '@/hooks/useApi';
-import { useSkillEvaluationResult } from '@/hooks/useSkillEvaluationResult';
+import { useAIAssetVersions } from '@/hooks/useAIAssetVersions';
+import { useAIAssetDefinition } from '@/hooks/useAIAssetDefinition';
+import { useAIAssetEvaluationResult } from '@/hooks/useAIAssetEvaluationResult';
 import { getEvalScore } from '@/types/evaluation';
 import { configAtom } from '@/atoms/configAtom';
 import { setDocumentTitle } from '@/utils/dom';
 import { DetailPageLayout, BreadcrumbItem } from '@/components/DetailPageLayout/DetailPageLayout';
 import { HeaderActions } from '@/experiences/HeaderActions';
+import { VersionSelect } from '@/experiences/VersionSelect';
+import { AIAssetDefinition } from '@/experiences/AIAssetDefinition';
 import { EvaluationDetails } from '@/experiences/EvaluationDetails';
 import { buildSkillDeeplink } from '@/utils/skillDeeplink';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import CustomMetadata from '@/components/CustomMetadata';
 import { EmptyStateMessage } from '@/components/EmptyStateMessage/EmptyStateMessage';
-import { ConnectPanel } from '@/components/ConnectPanel';
 import { InstallationBlock } from '@/components/InstallationBlock';
 import VsCodeLogo from '@/assets/vsCodeLogo.svg';
 
@@ -33,12 +36,15 @@ const SKILL_ASSERTION_DESCRIPTIONS: Record<string, string> = {
   'has-error-handling-section': 'Checks for a section describing error handling and edge cases.',
 };
 
+type SkillTab = 'documentation' | 'definition' | 'assessment' | 'properties';
+
 export const SkillInfo: React.FC = () => {
   const { name } = useParams<{ name: string }>();
   const api = useApi(name);
   const config = useRecoilValue(configAtom);
-  const evalResult = useSkillEvaluationResult(name);
-  const [selectedTab, setSelectedTab] = useState<string>('documentation');
+  const versions = useAIAssetVersions(api.data?.name, 'skills');
+  const [selectedVersion, setSelectedVersion] = useState<string | undefined>();
+  const [selectedTab, setSelectedTab] = useState<SkillTab>('documentation');
 
   setDocumentTitle(`Skill${api.data?.title ? ` - ${api.data.title}` : ''}`);
 
@@ -47,10 +53,33 @@ export const SkillInfo: React.FC = () => {
     { label: 'Skills', href: '/?kind=skill' },
     { label: api.data?.title || name || '...' },
   ], [api.data?.title, name]);
+
   const skillSourceUrl = useMemo(
     () => (api.data?.customProperties?.['sourceUrl'] as string | undefined) ?? SKILL_SOURCE_URL,
     [api.data]
   );
+
+  // Auto-select the first version once versions load.
+  useEffect(() => {
+    if (!selectedVersion && versions.data && versions.data.length > 0) {
+      setSelectedVersion(versions.data[0].name);
+    }
+  }, [versions.data, selectedVersion]);
+
+  // Reset selected version when navigating to a different skill.
+  useEffect(() => {
+    setSelectedVersion(undefined);
+  }, [name]);
+
+  const definition = useAIAssetDefinition(api.data?.name, selectedVersion, 'skills');
+  const evalResult = useAIAssetEvaluationResult(api.data?.name, selectedVersion, 'skills');
+
+  // Fall back to documentation tab if assessment data disappears after version change.
+  useEffect(() => {
+    if (selectedTab === 'assessment' && evalResult.isFetched && !evalResult.isFetching && !evalResult.data) {
+      setSelectedTab('documentation');
+    }
+  }, [selectedTab, evalResult.isFetched, evalResult.isFetching, evalResult.data]);
 
   const handleSkillInstall = useCallback(() => {
     if (!api.data?.name) return;
@@ -58,7 +87,39 @@ export const SkillInfo: React.FC = () => {
     window.open(deeplink);
   }, [skillSourceUrl, api.data?.name]);
 
+  const handleDownload = useCallback(() => {
+    if (!api.data?.name || !selectedVersion || !definition.data) return;
+    const blob = new Blob([definition.data], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    try {
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${api.data.name}-${selectedVersion}-definition.md`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } finally {
+      setTimeout(() => URL.revokeObjectURL(url), 0);
+    }
+  }, [api.data?.name, selectedVersion, definition.data]);
+
+  const versionOptions = useMemo(() => versions.data ?? [], [versions.data]);
   const hasCustomProps = !!Object.keys(api.data?.customProperties || {}).length;
+  const hasDefinition = !!definition.data;
+  const canInstall = !!skillSourceUrl;
+  const hasHeaderActions = canInstall || hasDefinition;
+
+  const headerSelector =
+    versionOptions.length > 0 ? (
+      <VersionSelect
+        id="skill-version-select"
+        versions={versionOptions}
+        selectedName={selectedVersion}
+        placeholder="Select skill version"
+        isInline
+        onChange={setSelectedVersion}
+      />
+    ) : undefined;
 
   return (
     <DetailPageLayout
@@ -69,9 +130,11 @@ export const SkillInfo: React.FC = () => {
         <Badge appearance="filled" color="brand" shape="circular">Skill</Badge>
       }
       lastUpdated={api.data?.lastUpdated}
+      selector={headerSelector}
       tabs={
-        <TabList selectedValue={selectedTab} onTabSelect={(_, d) => setSelectedTab(d.value as string)}>
+        <TabList selectedValue={selectedTab} onTabSelect={(_, d) => setSelectedTab(d.value as SkillTab)}>
           <Tab icon={<DocumentRegular />} value="documentation">Documentation</Tab>
+          <Tab icon={<CodeRegular />} value="definition">Definition</Tab>
           {evalResult.data && (() => {
             const { overallScore, maxScore } = getEvalScore(evalResult.data);
             return (
@@ -98,14 +161,21 @@ export const SkillInfo: React.FC = () => {
         </TabList>
       }
       headerActions={
-        skillSourceUrl ? (
+        hasHeaderActions ? (
           <HeaderActions showExtensionHint>
-            <Button
-              icon={<img height={18} src={VsCodeLogo} alt="VS Code" />}
-              onClick={handleSkillInstall}
-            >
-              Install in VS Code
-            </Button>
+            {canInstall && (
+              <Button
+                icon={<img height={18} src={VsCodeLogo} alt="VS Code" />}
+                onClick={handleSkillInstall}
+              >
+                Install in VS Code
+              </Button>
+            )}
+            {hasDefinition && (
+              <Button icon={<ArrowDownloadRegular />} onClick={handleDownload}>
+                Download definition
+              </Button>
+            )}
           </HeaderActions>
         ) : undefined
       }
@@ -129,9 +199,15 @@ export const SkillInfo: React.FC = () => {
           )}
         </>
       )}
+
+      {api.data && selectedTab === 'definition' && (
+        <AIAssetDefinition definition={definition} hasVersion={!!selectedVersion} />
+      )}
+
       {selectedTab === 'assessment' && (
         <EvaluationDetails evalResult={evalResult.data} isLoading={evalResult.isLoading} assertionDescriptions={SKILL_ASSERTION_DESCRIPTIONS} />
       )}
+
       {api.data && selectedTab === 'properties' && (
         <CustomMetadata value={api.data.customProperties} />
       )}
