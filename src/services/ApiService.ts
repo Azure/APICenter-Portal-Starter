@@ -13,7 +13,7 @@ import { Server, ServerResponse } from '@/types/server';
 import { MetadataSchema } from '@/types/metadataSchema';
 import { PluginDetails } from '@/types/plugin';
 import { SkillEvaluationResult, AgentEvaluationResult } from '@/types/evaluation';
-import { AIAssetResourceType, AIAssetVersion } from '@/types/aiAsset';
+import { AIAssetResourceType, AIAssetArtifact, AIAssetVersion } from '@/types/aiAsset';
 import { DEFAULT_PAGE_SIZE } from '@/constants';
 
 export const ApiService: IApiService = {
@@ -157,6 +157,17 @@ export const ApiService: IApiService = {
   async getAIAssetVersions(name: string, resourceType: AIAssetResourceType): Promise<AIAssetVersion[]> {
     const response = await HttpService.get<{ value: AIAssetVersion[] }>(
       `/${resourceType}/${encodeURIComponent(name)}/versions?$top=${DEFAULT_PAGE_SIZE}`
+    );
+    return response?.value || [];
+  },
+
+  async getAIAssetArtifacts(
+    name: string,
+    versionName: string,
+    resourceType: AIAssetResourceType
+  ): Promise<AIAssetArtifact[]> {
+    const response = await HttpService.get<{ value: AIAssetArtifact[] }>(
+      `/${resourceType}/${encodeURIComponent(name)}/versions/${encodeURIComponent(versionName)}/artifacts?$top=${DEFAULT_PAGE_SIZE}`
     );
     return response?.value || [];
   },

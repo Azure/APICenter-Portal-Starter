@@ -3,6 +3,7 @@ export enum QueryKeys {
   Api = 'Api',
   AIAssetVersions = 'AIAssetVersions',
   AIAssetDefinition = 'AIAssetDefinition',
+  AIAssetArtifacts = 'AIAssetArtifacts',
   AIAssetEvaluationResult = 'AIAssetEvaluationResult',
   Server = 'Server',
   ApiVersions = 'ApiVersions',

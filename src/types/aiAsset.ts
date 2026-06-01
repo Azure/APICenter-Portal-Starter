@@ -12,3 +12,14 @@ export interface AIAssetVersion {
   title?: string;
   lifecycleStage?: string;
 }
+
+export interface AIAssetArtifact {
+  name: string;
+  title?: string;
+  description?: string;
+  type?: 'file' | 'json';
+  value?: string;
+  contentType?: string;
+  fileName?: string;
+  contentLengthInBytes?: number;
+}

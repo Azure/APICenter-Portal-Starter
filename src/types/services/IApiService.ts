@@ -9,7 +9,7 @@ import { Server } from '@/types/server';
 import { MetadataSchema } from '@/types/metadataSchema';
 import { PluginDetails } from '@/types/plugin';
 import { SkillEvaluationResult, AgentEvaluationResult } from '@/types/evaluation';
-import { AIAssetResourceType, AIAssetVersion } from '@/types/aiAsset';
+import { AIAssetResourceType, AIAssetArtifact, AIAssetVersion } from '@/types/aiAsset';
 
 export interface PaginatedResult<T> {
   value: T[];
@@ -37,6 +37,7 @@ export interface IApiService {
   getMetadataSchemas(): Promise<MetadataSchema[]>;
   getPlugin(name: string): Promise<PluginDetails>;
   getAIAssetVersions(name: string, resourceType: AIAssetResourceType): Promise<AIAssetVersion[]>;
+  getAIAssetArtifacts(name: string, versionName: string, resourceType: AIAssetResourceType): Promise<AIAssetArtifact[]>;
   getAIAssetDefinition(
     name: string,
     versionName: string,

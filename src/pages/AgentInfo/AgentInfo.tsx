@@ -1,11 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Badge, Button, Tab, TabList } from '@fluentui/react-components';
-import { ArrowDownloadRegular, CodeRegular, DocumentRegular } from '@fluentui/react-icons';
+import { ArrowDownloadRegular, CodeRegular, DocumentRegular, PlugConnectedRegular } from '@fluentui/react-icons';
 import { useApi } from '@/hooks/useApi';
 import { useAIAssetVersions } from '@/hooks/useAIAssetVersions';
 import { useAIAssetDefinition } from '@/hooks/useAIAssetDefinition';
 import { useAIAssetEvaluationResult } from '@/hooks/useAIAssetEvaluationResult';
+import { useAIAssetArtifacts } from '@/hooks/useAIAssetArtifacts';
 import { getEvalScore } from '@/types/evaluation';
 import { setDocumentTitle } from '@/utils/dom';
 import { getLifecycleBadgeColor, formatLifecycleStage } from '@/utils/badgeSystem';
@@ -19,7 +20,7 @@ import { AIAssetDefinition } from '@/experiences/AIAssetDefinition';
 import { EvaluationDetails } from '@/experiences/EvaluationDetails';
 import styles from './AgentInfo.module.scss';
 
-type AgentTab = 'documentation' | 'definition' | 'assessment' | 'properties';
+type AgentTab = 'documentation' | 'definition' | 'a2a' | 'assessment' | 'properties';
 
 export const AgentInfo: React.FC = () => {
   const { name } = useParams<{ name: string }>();
@@ -52,6 +53,18 @@ export const AgentInfo: React.FC = () => {
 
   const definition = useAIAssetDefinition(api.data?.name, selectedVersion, 'agents');
   const evalResult = useAIAssetEvaluationResult(api.data?.name, selectedVersion, 'agents');
+  const artifacts = useAIAssetArtifacts(api.data?.name, selectedVersion, 'agents');
+
+  const a2aArtifact = useMemo(() => {
+    if (!artifacts.data) return undefined;
+    const artifact = artifacts.data.find((a) => a.name === 'a2a-agent-card' || a.name === 'a2a');
+    if (!artifact?.value) return undefined;
+    try {
+      return JSON.parse(artifact.value);
+    } catch {
+      return undefined;
+    }
+  }, [artifacts.data]);
 
   // Fall back to definition tab if assessment data disappears after version change.
   useEffect(() => {
@@ -126,6 +139,11 @@ export const AgentInfo: React.FC = () => {
           <Tab icon={<CodeRegular />} value="definition">
             Definition
           </Tab>
+          {a2aArtifact && (
+            <Tab icon={<PlugConnectedRegular />} value="a2a">
+              A2A
+            </Tab>
+          )}
           <Tab icon={<DocumentRegular />} value="documentation">
             Documentation
           </Tab>
@@ -175,6 +193,22 @@ export const AgentInfo: React.FC = () => {
 
       {api.data && selectedTab === 'definition' && (
         <AIAssetDefinition definition={definition} hasVersion={!!selectedVersion} />
+      )}
+
+      {api.data && selectedTab === 'a2a' && a2aArtifact && (
+        <pre
+          style={{
+            padding: 16,
+            borderRadius: 6,
+            backgroundColor: 'var(--colorNeutralBackground3)',
+            overflow: 'auto',
+            fontSize: '0.85em',
+            fontFamily: 'ui-monospace, SFMono-Regular, monospace',
+            lineHeight: 1.5,
+          }}
+        >
+          {JSON.stringify(a2aArtifact, null, 2)}
+        </pre>
       )}
 
       {selectedTab === 'assessment' && (
