@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Button, Tooltip } from '@fluentui/react-components';
 import { CopyRegular, CheckmarkRegular } from '@fluentui/react-icons';
 import styles from './JsonCodeBlock.module.scss';
@@ -36,7 +36,17 @@ interface JsonCodeBlockProps {
 export const JsonCodeBlock: React.FC<JsonCodeBlockProps> = ({ value }) => {
   const [copied, setCopied] = useState(false);
 
-  const jsonText = typeof value === 'string' ? value : JSON.stringify(value, null, 2);
+  const jsonText = useMemo(() => {
+    if (typeof value === 'string') {
+      // Re-parse and re-format to ensure consistent 2-space indentation
+      try {
+        return JSON.stringify(JSON.parse(value), null, 2);
+      } catch {
+        return value;
+      }
+    }
+    return JSON.stringify(value, null, 2);
+  }, [value]);
 
   const handleCopy = () => {
     void navigator.clipboard.writeText(jsonText);
