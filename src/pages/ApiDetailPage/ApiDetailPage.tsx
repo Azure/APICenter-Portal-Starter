@@ -22,6 +22,7 @@ import { configAtom } from '@/atoms/configAtom';
 import { InstallationBlock } from '@/components/InstallationBlock';
 import { Spinner } from '@fluentui/react-components';
 import VsCodeLogo from '@/assets/vsCodeLogo.svg';
+import { MarkdownRenderer } from '@/components/MarkdownRenderer/MarkdownRenderer';
 
 export const ApiDetailPage: React.FC = () => {
   const { apiName } = useParams<{ apiName: string }>();
@@ -296,7 +297,12 @@ export const ApiDetailPage: React.FC = () => {
       sidebar={undefined}
     >
       {api.data && selectedTab === 'properties' && (
-        <ApiAdditionalInfo api={api.data} />
+        <>
+          {api.data.description && api.data.description !== api.data.summary && (
+            <MarkdownRenderer markdown={api.data.description} />
+          )}
+          <ApiAdditionalInfo api={api.data} />
+        </>
       )}
       {api.data && selectedTab === 'documentation' && (
         <>
