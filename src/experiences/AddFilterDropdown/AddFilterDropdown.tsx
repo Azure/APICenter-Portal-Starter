@@ -12,6 +12,7 @@ import {
 import { FilterRegular } from '@fluentui/react-icons';
 import { useSearchFilters } from '@/hooks/useSearchFilters';
 import { FilterType, FilterOperator } from '@/types/apiFilters';
+import { ApiFilterParameters } from '@/config/apiFilters';
 import styles from './AddFilterDropdown.module.scss';
 
 const operatorLabels: Record<FilterOperator, string> = {
@@ -34,6 +35,9 @@ export const AddFilterDropdown: React.FC = () => {
   const availableValues = selectedFilterType
     ? searchFilters.metadata[selectedFilterType].options
     : [];
+
+  // Built-in filters (asset type, lifecycle) are known enums, so only exact-match (Equals) makes sense.
+  const isEnumFilter = selectedFilterType ? selectedFilterType in ApiFilterParameters : false;
 
   const handleApply = useCallback(() => {
     if (selectedFilterType && selectedValue) {
@@ -68,8 +72,12 @@ export const AddFilterDropdown: React.FC = () => {
             placeholder="Select options"
             value={selectedFilterType ? searchFilters.metadata[selectedFilterType].label : ''}
             onOptionSelect={(_, data) => {
-              setSelectedFilterType(data.optionValue as FilterType);
+              const type = data.optionValue as FilterType;
+              setSelectedFilterType(type);
               setSelectedValue('');
+              if (type in ApiFilterParameters) {
+                setSelectedOperator('eq');
+              }
             }}
           >
             {filterTypes.map((ft) => (
@@ -84,7 +92,7 @@ export const AddFilterDropdown: React.FC = () => {
             value={operatorLabels[selectedOperator]}
             onOptionSelect={(_, data) => setSelectedOperator(data.optionValue as FilterOperator)}
           >
-            <Option value="contains">Contains</Option>
+            {!isEnumFilter && <Option value="contains">Contains</Option>}
             <Option value="eq">Equals</Option>
           </Dropdown>
         </div>
