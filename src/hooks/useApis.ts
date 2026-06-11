@@ -3,7 +3,6 @@ import { useInfiniteQuery } from '@tanstack/react-query';
 import { ApiMetadata } from '@/types/api';
 import { PaginatedResult } from '@/types/services/IApiService';
 import { ActiveFilterData } from '@/types/apiFilters';
-import { SortBy, SortByOrder } from '@/types/sorting';
 import { apiListSortingAtom } from '@/atoms/apiListSortingAtom';
 import { isAuthenticatedAtom } from '@/atoms/isAuthenticatedAtom';
 import { useApiService } from '@/hooks/useApiService';
@@ -17,26 +16,6 @@ interface Props {
   isSemanticSearch?: boolean;
 }
 
-function sortApis(apis: ApiMetadata[], sortBy?: SortBy): ApiMetadata[] {
-  if (!sortBy) {
-    return apis;
-  }
-
-  return apis.slice().sort((a, b) => {
-    let result = 0;
-    if (a.title > b.title) {
-      result = 1;
-    } else {
-      result = -1;
-    }
-
-    if (sortBy.order === SortByOrder.DESC) {
-      return -result;
-    }
-    return result;
-  });
-}
-
 /**
  * Provides a paginated list of APIs based on search and filters
  */
@@ -46,7 +25,7 @@ export function useApis({ search, filters, isAutoCompleteMode, isSemanticSearch 
   const sortBy = useRecoilValue(apiListSortingAtom);
 
   const query = useInfiniteQuery<PaginatedResult<ApiMetadata>>({
-    queryKey: [QueryKeys.Apis, search, filters, isAutoCompleteMode, isSemanticSearch],
+    queryKey: [QueryKeys.Apis, search, filters, isAutoCompleteMode, isSemanticSearch, sortBy],
     queryFn: async ({ pageParam }) => {
       if (isAutoCompleteMode && (!search || isSemanticSearch)) {
         return { value: [] };
@@ -56,7 +35,7 @@ export function useApis({ search, filters, isAutoCompleteMode, isSemanticSearch 
         return await ApiService.getApisByNextLink(pageParam as string);
       }
 
-      return await ApiService.getApis(search, filters, isSemanticSearch);
+      return await ApiService.getApis(search, filters, isSemanticSearch, sortBy);
     },
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) => lastPage.nextLink,
@@ -65,10 +44,9 @@ export function useApis({ search, filters, isAutoCompleteMode, isSemanticSearch 
   });
 
   const data = query.data?.pages.flatMap((page) => page.value);
-  const sortedData = data ? sortApis(data, sortBy) : undefined;
 
   return {
     ...query,
-    data: sortedData,
+    data,
   };
 }
