@@ -10,6 +10,7 @@ import { MetadataSchema } from '@/types/metadataSchema';
 import { PluginDetails } from '@/types/plugin';
 import { SkillEvaluationResult, AgentEvaluationResult } from '@/types/evaluation';
 import { AIAssetResourceType, AIAssetArtifact, AIAssetVersion } from '@/types/aiAsset';
+import { SortBy } from '@/types/sorting';
 
 export interface PaginatedResult<T> {
   value: T[];
@@ -20,7 +21,8 @@ export interface IApiService {
   getApis(
     search: string,
     filters?: ActiveFilterData[],
-    isSemanticSearch?: boolean
+    isSemanticSearch?: boolean,
+    sortBy?: SortBy
   ): Promise<PaginatedResult<ApiMetadata>>;
   getApisByNextLink(nextLink: string): Promise<PaginatedResult<ApiMetadata>>;
   getApi(id: string, resourceType?: ResourceType): Promise<ApiMetadata>;

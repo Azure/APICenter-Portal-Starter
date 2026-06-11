@@ -17,13 +17,13 @@ function keyToSortBy(key: string): SortBy {
   return { field, order: order as SortByOrder };
 }
 
-const options = ['name asc', 'name desc', 'lastUpdated desc', 'lastUpdated asc'];
+const options = ['name asc', 'name desc', 'updated desc', 'updated asc'];
 
 const optionLabelByKey = {
   'name asc': 'A to Z, ascending',
   'name desc': 'Z to A, descending',
-  'lastUpdated asc': 'Oldest to newest',
-  'lastUpdated desc': 'Newest to oldest',
+  'updated asc': 'Oldest to newest',
+  'updated desc': 'Newest to oldest',
 };
 
 export const ApiListSortingSelect: React.FC = () => {

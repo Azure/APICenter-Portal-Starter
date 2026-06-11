@@ -14,18 +14,28 @@ import { MetadataSchema } from '@/types/metadataSchema';
 import { PluginDetails } from '@/types/plugin';
 import { SkillEvaluationResult, AgentEvaluationResult } from '@/types/evaluation';
 import { AIAssetResourceType, AIAssetArtifact, AIAssetVersion } from '@/types/aiAsset';
+import { SortBy, SortByOrder } from '@/types/sorting';
 import { DEFAULT_PAGE_SIZE } from '@/constants';
+
+const DEFAULT_SORT_BY: SortBy = { field: 'name', order: SortByOrder.ASC };
 
 export const ApiService: IApiService = {
   async getApis(
     search: string,
     filters: ActiveFilterData[] = [],
-    isSemanticSearch?: boolean
+    isSemanticSearch?: boolean,
+    sortBy: SortBy = DEFAULT_SORT_BY
   ): Promise<PaginatedResult<ApiMetadata>> {
+    const useSemanticSearch = Boolean(search.length && isSemanticSearch);
+
     const searchParams = new URLSearchParams();
     searchParams.set('$top', String(DEFAULT_PAGE_SIZE));
-    if (search.length && !isSemanticSearch) {
+    if (search.length && !useSemanticSearch) {
       searchParams.set('$search', search);
+    }
+
+    if (!useSemanticSearch) {
+      searchParams.set('$orderby', `${sortBy.field} ${sortBy.order}`);
     }
 
     if (filters.length) {
@@ -45,7 +55,7 @@ export const ApiService: IApiService = {
       searchParams.set('$filter', filtersString);
     }
 
-    if (search.length && isSemanticSearch) {
+    if (useSemanticSearch) {
       const response = await HttpService.post<{ value: ApiMetadata[]; nextLink?: string }>(
         `:search?${searchParams.toString()}`,
         {
