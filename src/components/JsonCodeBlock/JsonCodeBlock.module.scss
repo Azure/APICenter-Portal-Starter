@@ -1,0 +1,68 @@
+.jsonCodeBlock {
+  position: relative;
+  display: flex;
+  margin: 0;
+  padding: 14px 16px;
+  background: var(--colorNeutralBackground4);
+  border-radius: var(--borderRadiusMedium);
+  overflow-x: auto;
+}
+
+.copyBtn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  min-width: 32px;
+  z-index: 1;
+  color: var(--colorNeutralForeground3);
+
+  &:hover {
+    color: var(--colorNeutralForeground1);
+  }
+}
+
+.lineNumbers {
+  display: flex;
+  flex-direction: column;
+  padding-right: 16px;
+  border-right: 1px solid var(--colorNeutralStroke2);
+  margin-right: 16px;
+  user-select: none;
+
+  span {
+    font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+    font-size: 0.8125rem;
+    line-height: 1.6;
+    color: var(--colorNeutralForeground4);
+    text-align: right;
+    min-width: 1.5em;
+  }
+}
+
+.codeContent {
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+
+  code {
+    font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+    font-size: 0.8125rem;
+    line-height: 1.6;
+    color: var(--colorNeutralForeground1);
+    background: transparent;
+  }
+}
+
+// JSON syntax — light
+.jsonKey { color: #0451a5; }
+.jsonString { color: #a31515; }
+.jsonKeyword { color: #0000ff; }
+.jsonNumber { color: #098658; }
+
+// ── Dark mode overrides ──
+:global([data-theme='dark']) {
+  .jsonKey { color: #9cdcfe; }
+  .jsonString { color: #ce9178; }
+  .jsonKeyword { color: #569cd6; }
+  .jsonNumber { color: #b5cea8; }
+}

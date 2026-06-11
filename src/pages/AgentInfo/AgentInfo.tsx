@@ -1,11 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Badge, Button, Tab, TabList } from '@fluentui/react-components';
-import { ArrowDownloadRegular, CodeRegular, DocumentRegular } from '@fluentui/react-icons';
+import { ArrowDownloadRegular, CodeRegular, DocumentRegular, PlugConnectedRegular } from '@fluentui/react-icons';
 import { useApi } from '@/hooks/useApi';
-import { useAgentVersions } from '@/hooks/useAgentVersions';
-import { useAgentDefinition } from '@/hooks/useAgentDefinition';
-import { useAgentEvaluationResult } from '@/hooks/useAgentEvaluationResult';
+import { useAIAssetVersions } from '@/hooks/useAIAssetVersions';
+import { useAIAssetDefinition } from '@/hooks/useAIAssetDefinition';
+import { useAIAssetEvaluationResult } from '@/hooks/useAIAssetEvaluationResult';
+import { useAIAssetArtifacts } from '@/hooks/useAIAssetArtifacts';
 import { getEvalScore } from '@/types/evaluation';
 import { setDocumentTitle } from '@/utils/dom';
 import { getLifecycleBadgeColor, formatLifecycleStage } from '@/utils/badgeSystem';
@@ -13,18 +14,19 @@ import { DetailPageLayout, BreadcrumbItem } from '@/components/DetailPageLayout/
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import CustomMetadata from '@/components/CustomMetadata';
 import { EmptyStateMessage } from '@/components/EmptyStateMessage/EmptyStateMessage';
+import { JsonCodeBlock } from '@/components/JsonCodeBlock';
 import { HeaderActions } from '@/experiences/HeaderActions';
 import { VersionSelect } from '@/experiences/VersionSelect';
-import { AgentDefinition } from '@/experiences/AgentDefinition';
+import { AIAssetDefinition } from '@/experiences/AIAssetDefinition';
 import { EvaluationDetails } from '@/experiences/EvaluationDetails';
 import styles from './AgentInfo.module.scss';
 
-type AgentTab = 'documentation' | 'definition' | 'assessment' | 'properties';
+type AgentTab = 'documentation' | 'definition' | 'a2a' | 'assessment' | 'properties';
 
 export const AgentInfo: React.FC = () => {
   const { name } = useParams<{ name: string }>();
   const api = useApi(name);
-  const versions = useAgentVersions(api.data?.name);
+  const versions = useAIAssetVersions(api.data?.name, 'agents');
   const [selectedVersion, setSelectedVersion] = useState<string | undefined>();
   const [selectedTab, setSelectedTab] = useState<AgentTab>('definition');
 
@@ -50,8 +52,20 @@ export const AgentInfo: React.FC = () => {
     setSelectedVersion(undefined);
   }, [name]);
 
-  const definition = useAgentDefinition(api.data?.name, selectedVersion);
-  const evalResult = useAgentEvaluationResult(api.data?.name, selectedVersion);
+  const definition = useAIAssetDefinition(api.data?.name, selectedVersion, 'agents');
+  const evalResult = useAIAssetEvaluationResult(api.data?.name, selectedVersion, 'agents');
+  const artifacts = useAIAssetArtifacts(api.data?.name, selectedVersion, 'agents');
+
+  const a2aArtifact = useMemo(() => {
+    if (!artifacts.data) return undefined;
+    const artifact = artifacts.data.find((a) => a.name === 'a2a-agent-card' || a.name === 'a2a');
+    if (!artifact?.value) return undefined;
+    try {
+      return JSON.parse(artifact.value);
+    } catch {
+      return undefined;
+    }
+  }, [artifacts.data]);
 
   // Fall back to definition tab if assessment data disappears after version change.
   useEffect(() => {
@@ -126,33 +140,39 @@ export const AgentInfo: React.FC = () => {
           <Tab icon={<CodeRegular />} value="definition">
             Definition
           </Tab>
+          {a2aArtifact && (
+            <Tab icon={<PlugConnectedRegular />} value="a2a">
+              A2A
+            </Tab>
+          )}
           <Tab icon={<DocumentRegular />} value="documentation">
             Documentation
           </Tab>
-          {evalResult.data && (() => {
-            const { overallScore, maxScore } = getEvalScore(evalResult.data);
-            return (
-              <Tab value="assessment">
-                Assessment
-                {maxScore > 0 && (
-                  <Badge
-                    appearance="filled"
-                    color={
-                      overallScore / maxScore >= 0.8
-                        ? 'success'
-                        : overallScore / maxScore >= 0.6
-                          ? 'warning'
-                          : 'danger'
-                    }
-                    shape="circular"
-                    style={{ marginLeft: 8 }}
-                  >
-                    {((overallScore / maxScore) * 5).toFixed(1)}/5
-                  </Badge>
-                )}
-              </Tab>
-            );
-          })()}
+          {evalResult.data &&
+            (() => {
+              const { overallScore, maxScore } = getEvalScore(evalResult.data);
+              return (
+                <Tab value="assessment">
+                  Assessment
+                  {maxScore > 0 && (
+                    <Badge
+                      appearance="filled"
+                      color={
+                        overallScore / maxScore >= 0.8
+                          ? 'success'
+                          : overallScore / maxScore >= 0.6
+                            ? 'warning'
+                            : 'danger'
+                      }
+                      shape="circular"
+                      style={{ marginLeft: 8 }}
+                    >
+                      {((overallScore / maxScore) * 5).toFixed(1)}/5
+                    </Badge>
+                  )}
+                </Tab>
+              );
+            })()}
           {hasCustomProps && <Tab value="properties">Additional properties</Tab>}
         </TabList>
       }
@@ -173,8 +193,10 @@ export const AgentInfo: React.FC = () => {
         ))}
 
       {api.data && selectedTab === 'definition' && (
-        <AgentDefinition definition={definition} hasVersion={!!selectedVersion} />
+        <AIAssetDefinition definition={definition} hasVersion={!!selectedVersion} />
       )}
+
+      {api.data && selectedTab === 'a2a' && a2aArtifact && <JsonCodeBlock value={a2aArtifact} />}
 
       {selectedTab === 'assessment' && (
         <EvaluationDetails evalResult={evalResult.data} isLoading={evalResult.isLoading} />

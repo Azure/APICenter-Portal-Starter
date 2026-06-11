@@ -1,18 +1,18 @@
 import { useRecoilValue } from 'recoil';
 import { useQuery } from '@tanstack/react-query';
-import { AgentVersion } from '@/types/agent';
+import { AIAssetResourceType, AIAssetVersion } from '@/types/aiAsset';
 import { isAuthenticatedAtom } from '@/atoms/isAuthenticatedAtom';
 import { useApiService } from '@/hooks/useApiService';
 import { QueryKeys } from '@/constants/QueryKeys';
 
-export function useAgentVersions(agentName?: string) {
+export function useAIAssetVersions(name: string | undefined, resourceType: AIAssetResourceType) {
   const ApiService = useApiService();
   const isAuthenticated = useRecoilValue(isAuthenticatedAtom);
 
-  return useQuery<AgentVersion[]>({
-    queryKey: [QueryKeys.AgentVersions, agentName],
-    queryFn: () => ApiService.getAgentVersions(agentName!),
+  return useQuery<AIAssetVersion[]>({
+    queryKey: [QueryKeys.AIAssetVersions, resourceType, name],
+    queryFn: () => ApiService.getAIAssetVersions(name!, resourceType),
     staleTime: Infinity,
-    enabled: Boolean(isAuthenticated && agentName),
+    enabled: Boolean(isAuthenticated && name),
   });
 }

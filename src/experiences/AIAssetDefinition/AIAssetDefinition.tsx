@@ -4,7 +4,7 @@ import * as yaml from 'yaml';
 import { UseQueryResult } from '@tanstack/react-query';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import { EmptyStateMessage } from '@/components/EmptyStateMessage/EmptyStateMessage';
-import styles from './AgentDefinition.module.scss';
+import styles from './AIAssetDefinition.module.scss';
 
 interface Props {
   definition: UseQueryResult<string | undefined>;
@@ -79,14 +79,14 @@ function renderFrontmatterTable(data: Record<string, unknown>): React.ReactNode 
   );
 }
 
-export const AgentDefinition: React.FC<Props> = ({ definition, hasVersion }) => {
+export const AIAssetDefinition: React.FC<Props> = ({ definition, hasVersion }) => {
   const parsed = useMemo<ParsedDefinition | undefined>(
     () => (definition.data ? parseDefinition(definition.data) : undefined),
     [definition.data]
   );
 
   if (!hasVersion) {
-    return <EmptyStateMessage>No definition available for this agent.</EmptyStateMessage>;
+    return <EmptyStateMessage>No definition available.</EmptyStateMessage>;
   }
 
   if (definition.isLoading) {
@@ -115,4 +115,4 @@ export const AgentDefinition: React.FC<Props> = ({ definition, hasVersion }) => 
   );
 };
 
-export default React.memo(AgentDefinition);
+export default React.memo(AIAssetDefinition);

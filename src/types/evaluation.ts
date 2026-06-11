@@ -53,6 +53,7 @@ export function getEvalScore(r: EvaluationResult): { overallScore: number; maxSc
 /** Skill-specific evaluation result. */
 export interface SkillEvaluationResult extends EvaluationResult {
   skillName: string;
+  versionName?: string;
 }
 
 /** Agent-specific evaluation result (version-scoped). */
