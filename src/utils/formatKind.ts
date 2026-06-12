@@ -1,6 +1,7 @@
 const UPPERCASE_KINDS = ['mcp', 'a2a', 'rest', 'api', 'soap', 'grpc'];
 
 const CUSTOM_LABELS: Record<string, string> = {
+  model: 'Model',
   languagemodel: 'Model',
 };
 

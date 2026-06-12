@@ -44,7 +44,7 @@ export const LocationsService = {
   },
 
   getModelDetailUrl(name: string): string {
-    return `/languageModels/${name}`;
+    return `/models/${name}/detail`;
   },
 
   getAgentChatUrl(name: string): string {

@@ -1,4 +1,4 @@
-export type HomeDrawerKind = 'api' | 'languageModel';
+export type HomeDrawerKind = 'api' | 'model';
 
 export interface HomeDrawerSelection {
   kind: HomeDrawerKind;

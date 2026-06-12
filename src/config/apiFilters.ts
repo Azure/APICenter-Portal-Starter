@@ -4,8 +4,11 @@ export const ApiFilterParameters: Record<FilterType, FilterMetadata> = {
   kind: {
     label: 'Asset type',
     options: [
+      { value: 'api', label: 'APIs' },
       { value: 'rest', label: 'REST' },
       { value: 'mcp', label: 'MCP' },
+      { value: 'agent', label: 'Agent' },
+      { value: 'model', label: 'Model' },
       { value: 'skill', label: 'Skill' },
       { value: 'a2a', label: 'A2A' },
       { value: 'plugin', label: 'Plugin' },
@@ -14,6 +17,7 @@ export const ApiFilterParameters: Record<FilterType, FilterMetadata> = {
       { value: 'soap', label: 'SOAP' },
       { value: 'webhook', label: 'Webhook' },
       { value: 'websocket', label: 'WebSocket' },
+      { value: 'odata', label: 'OData' },
     ],
   },
   lifecycleStage: {

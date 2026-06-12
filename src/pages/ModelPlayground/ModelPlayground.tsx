@@ -90,7 +90,7 @@ const CHAT_PATH = '/chat/completions';
 export const ModelPlayground: React.FC = () => {
   const { name } = useParams<{ name: string }>();
   const model = useLanguageModel(name);
-  const deployments = useApiDeployments(name, 'languageModels');
+  const deployments = useApiDeployments(name, 'models');
 
   const runtimeUrl = (() => {
     const list = deployments.data ?? [];
@@ -203,7 +203,7 @@ export const ModelPlayground: React.FC = () => {
         <nav className={styles.breadcrumb}>
           <a href="/" className={styles.breadcrumbLink}>Home</a>
           <span className={styles.breadcrumbSep}>/</span>
-          <a href="/?kind=languagemodel" className={styles.breadcrumbLink}>Models</a>
+          <a href="/?kind=model" className={styles.breadcrumbLink}>Models</a>
           <span className={styles.breadcrumbSep}>/</span>
           <span className={styles.breadcrumbCurrent}>{modelTitle}</span>
         </nav>

@@ -23,7 +23,7 @@ function getNavigationTarget(api: ApiMetadata): { to: string; state?: HomeLocati
     return { to: LocationsService.getPluginInfoUrl(api.name) };
   }
 
-  if (kind === 'languagemodel') {
+  if (kind === 'model' || kind === 'languagemodel') {
     return { to: LocationsService.getModelDetailUrl(api.name) };
   }
 

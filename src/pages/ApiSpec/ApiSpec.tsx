@@ -17,7 +17,7 @@ import styles from './ApiSpec.module.scss';
 export const ApiSpec: React.FC = () => {
   const { apiName, versionName, definitionName } = useParams<Readonly<ApiDefinitionId>>() as ApiDefinitionId;
   const location = useLocation();
-  const resourceType: ResourceType = location.pathname.startsWith('/languageModels') ? 'languageModels' : 'apis';
+  const resourceType: ResourceType = location.pathname.startsWith('/models') ? 'models' : 'apis';
 
   const [deployment, setDeployment] = useState<ApiDeployment | null | undefined>();
   const [resolvedDefinitionName, setResolvedDefinitionName] = useState<string | undefined>(undefined);

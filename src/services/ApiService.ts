@@ -39,10 +39,14 @@ export const ApiService: IApiService = {
     }
 
     if (filters.length) {
+      const STANDALONE_KINDS = ['agent', 'mcp', 'model', 'skill', 'plugin'];
       const filtersByType = groupBy(filters, 'type');
       const filtersString = Object.values(filtersByType)
         .map((filters) => {
           const filtersSet = filters.map((filter) => {
+            if (filter.type === 'kind' && filter.value === 'api') {
+              return STANDALONE_KINDS.map((k) => `kind ne '${k}'`).join(' and ');
+            }
             if (filter.operator === 'contains') {
               return `contains(${filter.type}, '${filter.value}')`;
             }

@@ -1,5 +1,5 @@
-import React, { useCallback, useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Badge, Button, Dropdown, Field, Link, Option, Tab, TabList } from '@fluentui/react-components';
 import { ArrowDownloadRegular, CodeRegular, DocumentRegular, ListRegular, TagRegular } from '@fluentui/react-icons';
 import { useApi } from '@/hooks/useApi';
@@ -23,24 +23,32 @@ import { InstallationBlock } from '@/components/InstallationBlock';
 import { Spinner } from '@fluentui/react-components';
 import VsCodeLogo from '@/assets/vsCodeLogo.svg';
 import { MarkdownRenderer } from '@/components/MarkdownRenderer/MarkdownRenderer';
+import { LocationsService } from '@/services/LocationsService';
 
 export const ApiDetailPage: React.FC = () => {
   const { apiName } = useParams<{ apiName: string }>();
   const api = useApi(apiName);
   const config = useRecoilValue(configAtom);
+  const navigate = useNavigate();
   const [definitionSelection, setDefinitionSelection] = useState<ApiDefinitionSelection | undefined>();
   const [selectedTab, setSelectedTab] = useState<string>('properties');
 
   setDocumentTitle(`API${api.data?.title ? ` - ${api.data.title}` : ''}`);
 
   const kind = api.data?.kind;
-  const STANDALONE_KINDS = ['skill', 'a2a', 'plugin', 'agent', 'languagemodel'];
+
+  useEffect(() => {
+    if ((kind?.toLowerCase() === 'model' || kind?.toLowerCase() === 'languagemodel') && apiName) {
+      navigate(LocationsService.getModelDetailUrl(apiName), { replace: true });
+    }
+  }, [kind, apiName, navigate]);
+  const STANDALONE_KINDS = ['skill', 'a2a', 'plugin', 'agent', 'model', 'languagemodel'];
   const isStandaloneKind = kind ? STANDALONE_KINDS.includes(kind.toLowerCase()) : false;
   const categoryLabel = isStandaloneKind ? formatKindDisplay(kind!) : 'API';
 
   const CATEGORY_PLURALS: Record<string, string> = {
     rest: 'APIs', graphql: 'APIs', grpc: 'APIs', soap: 'APIs',
-    skill: 'Skills', plugin: 'Plugins', agent: 'Agents', a2a: 'Agents', languagemodel: 'Models',
+    skill: 'Skills', plugin: 'Plugins', agent: 'Agents', a2a: 'Agents', model: 'Models', languagemodel: 'Models',
   };
   const breadcrumbs = useMemo<BreadcrumbItem[]>(() => {
     const categoryPlural = CATEGORY_PLURALS[kind?.toLowerCase() ?? ''] ?? 'APIs';
@@ -122,7 +130,7 @@ export const ApiDetailPage: React.FC = () => {
   // Download definition — fetch available definitions and spec URL
   const apiDefinitions = useApiDefinitions(apiName, definitionSelection?.version?.name, kindToResourceType(api.data?.kind));
   const apiSpecUrl = useApiSpecUrl(definitionId ?? { apiName: '', versionName: '', definitionName: '' });
-  const DOWNLOAD_EXCLUDED_KINDS = ['mcp', 'skill', 'plugin', 'languagemodel'];
+  const DOWNLOAD_EXCLUDED_KINDS = ['mcp', 'skill', 'plugin', 'model', 'languagemodel'];
   const showDownloadDefinition = kind && !DOWNLOAD_EXCLUDED_KINDS.includes(kind.toLowerCase()) && !!definitionSelection?.definition;
 
   const [downloadDefinitionName, setDownloadDefinitionName] = useState<string | undefined>();
