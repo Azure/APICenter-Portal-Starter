@@ -1,15 +1,8 @@
-.sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.section {
-  margin-bottom: 0;
-
-  h3 {
-    margin-bottom: 8px;
-  }
+.modelProperties {
+  margin-bottom: 24px;
+  padding: 16px 20px;
+  background: var(--colorNeutralBackground2);
+  border-radius: 8px;
 }
 
 .detailsGrid {
@@ -28,17 +21,8 @@
   }
 }
 
-.badgeSection {
-  margin-bottom: 24px;
-}
-
 .badges {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
-  margin-top: 8px;
-}
-
-.descriptionSection {
-  margin-top: 8px;
 }

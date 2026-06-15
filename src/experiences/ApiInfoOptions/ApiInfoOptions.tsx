@@ -138,7 +138,7 @@ export const ApiInfoOptions: React.FC<Props> = ({ api, apiVersion, apiDefinition
               <Document20Regular /> <strong>API Definition</strong>
             </span>
 
-            {api.kind !== 'skill' && api.kind?.toLowerCase() !== 'languagemodel' && (
+            {api.kind !== 'skill' && api.kind?.toLowerCase() !== 'model' && api.kind?.toLowerCase() !== 'languagemodel' && (
               <span className={styles.linkGroup}>
                 {apiSpecUrl.data && api.kind !== 'mcp' && (
                   <Link href={apiSpecUrl.data} className={styles.link}>

@@ -1,10 +1,11 @@
 /** The asset-type route segment used in UI URLs. */
-export type ResourceType = 'apis' | 'languageModels';
+export type ResourceType = 'apis' | 'models';
 
 /** Maps an API kind to the matching UI route segment. */
 export function kindToResourceType(kind?: string): ResourceType {
-  if (kind?.toLowerCase() === 'languagemodel') {
-    return 'languageModels';
+  const k = kind?.toLowerCase();
+  if (k === 'model' || k === 'languagemodel') {
+    return 'models';
   }
   return 'apis';
 }

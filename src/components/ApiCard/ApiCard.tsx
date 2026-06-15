@@ -19,7 +19,7 @@ interface Props {
   transportTags?: string[];
 }
 
-const STANDALONE_KINDS = ['skill', 'a2a', 'mcp', 'plugin', 'agent', 'languagemodel'];
+const STANDALONE_KINDS = ['skill', 'a2a', 'mcp', 'plugin', 'agent', 'model', 'languagemodel'];
 
 function getCategoryLabel(type?: string): string {
   if (type && STANDALONE_KINDS.includes(type.toLowerCase())) {

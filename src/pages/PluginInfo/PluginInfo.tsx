@@ -42,7 +42,7 @@ function getResourceNavigation(name: string, kind?: string): { to: string; state
   const k = kind?.toLowerCase();
   if (k === 'agent') return { to: LocationsService.getAgentInfoUrl(name) };
   if (k === 'skill') return { to: LocationsService.getSkillInfoUrl(name) };
-  if (k === 'languagemodel') {
+  if (k === 'model' || k === 'languagemodel') {
     return { to: LocationsService.getModelDetailUrl(name) };
   }
   return {

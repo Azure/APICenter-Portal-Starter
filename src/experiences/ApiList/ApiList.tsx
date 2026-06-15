@@ -61,7 +61,7 @@ export const ApiList: React.FC = () => {
       if (kind === 'skill') return LocationsService.getSkillInfoUrl(api.name);
       if (kind === 'plugin') return LocationsService.getPluginInfoUrl(api.name);
       if (kind === 'mcp') return LocationsService.getMcpServerUrl(api.name);
-      if (kind === 'languagemodel') return LocationsService.getModelPlaygroundUrl(api.name);
+      if (kind === 'model' || kind === 'languagemodel') return LocationsService.getModelDetailUrl(api.name);
       return LocationsService.getApiDetailUrl(api.name);
     },
     []
@@ -176,9 +176,9 @@ export const ApiList: React.FC = () => {
             <InfoTable.Cell>
               <div style={{ display: 'flex', gap: '0.5rem' }}>
                 <Badge appearance="filled" color="brand" shape="circular">
-                  {['skill', 'a2a', 'mcp', 'plugin', 'agent', 'languagemodel'].includes(api.type?.toLowerCase() ?? '') ? formatKindDisplay(api.type!) : 'API'}
+                  {['skill', 'a2a', 'mcp', 'plugin', 'agent', 'model', 'languagemodel'].includes(api.type?.toLowerCase() ?? '') ? formatKindDisplay(api.type!) : 'API'}
                 </Badge>
-                {!!api.type && !['skill', 'a2a', 'mcp', 'plugin', 'agent', 'languagemodel'].includes(api.type.toLowerCase()) && (
+                {!!api.type && !['skill', 'a2a', 'mcp', 'plugin', 'agent', 'model', 'languagemodel'].includes(api.type.toLowerCase()) && (
                   <Badge appearance="tint" color="brand" shape="circular">
                     {formatKindDisplay(api.type)}
                   </Badge>

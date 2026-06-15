@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Badge, Button, Tab, TabList } from '@fluentui/react-components';
-import { ArrowDownloadRegular, CodeRegular, DocumentRegular, PlugConnectedRegular } from '@fluentui/react-icons';
+import { ArrowDownloadRegular, CodeRegular, DocumentRegular, ListRegular, PlugConnectedRegular } from '@fluentui/react-icons';
 import { useApi } from '@/hooks/useApi';
 import { useAIAssetVersions } from '@/hooks/useAIAssetVersions';
 import { useAIAssetDefinition } from '@/hooks/useAIAssetDefinition';
@@ -173,7 +173,7 @@ export const AgentInfo: React.FC = () => {
                 </Tab>
               );
             })()}
-          {hasCustomProps && <Tab value="properties">Additional properties</Tab>}
+          {hasCustomProps && <Tab icon={<ListRegular />} value="properties">Additional properties</Tab>}
         </TabList>
       }
       isLoading={api.isLoading}

@@ -39,7 +39,7 @@ const App: React.FC = () => {
             element: <McpServerDetailPage />,
           },
           {
-            path: 'languageModels/:apiName',
+            path: 'models/:apiName/detail',
             element: <ModelDetailPage />,
           },
           {
