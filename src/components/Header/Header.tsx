@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, Text, Tooltip, ToggleButton } from '@fluentui/react-components';
+import { Link, Text, Tooltip, ToggleButton } from '@coreai-microsoft/manifold-fluentui-react';
 import { WeatherMoonRegular, WeatherSunnyRegular } from '@fluentui/react-icons';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import LogoSvg from '@/assets/logo.svg';

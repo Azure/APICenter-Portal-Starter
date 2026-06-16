@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { Dropdown, Option } from '@fluentui/react-components';
+import { Dropdown, Option } from '@coreai-microsoft/manifold-fluentui-react';
 import { useRecoilState } from 'recoil';
 import { SortBy, SortByOrder } from '@/types/sorting';
 import { apiListSortingAtom } from '@/atoms/apiListSortingAtom';

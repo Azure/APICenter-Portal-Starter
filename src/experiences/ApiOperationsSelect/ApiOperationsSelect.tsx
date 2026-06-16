@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { ApiOperationsList } from 'api-docs-ui';
-import { Accordion, AccordionHeader, AccordionItem, AccordionPanel } from '@fluentui/react-components';
+import { Accordion, AccordionHeader, AccordionItem, AccordionPanel } from '@coreai-microsoft/manifold-fluentui-react';
 import { ApiSpecReader, OperationMetadata } from '@/types/apiSpec';
 import { useSelectedOperation } from '@/hooks/useSelectedOperation';
 import { sortOperationsAlphabetically } from './utils';

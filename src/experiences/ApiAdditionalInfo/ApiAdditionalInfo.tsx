@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from '@fluentui/react-components';
+import { Link } from '@coreai-microsoft/manifold-fluentui-react';
 import { Open16Regular, DocumentTextRegular, PeopleRegular, ListRegular } from '@fluentui/react-icons';
 import { ApiMetadata } from '@/types/api';
 import CustomMetadata from '@/components/CustomMetadata';

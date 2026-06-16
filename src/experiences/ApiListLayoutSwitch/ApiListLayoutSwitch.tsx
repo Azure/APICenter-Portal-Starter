@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { ToggleButton } from '@fluentui/react-components';
+import { ToggleButton } from '@coreai-microsoft/manifold-fluentui-react';
 import { AppsListRegular, GridRegular } from '@fluentui/react-icons';
 import { useRecoilState } from 'recoil';
 import { Layouts } from '@/types/layouts';

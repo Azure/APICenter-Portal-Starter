@@ -1,4 +1,4 @@
-import type { BadgeProps } from '@fluentui/react-components';
+import type { BadgeProps } from '@coreai-microsoft/manifold-fluentui-react';
 
 /**
  * Badge design system — consistent visual hierarchy across all pages.

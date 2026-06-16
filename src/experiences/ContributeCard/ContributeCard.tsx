@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, Text, makeStyles, tokens, shorthands } from '@fluentui/react-components';
+import { Card, Text, makeStyles, tokens, shorthands } from '@coreai-microsoft/manifold-fluentui-react';
 
 interface Props {
   url: string;

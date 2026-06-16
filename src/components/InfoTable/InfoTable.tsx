@@ -6,7 +6,7 @@ import {
   TableRow,
   TableCell,
   TableHeaderCell,
-} from '@fluentui/react-components';
+} from '@coreai-microsoft/manifold-fluentui-react';
 import styles from './InfoTable.module.scss';
 
 /* ---------- Sub-components ---------- */

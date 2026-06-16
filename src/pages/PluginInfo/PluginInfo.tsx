@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { Badge, Tab, TabList } from '@fluentui/react-components';
+import { Badge, Tab, TabList } from '@coreai-microsoft/manifold-fluentui-react';
 import {
   PlugConnectedRegular,
   DocumentRegular,

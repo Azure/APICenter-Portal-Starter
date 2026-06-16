@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo } from 'react';
-import { Badge, Link, Spinner } from '@fluentui/react-components';
+import { Badge, Link, Spinner } from '@coreai-microsoft/manifold-fluentui-react';
 import { useRecoilValue } from 'recoil';
 import { useNavigate } from 'react-router-dom';
 import { useSearchFilters } from '@/hooks/useSearchFilters';

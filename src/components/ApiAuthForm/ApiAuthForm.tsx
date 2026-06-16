@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import TimeAgo from 'react-timeago';
 import { Stack } from '@fluentui/react';
-import { Button, Field, Select, Spinner } from '@fluentui/react-components';
+import { Button, Field, Select, Spinner } from '@coreai-microsoft/manifold-fluentui-react';
 import { CheckmarkFilled } from '@fluentui/react-icons';
 import { ApiAuthCredentials, ApiAuthType } from '@/types/apiAuth';
 import styles from './ApiAuthForm.module.scss';

@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { Dropdown, Field, Option } from '@fluentui/react-components';
+import { Dropdown, Field, Option } from '@coreai-microsoft/manifold-fluentui-react';
 import classNames from 'classnames';
 import styles from './VersionSelect.module.scss';
 

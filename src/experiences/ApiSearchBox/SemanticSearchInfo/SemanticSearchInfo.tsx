@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import { Dismiss16Regular, Info16Filled, Open16Filled } from '@fluentui/react-icons';
-import { Button, Link } from '@fluentui/react-components';
+import { Button, Link } from '@coreai-microsoft/manifold-fluentui-react';
 import { useRecoilValue } from 'recoil';
 import { LocalStorageService } from '@/services/LocalStorageService';
 import { LocationsService } from '@/services/LocationsService';

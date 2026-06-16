@@ -12,7 +12,10 @@
     },
     "dependencies": {
         "@azure/msal-browser": "3.13.0",
-        "@fluentui/react-components": "9.56.8",
+        "@coreai-microsoft/manifold-fluentui-react": "^0.1.2",
+        "@fluentui/react-components": "^9.56.8",
+        "@fluentui/react-datepicker-compat": "^0.6.32",
+        "@fluentui/react-timepicker-compat": "^0.4.35",
         "@tanstack/react-query": "5.85.5",
         "@vitejs/plugin-basic-ssl": "1.2.0",
         "api-docs-ui": "1.0.29",

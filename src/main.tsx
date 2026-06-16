@@ -1,7 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { FluentProvider, webLightTheme, webDarkTheme } from '@fluentui/react-components';
+import { ManifoldFluentProvider, manifoldLightTheme, manifoldDarkTheme } from '@coreai-microsoft/manifold-fluentui-react';
+import '@coreai-microsoft/manifold-fluentui-react/fonts/fonts.css';
 import { useRecoilValue } from 'recoil';
 import RootProvider from '@/RootProvider';
 import { ErrorBoundary } from '@/components/ErrorBoundary/ErrorBoundary';
@@ -15,7 +16,7 @@ const ThemedApp: React.FC = () => {
   const isDarkMode = useRecoilValue(isDarkModeAtom);
 
   return (
-    <FluentProvider theme={isDarkMode ? webDarkTheme : webLightTheme} applyStylesToPortals>
+    <ManifoldFluentProvider theme={isDarkMode ? manifoldDarkTheme : manifoldLightTheme} applyStylesToPortals>
       <ErrorBoundary>
         <QueryClientProvider client={queryClient}>
           <div className="app-root">
@@ -23,7 +24,7 @@ const ThemedApp: React.FC = () => {
           </div>
         </QueryClientProvider>
       </ErrorBoundary>
-    </FluentProvider>
+    </ManifoldFluentProvider>
   );
 };
 

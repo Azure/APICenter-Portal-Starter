@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Button, MessageBar, MessageBarBody, Spinner } from '@fluentui/react-components';
+import { Button, MessageBar, MessageBarBody, Spinner } from '@coreai-microsoft/manifold-fluentui-react';
 import { EmptyStateMessage } from '@/components/EmptyStateMessage/EmptyStateMessage';
 import styles from './DetailPageLayout.module.scss';
 

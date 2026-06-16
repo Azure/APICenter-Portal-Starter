@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Badge, Button, Dropdown, Field, Link, Option, Tab, TabList } from '@fluentui/react-components';
+import { Badge, Button, Dropdown, Field, Link, Option, Tab, TabList } from '@coreai-microsoft/manifold-fluentui-react';
 import { ArrowDownloadRegular, CodeRegular, DocumentRegular, ListRegular, TagRegular } from '@fluentui/react-icons';
 import { useApi } from '@/hooks/useApi';
 import { kindToResourceType, ApiDefinitionId } from '@/types/apiDefinition';
@@ -20,7 +20,7 @@ import EmptyStateMessage from '@/components/EmptyStateMessage';
 import { useRecoilValue } from 'recoil';
 import { configAtom } from '@/atoms/configAtom';
 import { InstallationBlock } from '@/components/InstallationBlock';
-import { Spinner } from '@fluentui/react-components';
+import { Spinner } from '@coreai-microsoft/manifold-fluentui-react';
 import VsCodeLogo from '@/assets/vsCodeLogo.svg';
 import { MarkdownRenderer } from '@/components/MarkdownRenderer/MarkdownRenderer';
 import { LocationsService } from '@/services/LocationsService';

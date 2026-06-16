@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import {
   Badge, Button, Spinner, Tab, TabList,
   Menu, MenuTrigger, MenuPopover, MenuList, MenuItem, MenuButton,
-} from '@fluentui/react-components';
+} from '@coreai-microsoft/manifold-fluentui-react';
 import { DocumentRegular, TagRegular, WindowConsoleRegular } from '@fluentui/react-icons';
 import { useApi } from '@/hooks/useApi';
 import { useServer } from '@/hooks/useServer';

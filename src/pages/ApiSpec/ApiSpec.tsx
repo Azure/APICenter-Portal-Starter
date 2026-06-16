@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { useNavigate, useParams, useLocation, Link } from 'react-router-dom';
-import { Badge, Spinner, Tab, TabList } from '@fluentui/react-components';
+import { Badge, Spinner, Tab, TabList } from '@coreai-microsoft/manifold-fluentui-react';
 import { DocumentRegular } from '@fluentui/react-icons';
 import { formatKindDisplay } from '@/utils/formatKind';
 import { getLifecycleBadgeColor, formatLifecycleStage } from '@/utils/badgeSystem';

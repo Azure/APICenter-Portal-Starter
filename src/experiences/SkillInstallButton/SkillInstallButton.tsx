@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { Button } from '@fluentui/react-components';
+import { Button } from '@coreai-microsoft/manifold-fluentui-react';
 import { ArrowDownloadRegular } from '@fluentui/react-icons';
 import VsCodeLogo from '@/assets/vsCodeLogo.svg';
 import { buildSkillDeeplink, VsCodeVariant } from '@/utils/skillDeeplink';

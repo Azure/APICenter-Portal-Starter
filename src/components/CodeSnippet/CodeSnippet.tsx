@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { Button, Tooltip } from '@fluentui/react-components';
+import { Button, Tooltip } from '@coreai-microsoft/manifold-fluentui-react';
 import styles from './CodeSnippet.module.scss';
 
 interface CodeSnippetProps {

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button, Tooltip } from '@fluentui/react-components';
+import { Button, Tooltip } from '@coreai-microsoft/manifold-fluentui-react';
 import { CopyRegular, CheckmarkRegular, ChevronDownRegular, ChevronUpRegular } from '@fluentui/react-icons';
 import styles from './InstallationBlock.module.scss';
 

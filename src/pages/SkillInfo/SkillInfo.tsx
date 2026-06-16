@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Badge, Button, Tab, TabList } from '@fluentui/react-components';
+import { Badge, Button, Tab, TabList } from '@coreai-microsoft/manifold-fluentui-react';
 import { CodeRegular, DocumentRegular } from '@fluentui/react-icons';
 import { useRecoilValue } from 'recoil';
 import { useApi } from '@/hooks/useApi';

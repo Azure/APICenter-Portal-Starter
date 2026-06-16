@@ -6,7 +6,7 @@ import {
   AccordionPanel,
   Checkbox,
   Divider,
-} from '@fluentui/react-components';
+} from '@coreai-microsoft/manifold-fluentui-react';
 import { CheckboxOnChangeData } from '@fluentui/react-checkbox';
 import { useSearchFilters } from '@/hooks/useSearchFilters';
 import { FilterType } from '@/types/apiFilters';

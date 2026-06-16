@@ -8,7 +8,7 @@ import {
   Option,
   Input,
   Label,
-} from '@fluentui/react-components';
+} from '@coreai-microsoft/manifold-fluentui-react';
 import { FilterRegular } from '@fluentui/react-icons';
 import { useSearchFilters } from '@/hooks/useSearchFilters';
 import { FilterType, FilterOperator } from '@/types/apiFilters';

@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Dismiss16Regular, Search24Regular } from '@fluentui/react-icons';
-import { Button, Input } from '@fluentui/react-components';
+import { Button, Input } from '@coreai-microsoft/manifold-fluentui-react';
 import { useLocation } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
 import { useRecentSearches, RecentSearchType } from '@/hooks/useRecentSearches.ts';

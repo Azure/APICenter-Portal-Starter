@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { Button, Tab, TabList, Tooltip } from '@fluentui/react-components';
+import { Button, Tab, TabList, Tooltip } from '@coreai-microsoft/manifold-fluentui-react';
 import { CopyRegular, CheckmarkRegular, ArrowDownloadRegular } from '@fluentui/react-icons';
 import styles from './ConnectPanel.module.scss';
 

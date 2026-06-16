@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { Tooltip, Link } from '@fluentui/react-components';
+import { Tooltip, Link } from '@coreai-microsoft/manifold-fluentui-react';
 import { CheckmarkCircle12Regular, CopyRegular } from '@fluentui/react-icons';
 import styles from './CopyLink.module.scss';
 

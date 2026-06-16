@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button, Tab, TabList, Tooltip } from '@fluentui/react-components';
+import { Button, Tab, TabList, Tooltip } from '@coreai-microsoft/manifold-fluentui-react';
 import { CopyRegular, CheckmarkRegular, ChevronDownRegular, ChevronUpRegular } from '@fluentui/react-icons';
 import styles from './ConnectBar.module.scss';
 

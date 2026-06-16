@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { Button } from '@fluentui/react-components';
+import { Button } from '@coreai-microsoft/manifold-fluentui-react';
 import ParamSchemaDefinition from '@/components/ParamSchemaDefinition';
 import { OperationDetailsViewProps } from '../types';
 import { McpCapabilityTypes } from '@/types/mcp';

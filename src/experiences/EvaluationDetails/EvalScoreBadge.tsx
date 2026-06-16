@@ -1,5 +1,5 @@
 import React from 'react';
-import { Badge } from '@fluentui/react-components';
+import { Badge } from '@coreai-microsoft/manifold-fluentui-react';
 import { EvaluationResult, getEvalScore } from '@/types/evaluation';
 import styles from './EvaluationDetails.module.scss';
 
