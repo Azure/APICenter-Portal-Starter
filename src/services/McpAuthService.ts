@@ -97,6 +97,26 @@ export function validateResourceMetadata(metadata: McpProtectedResourceMetadata,
   }
 }
 
+/**
+ * Builds the ordered list of protected-resource metadata URLs to try for an MCP server URI.
+ *
+ * RFC 9728 places the well-known segment between host and the resource path
+ * (e.g. https://svc.azure-api.net/myapi/mcp ->
+ *  https://svc.azure-api.net/.well-known/oauth-protected-resource/myapi/mcp),
+ * with a fallback to the root-level metadata document.
+ */
+function protectedResourceMetadataCandidates(serverUri: string): string[] {
+  const url = new URL(serverUri);
+  const path = url.pathname.replace(/\/$/, '');
+
+  const root = `${url.origin}/.well-known/oauth-protected-resource`;
+  if (!path) {
+    return [root];
+  }
+
+  return [`${url.origin}/.well-known/oauth-protected-resource${path}`, root];
+}
+
 async function fetchResourceMetadata(url: string): Promise<McpProtectedResourceMetadata | undefined> {
   try {
     const response = await mcpFetch(url, { method: 'GET' });
@@ -204,24 +224,43 @@ async function registerClient(metadata: McpServerAuthMetadata): Promise<Oauth2Cr
 
 export const McpAuthService = {
   /**
-   * Proactive discovery via .well-known/oauth-authorization-server.
-   * Replaces the old getMcpServerOAuthCredentials() from mcp.ts.
-   * No longer fabricates fallback endpoints — returns undefined if discovery fails.
+   * Proactive discovery per RFC 9728: tries path-aware protected-resource metadata
+   * (with root fallback), follows the first authorization server, fetches its metadata
+   * (RFC 8414), and performs dynamic client registration.
+   *
+   * Returns undefined when the server does not expose discoverable, dynamically
+   * registrable OAuth — the reactive 401 / WWW-Authenticate flow handles those servers.
    */
   async discoverOAuthCredentials(serverUri: string): Promise<Oauth2Credentials | undefined> {
     try {
-      const origin = new URL(serverUri).origin;
+      for (const metadataUrl of protectedResourceMetadataCandidates(serverUri)) {
+        if (!validateMetadataUrl(metadataUrl)) {
+          continue;
+        }
 
-      const metadataResponse = await mcpFetch(`${origin}/.well-known/oauth-authorization-server`, {
-        method: 'GET',
-      });
+        const resourceMetadata = await fetchResourceMetadata(metadataUrl);
+        if (!resourceMetadata) {
+          continue;
+        }
 
-      if (!metadataResponse.ok) {
-        return undefined;
+        if (!validateResourceMetadata(resourceMetadata, serverUri)) {
+          continue;
+        }
+
+        const issuer = resourceMetadata.authorization_servers?.[0];
+        if (!issuer) {
+          continue;
+        }
+
+        const authServerMetadata = await fetchAuthServerMetadata(issuer);
+        if (!authServerMetadata) {
+          continue;
+        }
+
+        return registerClient(authServerMetadata);
       }
 
-      const metadata: McpServerAuthMetadata = await metadataResponse.json();
-      return registerClient(metadata);
+      return undefined;
     } catch {
       console.warn('Failed to fetch MCP OAuth credentials — server may not support OAuth or is blocked by CORS.');
       return undefined;
