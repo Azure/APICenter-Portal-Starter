@@ -34,7 +34,7 @@ flowchart TD
     Anon --> Call[Call MCP server]
     Call -->|401 + WWW-Authenticate| R[Reactive discovery<br/>discoverFromWwwAuthenticate]
     R --> DR
-    R --> MSAL[MSAL / Entra consent]
+    R --> MSAL[MSAL silent token,<br/>consent if needed]
 ```
 
 - **Ref:** `src/pages/ApiSpec/McpSpecPage/McpSpecPage.tsx:49` (`determineAuthFlow`);
@@ -79,10 +79,12 @@ requests to a nonexistent endpoint (404), so the placement rules are implemented
 | Metadata | RFC | Placement for a path-bearing base | Example |
 |---|---|---|---|
 | Protected resource | 9728 | insert before path, **root fallback** | `host/.well-known/oauth-protected-resource/myapi/mcp` → `host/.well-known/oauth-protected-resource` |
-| Authorization server | 8414 §3.1 | insert between host and path | `host/.well-known/oauth-authorization-server/tenant1` |
-| Authorization server (OIDC) | — | appended (Entra compatibility fallback) | `host/tenant1/.well-known/openid-configuration` |
+| Authorization server | 8414 §3.1 | insert before path | `host/.well-known/oauth-authorization-server/tenant1` |
+| Authorization server (OIDC) | — | insert before path, then appended fallback | `host/.well-known/openid-configuration/tenant1` → `host/tenant1/.well-known/openid-configuration` (Entra) |
 
-The candidate lists are produced by small pure helpers and tried in order until one returns
+`authServerMetadataCandidates` tries the RFC 8414 inserted form first, then the OIDC
+metadata inserted form, then — only when the issuer has a path — the appended OIDC form for
+Microsoft Entra compatibility (duplicates are removed). The candidate lists are produced by
 a document; every candidate is checked by `validateMetadataUrl` (HTTPS-only, rejects
 localhost/private IPs, fragments, and userinfo) before it is fetched.
 
@@ -103,9 +105,10 @@ localhost/private IPs, fragments, and userinfo) before it is fetched.
 - `MSAL_CONSENT_NEEDED` — discovered Entra-backed auth requiring interactive consent.
 - `AUTHORIZED` — anonymous, or a token already acquired.
 
-Token acquisition for the discovered/configured OAuth flows is handled by
-`OAuthService.authenticate` (`src/services/OAuthService.ts:87`), which POSTs to
-`credentials.tokenUrl` — the endpoint that must be resolved correctly by the rules above.
+Token acquisition for the discovered/configured OAuth flows is dispatched by
+`OAuthService.authenticate` (`src/services/OAuthService.ts:87`); the authorization-code/PKCE
+path POSTs to `credentials.tokenUrl` (`src/services/OAuthService.ts:181`) — the endpoint that
+must be resolved correctly by the rules above.
 
 ## Code map
 
