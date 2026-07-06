@@ -111,6 +111,30 @@ async function fetchResourceMetadata(url: string): Promise<McpProtectedResourceM
   }
 }
 
+/**
+ * Builds the ordered list of authorization-server metadata URLs to try for an issuer.
+ *
+ * RFC 8414 §3.1 requires the well-known segment to be INSERTED between host and path
+ * (e.g. issuer https://host/tenant1 -> https://host/.well-known/oauth-authorization-server/tenant1).
+ * The appended OpenID Connect form is kept only as a Microsoft Entra compatibility fallback.
+ */
+function authServerMetadataCandidates(issuer: string): string[] {
+  const url = new URL(issuer);
+  const path = url.pathname.replace(/\/$/, '');
+
+  const candidates = [
+    `${url.origin}/.well-known/oauth-authorization-server${path}`,
+    `${url.origin}/.well-known/openid-configuration${path}`,
+  ];
+
+  if (path) {
+    // Entra serves OIDC metadata at the appended location; keep as fallback.
+    candidates.push(`${url.origin}${path}/.well-known/openid-configuration`);
+  }
+
+  return [...new Set(candidates)];
+}
+
 async function fetchAuthServerMetadata(issuer: string): Promise<McpServerAuthMetadata | undefined> {
   try {
     if (!validateMetadataUrl(issuer)) {
@@ -118,16 +142,7 @@ async function fetchAuthServerMetadata(issuer: string): Promise<McpServerAuthMet
       return undefined;
     }
 
-    const normalized = issuer.endsWith('/') ? issuer.slice(0, -1) : issuer;
-
-    // Try RFC 8414 first, then fall back to OpenID Connect discovery
-    // (e.g., Microsoft Entra ID uses openid-configuration instead of oauth-authorization-server)
-    const candidates = [
-      `${normalized}/.well-known/oauth-authorization-server`,
-      `${normalized}/.well-known/openid-configuration`,
-    ];
-
-    for (const metadataUrl of candidates) {
+    for (const metadataUrl of authServerMetadataCandidates(issuer)) {
       if (!validateMetadataUrl(metadataUrl)) {
         continue;
       }
