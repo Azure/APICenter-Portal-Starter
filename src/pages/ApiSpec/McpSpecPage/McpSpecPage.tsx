@@ -51,18 +51,20 @@ export const McpSpecPage: React.FC<Props> = ({ definitionId, deployment }) => {
       return;
     }
 
-    // Use dynamic registration flow if the server has this feature
+    // Prefer pre-configured "API access" auth if it exists — it already contains the
+    // correct token/authorization endpoints, so no .well-known discovery is needed.
+    const securityRequirements = await ApiService.getSecurityRequirements(definitionId);
+    if (securityRequirements.length) {
+      setAuthState(McpServerAuthState.API_ACCESS_FLOW);
+      return;
+    }
+
+    // Otherwise, try proactive discovery (path-aware) for servers that support
+    // dynamic client registration.
     const mcpServerCredentials = await McpAuthService.discoverOAuthCredentials(deployment.server.runtimeUri[0]);
     if (mcpServerCredentials) {
       setMcpOAuthCredentials(mcpServerCredentials);
       setAuthState(McpServerAuthState.DYNAMIC_REGISTRATION_FLOW);
-      return;
-    }
-
-    // Use API access flow if it was configured for this server
-    const securityRequirements = await ApiService.getSecurityRequirements(definitionId);
-    if (securityRequirements.length) {
-      setAuthState(McpServerAuthState.API_ACCESS_FLOW);
       return;
     }
 
