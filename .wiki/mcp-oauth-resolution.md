@@ -63,10 +63,10 @@ sequenceDiagram
     P-->>P: Oauth2Credentials
 ```
 
-- **Proactive** (`discoverOAuthCredentials`, `src/services/McpAuthService.ts:234`): runs
+- **Proactive** (`discoverOAuthCredentials`, `src/services/McpAuthService.ts:252`): runs
   eagerly from the server URI. It is path-aware — it does **not** reduce the URI to its
   origin.
-- **Reactive** (`discoverFromWwwAuthenticate`, `src/services/McpAuthService.ts:274`): runs
+- **Reactive** (`discoverFromWwwAuthenticate`, `src/services/McpAuthService.ts:292`): runs
   after a `401`, taking the `resource_metadata` URL directly from the `WWW-Authenticate`
   header (`parseWwwAuthenticate`, `:20`). When the authorization server does not support
   dynamic registration, it falls back to an MSAL/Entra consent flow.
@@ -85,15 +85,17 @@ requests to a nonexistent endpoint (404), so the placement rules are implemented
 `authServerMetadataCandidates` tries the RFC 8414 inserted form first, then the OIDC
 metadata inserted form, then — only when the issuer has a path — the appended OIDC form for
 Microsoft Entra compatibility (duplicates are removed). The candidate lists are produced by
-a document; every candidate is checked by `validateMetadataUrl` (HTTPS-only, rejects
-localhost/private IPs, fragments, and userinfo) before it is fetched.
+small pure helpers and tried in order until one returns a document; every candidate is
+checked by `validateMetadataUrl` (HTTPS-only; rejects credentials, fragments, and hostnames
+that are literal loopback/link-local/private-range addresses — defense-in-depth for the
+server-side proxy path) before it is fetched.
 
 - Protected-resource candidates: `protectedResourceMetadataCandidates`,
-  `src/services/McpAuthService.ts:108`.
+  `src/services/McpAuthService.ts:126`.
 - Authorization-server candidates: `authServerMetadataCandidates`,
-  `src/services/McpAuthService.ts:141`; consumed by `fetchAuthServerMetadata`, `:158`.
-- `validateMetadataUrl`, `:47`; `validateResourceMetadata` (resource ↔ server origin),
-  `:90`; `registerClient` (dynamic registration), `:184`.
+  `src/services/McpAuthService.ts:159`; consumed by `fetchAuthServerMetadata`, `:176`.
+- `validateMetadataUrl`, `:53`; `validateResourceMetadata` (resource ↔ server origin),
+  `:108`; `registerClient` (dynamic registration), `:202`.
 
 ## Auth states
 
@@ -116,12 +118,12 @@ must be resolved correctly by the rules above.
 |---|---|
 | Flow selection / ordering | `src/pages/ApiSpec/McpSpecPage/McpSpecPage.tsx:49` |
 | Reactive 401 handling | `src/pages/ApiSpec/McpSpecPage/McpSpecPage.tsx:106` |
-| Proactive discovery | `src/services/McpAuthService.ts:234` |
-| Reactive discovery | `src/services/McpAuthService.ts:274` |
-| Protected-resource URL rules (RFC 9728) | `src/services/McpAuthService.ts:108` |
-| Auth-server URL rules (RFC 8414) | `src/services/McpAuthService.ts:141` |
-| URL / resource validation | `src/services/McpAuthService.ts:47`, `:90` |
-| Dynamic client registration | `src/services/McpAuthService.ts:184` |
+| Proactive discovery | `src/services/McpAuthService.ts:252` |
+| Reactive discovery | `src/services/McpAuthService.ts:292` |
+| Protected-resource URL rules (RFC 9728) | `src/services/McpAuthService.ts:126` |
+| Auth-server URL rules (RFC 8414) | `src/services/McpAuthService.ts:159` |
+| URL / resource validation | `src/services/McpAuthService.ts:53`, `:108` |
+| Dynamic client registration | `src/services/McpAuthService.ts:202` |
 | Token acquisition | `src/services/OAuthService.ts:87` |
 
 ## Related

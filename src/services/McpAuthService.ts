@@ -42,7 +42,13 @@ export function parseWwwAuthenticate(header: string): string | undefined {
 
 /**
  * Validates that a metadata URL is safe to fetch.
- * Requires HTTPS, rejects localhost/private IPs, fragments, and userinfo.
+ *
+ * Requires HTTPS, rejects credentials and fragments, and blocks hostnames that are
+ * literal loopback, link-local, "this host", or private-range addresses. This is
+ * defense-in-depth against SSRF when the CORS proxy (apimFetchProxy) fetches the URL
+ * server-side. Note: a string check cannot catch a public hostname that resolves to an
+ * internal address via DNS — the proxy must enforce network egress rules as the
+ * authoritative control.
  */
 export function validateMetadataUrl(url: string): boolean {
   try {
@@ -61,19 +67,35 @@ export function validateMetadataUrl(url: string): boolean {
     }
 
     const hostname = parsed.hostname.toLowerCase();
-
-    if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1' || hostname === '[::1]') {
-      return false;
-    }
-
-    // Reject private IPv4 ranges
-    if (/^10\./.test(hostname) || /^172\.(1[6-9]|2\d|3[01])\./.test(hostname) || /^192\.168\./.test(hostname)) {
-      return false;
-    }
-
-    // Reject private IPv6 ranges (unique local fc00::/7 and link-local fe80::/10)
     const bare = hostname.replace(/^\[|\]$/g, '');
-    if (/^fe80:/i.test(bare) || /^f[cd][0-9a-f]{2}:/i.test(bare)) {
+
+    if (hostname === 'localhost' || hostname.endsWith('.localhost')) {
+      return false;
+    }
+
+    // Reject loopback (127/8), link-local incl. cloud IMDS (169.254/16), "this host" (0/8),
+    // and private IPv4 ranges (10/8, 172.16-31/12, 192.168/16).
+    if (
+      /^127\./.test(bare) ||
+      /^169\.254\./.test(bare) ||
+      /^0\./.test(bare) ||
+      /^10\./.test(bare) ||
+      /^172\.(1[6-9]|2\d|3[01])\./.test(bare) ||
+      /^192\.168\./.test(bare)
+    ) {
+      return false;
+    }
+
+    // Reject IPv6 loopback (::1), unspecified (::), IPv4-mapped (::ffff:.../ which the URL
+    // parser normalizes to hex and can hide an internal IPv4), unique local (fc00::/7) and
+    // link-local (fe80::/10).
+    if (
+      bare === '::1' ||
+      bare === '::' ||
+      /^::ffff:/i.test(bare) ||
+      /^fe80:/i.test(bare) ||
+      /^f[cd][0-9a-f]{2}:/i.test(bare)
+    ) {
       return false;
     }
 
