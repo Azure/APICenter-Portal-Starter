@@ -20,6 +20,7 @@ Quick navigation to the architecture and development documentation maintained in
 
 - **[api-integration.md](./api-integration.md)** - Azure API Center data plane integration
 - **[authentication.md](./authentication.md)** - Authentication modes and flows
+- **[mcp-oauth-resolution.md](./mcp-oauth-resolution.md)** - MCP server OAuth credential resolution and discovery
 - **[deployment.md](./deployment.md)** - Infrastructure as code and deployment patterns
 - **[configuration.md](./configuration.md)** - Runtime configuration and environment setup
 
@@ -43,6 +44,7 @@ Quick navigation to the architecture and development documentation maintained in
 | Backend calls | services.md | ApiService, HttpService, auth |
 | API Center | api-integration.md | Data plane APIs, endpoints |
 | Auth modes | authentication.md | MSAL vs anonymous flows |
+| MCP OAuth | mcp-oauth-resolution.md | Pre-configured vs discovered creds, RFC 8414/9728 |
 | Infrastructure | deployment.md | Bicep, azd, Static Web Apps |
 | Config | configuration.md | config.json, runtime settings |
 | File org | folder-structure.md | src/ layout, naming conventions |

@@ -42,7 +42,13 @@ export function parseWwwAuthenticate(header: string): string | undefined {
 
 /**
  * Validates that a metadata URL is safe to fetch.
- * Requires HTTPS, rejects localhost/private IPs, fragments, and userinfo.
+ *
+ * Requires HTTPS, rejects credentials and fragments, and blocks hostnames that are
+ * literal loopback, link-local, "this host", or private-range addresses. This is
+ * defense-in-depth against SSRF when the CORS proxy (apimFetchProxy) fetches the URL
+ * server-side. Note: a string check cannot catch a public hostname that resolves to an
+ * internal address via DNS — the proxy must enforce network egress rules as the
+ * authoritative control.
  */
 export function validateMetadataUrl(url: string): boolean {
   try {
@@ -61,19 +67,35 @@ export function validateMetadataUrl(url: string): boolean {
     }
 
     const hostname = parsed.hostname.toLowerCase();
-
-    if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1' || hostname === '[::1]') {
-      return false;
-    }
-
-    // Reject private IPv4 ranges
-    if (/^10\./.test(hostname) || /^172\.(1[6-9]|2\d|3[01])\./.test(hostname) || /^192\.168\./.test(hostname)) {
-      return false;
-    }
-
-    // Reject private IPv6 ranges (unique local fc00::/7 and link-local fe80::/10)
     const bare = hostname.replace(/^\[|\]$/g, '');
-    if (/^fe80:/i.test(bare) || /^f[cd][0-9a-f]{2}:/i.test(bare)) {
+
+    if (hostname === 'localhost' || hostname.endsWith('.localhost')) {
+      return false;
+    }
+
+    // Reject loopback (127/8), link-local incl. cloud IMDS (169.254/16), "this host" (0/8),
+    // and private IPv4 ranges (10/8, 172.16-31/12, 192.168/16).
+    if (
+      /^127\./.test(bare) ||
+      /^169\.254\./.test(bare) ||
+      /^0\./.test(bare) ||
+      /^10\./.test(bare) ||
+      /^172\.(1[6-9]|2\d|3[01])\./.test(bare) ||
+      /^192\.168\./.test(bare)
+    ) {
+      return false;
+    }
+
+    // Reject IPv6 loopback (::1), unspecified (::), IPv4-mapped (::ffff:.../ which the URL
+    // parser normalizes to hex and can hide an internal IPv4), unique local (fc00::/7) and
+    // link-local (fe80::/10).
+    if (
+      bare === '::1' ||
+      bare === '::' ||
+      /^::ffff:/i.test(bare) ||
+      /^fe80:/i.test(bare) ||
+      /^f[cd][0-9a-f]{2}:/i.test(bare)
+    ) {
       return false;
     }
 
@@ -97,6 +119,26 @@ export function validateResourceMetadata(metadata: McpProtectedResourceMetadata,
   }
 }
 
+/**
+ * Builds the ordered list of protected-resource metadata URLs to try for an MCP server URI.
+ *
+ * RFC 9728 places the well-known segment between host and the resource path
+ * (e.g. https://svc.azure-api.net/myapi/mcp ->
+ *  https://svc.azure-api.net/.well-known/oauth-protected-resource/myapi/mcp),
+ * with a fallback to the root-level metadata document.
+ */
+function protectedResourceMetadataCandidates(serverUri: string): string[] {
+  const url = new URL(serverUri);
+  const path = url.pathname.replace(/\/$/, '');
+
+  const root = `${url.origin}/.well-known/oauth-protected-resource`;
+  if (!path) {
+    return [root];
+  }
+
+  return [`${url.origin}/.well-known/oauth-protected-resource${path}`, root];
+}
+
 async function fetchResourceMetadata(url: string): Promise<McpProtectedResourceMetadata | undefined> {
   try {
     const response = await mcpFetch(url, { method: 'GET' });
@@ -111,6 +153,30 @@ async function fetchResourceMetadata(url: string): Promise<McpProtectedResourceM
   }
 }
 
+/**
+ * Builds the ordered list of authorization-server metadata URLs to try for an issuer.
+ *
+ * RFC 8414 §3.1 requires the well-known segment to be INSERTED between host and path
+ * (e.g. issuer https://host/tenant1 -> https://host/.well-known/oauth-authorization-server/tenant1).
+ * The appended OpenID Connect form is kept only as a Microsoft Entra compatibility fallback.
+ */
+function authServerMetadataCandidates(issuer: string): string[] {
+  const url = new URL(issuer);
+  const path = url.pathname.replace(/\/$/, '');
+
+  const candidates = [
+    `${url.origin}/.well-known/oauth-authorization-server${path}`,
+    `${url.origin}/.well-known/openid-configuration${path}`,
+  ];
+
+  if (path) {
+    // Entra serves OIDC metadata at the appended location; keep as fallback.
+    candidates.push(`${url.origin}${path}/.well-known/openid-configuration`);
+  }
+
+  return [...new Set(candidates)];
+}
+
 async function fetchAuthServerMetadata(issuer: string): Promise<McpServerAuthMetadata | undefined> {
   try {
     if (!validateMetadataUrl(issuer)) {
@@ -118,16 +184,7 @@ async function fetchAuthServerMetadata(issuer: string): Promise<McpServerAuthMet
       return undefined;
     }
 
-    const normalized = issuer.endsWith('/') ? issuer.slice(0, -1) : issuer;
-
-    // Try RFC 8414 first, then fall back to OpenID Connect discovery
-    // (e.g., Microsoft Entra ID uses openid-configuration instead of oauth-authorization-server)
-    const candidates = [
-      `${normalized}/.well-known/oauth-authorization-server`,
-      `${normalized}/.well-known/openid-configuration`,
-    ];
-
-    for (const metadataUrl of candidates) {
+    for (const metadataUrl of authServerMetadataCandidates(issuer)) {
       if (!validateMetadataUrl(metadataUrl)) {
         continue;
       }
@@ -189,24 +246,43 @@ async function registerClient(metadata: McpServerAuthMetadata): Promise<Oauth2Cr
 
 export const McpAuthService = {
   /**
-   * Proactive discovery via .well-known/oauth-authorization-server.
-   * Replaces the old getMcpServerOAuthCredentials() from mcp.ts.
-   * No longer fabricates fallback endpoints — returns undefined if discovery fails.
+   * Proactive discovery per RFC 9728: tries path-aware protected-resource metadata
+   * (with root fallback), follows the first authorization server, fetches its metadata
+   * (RFC 8414), and performs dynamic client registration.
+   *
+   * Returns undefined when the server does not expose discoverable, dynamically
+   * registrable OAuth — the reactive 401 / WWW-Authenticate flow handles those servers.
    */
   async discoverOAuthCredentials(serverUri: string): Promise<Oauth2Credentials | undefined> {
     try {
-      const origin = new URL(serverUri).origin;
+      for (const metadataUrl of protectedResourceMetadataCandidates(serverUri)) {
+        if (!validateMetadataUrl(metadataUrl)) {
+          continue;
+        }
 
-      const metadataResponse = await mcpFetch(`${origin}/.well-known/oauth-authorization-server`, {
-        method: 'GET',
-      });
+        const resourceMetadata = await fetchResourceMetadata(metadataUrl);
+        if (!resourceMetadata) {
+          continue;
+        }
 
-      if (!metadataResponse.ok) {
-        return undefined;
+        if (!validateResourceMetadata(resourceMetadata, serverUri)) {
+          continue;
+        }
+
+        const issuer = resourceMetadata.authorization_servers?.[0];
+        if (!issuer) {
+          continue;
+        }
+
+        const authServerMetadata = await fetchAuthServerMetadata(issuer);
+        if (!authServerMetadata) {
+          continue;
+        }
+
+        return registerClient(authServerMetadata);
       }
 
-      const metadata: McpServerAuthMetadata = await metadataResponse.json();
-      return registerClient(metadata);
+      return undefined;
     } catch {
       console.warn('Failed to fetch MCP OAuth credentials — server may not support OAuth or is blocked by CORS.');
       return undefined;
