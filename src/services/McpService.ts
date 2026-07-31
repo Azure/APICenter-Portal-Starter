@@ -70,8 +70,14 @@ export class McpService {
       this.sse.removeEventListener('endpoint', this.handleEndpointReceived);
       this.sse.removeEventListener('error', this.handleErrorReceived);
       this.sse.removeEventListener('message', this.handleMessageReceived);
+      this.sse.close();
     }
-    currentInstance = undefined;
+
+    // Only drop the shared instance when this *is* the shared instance. Instances created
+    // through createMcpService() are owned by their caller and must not clear it.
+    if (currentInstance === this) {
+      currentInstance = undefined;
+    }
   }
 
   public async collectMcpSpec(): Promise<string> {
@@ -395,22 +401,54 @@ export class McpService {
   }
 }
 
-let currentInstance: McpService | undefined;
-export function getMcpService(uri?: string, authCredentials?: ApiAuthCredentials): McpService | undefined {
-  let serverUri = uri;
-  if (serverUri.endsWith('/sse')) {
-    serverUri = serverUri.split('/').slice(0, -1).join('/');
+function normalizeServerUri(uri?: string): string | undefined {
+  if (!uri) {
+    return undefined;
   }
 
+  if (uri.endsWith('/sse')) {
+    return uri.split('/').slice(0, -1).join('/');
+  }
+
+  return uri;
+}
+
+/**
+ * Creates a standalone McpService owned by the caller.
+ *
+ * Use this when a consumer needs its own connection lifetime (e.g. the test console drawer,
+ * which tears the connection down on close) so that closing it doesn't affect the shared
+ * instance returned by getMcpService().
+ */
+export function createMcpService(uri?: string, authCredentials?: ApiAuthCredentials): McpService | undefined {
+  const serverUri = normalizeServerUri(uri);
   if (!serverUri) {
     return undefined;
   }
 
-  if (currentInstance?.serverUri !== serverUri) {
+  return new McpService(serverUri, authCredentials);
+}
+
+let currentInstance: McpService | undefined;
+
+/**
+ * Returns the shared McpService for the given server URI.
+ *
+ * Omitting `authCredentials` means "reuse whatever is already connected" — it must never
+ * downgrade an authenticated instance to an anonymous one.
+ */
+export function getMcpService(uri?: string, authCredentials?: ApiAuthCredentials): McpService | undefined {
+  const serverUri = normalizeServerUri(uri);
+  if (!serverUri) {
+    return undefined;
+  }
+
+  const isDifferentServer = currentInstance?.serverUri !== serverUri;
+  const isExplicitCredentialsChange =
+    !!currentInstance && authCredentials !== undefined && currentInstance.authCredentials !== authCredentials;
+
+  if (isDifferentServer || isExplicitCredentialsChange) {
     currentInstance?.closeConnection();
-    currentInstance = new McpService(serverUri, authCredentials);
-  } else if (currentInstance && currentInstance.authCredentials !== authCredentials) {
-    currentInstance.closeConnection();
     currentInstance = new McpService(serverUri, authCredentials);
   }
 
