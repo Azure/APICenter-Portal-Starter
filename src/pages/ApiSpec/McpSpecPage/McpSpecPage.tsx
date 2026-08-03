@@ -16,6 +16,7 @@ import { McpAuthService } from '@/services/McpAuthService';
 import { McpDiscoveredAuth } from '@/types/mcp';
 import { McpMsalAuthService } from '@/services/McpMsalAuthService';
 import { configAtom } from '@/atoms/configAtom';
+import { McpAuthProvider } from '@/contexts/McpAuthContext';
 import styles from './McpSpecPage.module.scss';
 import McpMetadataBasedAuthForm from './McpMetadataBasedAuthForm';
 
@@ -254,11 +255,9 @@ export const McpSpecPage: React.FC<Props> = ({ definitionId, deployment }) => {
   }
 
   return (
-    <ApiSpecPageLayout
-      definitionId={definitionId}
-      deployment={deployment}
-      apiSpec={apiSpec}
-    />
+    <McpAuthProvider credentials={authCredentials}>
+      <ApiSpecPageLayout definitionId={definitionId} deployment={deployment} apiSpec={apiSpec} />
+    </McpAuthProvider>
   );
 };
 

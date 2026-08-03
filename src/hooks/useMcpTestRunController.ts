@@ -2,8 +2,9 @@ import { useCallback, useEffect, useState } from 'react';
 import { HttpReqParam } from 'api-docs-ui';
 import { OperationMetadata } from '@/types/apiSpec';
 import { ApiDeployment } from '@/types/apiDeployment';
-import { getMcpService, McpService } from '@/services/McpService';
+import { createMcpService, McpService } from '@/services/McpService';
 import { McpCapabilityTypes } from '@/types/mcp';
+import { useMcpAuthCredentials } from '@/contexts/McpAuthContext';
 
 interface ReturnType {
   result?: string;
@@ -23,23 +24,24 @@ export function useMcpTestRunController(
   const [error, setError] = useState<string>(undefined);
   const [isRunning, setIsRunning] = useState(false);
 
+  const authCredentials = useMcpAuthCredentials();
+  const runtimeUri = deployment?.server?.runtimeUri?.[0];
+
   useEffect(() => {
-    const runtimeUri = deployment?.server.runtimeUri[0];
     if (!runtimeUri || !shouldConnect) {
-      return;
+      return undefined;
     }
 
-    setMcpService((prev) => {
-      prev?.closeConnection();
-      return getMcpService(deployment?.server.runtimeUri[0]);
-    });
-  }, [deployment?.server.runtimeUri, shouldConnect]);
+    // The test console owns its connection: it is torn down when the drawer closes, so it must
+    // not share the instance the spec page keeps alive.
+    const service = createMcpService(runtimeUri, authCredentials);
+    setMcpService(service);
 
-  useEffect(() => {
-    if (!shouldConnect && mcpService) {
-      mcpService.closeConnection();
-    }
-  }, [mcpService, shouldConnect]);
+    return () => {
+      service?.closeConnection();
+      setMcpService(undefined);
+    };
+  }, [authCredentials, runtimeUri, shouldConnect]);
 
   useEffect(() => {
     setResult(undefined);

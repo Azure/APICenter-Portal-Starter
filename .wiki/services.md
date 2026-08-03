@@ -165,6 +165,32 @@ const makeRequestWithCache = memoizee(makeRequest);
 **File**: `src/services/McpService.ts`
 **Purpose**: MCP (Model Context Protocol) server communication
 
+#### Instance lifetime
+
+Two factories are exported:
+
+| Factory | Ownership | Used by |
+|---------|-----------|---------|
+| `getMcpService(uri, credentials?)` | Module-level shared instance, reused across calls | `McpSpecPage` (connect + capability listing) |
+| `createMcpService(uri, credentials?)` | Standalone instance owned by the caller | `useMcpTestRunController` (test console drawer) |
+
+`getMcpService` only rebuilds the shared instance when the server URI changes or the caller
+explicitly passes *different* credentials. Omitting `authCredentials` means "reuse whatever is
+already connected" and must never downgrade an authenticated instance to an anonymous one.
+
+Consumers with their own connection lifetime (the test console tears the connection down when the
+drawer closes) must use `createMcpService`, so that `closeConnection()` does not affect the shared
+instance the spec page is still using.
+
+#### Credential propagation
+
+`McpService.fetchProxy()` injects header-based credentials (`in: 'header'`) on **every** request —
+subscription key, OAuth bearer token, and Entra ID / MSAL token alike. Credentials are resolved by
+`McpSpecPage` and published to the subtree through `McpAuthProvider`
+(`src/contexts/McpAuthContext.tsx`); `useMcpTestRunController` reads them via
+`useMcpAuthCredentials()` so tool/prompt/resource execution is authenticated the same way
+discovery is.
+
 #### TODO: Methods & Protocol
 - [ ] Document MCP server API
 - [ ] Clarify streaming vs request/response
