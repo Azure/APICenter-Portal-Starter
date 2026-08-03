@@ -17,6 +17,26 @@ export interface OAuthTokenResponse {
   refresh_token: string;
 }
 
+/** Payload posted back by the OAuth callback bridge in `index.html`. */
+export interface OAuthCallbackPayload {
+  /** Authorization code, for the authorization code (PKCE) flow. */
+  code?: string;
+  /** Opaque value echoed back by the authorization server. */
+  state?: string;
+  /** OAuth error code, e.g. `access_denied`. */
+  error?: string;
+  /** Human readable description of the OAuth error. */
+  error_description?: string;
+  /** Raw fragment (or query string) carrying implicit flow tokens. */
+  uri?: string;
+}
+
+/** How long to wait for the authorization popup to report a result before giving up. */
+const AUTH_POPUP_TIMEOUT_MS = 5 * 60 * 1000;
+
+/** How often to check whether the user dismissed the authorization popup. */
+const POPUP_CLOSE_POLL_INTERVAL_MS = 500;
+
 async function generateCodeChallenge(codeVerifier: string): Promise<string> {
   const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(codeVerifier));
 
@@ -37,47 +57,96 @@ function generateRandomString(length: number): string {
   return text;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function ensurePopupIsClosed(popup: Window, receiveMessage: (event: MessageEvent<any>) => any): Promise<void> {
-  return new Promise((resolve) => {
-    const checkPopup = setInterval(() => {
-      if (!popup || popup.closed) {
-        clearInterval(checkPopup);
-        window.removeEventListener('message', receiveMessage, false);
-        resolve();
-      }
-    }, 500);
-  });
+/** Ensures a `message` event actually comes from our own OAuth callback bridge. */
+function isOAuthCallbackMessage(event: MessageEvent): boolean {
+  if (event.origin !== window.location.origin) {
+    return false;
+  }
+
+  const data = event.data as OAuthCallbackPayload | undefined;
+
+  return Boolean(data && typeof data === 'object' && (data.code || data.error || data.uri));
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function openAuthPopup(uri: string, listener: (event: MessageEvent<any>) => any): Promise<string | undefined> {
-  return new Promise<string>(async (resolve, reject) => {
-    try {
-      let isComplete = false;
-      const popup = window.open(uri, '_blank', 'width=400,height=500');
+/**
+ * Opens the authorization popup and resolves with the token produced by `listener` once the
+ * callback bridge reports back. Resolves with `undefined` if the user dismisses the popup.
+ */
+function openAuthPopup(
+  uri: string,
+  expectedState: string,
+  listener: (payload: OAuthCallbackPayload) => Promise<string | undefined>
+): Promise<string | undefined> {
+  return new Promise<string | undefined>((resolve, reject) => {
+    const popup = window.open(uri, '_blank', 'width=400,height=500');
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const receiveMessage = async (event: MessageEvent<any>): Promise<void> => {
-        isComplete = true;
-        try {
-          const result = await listener(event);
-          resolve(result);
-        } catch (error) {
-          reject(error);
-        } finally {
-          window.removeEventListener('message', listener, false);
-        }
-      };
-
-      window.addEventListener('message', receiveMessage, false);
-      await ensurePopupIsClosed(popup, receiveMessage);
-      if (!isComplete) {
-        resolve(undefined);
-      }
-    } catch (error) {
-      reject(error);
+    if (!popup) {
+      reject(new Error('Unable to open the sign-in window. Allow pop-ups for this site and try again.'));
+      return;
     }
+
+    let isSettled = false;
+
+    const cleanUp = (): void => {
+      isSettled = true;
+      window.removeEventListener('message', receiveMessage, false);
+      clearInterval(closePollTimer);
+      clearTimeout(timeoutTimer);
+    };
+
+    const closePopup = (): void => {
+      try {
+        popup.close();
+      } catch {
+        // The popup may already be gone - nothing to do.
+      }
+    };
+
+    const receiveMessage = (event: MessageEvent): void => {
+      if (isSettled || !isOAuthCallbackMessage(event)) {
+        return;
+      }
+
+      cleanUp();
+      closePopup();
+
+      const payload = event.data as OAuthCallbackPayload;
+
+      if (payload.error) {
+        reject(new Error(payload.error_description || payload.error));
+        return;
+      }
+
+      // Authorization servers are required to echo `state` back, but not all of them do. Reject
+      // only when a value comes back and it does not match the one we sent.
+      if (payload.state && payload.state !== expectedState) {
+        reject(new Error('Authentication failed: the authorization server returned an unexpected state value.'));
+        return;
+      }
+
+      listener(payload).then(resolve, reject);
+    };
+
+    window.addEventListener('message', receiveMessage, false);
+
+    const closePollTimer = setInterval(() => {
+      if (isSettled || !popup.closed) {
+        return;
+      }
+
+      cleanUp();
+      resolve(undefined);
+    }, POPUP_CLOSE_POLL_INTERVAL_MS);
+
+    const timeoutTimer = setTimeout(() => {
+      if (isSettled) {
+        return;
+      }
+
+      cleanUp();
+      closePopup();
+      reject(new Error('Authentication timed out before the authorization server responded. Please try again.'));
+    }, AUTH_POPUP_TIMEOUT_MS);
   });
 }
 
@@ -87,24 +156,28 @@ export const OAuthService = {
   authenticate(credentials: Oauth2Credentials, grantType: string, useProxy?: boolean): Promise<string | undefined> {
     const backendUrl = window.location.origin;
 
-    try {
-      switch (grantType) {
-        case OAuthGrantTypes.implicit:
-          return this.authenticateImplicit(backendUrl, credentials);
+    switch (grantType) {
+      case OAuthGrantTypes.implicit:
+        return this.authenticateImplicit(backendUrl, credentials);
 
-        case OAuthGrantTypes.authorizationCode:
-        case OAuthGrantTypes.authorizationCodeWithPkce:
-          return this.authenticateCodeWithPkce(backendUrl, credentials, useProxy);
-      }
-    } catch {
-      throw new Error('Authentication failed');
+      case OAuthGrantTypes.authorizationCode:
+      case OAuthGrantTypes.authorizationCodeWithPkce:
+        return this.authenticateCodeWithPkce(backendUrl, credentials, useProxy);
+
+      default:
+        throw new Error(`Unsupported grant type: ${grantType}`);
     }
   },
 
   /** Acquires access token using "implicit" grant flow. */
   authenticateImplicit(backendUrl: string, credentials: Oauth2Credentials): Promise<string | undefined> {
+    const state = uuid.v4();
+
     const query = {
-      state: uuid.v4(),
+      state,
+      // Implicit responses are always returned in the fragment; ask for it explicitly so that
+      // providers defaulting to `query` cannot leak tokens into a server-visible URL.
+      response_mode: 'fragment',
     };
 
     if (credentials.supportedScopes.includes('openid')) {
@@ -121,11 +194,11 @@ export const OAuthService = {
       query: query,
     });
 
-    const listener = async (event: MessageEvent): Promise<string> => {
-      const tokenHash = event.data['uri'];
+    const listener = async (payload: OAuthCallbackPayload): Promise<string | undefined> => {
+      const tokenHash = payload.uri;
 
       if (!tokenHash) {
-        return;
+        throw new Error('Authentication response did not contain a token');
       }
 
       const tokenInfo = await oauthClient.token.getToken(backendUrl + tokenHash);
@@ -137,7 +210,7 @@ export const OAuthService = {
       }
     };
 
-    return openAuthPopup(oauthClient.token.getUri(), listener);
+    return openAuthPopup(oauthClient.token.getUri(), state, listener);
   },
 
   async authenticateCodeWithPkce(
@@ -147,6 +220,7 @@ export const OAuthService = {
   ): Promise<string | undefined> {
     const codeVerifier = generateRandomString(64);
     const challengeMethod = crypto.subtle ? 'S256' : 'plain';
+    const state = uuid.v4();
 
     const codeChallenge = challengeMethod === 'S256' ? await generateCodeChallenge(codeVerifier) : codeVerifier;
 
@@ -154,15 +228,21 @@ export const OAuthService = {
 
     const args = new URLSearchParams({
       response_type: 'code',
+      // Return the code in the URL fragment instead of the query string. Fragments are never sent
+      // to the server, so long authorization codes cannot be rejected by server-side URL/query
+      // length limits (IIS `maxQueryString`, CDN/gateway limits). Providers that do not implement
+      // `response_mode` simply ignore it and the callback bridge falls back to the query string.
+      response_mode: 'fragment',
       client_id: credentials.clientId,
       code_challenge_method: challengeMethod,
       code_challenge: codeChallenge,
       redirect_uri: backendUrl,
       scope: credentials.supportedScopes.join(' '),
+      state,
     });
 
-    const listener = async (event: MessageEvent): Promise<string> => {
-      const authorizationCode = event.data['code'];
+    const listener = async (payload: OAuthCallbackPayload): Promise<string> => {
+      const authorizationCode = payload.code;
 
       if (!authorizationCode) {
         throw new Error('Authorization code is missing');
@@ -195,6 +275,6 @@ export const OAuthService = {
       return `${capitalize(tokenResponse.token_type)} ${tokenResponse.access_token}`;
     };
 
-    return openAuthPopup(`${credentials.authorizationUrl}?${args}`, listener);
+    return openAuthPopup(`${credentials.authorizationUrl}?${args}`, state, listener);
   },
 };

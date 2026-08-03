@@ -175,13 +175,50 @@ const makeRequestWithCache = memoizee(makeRequest);
 ### 6. OAuthService
 
 **File**: `src/services/OAuthService.ts`
-**Purpose**: OAuth 2.0 flows for test console
+**Purpose**: OAuth 2.0 flows for the test console ("Test with Authorization")
+
+#### Supported Flows
+- `authorization_code` / `authorization_code (PKCE)` → `authenticateCodeWithPkce()`
+- `implicit` → `authenticateImplicit()` (delegates token parsing to `client-oauth2`)
+
+Any other grant type throws `Unsupported grant type: <flow>`.
+
+#### Popup + callback bridge contract
+
+The flows are driven from a popup window (`openAuthPopup`), not a full-page redirect:
+
+1. `openAuthPopup()` opens the authorization URL in a popup and listens for `message` events.
+2. The authorization server redirects the popup back to the portal origin (`window.location.origin`
+   is always the `redirect_uri`).
+3. The inline bootstrap script in **`index.html`** is the callback bridge. It parses the response,
+   `postMessage`s an `OAuthCallbackPayload` (`code` / `state` / `error` / `error_description` /
+   `uri`) to `window.opener` targeting the portal origin, and closes itself.
+4. `openAuthPopup()` accepts the message only when `event.origin` matches the portal origin and the
+   payload has the expected shape, then surfaces provider errors, checks `state`, and hands the
+   payload to the flow-specific listener.
+
+**`index.html` and `OAuthService.ts` are two halves of one contract** — change them together.
+
+#### `response_mode=fragment`
+
+Both flows request `response_mode=fragment`, so the authorization code / token comes back in the URL
+**fragment**. Fragments are never sent to the server, so no server-side URL or query-string length
+limit (IIS `maxQueryString`/`maxUrl`, CDN or gateway limits) can reject a callback carrying a long
+authorization code. `response_mode` is a per-request parameter, not part of the app registration, so
+no change to a customer's identity provider configuration is required.
+
+Providers that do not implement `response_mode` ignore it and answer in the query string; the bridge
+parses **both** the fragment and the query string, so those providers keep working.
+
+#### Resilience
+
+- The popup is polled for closure, so dismissing it resolves with `undefined` instead of hanging.
+- A 5-minute timeout rejects with an actionable error so the UI never stays on "Authenticating".
+- A blocked popup produces an explicit "allow pop-ups" error.
 
 #### TODO: Implementation Details
-- [ ] Authorization code flow
 - [ ] Client credentials flow
 - [ ] Token refresh
-- [ ] Integration with `client-oauth2` package
 
 ---
 

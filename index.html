@@ -7,16 +7,52 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<title>Tool portal</title>
   <script type="text/javascript">
+    /*
+     * OAuth callback bridge.
+     *
+     * The authorization server redirects the auth popup back to the portal origin. This script
+     * forwards the result to the window that opened the popup and closes it.
+     *
+     * The response may arrive either in the URL fragment (`response_mode=fragment`, which is what
+     * the portal asks for - fragments are never sent to the server, so no server-side URL/query
+     * length limit can ever truncate or reject the callback) or in the query string (providers
+     * that ignore `response_mode`). Both are parsed, with the fragment taking precedence.
+     */
     (() => {
-      const args = new URLSearchParams(window.location.search);
-      const code = args.get('code');
-
-      if (!opener || !code) {
+      if (!window.opener) {
         return;
       }
 
-      opener.postMessage({ code: code });
-      self.close();
+      const hash = window.location.hash.replace(/^#/, '');
+      const search = window.location.search.replace(/^\?/, '');
+      const hashParams = new URLSearchParams(hash);
+      const queryParams = new URLSearchParams(search);
+
+      const read = (name) => hashParams.get(name) || queryParams.get(name) || undefined;
+      const hasImplicitToken = (params) => params.has('access_token') || params.has('id_token');
+
+      // Raw response used by the implicit flow, which needs the untouched parameter string.
+      let uri;
+      if (hasImplicitToken(hashParams)) {
+        uri = '#' + hash;
+      } else if (hasImplicitToken(queryParams)) {
+        uri = '?' + search;
+      }
+
+      const payload = {
+        code: read('code'),
+        state: read('state'),
+        error: read('error'),
+        error_description: read('error_description'),
+        uri: uri,
+      };
+
+      if (!payload.code && !payload.error && !payload.uri) {
+        return;
+      }
+
+      window.opener.postMessage(payload, window.location.origin);
+      window.close();
     })();
   </script>
 </head>

@@ -58,6 +58,7 @@ export function useApiAuthorization({ definitionId, schemeName }: Props): Return
 
       try {
         setCredentials(undefined);
+        setAuthError(undefined);
         setIsAuthenticating(true);
         const token = await OAuthService.authenticate(schemeQuery.data.oauth2, OAuthGrantTypes[oauthFlow]);
         if (token !== undefined) {
