@@ -37,6 +37,9 @@ const AUTH_POPUP_TIMEOUT_MS = 5 * 60 * 1000;
 /** How often to check whether the user dismissed the authorization popup. */
 const POPUP_CLOSE_POLL_INTERVAL_MS = 500;
 
+/** Grace period after the popup disappears, to let an in-flight callback message land. */
+const POPUP_CLOSE_GRACE_MS = 1000;
+
 async function generateCodeChallenge(codeVerifier: string): Promise<string> {
   const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(codeVerifier));
 
@@ -107,20 +110,22 @@ function openAuthPopup(
         return;
       }
 
-      cleanUp();
-      closePopup();
-
       const payload = event.data as OAuthCallbackPayload;
 
-      if (payload.error) {
-        reject(new Error(payload.error_description || payload.error));
+      // Every in-flight authentication attempt listens on the same window, and a single callback
+      // is delivered to all of them. A response carrying a different `state` belongs to another
+      // attempt, so ignore it silently rather than failing this one. Providers that drop `state`
+      // altogether are still accepted - `event.origin` above is the guard that matters, and the
+      // PKCE code verifier binds the code to this session.
+      if (payload.state && payload.state !== expectedState) {
         return;
       }
 
-      // Authorization servers are required to echo `state` back, but not all of them do. Reject
-      // only when a value comes back and it does not match the one we sent.
-      if (payload.state && payload.state !== expectedState) {
-        reject(new Error('Authentication failed: the authorization server returned an unexpected state value.'));
+      cleanUp();
+      closePopup();
+
+      if (payload.error) {
+        reject(new Error(payload.error_description || payload.error));
         return;
       }
 
@@ -134,8 +139,17 @@ function openAuthPopup(
         return;
       }
 
-      cleanUp();
-      resolve(undefined);
+      // The bridge posts its message and only then closes itself, so a successful callback can
+      // race this poll. Give the pending message a chance to arrive before reporting a dismissal.
+      clearInterval(closePollTimer);
+      setTimeout(() => {
+        if (isSettled) {
+          return;
+        }
+
+        cleanUp();
+        resolve(undefined);
+      }, POPUP_CLOSE_GRACE_MS);
     }, POPUP_CLOSE_POLL_INTERVAL_MS);
 
     const timeoutTimer = setTimeout(() => {
@@ -175,8 +189,9 @@ export const OAuthService = {
 
     const query = {
       state,
-      // Implicit responses are always returned in the fragment; ask for it explicitly so that
-      // providers defaulting to `query` cannot leak tokens into a server-visible URL.
+      // Implicit responses are always returned in the fragment, but ask for it explicitly so a
+      // provider that would otherwise default to `query` cannot put an access token in a
+      // server-visible URL, where it would end up in request logs.
       response_mode: 'fragment',
     };
 
@@ -191,6 +206,10 @@ export const OAuthService = {
       authorizationUri: credentials.authorizationUrl,
       redirectUri: backendUrl,
       scopes: credentials.supportedScopes,
+      // `state` is passed through `query` rather than as a top-level option on purpose. As a
+      // top-level option `client-oauth2` would reject any response that does not echo `state`
+      // back, which would break providers that omit it. `openAuthPopup` is therefore the only
+      // place that checks `state`.
       query: query,
     });
 
