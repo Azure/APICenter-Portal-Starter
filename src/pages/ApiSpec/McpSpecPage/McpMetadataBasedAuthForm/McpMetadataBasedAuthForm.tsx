@@ -27,6 +27,7 @@ export const McpMetadataBasedAuthForm: React.FC<Props> = ({ credentials, onChang
   const handleAuthRequested = useCallback(
     async (flow: string) => {
       try {
+        setAuthError(undefined);
         setIsAuthenticating(true);
 
         // TODO: we should not really use proxy for oauth
