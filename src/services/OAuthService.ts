@@ -229,9 +229,9 @@ export const OAuthService = {
     const args = new URLSearchParams({
       response_type: 'code',
       // Return the code in the URL fragment instead of the query string. Fragments are never sent
-      // to the server, so long authorization codes cannot be rejected by server-side URL/query
-      // length limits (IIS `maxQueryString`, CDN/gateway limits). Providers that do not implement
-      // `response_mode` simply ignore it and the callback bridge falls back to the query string.
+      // to the server, so long authorization codes cannot be rejected by server-side URL or query
+      // string length limits. Providers that do not implement `response_mode` simply ignore it and
+      // the callback bridge falls back to the query string.
       response_mode: 'fragment',
       client_id: credentials.clientId,
       code_challenge_method: challengeMethod,

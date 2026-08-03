@@ -202,10 +202,10 @@ The flows are driven from a popup window (`openAuthPopup`), not a full-page redi
 #### `response_mode=fragment`
 
 Both flows request `response_mode=fragment`, so the authorization code / token comes back in the URL
-**fragment**. Fragments are never sent to the server, so no server-side URL or query-string length
-limit (IIS `maxQueryString`/`maxUrl`, CDN or gateway limits) can reject a callback carrying a long
-authorization code. `response_mode` is a per-request parameter, not part of the app registration, so
-no change to a customer's identity provider configuration is required.
+**fragment**. Fragments are never sent to the server, so no server-side URL or query string length
+limit can reject a callback carrying a long authorization code. `response_mode` is a per-request
+parameter, not part of the app registration, so no change to a customer's identity provider
+configuration is required.
 
 Providers that do not implement `response_mode` ignore it and answer in the query string; the bridge
 parses **both** the fragment and the query string, so those providers keep working.
