@@ -202,7 +202,6 @@ export const OAuthService = {
 
     const oauthClient = new ClientOAuth2({
       clientId: credentials.clientId,
-      accessTokenUri: credentials.tokenUrl,
       authorizationUri: credentials.authorizationUrl,
       redirectUri: backendUrl,
       scopes: credentials.supportedScopes,
@@ -237,6 +236,10 @@ export const OAuthService = {
     credentials: Oauth2Credentials,
     useProxy?: boolean
   ): Promise<string | undefined> {
+    if (!credentials.tokenUrl) {
+      throw new Error('Authentication configuration does not include a token endpoint.');
+    }
+
     const codeVerifier = generateRandomString(64);
     const challengeMethod = crypto.subtle ? 'S256' : 'plain';
     const state = uuid.v4();

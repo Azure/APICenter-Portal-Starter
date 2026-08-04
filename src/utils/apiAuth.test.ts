@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { ApiAuthType, OAuthGrantTypes } from '@/types/apiAuth';
-import { getApiKeyCredentials, isUsableOauthScheme, MISSING_CREDENTIALS_ERROR } from './apiAuth';
+import { getApiKeyCredentials, getUsableOauthScheme, isUsableOauthScheme, MISSING_CREDENTIALS_ERROR } from './apiAuth';
 
 describe('getApiKeyCredentials', () => {
   it('returns credentials only when every API-key field is present', () => {
@@ -33,6 +33,34 @@ describe('isUsableOauthScheme', () => {
     ).toBe(true);
   });
 
+  it('accepts an implicit-only OAuth configuration without a token endpoint', () => {
+    expect(
+      isUsableOauthScheme({
+        securityScheme: ApiAuthType.oauth2,
+        oauth2: {
+          clientId: 'portal-client',
+          authorizationUrl: 'https://login.example.test/authorize',
+          supportedScopes: ['openid'],
+          supportedFlows: [OAuthGrantTypes.implicit],
+        },
+      })
+    ).toBe(true);
+  });
+
+  it('rejects a code-only OAuth configuration without a token endpoint', () => {
+    expect(
+      isUsableOauthScheme({
+        securityScheme: ApiAuthType.oauth2,
+        oauth2: {
+          clientId: 'portal-client',
+          authorizationUrl: 'https://login.example.test/authorize',
+          supportedScopes: ['openid'],
+          supportedFlows: [OAuthGrantTypes.authorizationCodeWithPkce],
+        },
+      })
+    ).toBe(false);
+  });
+
   it('rejects an OAuth response that omits required public configuration', () => {
     expect(
       isUsableOauthScheme({
@@ -45,6 +73,32 @@ describe('isUsableOauthScheme', () => {
         },
       })
     ).toBe(false);
+  });
+
+  it('exposes only the implicit flow when mixed browser flows omit a token endpoint', () => {
+    expect(
+      getUsableOauthScheme({
+        securityScheme: ApiAuthType.oauth2,
+        oauth2: {
+          clientId: 'portal-client',
+          authorizationUrl: 'https://login.example.test/authorize',
+          supportedScopes: ['openid'],
+          supportedFlows: [
+            OAuthGrantTypes.authorizationCode,
+            OAuthGrantTypes.authorizationCodeWithPkce,
+            OAuthGrantTypes.implicit,
+          ],
+        },
+      })
+    ).toEqual({
+      securityScheme: ApiAuthType.oauth2,
+      oauth2: {
+        clientId: 'portal-client',
+        authorizationUrl: 'https://login.example.test/authorize',
+        supportedScopes: ['openid'],
+        supportedFlows: [OAuthGrantTypes.implicit],
+      },
+    });
   });
 
   it('rejects OAuth flows that are unsupported by the browser client', () => {

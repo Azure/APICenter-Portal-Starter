@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useRecoilValue } from 'recoil';
 import { useQuery } from '@tanstack/react-query';
 import { ApiAuthCredentials, ApiAuthScheme, ApiAuthType, OAuthGrantTypes } from '@/types/apiAuth';
@@ -7,7 +7,12 @@ import { useApiService } from '@/hooks/useApiService';
 import { OAuthService } from '@/services/OAuthService';
 import { ApiDefinitionId } from '@/types/apiDefinition';
 import { QueryKeys } from '@/constants/QueryKeys';
-import { getApiKeyCredentials, isUsableOauthScheme, MISSING_CREDENTIALS_ERROR } from '@/utils/apiAuth';
+import {
+  getApiKeyCredentials,
+  getUsableOauthScheme,
+  isUsableOauthScheme,
+  MISSING_CREDENTIALS_ERROR,
+} from '@/utils/apiAuth';
 
 interface ReturnType {
   scheme?: ApiAuthScheme;
@@ -30,6 +35,15 @@ export function useApiAuthorization({ definitionId, schemeName }: Props): Return
   const ApiService = useApiService();
   const isAuthenticated = useRecoilValue(isAuthenticatedAtom);
 
+  useEffect(() => {
+    if (isAuthenticated && schemeName) {
+      return;
+    }
+
+    setCredentials(undefined);
+    setAuthError(undefined);
+  }, [isAuthenticated, schemeName]);
+
   const schemeQuery = useQuery<ApiAuthScheme | undefined>({
     queryKey: [QueryKeys.ApiAuthScheme, definitionId, schemeName],
     queryFn: async () => {
@@ -49,8 +63,9 @@ export function useApiAuthorization({ definitionId, schemeName }: Props): Return
         return scheme;
       }
 
-      if (isUsableOauthScheme(scheme)) {
-        return scheme;
+      const oauthScheme = getUsableOauthScheme(scheme);
+      if (oauthScheme) {
+        return oauthScheme;
       }
 
       setAuthError(MISSING_CREDENTIALS_ERROR);
@@ -72,7 +87,7 @@ export function useApiAuthorization({ definitionId, schemeName }: Props): Return
         return;
       }
 
-      if (!OAuthGrantTypes[oauthFlow]) {
+      if (!Object.values(OAuthGrantTypes).includes(oauthFlow as OAuthGrantTypes)) {
         throw new Error(`Unsupported grant type: ${oauthFlow}`);
       }
 
@@ -80,7 +95,7 @@ export function useApiAuthorization({ definitionId, schemeName }: Props): Return
         setCredentials(undefined);
         setAuthError(undefined);
         setIsAuthenticating(true);
-        const token = await OAuthService.authenticate(schemeQuery.data.oauth2, OAuthGrantTypes[oauthFlow]);
+        const token = await OAuthService.authenticate(schemeQuery.data.oauth2, oauthFlow as OAuthGrantTypes);
         if (token !== undefined) {
           setCredentials({ name: 'Authorization', value: token, in: 'header', createdAt: new Date() });
         }
