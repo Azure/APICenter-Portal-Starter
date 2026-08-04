@@ -9,13 +9,27 @@ export interface MetadataSchema {
 }
 
 /**
+ * Enumerated value definition used by `oneOf` in a JSON schema.
+ */
+export interface SchemaOneOfEntry {
+  const?: string;
+  description?: string;
+}
+
+/**
  * Parsed schema content from the JSON schema string.
  */
 export interface ParsedMetadataSchema {
   type?: string;
   title?: string;
   enum?: string[];
-  oneOf?: Array<{ const?: string; description?: string }>;
+  oneOf?: SchemaOneOfEntry[];
+  /** Present for `type: 'array'` (multi-select) properties. */
+  items?: {
+    type?: string;
+    enum?: string[];
+    oneOf?: SchemaOneOfEntry[];
+  };
   [key: string]: unknown;
 }
 
@@ -27,4 +41,6 @@ export interface MetadataSchemaWithTitle {
   title: string;
   type?: string;
   options?: Array<{ value: string; label: string }>;
+  /** True when the property holds an array of values (multi-select). */
+  isMultiValue?: boolean;
 }

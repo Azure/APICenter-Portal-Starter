@@ -47,6 +47,14 @@ export const ApiService: IApiService = {
             if (filter.type === 'kind' && filter.value === 'api') {
               return STANDALONE_KINDS.map((k) => `kind ne '${k}'`).join(' and ');
             }
+            // Multi-value (array) properties require an OData lambda operator to match
+            // against any element of the collection.
+            if (filter.isMultiValue) {
+              if (filter.operator === 'contains') {
+                return `${filter.type}/any(t: contains(t, '${filter.value}'))`;
+              }
+              return `${filter.type}/any(t: t eq '${filter.value}')`;
+            }
             if (filter.operator === 'contains') {
               return `contains(${filter.type}, '${filter.value}')`;
             }

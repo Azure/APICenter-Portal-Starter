@@ -29,9 +29,20 @@ export const ApiList: React.FC = () => {
   const searchFilters = useSearchFilters();
   const searchQuery = useSearchQuery();
   const navigate = useNavigate();
+  // Enrich active filters with schema info (e.g. multi-value/array properties) so the
+  // service can build the correct OData query. This is derived per-render and kept out
+  // of the atom to avoid interfering with filter equality checks (isActive/remove).
+  const enrichedFilters = useMemo(
+    () =>
+      searchFilters.activeFilters.map((filter) => ({
+        ...filter,
+        isMultiValue: searchFilters.metadata[filter.type]?.isMultiValue,
+      })),
+    [searchFilters.activeFilters, searchFilters.metadata]
+  );
   const apis = useApis({
     search: searchQuery.search,
-    filters: searchFilters.activeFilters,
+    filters: enrichedFilters,
     isSemanticSearch: searchQuery.isSemanticSearch,
   });
 

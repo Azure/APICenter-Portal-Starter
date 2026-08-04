@@ -26,6 +26,7 @@ export const AddFilterDropdown: React.FC = () => {
   const [selectedFilterType, setSelectedFilterType] = useState<FilterType | ''>('');
   const [selectedOperator, setSelectedOperator] = useState<FilterOperator>('contains');
   const [selectedValue, setSelectedValue] = useState('');
+  const [selectedValues, setSelectedValues] = useState<string[]>([]);
 
   const filterTypes = Object.entries(searchFilters.metadata).map(([key, meta]) => ({
     key: key as FilterType,
@@ -36,25 +37,45 @@ export const AddFilterDropdown: React.FC = () => {
     ? searchFilters.metadata[selectedFilterType].options
     : [];
 
-  // Built-in filters (asset type, lifecycle) are known enums, so only exact-match (Equals) makes sense.
-  const isEnumFilter = selectedFilterType ? selectedFilterType in ApiFilterParameters : false;
+  // Multi-value (array) properties allow selecting several values at once via checkboxes.
+  const isMultiValue = selectedFilterType
+    ? Boolean(searchFilters.metadata[selectedFilterType]?.isMultiValue)
+    : false;
 
-  const handleApply = useCallback(() => {
-    if (selectedFilterType && selectedValue) {
-      searchFilters.add({ type: selectedFilterType, value: selectedValue, operator: selectedOperator });
-      setSelectedFilterType('');
-      setSelectedOperator('contains');
-      setSelectedValue('');
-      setIsOpen(false);
-    }
-  }, [searchFilters, selectedFilterType, selectedOperator, selectedValue]);
+  // Filters with a fixed value set (built-in enums or custom enum/multi-select metadata)
+  // only support exact matching, so we hide the "Contains" operator for them.
+  const isEnumFilter = selectedFilterType
+    ? selectedFilterType in ApiFilterParameters || availableValues.length > 0
+    : false;
 
-  const handleCancel = useCallback(() => {
+  const resetSelection = useCallback(() => {
     setSelectedFilterType('');
     setSelectedOperator('contains');
     setSelectedValue('');
-    setIsOpen(false);
+    setSelectedValues([]);
   }, []);
+
+  const handleApply = useCallback(() => {
+    if (!selectedFilterType) return;
+
+    if (isMultiValue) {
+      if (!selectedValues.length) return;
+      selectedValues
+        .filter((value) => !searchFilters.isActive({ type: selectedFilterType, value, operator: 'eq' }))
+        .forEach((value) => searchFilters.add({ type: selectedFilterType, value, operator: 'eq' }));
+    } else {
+      if (!selectedValue) return;
+      searchFilters.add({ type: selectedFilterType, value: selectedValue, operator: selectedOperator });
+    }
+
+    resetSelection();
+    setIsOpen(false);
+  }, [searchFilters, selectedFilterType, selectedOperator, selectedValue, selectedValues, isMultiValue, resetSelection]);
+
+  const handleCancel = useCallback(() => {
+    resetSelection();
+    setIsOpen(false);
+  }, [resetSelection]);
 
   return (
     <Popover open={isOpen} onOpenChange={(_, data) => setIsOpen(data.open)} positioning="below-end">
@@ -75,7 +96,10 @@ export const AddFilterDropdown: React.FC = () => {
               const type = data.optionValue as FilterType;
               setSelectedFilterType(type);
               setSelectedValue('');
-              if (type in ApiFilterParameters) {
+              setSelectedValues([]);
+              const hasFixedOptions =
+                type in ApiFilterParameters || (searchFilters.metadata[type]?.options.length ?? 0) > 0;
+              if (hasFixedOptions) {
                 setSelectedOperator('eq');
               }
             }}
@@ -99,7 +123,21 @@ export const AddFilterDropdown: React.FC = () => {
 
         <div className={styles.field}>
           <Label>Value</Label>
-          {selectedFilterType && availableValues.length && selectedOperator === 'eq' ? (
+          {selectedFilterType && isMultiValue ? (
+            <Dropdown
+              multiselect
+              placeholder="Select values"
+              selectedOptions={selectedValues}
+              value={selectedValues
+                .map((v) => availableValues.find((o) => o.value === v)?.label ?? v)
+                .join(', ')}
+              onOptionSelect={(_, data) => setSelectedValues(data.selectedOptions)}
+            >
+              {availableValues.map((opt) => (
+                <Option key={opt.value} value={opt.value}>{opt.label}</Option>
+              ))}
+            </Dropdown>
+          ) : selectedFilterType && availableValues.length && selectedOperator === 'eq' ? (
             <Dropdown
               placeholder="Search"
               value={selectedValue ? availableValues.find((v) => v.value === selectedValue)?.label ?? '' : ''}
@@ -120,7 +158,11 @@ export const AddFilterDropdown: React.FC = () => {
         </div>
 
         <div className={styles.actions}>
-          <Button appearance="primary" onClick={handleApply} disabled={!selectedFilterType || !selectedValue}>
+          <Button
+            appearance="primary"
+            onClick={handleApply}
+            disabled={!selectedFilterType || (isMultiValue ? !selectedValues.length : !selectedValue)}
+          >
             Apply
           </Button>
           <Button appearance="secondary" onClick={handleCancel}>

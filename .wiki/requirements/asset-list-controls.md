@@ -25,5 +25,11 @@
 
 ### Custom Metadata Properties
 - Custom properties from `/metadataSchemas` are included in the filter dropdown alongside built-in filters (API type, Lifecycle).
-- Only metadata schemas with **enum** values are shown as filter options.
+- Metadata schemas with a fixed value set are shown as filter options. Supported shapes:
+  - Top-level `enum` values.
+  - Top-level `oneOf` entries (`const` value, optional `description` label).
+  - `boolean` type (rendered as Yes/No).
+  - **Multi-select** (`type: "array"`) where the value set is defined on `items.enum` or `items.oneOf`.
+- Multi-select (array) properties are matched with an OData lambda operator, e.g. `customProperties/tags/any(t: t eq 'Bug')`.
 - Filter keys for custom properties use the format `customProperties/{name}`.
+
