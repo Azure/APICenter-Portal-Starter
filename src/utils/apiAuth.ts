@@ -1,6 +1,11 @@
-import { ApiAuthCredentials, ApiAuthType, OAuthGrantTypes, Oauth2Scheme } from '@/types/apiAuth';
+import { ApiAuthCredentials, ApiAuthScheme, ApiAuthType, OAuthGrantTypes, Oauth2Scheme } from '@/types/apiAuth';
 
 type ApiKeyCredentials = Omit<ApiAuthCredentials, 'createdAt'>;
+
+interface QueryDerivedApiAuthState {
+  credentials?: ApiAuthCredentials;
+  authError?: string;
+}
 
 export const MISSING_CREDENTIALS_ERROR =
   'Credentials are unavailable for the current user. The request will be sent without authentication.';
@@ -57,6 +62,32 @@ export function getApiKeyCredentials(scheme: unknown): ApiKeyCredentials | undef
     value: candidate.apiKey.value,
     in: candidate.apiKey.in,
   };
+}
+
+export function getResolvedApiAuthScheme(scheme: unknown): ApiAuthScheme | null {
+  if (getApiKeyCredentials(scheme)) {
+    return scheme as ApiAuthScheme;
+  }
+
+  return getUsableOauthScheme(scheme) ?? null;
+}
+
+export function getApiKeyQueryAuthState(schemeName: string | undefined, scheme: unknown): QueryDerivedApiAuthState {
+  if (!schemeName) {
+    return {};
+  }
+
+  const apiKey = getApiKeyCredentials(scheme);
+  if (apiKey) {
+    return {
+      credentials: {
+        ...apiKey,
+        createdAt: new Date(),
+      },
+    };
+  }
+
+  return scheme === null ? { authError: MISSING_CREDENTIALS_ERROR } : {};
 }
 
 export function isUsableOauthScheme(scheme: unknown): scheme is Oauth2Scheme {

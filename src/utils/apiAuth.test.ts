@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { ApiAuthType, OAuthGrantTypes } from '@/types/apiAuth';
-import { getApiKeyCredentials, getUsableOauthScheme, isUsableOauthScheme, MISSING_CREDENTIALS_ERROR } from './apiAuth';
+import {
+  getApiKeyCredentials,
+  getApiKeyQueryAuthState,
+  getResolvedApiAuthScheme,
+  getUsableOauthScheme,
+  isUsableOauthScheme,
+  MISSING_CREDENTIALS_ERROR,
+} from './apiAuth';
 
 describe('getApiKeyCredentials', () => {
   it('returns credentials only when every API-key field is present', () => {
@@ -114,6 +121,62 @@ describe('isUsableOauthScheme', () => {
         },
       })
     ).toBe(false);
+  });
+});
+
+describe('getResolvedApiAuthScheme', () => {
+  it('preserves a valid API-key response for cached query reuse', () => {
+    const scheme = {
+      securityScheme: ApiAuthType.apiKey,
+      apiKey: { name: 'X-API-Key', value: 'secret', in: 'header' },
+    } as const;
+
+    expect(getResolvedApiAuthScheme(scheme)).toBe(scheme);
+  });
+
+  it('returns the explicit unavailable sentinel when an API-key response omits credentials', () => {
+    expect(getResolvedApiAuthScheme({ securityScheme: ApiAuthType.apiKey })).toBeNull();
+  });
+});
+
+describe('getApiKeyQueryAuthState', () => {
+  const apiKeyScheme = {
+    securityScheme: ApiAuthType.apiKey,
+    apiKey: { name: 'X-API-Key', value: 'secret', in: 'header' },
+  } as const;
+
+  it('leaves credentials and errors undefined when no auth option is active', () => {
+    expect(getApiKeyQueryAuthState(undefined, apiKeyScheme)).toEqual({});
+    expect(getApiKeyQueryAuthState(undefined, null)).toEqual({});
+  });
+
+  it('derives API-key credentials from the active query result', () => {
+    const authState = getApiKeyQueryAuthState('api-key', apiKeyScheme);
+
+    expect(authState.authError).toBeUndefined();
+    expect(authState.credentials).toMatchObject({
+      name: 'X-API-Key',
+      value: 'secret',
+      in: 'header',
+    });
+    expect(authState.credentials?.createdAt).toBeInstanceOf(Date);
+  });
+
+  it('returns the unavailable-credentials error only for the active null sentinel', () => {
+    expect(getApiKeyQueryAuthState('api-key', null)).toEqual({
+      authError: MISSING_CREDENTIALS_ERROR,
+    });
+    expect(
+      getApiKeyQueryAuthState('api-key', {
+        securityScheme: ApiAuthType.oauth2,
+        oauth2: {
+          clientId: 'portal-client',
+          authorizationUrl: 'https://login.example.test/authorize',
+          supportedScopes: ['openid'],
+          supportedFlows: [OAuthGrantTypes.implicit],
+        },
+      })
+    ).toEqual({});
   });
 });
 
