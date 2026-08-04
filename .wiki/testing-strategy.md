@@ -159,33 +159,17 @@ npm run lint-staged
 
 ---
 
-## Unit Testing (TODO: Implement)
+## Unit Tests
 
-### Recommended Framework
+**Tool**: Vitest 2.1.8.
 
-**Tool**: Vitest (fast, Vite-native, Jest-compatible API).
-
-**Why Vitest**:
-- Native ESM support
-- Fast watch mode
-- TypeScript support
-- React Testing Library integration
-
-**Installation**:
+**Run Command**:
 ```bash
-npm install -D vitest @testing-library/react @testing-library/jest-dom jsdom
+npm test
 ```
 
-**Configuration** (`vite.config.ts`):
-```typescript
-export default defineConfig({
-  test: {
-    globals: true,
-    environment: 'jsdom',
-    setupFiles: './src/test/setup.ts',
-  },
-});
-```
+Use unit tests for pure response-normalization and validation helpers. Keep malformed external
+payloads typed as `unknown` in tests so the runtime guard—not a TypeScript assertion—is verified.
 
 ---
 
