@@ -44,7 +44,7 @@ export function useApiAuthorization({ definitionId, schemeName }: Props): Return
     setAuthError(undefined);
   }, [isAuthenticated, schemeName]);
 
-  const schemeQuery = useQuery<ApiAuthScheme | undefined>({
+  const schemeQuery = useQuery<ApiAuthScheme | null>({
     queryKey: [QueryKeys.ApiAuthScheme, definitionId, schemeName],
     queryFn: async () => {
       setCredentials(undefined);
@@ -56,7 +56,7 @@ export function useApiAuthorization({ definitionId, schemeName }: Props): Return
         const apiKey = getApiKeyCredentials(scheme);
         if (!apiKey) {
           setAuthError(MISSING_CREDENTIALS_ERROR);
-          return undefined;
+          return null;
         }
 
         setCredentials({ ...apiKey, createdAt: new Date() });
@@ -69,7 +69,7 @@ export function useApiAuthorization({ definitionId, schemeName }: Props): Return
       }
 
       setAuthError(MISSING_CREDENTIALS_ERROR);
-      return undefined;
+      return null;
     },
     staleTime: Infinity,
     enabled: Boolean(isAuthenticated && definitionId.apiName && definitionId.versionName && schemeName),
@@ -109,7 +109,7 @@ export function useApiAuthorization({ definitionId, schemeName }: Props): Return
   );
 
   return {
-    scheme: schemeQuery.data,
+    scheme: schemeQuery.data ?? undefined,
     credentials,
     authError,
     isLoading: schemeQuery.isLoading || isAuthenticating,
