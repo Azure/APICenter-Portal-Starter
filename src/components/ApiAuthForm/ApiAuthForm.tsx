@@ -98,9 +98,7 @@ export const ApiAuthForm: React.FC<Props> = ({
     }
 
     let status = null;
-    if (authError) {
-      status = <div className={styles.error}>{authError}</div>;
-    } else if (credentials) {
+    if (credentials) {
       status = (
         <div className={styles.status}>
           Authenticated <TimeAgo date={credentials.createdAt} formatter={timeAgoFormatter} minPeriod={60} />
@@ -147,6 +145,8 @@ export const ApiAuthForm: React.FC<Props> = ({
       )}
 
       {isLoading && <Spinner className={styles.spinner} />}
+
+      {authError && <div className={styles.error}>{authError}</div>}
 
       {renderAuthBtn()}
     </div>

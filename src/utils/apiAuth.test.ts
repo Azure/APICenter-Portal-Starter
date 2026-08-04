@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { ApiAuthType, OAuthGrantTypes } from '@/types/apiAuth';
-import { getApiKeyCredentials, isUsableOauthScheme } from './apiAuth';
+import { getApiKeyCredentials, isUsableOauthScheme, MISSING_CREDENTIALS_ERROR } from './apiAuth';
 
 describe('getApiKeyCredentials', () => {
   it('returns credentials only when every API-key field is present', () => {
@@ -60,5 +60,13 @@ describe('isUsableOauthScheme', () => {
         },
       })
     ).toBe(false);
+  });
+});
+
+describe('MISSING_CREDENTIALS_ERROR', () => {
+  it('uses a stable message for omitted credentials', () => {
+    expect(MISSING_CREDENTIALS_ERROR).toBe(
+      'Credentials are unavailable for the current user. The request will be sent without authentication.'
+    );
   });
 });

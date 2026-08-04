@@ -2,6 +2,9 @@ import { ApiAuthCredentials, ApiAuthType, OAuthGrantTypes, Oauth2Scheme } from '
 
 type ApiKeyCredentials = Omit<ApiAuthCredentials, 'createdAt'>;
 
+export const MISSING_CREDENTIALS_ERROR =
+  'Credentials are unavailable for the current user. The request will be sent without authentication.';
+
 function isNonEmptyString(value: unknown): value is string {
   return typeof value === 'string' && value.trim().length > 0;
 }

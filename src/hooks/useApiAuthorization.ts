@@ -7,6 +7,7 @@ import { useApiService } from '@/hooks/useApiService';
 import { OAuthService } from '@/services/OAuthService';
 import { ApiDefinitionId } from '@/types/apiDefinition';
 import { QueryKeys } from '@/constants/QueryKeys';
+import { getApiKeyCredentials, isUsableOauthScheme, MISSING_CREDENTIALS_ERROR } from '@/utils/apiAuth';
 
 interface ReturnType {
   scheme?: ApiAuthScheme;
@@ -32,11 +33,28 @@ export function useApiAuthorization({ definitionId, schemeName }: Props): Return
   const schemeQuery = useQuery<ApiAuthScheme | undefined>({
     queryKey: [QueryKeys.ApiAuthScheme, definitionId, schemeName],
     queryFn: async () => {
+      setCredentials(undefined);
+      setAuthError(undefined);
+
       const scheme = await ApiService.getSecurityCredentials(definitionId, schemeName);
+
       if (scheme?.securityScheme === ApiAuthType.apiKey) {
-        setCredentials({ ...scheme.apiKey, createdAt: new Date() });
+        const apiKey = getApiKeyCredentials(scheme);
+        if (!apiKey) {
+          setAuthError(MISSING_CREDENTIALS_ERROR);
+          return undefined;
+        }
+
+        setCredentials({ ...apiKey, createdAt: new Date() });
+        return scheme;
       }
-      return scheme ?? null;
+
+      if (isUsableOauthScheme(scheme)) {
+        return scheme;
+      }
+
+      setAuthError(MISSING_CREDENTIALS_ERROR);
+      return undefined;
     },
     staleTime: Infinity,
     enabled: Boolean(isAuthenticated && definitionId.apiName && definitionId.versionName && schemeName),
@@ -48,8 +66,10 @@ export function useApiAuthorization({ definitionId, schemeName }: Props): Return
         return;
       }
 
-      if (schemeQuery.data?.securityScheme !== ApiAuthType.oauth2) {
-        throw new Error('Currently selected scheme is not OAuth2');
+      if (!isUsableOauthScheme(schemeQuery.data)) {
+        setCredentials(undefined);
+        setAuthError(MISSING_CREDENTIALS_ERROR);
+        return;
       }
 
       if (!OAuthGrantTypes[oauthFlow]) {
