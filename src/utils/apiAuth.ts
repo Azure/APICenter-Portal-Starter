@@ -1,10 +1,16 @@
-import { ApiAuthCredentials, ApiAuthType, Oauth2Scheme } from '@/types/apiAuth';
+import { ApiAuthCredentials, ApiAuthType, OAuthGrantTypes, Oauth2Scheme } from '@/types/apiAuth';
 
 type ApiKeyCredentials = Omit<ApiAuthCredentials, 'createdAt'>;
 
 function isNonEmptyString(value: unknown): value is string {
   return typeof value === 'string' && value.trim().length > 0;
 }
+
+const supportedBrowserFlows = [
+  OAuthGrantTypes.implicit,
+  OAuthGrantTypes.authorizationCode,
+  OAuthGrantTypes.authorizationCodeWithPkce,
+];
 
 export function getApiKeyCredentials(scheme: unknown): ApiKeyCredentials | undefined {
   if (typeof scheme !== 'object' || scheme === null) {
@@ -57,6 +63,7 @@ export function isUsableOauthScheme(scheme: unknown): scheme is Oauth2Scheme {
     candidate.oauth2.supportedScopes.every(isNonEmptyString) &&
     Array.isArray(candidate.oauth2?.supportedFlows) &&
     candidate.oauth2.supportedFlows.length > 0 &&
-    candidate.oauth2.supportedFlows.every(isNonEmptyString)
+    candidate.oauth2.supportedFlows.every(isNonEmptyString) &&
+    candidate.oauth2.supportedFlows.some((flow) => supportedBrowserFlows.includes(flow as OAuthGrantTypes))
   );
 }

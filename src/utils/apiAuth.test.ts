@@ -46,4 +46,19 @@ describe('isUsableOauthScheme', () => {
       })
     ).toBe(false);
   });
+
+  it('rejects OAuth flows that are unsupported by the browser client', () => {
+    expect(
+      isUsableOauthScheme({
+        securityScheme: ApiAuthType.oauth2,
+        oauth2: {
+          clientId: 'portal-client',
+          authorizationUrl: 'https://login.example.test/authorize',
+          tokenUrl: 'https://login.example.test/token',
+          supportedScopes: ['openid'],
+          supportedFlows: ['client_credentials'],
+        },
+      })
+    ).toBe(false);
+  });
 });
