@@ -3,19 +3,31 @@ import { useQuery } from '@tanstack/react-query';
 import { isAuthenticatedAtom } from '@/atoms/isAuthenticatedAtom';
 import { useApiService } from '@/hooks/useApiService';
 import { QueryKeys } from '@/constants/QueryKeys';
-import { MetadataSchemaWithTitle, ParsedMetadataSchema } from '@/types/metadataSchema';
+import { MetadataSchemaWithTitle, ParsedMetadataSchema, SchemaOneOfEntry } from '@/types/metadataSchema';
 
-function extractOptions(parsed: ParsedMetadataSchema): Array<{ value: string; label: string }> | undefined {
-  if (parsed.enum?.length) {
-    return parsed.enum.map((val) => ({ value: val, label: val }));
+type FilterOption = { value: string; label: string };
+
+function optionsFromEnum(values?: string[]): FilterOption[] | undefined {
+  if (!values?.length) return undefined;
+  return values.map((val) => ({ value: val, label: val }));
+}
+
+function optionsFromOneOf(oneOf?: SchemaOneOfEntry[]): FilterOption[] | undefined {
+  if (!oneOf?.length) return undefined;
+  const options = oneOf
+    .filter((entry) => entry.const != null)
+    .map((entry) => ({ value: entry.const!, label: entry.description || entry.const! }));
+  return options.length ? options : undefined;
+}
+
+function extractOptions(parsed: ParsedMetadataSchema): FilterOption[] | undefined {
+  // Multi-select: `type: 'array'` with the value set defined on `items`.
+  if (parsed.type === 'array' && parsed.items) {
+    return optionsFromEnum(parsed.items.enum) ?? optionsFromOneOf(parsed.items.oneOf);
   }
 
-  if (parsed.oneOf?.length) {
-    const options = parsed.oneOf
-      .filter((entry) => entry.const != null)
-      .map((entry) => ({ value: entry.const!, label: entry.description || entry.const! }));
-    if (options.length) return options;
-  }
+  const direct = optionsFromEnum(parsed.enum) ?? optionsFromOneOf(parsed.oneOf);
+  if (direct) return direct;
 
   if (parsed.type === 'boolean') {
     return [
@@ -50,6 +62,7 @@ export function useMetadataSchemas() {
             title: parsed.title || schema.name,
             type: parsed.type,
             options,
+            isMultiValue: parsed.type === 'array',
           });
         } catch {
           // If parsing fails, use the name as the title

@@ -53,6 +53,7 @@ export function useSearchFilters(): ReturnType {
         combined[filterKey] = {
           label: schema.title,
           options: schema.options || [],
+          isMultiValue: schema.isMultiValue,
         };
       }
     }
