@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { ApiAuthType, OAuthGrantTypes } from '@/types/apiAuth';
 import {
+  getActiveOauthAuthState,
+  getApiDefinitionKey,
   getApiKeyCredentials,
   getApiKeyQueryAuthState,
   getResolvedApiAuthScheme,
@@ -8,6 +10,46 @@ import {
   isUsableOauthScheme,
   MISSING_CREDENTIALS_ERROR,
 } from './apiAuth';
+
+describe('getApiDefinitionKey', () => {
+  it('distinguishes definitions with the same auth scheme across resource types', () => {
+    expect(
+      getApiDefinitionKey({
+        apiName: 'orders',
+        versionName: 'v1',
+        definitionName: 'openapi',
+        resourceType: 'apis',
+      })
+    ).toBe('apis/orders/v1/openapi');
+
+    expect(
+      getApiDefinitionKey({
+        apiName: 'orders',
+        versionName: 'v1',
+        definitionName: 'openapi',
+        resourceType: 'models',
+      })
+    ).toBe('models/orders/v1/openapi');
+  });
+});
+
+describe('getActiveOauthAuthState', () => {
+  it('does not expose OAuth state owned by another definition', () => {
+    expect(
+      getActiveOauthAuthState('apis/orders/v1/openapi', 'oauth', {
+        definitionKey: 'apis/inventory/v1/openapi',
+        schemeName: 'oauth',
+        credentials: {
+          name: 'Authorization',
+          value: 'token-for-inventory',
+          in: 'header',
+          createdAt: new Date(),
+        },
+        isAuthenticating: false,
+      })
+    ).toBeUndefined();
+  });
+});
 
 describe('getApiKeyCredentials', () => {
   it('returns credentials only when every API-key field is present', () => {

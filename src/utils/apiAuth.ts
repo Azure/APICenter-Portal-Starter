@@ -1,4 +1,5 @@
 import { ApiAuthCredentials, ApiAuthScheme, ApiAuthType, OAuthGrantTypes, Oauth2Scheme } from '@/types/apiAuth';
+import { ApiDefinitionId } from '@/types/apiDefinition';
 
 type ApiKeyCredentials = Omit<ApiAuthCredentials, 'createdAt'>;
 
@@ -7,8 +8,47 @@ interface QueryDerivedApiAuthState {
   authError?: string;
 }
 
+export interface OauthAuthState {
+  definitionKey: string;
+  schemeName?: string;
+  credentials?: ApiAuthCredentials;
+  authError?: string;
+  isAuthenticating: boolean;
+}
+
 export const MISSING_CREDENTIALS_ERROR =
   'Credentials are unavailable for the current user. The request will be sent without authentication.';
+
+/**
+ * Builds a stable identity for state that belongs to one API definition.
+ *
+ * @param definitionId - The API definition whose authorization state is being tracked.
+ * @returns A stable definition identity including its resource type.
+ */
+export function getApiDefinitionKey({
+  apiName,
+  versionName,
+  definitionName,
+  resourceType = 'apis',
+}: ApiDefinitionId): string {
+  return [resourceType, apiName, versionName, definitionName].join('/');
+}
+
+/**
+ * Returns OAuth state only when it belongs to the currently rendered definition and auth option.
+ *
+ * @param definitionKey - The definition currently rendered by the authorization form.
+ * @param schemeName - The authentication scheme currently selected by the user.
+ * @param oauthState - Transient OAuth state from a pending or completed authentication flow.
+ * @returns OAuth state for the active authorization context, or `undefined` when it is stale.
+ */
+export function getActiveOauthAuthState(
+  definitionKey: string,
+  schemeName: string | undefined,
+  oauthState: OauthAuthState | undefined
+): OauthAuthState | undefined {
+  return oauthState?.definitionKey === definitionKey && oauthState.schemeName === schemeName ? oauthState : undefined;
+}
 
 function isNonEmptyString(value: unknown): value is string {
   return typeof value === 'string' && value.trim().length > 0;

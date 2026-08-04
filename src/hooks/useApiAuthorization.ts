@@ -7,7 +7,14 @@ import { useApiService } from '@/hooks/useApiService';
 import { OAuthService } from '@/services/OAuthService';
 import { ApiDefinitionId } from '@/types/apiDefinition';
 import { QueryKeys } from '@/constants/QueryKeys';
-import { getApiKeyQueryAuthState, getResolvedApiAuthScheme, isUsableOauthScheme } from '@/utils/apiAuth';
+import {
+  getApiDefinitionKey,
+  getActiveOauthAuthState,
+  getApiKeyQueryAuthState,
+  getResolvedApiAuthScheme,
+  isUsableOauthScheme,
+  OauthAuthState,
+} from '@/utils/apiAuth';
 
 interface ReturnType {
   scheme?: ApiAuthScheme;
@@ -23,10 +30,14 @@ interface Props {
 }
 
 export function useApiAuthorization({ definitionId, schemeName }: Props): ReturnType {
-  const [oauthCredentials, setOauthCredentials] = useState<ApiAuthCredentials | undefined>();
-  const [oauthAuthError, setOauthAuthError] = useState<string | undefined>();
-  const [isAuthenticating, setIsAuthenticating] = useState(false);
+  const activeDefinitionKey = getApiDefinitionKey(definitionId);
+  const [oauthState, setOauthState] = useState<OauthAuthState>({
+    definitionKey: activeDefinitionKey,
+    schemeName,
+    isAuthenticating: false,
+  });
   const activeSchemeNameRef = useRef<string | undefined>(schemeName);
+  const activeDefinitionKeyRef = useRef(activeDefinitionKey);
   const oauthRequestIdRef = useRef(0);
 
   const ApiService = useApiService();
@@ -35,11 +46,14 @@ export function useApiAuthorization({ definitionId, schemeName }: Props): Return
 
   useEffect(() => {
     activeSchemeNameRef.current = schemeName;
+    activeDefinitionKeyRef.current = activeDefinitionKey;
     oauthRequestIdRef.current += 1;
-    setOauthCredentials(undefined);
-    setOauthAuthError(undefined);
-    setIsAuthenticating(false);
-  }, [isAuthenticated, schemeName]);
+    setOauthState({
+      definitionKey: activeDefinitionKey,
+      schemeName,
+      isAuthenticating: false,
+    });
+  }, [activeDefinitionKey, isAuthenticated, schemeName]);
 
   const schemeQuery = useQuery<ApiAuthScheme | null>({
     queryKey: [QueryKeys.ApiAuthScheme, definitionId, schemeName],
@@ -68,44 +82,67 @@ export function useApiAuthorization({ definitionId, schemeName }: Props): Return
       }
 
       const activeSchemeName = schemeName;
+      const definitionKey = activeDefinitionKey;
       const requestId = oauthRequestIdRef.current + 1;
       oauthRequestIdRef.current = requestId;
+      const isActiveOauthRequest = (): boolean =>
+        oauthRequestIdRef.current === requestId &&
+        activeSchemeNameRef.current === activeSchemeName &&
+        activeDefinitionKeyRef.current === definitionKey;
 
       try {
-        setOauthCredentials(undefined);
-        setOauthAuthError(undefined);
-        setIsAuthenticating(true);
+        setOauthState({
+          definitionKey,
+          schemeName: activeSchemeName,
+          isAuthenticating: true,
+        });
         const token = await OAuthService.authenticate(schemeQuery.data.oauth2, oauthFlow as OAuthGrantTypes);
 
-        if (oauthRequestIdRef.current !== requestId || activeSchemeNameRef.current !== activeSchemeName) {
+        if (!isActiveOauthRequest()) {
           return;
         }
 
         if (token !== undefined) {
-          setOauthCredentials({ name: 'Authorization', value: token, in: 'header', createdAt: new Date() });
+          setOauthState({
+            definitionKey,
+            schemeName: activeSchemeName,
+            credentials: { name: 'Authorization', value: token, in: 'header', createdAt: new Date() },
+            isAuthenticating: true,
+          });
         }
       } catch (e) {
-        if (oauthRequestIdRef.current !== requestId || activeSchemeNameRef.current !== activeSchemeName) {
+        if (!isActiveOauthRequest()) {
           return;
         }
 
-        setOauthAuthError(e.message);
+        setOauthState({
+          definitionKey,
+          schemeName: activeSchemeName,
+          authError: e.message,
+          isAuthenticating: true,
+        });
       } finally {
-        if (oauthRequestIdRef.current === requestId && activeSchemeNameRef.current === activeSchemeName) {
-          setIsAuthenticating(false);
+        if (isActiveOauthRequest()) {
+          setOauthState((currentState) => ({
+            ...currentState,
+            isAuthenticating: false,
+          }));
         }
       }
     },
-    [schemeName, schemeQuery.data, schemeQuery.isLoading]
+    [activeDefinitionKey, schemeName, schemeQuery.data, schemeQuery.isLoading]
   );
 
   const scheme = schemeQuery.data ?? undefined;
+  const activeOauthState = getActiveOauthAuthState(activeDefinitionKey, schemeName, oauthState);
 
   return {
     scheme,
-    credentials: scheme?.securityScheme === ApiAuthType.oauth2 ? oauthCredentials : apiKeyQueryAuthState.credentials,
-    authError: scheme?.securityScheme === ApiAuthType.oauth2 ? oauthAuthError : apiKeyQueryAuthState.authError,
-    isLoading: schemeQuery.isLoading || isAuthenticating,
+    credentials:
+      scheme?.securityScheme === ApiAuthType.oauth2 ? activeOauthState?.credentials : apiKeyQueryAuthState.credentials,
+    authError:
+      scheme?.securityScheme === ApiAuthType.oauth2 ? activeOauthState?.authError : apiKeyQueryAuthState.authError,
+    isLoading: schemeQuery.isLoading || activeOauthState?.isAuthenticating === true,
     authenticateWithOauth,
   };
 }
