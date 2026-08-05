@@ -8,7 +8,8 @@
         "build": "tsc && vite build",
         "eslint": "eslint .",
         "stylelint": "stylelint \"./src/**/*.{css,scss}\"",
-        "lint": "npm run eslint && npm run stylelint"
+        "lint": "npm run eslint && npm run stylelint",
+        "test": "vitest run"
     },
     "dependencies": {
         "@azure/msal-browser": "3.13.0",
@@ -45,6 +46,7 @@
         "@eslint/eslintrc": "3.2.0",
         "@eslint/js": "9.17.0",
         "@stylistic/eslint-plugin": "2.12.1",
+        "@testing-library/react": "^16.3.2",
         "@types/lodash": "4.17.14",
         "@types/memoizee": "0.4.11",
         "@types/react": "18.3.1",
@@ -58,6 +60,7 @@
         "eslint-plugin-react": "7.37.2",
         "eslint-plugin-react-hooks": "5.1.0",
         "eslint-plugin-storybook": "0.11.1",
+        "jsdom": "^26.1.0",
         "prettier": "3.4.2",
         "sass-embedded": "1.83.0",
         "stylelint": "16.13.2",
@@ -66,7 +69,8 @@
         "stylelint-order": "6.0.4",
         "typescript": "5.7.2",
         "vite": "6.0.5",
-        "vite-tsconfig-paths": "5.1.4"
+        "vite-tsconfig-paths": "5.1.4",
+        "vitest": "2.1.8"
     },
     "engines": {
         "node": ">=18"

@@ -46,7 +46,7 @@ export interface ApiAuthCredentials {
 export interface Oauth2Credentials {
   clientId: string;
   authorizationUrl: string;
-  tokenUrl: string;
+  tokenUrl?: string;
   supportedScopes: string[];
   supportedFlows: OAuthGrantTypes[];
 }
