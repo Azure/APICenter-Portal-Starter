@@ -210,6 +210,17 @@ async function registerClient(metadata: McpServerAuthMetadata): Promise<Oauth2Cr
       return undefined;
     }
 
+    // The authorization and token endpoints come from the publisher-controlled discovery
+    // document. The authorization endpoint is later handed to window.open(), so a
+    // `javascript:` / `data:` scheme would execute in the portal's own origin (stored XSS,
+    // enabling token theft). Require safe HTTPS URLs and fail closed on anything else.
+    if (!validateMetadataUrl(metadata.authorization_endpoint) || !validateMetadataUrl(metadata.token_endpoint)) {
+      console.warn(
+        'Auth server metadata contains an unsafe authorization_endpoint or token_endpoint; rejecting OAuth credentials.'
+      );
+      return undefined;
+    }
+
     const registrationResponse = await mcpFetch(metadata.registration_endpoint, {
       method: 'POST',
       headers: {
