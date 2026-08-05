@@ -1,6 +1,6 @@
 import React from 'react';
 import { OpenAPI, OpenAPIV2, OpenAPIV3 } from 'openapi-types';
-import { Link } from '@coreai-microsoft/manifold-fluentui-react';
+import { Link } from '@coreai/fluentui-react';
 import { get } from 'lodash';
 import { WithRef, SchemaMetadata, OperationParameterMetadata } from '@/types/apiSpec';
 

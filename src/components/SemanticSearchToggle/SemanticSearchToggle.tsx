@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import classNames from 'classnames';
 import { Dismiss12Regular } from '@fluentui/react-icons';
-import { Button } from '@coreai-microsoft/manifold-fluentui-react';
+import { Button } from '@coreai/fluentui-react';
 import SemanticSearchSvg from '@/assets/semanticSearch.svg';
 import styles from './SemanticSearchToggle.module.scss';
 

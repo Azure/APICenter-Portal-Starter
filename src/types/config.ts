@@ -20,6 +20,19 @@ export interface Config {
   title: string;
 
   /**
+   * Optional homepage hero branding.
+   */
+  hero?: {
+    title?: string;
+    subtitle?: string;
+    bannerImage?: string;
+    logo?: string;
+    accentColor?: string;
+    backgroundColor?: string;
+    textColor?: string;
+  };
+
+  /**
    * The authentication settings. If not provided, anonymous access is enabled.
    */
   authentication?: MsalSettings;

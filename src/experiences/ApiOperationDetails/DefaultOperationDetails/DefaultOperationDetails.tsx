@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import { ParametersTable } from 'api-docs-ui';
-import { Button } from '@coreai-microsoft/manifold-fluentui-react';
+import { Button } from '@coreai/fluentui-react';
 import { ApiSpecReader, ApiSpecTypes } from '@/types/apiSpec';
 import ParamSchemaDefinition from '@/components/ParamSchemaDefinition';
 import HttpTestConsole from '@/experiences/HttpTestConsole';

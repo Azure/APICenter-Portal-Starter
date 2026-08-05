@@ -1,6 +1,13 @@
 {
   "dataApiHostName": "<service name>.data.<region>.azure-apicenter.ms",
   "title": "API portal",
+  "hero": {
+    "title": "API Center portal",
+    "subtitle": "Discover, govern, and consume your organization's APIs.",
+    "bannerImage": "/hero/my-banner.png",
+    "accentColor": "#a78bfa",
+    "textColor": "#ffffff"
+  },
   "authentication": {
       "clientId": "<client ID>",
       "tenantId": "<tenant ID>",

@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { Spinner } from '@coreai-microsoft/manifold-fluentui-react';
+import { Spinner } from '@coreai/fluentui-react';
 import { Cloud16Regular, Dismiss12Regular, History16Regular, SparkleRegular } from '@fluentui/react-icons';
 import { Link, useNavigate } from 'react-router-dom';
 import { useRecentSearches, RecentSearchData, RecentSearchType } from '@/hooks/useRecentSearches.ts';

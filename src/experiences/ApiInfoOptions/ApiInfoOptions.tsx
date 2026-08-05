@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo } from 'react';
-import { Button, Link, MessageBar, MessageBarBody, Spinner } from '@coreai-microsoft/manifold-fluentui-react';
+import { Button, Link, MessageBar, MessageBarBody, Spinner } from '@coreai/fluentui-react';
 import { ArrowDownloadRegular, Document20Regular, Link20Regular, OpenRegular } from '@fluentui/react-icons';
 import { useRecoilValue } from 'recoil';
 import DevPortalLogo from '@/assets/devPortal.png';

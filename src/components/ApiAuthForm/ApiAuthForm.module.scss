@@ -1,3 +1,4 @@
+/* stylelint-disable custom-property-pattern -- Fluent token names are camelCase. */
 .apiAuthForm {
   display: flex;
   flex-direction: column;
@@ -5,6 +6,12 @@
 
   .spinner {
     height: 58px;
+  }
+
+  .authStatusRow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
   }
 
   .error {

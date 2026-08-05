@@ -1,0 +1,394 @@
+// Styles for the hero banner. Isolated so the whole feature can be removed by
+// deleting this folder + the Home.tsx mount.
+
+.gradientLayer,
+.waveLayer {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.waveLayer {
+  transition: opacity 0.25s ease;
+}
+
+// Optional solid banner background (config.hero.backgroundColor).
+.colorLayer {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+// Custom banner image fills the hero slot (config.hero.bannerImage).
+.imageLayer {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+// Floating control panel
+.panel {
+  position: fixed;
+  z-index: 9999;
+  right: 16px;
+  bottom: 16px;
+  box-sizing: border-box;
+  width: 320px;
+  max-height: calc(100vh - 32px);
+  padding: 12px 14px 10px;
+  overflow-y: auto;
+  border: 1px solid rgb(255 255 255 / 12%);
+  border-radius: 12px;
+  background: rgb(20 16 34 / 92%);
+  box-shadow: 0 12px 40px rgb(0 0 0 / 45%);
+  color: #ece9f5;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-size: 12px;
+  backdrop-filter: blur(12px);
+}
+
+.reopen {
+  position: fixed;
+  z-index: 9999;
+  right: 16px;
+  bottom: 16px;
+  padding: 8px 14px;
+  border: 1px solid rgb(255 255 255 / 14%);
+  border-radius: 999px;
+  background: rgb(20 16 34 / 92%);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 40%);
+  color: #ece9f5;
+  font-size: 12px;
+  cursor: pointer;
+  backdrop-filter: blur(12px);
+}
+
+// Minimal floating control: dark/light toggle + dot color + hide.
+.miniPanel {
+  position: fixed;
+  z-index: 9999;
+  right: 16px;
+  bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border: 1px solid rgb(255 255 255 / 12%);
+  border-radius: 999px;
+  background: rgb(20 16 34 / 92%);
+  box-shadow: 0 12px 40px rgb(0 0 0 / 45%);
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  backdrop-filter: blur(12px);
+}
+
+.miniColor {
+  display: inline-flex;
+  cursor: pointer;
+
+  input[type='color'] {
+    width: 28px;
+    height: 24px;
+    padding: 0;
+    border: 1px solid rgb(255 255 255 / 20%);
+    border-radius: 6px;
+    background: none;
+    cursor: pointer;
+  }
+}
+
+.miniHide {
+  width: 24px;
+  height: 24px;
+  border: 1px solid rgb(255 255 255 / 16%);
+  border-radius: 6px;
+  background: rgb(255 255 255 / 6%);
+  color: #ece9f5;
+  font-size: 12px;
+  cursor: pointer;
+
+  &:hover {
+    background: rgb(255 255 255 / 14%);
+  }
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.title {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.headerBtns {
+  display: flex;
+  gap: 6px;
+
+  button {
+    padding: 3px 8px;
+    border: 1px solid rgb(255 255 255 / 16%);
+    border-radius: 6px;
+    background: rgb(255 255 255 / 6%);
+    color: #ece9f5;
+    font-size: 11px;
+    cursor: pointer;
+
+    &:hover {
+      background: rgb(255 255 255 / 14%);
+    }
+  }
+}
+
+.section {
+  padding: 10px 0;
+  border-top: 1px solid rgb(255 255 255 / 8%);
+}
+
+.rowLabel {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.muted {
+  color: rgb(236 233 245 / 55%);
+  font-weight: 400;
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  // stylelint-disable-next-line no-descending-specificity
+  > button {
+    flex: 0 0 auto;
+    width: 24px;
+    height: 24px;
+    border: 1px solid rgb(255 255 255 / 16%);
+    border-radius: 6px;
+    background: rgb(255 255 255 / 6%);
+    color: #ece9f5;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+
+    &:hover {
+      background: rgb(255 255 255 / 14%);
+    }
+  }
+}
+
+.thumbs {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+  flex: 1 1 auto;
+}
+
+.thumb {
+  padding: 0;
+  border: 1px solid rgb(255 255 255 / 14%);
+  border-radius: 4px;
+  background-color: #2a1a5e;
+  background-position: center;
+  background-size: cover;
+  cursor: pointer;
+  aspect-ratio: 16 / 9;
+
+  &:hover {
+    border-color: rgb(255 255 255 / 40%);
+  }
+}
+
+.thumbActive {
+  border-color: #9a6ff0;
+  box-shadow: 0 0 0 1px #9a6ff0;
+}
+
+.swatches {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.swatch {
+  height: 34px;
+  padding: 0;
+  border: 1px solid rgb(255 255 255 / 14%);
+  border-radius: 6px;
+  cursor: pointer;
+
+  &:hover {
+    border-color: rgb(255 255 255 / 40%);
+  }
+}
+
+.swatchActive {
+  border-color: #fff;
+  box-shadow: 0 0 0 2px rgb(154 111 240 / 80%);
+}
+
+// Segmented toggle (Presets / Custom / Solid, etc.)
+.segmented {
+  display: flex;
+  margin-bottom: 8px;
+  border: 1px solid rgb(255 255 255 / 16%);
+  border-radius: 7px;
+  overflow: hidden;
+
+  button {
+    flex: 1 1 0;
+    padding: 5px 6px;
+    border: 0;
+    border-left: 1px solid rgb(255 255 255 / 12%);
+    background: rgb(255 255 255 / 4%);
+    color: #ece9f5;
+    font-size: 11px;
+    text-transform: capitalize;
+    cursor: pointer;
+
+    &:first-child {
+      border-left: 0;
+    }
+
+    &:hover {
+      background: rgb(255 255 255 / 12%);
+    }
+  }
+}
+
+.segActive {
+  background: rgb(154 111 240 / 38%) !important;
+  font-weight: 600;
+}
+
+// Row of native color pickers with labels
+.colorRow {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.colorPick {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  cursor: pointer;
+
+  input[type='color'] {
+    width: 100%;
+    height: 28px;
+    padding: 0;
+    border: 1px solid rgb(255 255 255 / 16%);
+    border-radius: 6px;
+    background: none;
+    cursor: pointer;
+  }
+
+  span {
+    color: rgb(236 233 245 / 70%);
+    font-size: 10px;
+  }
+}
+
+.colorPickOff {
+  opacity: 0.4;
+}
+
+.hint {
+  margin-top: 6px;
+  color: rgb(236 233 245 / 50%);
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+// Quick black/white/brand shortcuts
+.quickRow {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 4px;
+
+  button {
+    flex: 1 1 0;
+    padding: 4px 6px;
+    border: 1px solid rgb(255 255 255 / 16%);
+    border-radius: 6px;
+    background: rgb(255 255 255 / 6%);
+    color: #ece9f5;
+    font-size: 11px;
+    cursor: pointer;
+
+    &:hover {
+      background: rgb(255 255 255 / 14%);
+    }
+  }
+}
+
+.field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+
+  > span:first-child {
+    flex: 0 0 64px;
+  }
+
+  input[type='range'] {
+    flex: 1 1 auto;
+    accent-color: #9a6ff0;
+  }
+
+  input[type='color'] {
+    flex: 0 0 auto;
+    width: 40px;
+    height: 26px;
+    padding: 0;
+    border: 1px solid rgb(255 255 255 / 16%);
+    border-radius: 6px;
+    background: none;
+    cursor: pointer;
+  }
+
+  select {
+    flex: 1 1 auto;
+    padding: 3px 6px;
+    border: 1px solid rgb(255 255 255 / 16%);
+    border-radius: 6px;
+    background: rgb(255 255 255 / 6%);
+    color: #ece9f5;
+    font-size: 12px;
+  }
+}
+
+.checkboxField {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+
+  input {
+    accent-color: #9a6ff0;
+  }
+}
+
+.footer {
+  padding-top: 8px;
+  color: rgb(236 233 245 / 45%);
+  font-size: 10px;
+  text-align: center;
+}

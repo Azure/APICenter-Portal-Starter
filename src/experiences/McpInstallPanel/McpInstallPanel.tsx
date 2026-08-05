@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { Button } from '@coreai-microsoft/manifold-fluentui-react';
+import { Button } from '@coreai/fluentui-react';
 import { ArrowDownloadRegular } from '@fluentui/react-icons';
 import VsCodeLogo from '@/assets/vsCodeLogo.svg';
 import { useServer } from '@/hooks/useServer';

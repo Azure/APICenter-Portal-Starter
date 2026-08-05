@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from '@coreai-microsoft/manifold-fluentui-react';
+import { Link } from '@coreai/fluentui-react';
 import { getRefLabel } from '@/utils/openApi';
 
 interface Props {

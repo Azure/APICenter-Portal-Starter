@@ -1,5 +1,5 @@
 import React from 'react';
-import { Spinner } from '@coreai-microsoft/manifold-fluentui-react';
+import { Spinner } from '@coreai/fluentui-react';
 import { useApiSpec } from '@/hooks/useApiSpec';
 import { ApiDefinitionId } from '@/types/apiDefinition';
 import { ApiDeployment } from '@/types/apiDeployment';

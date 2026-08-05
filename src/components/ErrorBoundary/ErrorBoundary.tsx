@@ -1,5 +1,5 @@
 import React, { Component, type ErrorInfo, type ReactNode } from 'react';
-import { Button } from '@coreai-microsoft/manifold-fluentui-react';
+import { Button } from '@coreai/fluentui-react';
 import styles from './ErrorBoundary.module.scss';
 
 interface Props {

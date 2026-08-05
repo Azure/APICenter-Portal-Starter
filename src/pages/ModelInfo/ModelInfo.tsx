@@ -12,7 +12,7 @@ import {
   Subtitle2,
   Tab,
   TabList,
-} from '@coreai-microsoft/manifold-fluentui-react';
+} from '@coreai/fluentui-react';
 import { Dismiss24Regular, OpenRegular } from '@fluentui/react-icons';
 import { useNavigate } from 'react-router-dom';
 import { useLanguageModel } from '@/hooks/useLanguageModel';

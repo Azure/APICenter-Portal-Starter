@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from '@coreai-microsoft/manifold-fluentui-react';
+import { Link } from '@coreai/fluentui-react';
 import styles from './Footer.module.scss';
 
 const Footer: React.FC = () => {

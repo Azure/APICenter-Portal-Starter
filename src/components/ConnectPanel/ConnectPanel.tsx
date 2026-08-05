@@ -1,13 +1,11 @@
 import React, { useCallback, useState } from 'react';
-import { Button, Tab, TabList, Tooltip } from '@coreai-microsoft/manifold-fluentui-react';
+import { Button, Tab, TabList, Tooltip } from '@coreai/fluentui-react';
 import { CopyRegular, CheckmarkRegular, ArrowDownloadRegular } from '@fluentui/react-icons';
 import styles from './ConnectPanel.module.scss';
 
 interface ConnectPanelProps {
   /** The raw endpoint URL */
   endpointUrl?: string;
-  /** Asset name for display in snippets */
-  assetName?: string;
   /** Handler for VS Code install deeplink */
   onVsCodeInstall?: () => void;
   /** Whether VS Code install is available */
@@ -20,7 +18,6 @@ const EXTENSION_URL = 'https://marketplace.visualstudio.com/items?itemName=apide
 
 export const ConnectPanel: React.FC<ConnectPanelProps> = ({
   endpointUrl,
-  assetName,
   onVsCodeInstall,
   hasVsCodeInstall,
 }) => {

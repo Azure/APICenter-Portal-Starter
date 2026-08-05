@@ -1,0 +1,9 @@
+{
+  "servers": {
+    "storybook-coreai-hosted": {
+      "type": "http",
+      "url": "https://coreai-ds-storybook.azurewebsites.net/mcp"
+    }
+  },
+  "inputs": []
+}

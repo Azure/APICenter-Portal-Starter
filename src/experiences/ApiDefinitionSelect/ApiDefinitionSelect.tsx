@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Dropdown, Field, Option } from '@coreai-microsoft/manifold-fluentui-react';
+import { Dropdown, Field, Option } from '@coreai/fluentui-react';
 import { find, isUndefined } from 'lodash';
 import classNames from 'classnames';
 import { ApiVersion } from '@/types/apiVersion';

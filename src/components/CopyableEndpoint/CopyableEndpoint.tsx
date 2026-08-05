@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { Button, Tooltip } from '@coreai-microsoft/manifold-fluentui-react';
+import { Button, Tooltip } from '@coreai/fluentui-react';
 import { CopyRegular, CheckmarkRegular } from '@fluentui/react-icons';
 import styles from './CopyableEndpoint.module.scss';
 

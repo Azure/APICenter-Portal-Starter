@@ -1,5 +1,5 @@
 import React from 'react';
-import { Badge, Card, CardHeader, Text, makeStyles, tokens } from '@coreai-microsoft/manifold-fluentui-react';
+import { Badge, Card, CardHeader, Text, makeStyles, tokens } from '@coreai/fluentui-react';
 import { formatKindDisplay } from '@/utils/formatKind';
 
 export interface ApiCardApi {

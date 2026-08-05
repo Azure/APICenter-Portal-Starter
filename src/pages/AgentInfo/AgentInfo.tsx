@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Badge, Button, Tab, TabList } from '@coreai-microsoft/manifold-fluentui-react';
+import { Badge, Button, Tab, TabList } from '@coreai/fluentui-react';
 import { ArrowDownloadRegular, CodeRegular, DocumentRegular, ListRegular, PlugConnectedRegular } from '@fluentui/react-icons';
 import { useApi } from '@/hooks/useApi';
 import { useAIAssetVersions } from '@/hooks/useAIAssetVersions';

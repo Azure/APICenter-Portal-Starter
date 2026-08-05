@@ -13,6 +13,7 @@ import ApiListSortingSelect from '@/experiences/ApiListSortingSelect';
 import { ActiveFiltersBadges } from '@/experiences/ActiveFiltersBadges/ActiveFiltersBadges';
 import { setDocumentTitle } from '@/utils/dom';
 import { ConnectBar } from '@/components/ConnectBar';
+import HeroBanner from '@/experiences/HeroBanner';
 import styles from './Home.module.scss';
 
 export const Home: React.FC = () => {
@@ -48,12 +49,26 @@ export const Home: React.FC = () => {
   return (
     <div className={styles.home}>
       <div className={styles.searchPanel}>
-        <h1>API Center portal</h1>
+        {/* Hero banner slot — config-driven (default dot-grid, or config.hero.bannerImage) */}
+        <HeroBanner
+          bannerImage={config.hero?.bannerImage}
+          accentColor={config.hero?.accentColor}
+          backgroundColor={config.hero?.backgroundColor}
+          textColor={config.hero?.textColor}
+        />
 
-        <div className={styles.searchRow}>
-          <ApiSearchBox />
-          <ApiListSortingSelect />
-          <AddFilterDropdown />
+        <div className={styles.searchPanelInner}>
+          {config.hero?.logo && (
+            <img className={styles.heroLogo} src={config.hero.logo} alt={config.hero?.title ?? config.title} />
+          )}
+          <h1>{config.hero?.title ?? 'API Center portal'}</h1>
+          {config.hero?.subtitle && <p className={styles.heroSubtitle}>{config.hero.subtitle}</p>}
+
+          <div className={styles.searchRow}>
+            <ApiSearchBox />
+            <ApiListSortingSelect />
+            <AddFilterDropdown />
+          </div>
         </div>
       </div>
 

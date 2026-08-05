@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { InfoTable, MarkdownRenderer, ParametersTable, RawSchema } from 'api-docs-ui';
-import { Badge, Dropdown, Label, Option, Tab, TabList } from '@coreai-microsoft/manifold-fluentui-react';
+import { Badge, Dropdown, Label, Option, Tab, TabList } from '@coreai/fluentui-react';
 import { MediaContentMetadata, SchemaMetadata } from '@/types/apiSpec';
 import RefLink from '@/components/RefLink';
 import { isEnumSchemaMetadata, isStaticSchemaMetadata } from '@/utils/apiSpec';

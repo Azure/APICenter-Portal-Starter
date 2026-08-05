@@ -8,7 +8,7 @@ import {
   HttpTestConsole as HttpApiTestConsole,
   SyntaxHighlighter,
 } from 'api-docs-ui';
-import { Body1Strong, Button, Drawer, DrawerBody, DrawerHeader, DrawerHeaderTitle } from '@coreai-microsoft/manifold-fluentui-react';
+import { Body1Strong, Button, Drawer, DrawerBody, DrawerHeader, DrawerHeaderTitle } from '@coreai/fluentui-react';
 import { Dismiss24Regular } from '@fluentui/react-icons';
 import { uniqBy } from 'lodash';
 import { ApiSpecReader, OperationMetadata } from '@/types/apiSpec';

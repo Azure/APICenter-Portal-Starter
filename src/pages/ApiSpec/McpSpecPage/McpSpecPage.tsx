@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Spinner } from '@coreai-microsoft/manifold-fluentui-react';
+import { Spinner } from '@coreai/fluentui-react';
 import { getRecoil } from 'recoil-nexus';
 import ApiAccessAuthForm from '@/experiences/ApiAccessAuthForm';
 import { ApiDefinitionId } from '@/types/apiDefinition';

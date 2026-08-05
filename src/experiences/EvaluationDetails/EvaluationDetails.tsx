@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Badge, Spinner } from '@coreai-microsoft/manifold-fluentui-react';
+import { Badge, Spinner } from '@coreai/fluentui-react';
 import { Warning20Filled } from '@fluentui/react-icons';
 import { EvaluationResult, EvalJudgeScore, getEvalScore } from '@/types/evaluation';
 import { EvalScoreBar } from './EvalScoreBar';

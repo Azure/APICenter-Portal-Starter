@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Spinner } from '@coreai-microsoft/manifold-fluentui-react';
+import { Spinner } from '@coreai/fluentui-react';
 import * as yaml from 'yaml';
 import { UseQueryResult } from '@tanstack/react-query';
 import MarkdownRenderer from '@/components/MarkdownRenderer';

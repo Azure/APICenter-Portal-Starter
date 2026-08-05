@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { Button } from '@coreai-microsoft/manifold-fluentui-react';
+import { Button } from '@coreai/fluentui-react';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { isAuthenticatedAtom } from '@/atoms/isAuthenticatedAtom';
 import { isAnonymousAccessEnabledAtom } from '@/atoms/isAnonymousAccessEnabledAtom';

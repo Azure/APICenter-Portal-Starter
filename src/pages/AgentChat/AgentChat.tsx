@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { Button, Textarea, Spinner, Tab, TabList, Badge } from '@coreai-microsoft/manifold-fluentui-react';
+import { Button, Textarea, Spinner, Tab, TabList, Badge } from '@coreai/fluentui-react';
 import {
   ArrowRight24Regular,
   Bot24Regular,

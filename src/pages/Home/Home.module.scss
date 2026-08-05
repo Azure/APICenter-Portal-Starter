@@ -4,22 +4,40 @@
   overflow-x: hidden;
 
   .searchPanel {
+    position: relative;
     box-sizing: border-box;
-    min-height: 200px;
-    padding: 50px 0 10px;
-    background: linear-gradient(45deg, hsl(204deg 65% 71% / 100%) 0%, hsl(273deg 34% 75% / 100%) 43%, hsl(358deg 43% 75% / 100%) 57%, hsl(43deg 96% 63% / 100%) 100%);
-    color: white;
+    min-height: 160px;
+    overflow: hidden;
+    padding: 36px 0 14px;
+    background: transparent;
+    color: var(--hero-text-color, var(--colorNeutralForeground1));
     text-align: center;
 
-    // Dark mode variant: deeper, more muted gradient
-    :global([data-theme="dark"]) & {
-      background: linear-gradient(45deg, hsl(204deg 45% 30%) 0%, hsl(273deg 25% 32%) 43%, hsl(358deg 30% 32%) 57%, hsl(43deg 50% 30%) 100%);
+    // Hero content sits above the prototype gradient + wave background layers.
+    .searchPanelInner {
+      position: relative;
+      z-index: 1;
+    }
+
+    .heroLogo {
+      display: block;
+      height: 44px;
+      width: auto;
+      margin: 0 auto 0.75rem;
     }
 
     h1 {
-      margin: 0 0 1rem;
-      font-size: 2.5rem;
-      line-height: 3.25rem;
+      margin: 0 0 0.5rem;
+      font-size: 2rem;
+      line-height: 2.5rem;
+    }
+
+    .heroSubtitle {
+      max-width: 620px;
+      margin: 0 auto 1.5rem;
+      font-size: 0.95rem;
+      line-height: 1.4rem;
+      opacity: 0.8;
     }
 
     .searchRow {

@@ -9,7 +9,7 @@ import {
   isObjectType,
   isScalarType,
 } from 'graphql';
-import { Link } from '@coreai-microsoft/manifold-fluentui-react';
+import { Link } from '@coreai/fluentui-react';
 
 export function getUsedRefsForType(type: GraphQLType, acc: string[] = []): string[] {
   let result = acc.slice();

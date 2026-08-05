@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { capitalize } from 'lodash';
-import { Body1Strong, Button, Drawer, DrawerBody, DrawerHeader, DrawerHeaderTitle } from '@coreai-microsoft/manifold-fluentui-react';
+import { Body1Strong, Button, Drawer, DrawerBody, DrawerHeader, DrawerHeaderTitle } from '@coreai/fluentui-react';
 import { Dismiss24Regular } from '@fluentui/react-icons';
 import { HttpTestConsole, SyntaxHighlighter } from 'api-docs-ui';
 import { HttpReqParam } from 'api-docs-ui/dist/types/testConsole';

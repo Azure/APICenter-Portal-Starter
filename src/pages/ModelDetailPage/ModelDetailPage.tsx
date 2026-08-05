@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Badge, Tab, TabList } from '@coreai-microsoft/manifold-fluentui-react';
+import { Badge, Tab, TabList } from '@coreai/fluentui-react';
 import { ChatRegular, DocumentRegular } from '@fluentui/react-icons';
 import { useLanguageModel } from '@/hooks/useLanguageModel';
 import { useApiDeployments } from '@/hooks/useApiDeployments';

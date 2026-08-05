@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { Button, Spinner, Textarea } from '@coreai-microsoft/manifold-fluentui-react';
+import { Button, Spinner, Textarea } from '@coreai/fluentui-react';
 import { ArrowRight24Regular, Bot24Regular } from '@fluentui/react-icons';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import styles from './ModelChatPlayground.module.scss';
