@@ -72,6 +72,23 @@ function isOAuthCallbackMessage(event: MessageEvent): boolean {
 }
 
 /**
+ * Only http(s) URLs may be handed to `window.open`. Authorization endpoints ultimately
+ * originate from a publisher-controlled OAuth discovery document, so a dangerous scheme such
+ * as `javascript:`, `data:`, `blob:`, or `vbscript:` would execute in the portal's own origin
+ * (stored XSS). This is a defense-in-depth guard in addition to endpoint validation performed
+ * during OAuth discovery.
+ */
+function validateUriScheme(uri: string): boolean {
+  try {
+    const { protocol } = new URL(uri);
+
+    return protocol === 'https:' || protocol === 'http:';
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Opens the authorization popup and resolves with the token produced by `listener` once the
  * callback bridge reports back. Resolves with `undefined` if the user dismisses the popup.
  */
@@ -81,6 +98,11 @@ function openAuthPopup(
   listener: (payload: OAuthCallbackPayload) => Promise<string | undefined>
 ): Promise<string | undefined> {
   return new Promise<string | undefined>((resolve, reject) => {
+    if (!validateUriScheme(uri)) {
+      reject(new Error('The authorization endpoint uses an unsupported URL scheme and was blocked.'));
+      return;
+    }
+
     const popup = window.open(uri, '_blank', 'width=400,height=500');
 
     if (!popup) {
