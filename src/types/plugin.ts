@@ -10,5 +10,6 @@ export interface PluginDetails {
   title: string;
   description?: string;
   version?: string;
+  lastUpdated?: string;
   resources: Record<string, PluginResource>;
 }
