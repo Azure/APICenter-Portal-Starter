@@ -38,11 +38,12 @@ For each argument with a declared property schema:
 | `boolean` | Accept case-insensitive `true` or `false` only. |
 | `object` | Parse JSON and require a non-null, non-array object. |
 | `array` | Parse JSON and require an array. |
-| `null` | Accept the JSON literal `null`. |
+| `null` | Accept an empty value or the JSON literal `null`. |
 
-Optional empty arguments are omitted. Empty required arguments are valid only
-when the declared type permits the resulting empty string or null. Invalid
-values return an error that identifies the argument and expected type.
+Optional empty arguments are omitted. A required empty `string` remains an empty
+string, and a required empty `null` becomes `null`; other required empty values
+are rejected. Invalid values return an error that identifies the argument and
+expected type.
 
 Arguments with unsupported or missing schema types remain strings for
 compatibility. This matches the fallback behavior of the official MCP Inspector
