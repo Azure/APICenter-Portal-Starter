@@ -3,8 +3,9 @@ import { HttpReqParam } from 'api-docs-ui';
 import { OperationMetadata } from '@/types/apiSpec';
 import { ApiDeployment } from '@/types/apiDeployment';
 import { createMcpService, McpService } from '@/services/McpService';
-import { McpCapabilityTypes } from '@/types/mcp';
+import { McpCapabilityTypes, McpTool } from '@/types/mcp';
 import { useMcpAuthCredentials } from '@/contexts/McpAuthContext';
+import { convertMcpToolArguments } from '@/utils/mcpArguments';
 
 interface ReturnType {
   result?: string;
@@ -63,7 +64,14 @@ export function useMcpTestRunController(
 
         switch (operation.category) {
           case McpCapabilityTypes.TOOLS: {
-            const result = await mcpService.runTool(name, operationArguments);
+            const conversion = convertMcpToolArguments((operation.spec as McpTool).inputSchema, args);
+            if (conversion.success === false) {
+              setResult(undefined);
+              setError(conversion.error);
+              return;
+            }
+
+            const result = await mcpService.runTool(name, conversion.arguments);
             setResult(JSON.stringify(result, null, 2));
             break;
           }

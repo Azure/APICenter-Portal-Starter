@@ -61,7 +61,7 @@ export interface McpResource extends Annotated {
 }
 
 export interface McpToolInputProperty {
-  type: string;
+  type?: string;
   description?: string;
 }
 
