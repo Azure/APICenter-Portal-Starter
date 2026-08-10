@@ -135,4 +135,30 @@ describe('convertMcpToolArguments', () => {
       },
     });
   });
+
+  it('preserves required empty values for unsupported schema types', () => {
+    expect(
+      convert(
+        {
+          custom: { type: 'date' },
+        },
+        [{ name: 'custom', value: '' }],
+        ['custom']
+      )
+    ).toEqual({
+      success: true,
+      arguments: {
+        custom: '',
+      },
+    });
+  });
+
+  it('preserves required empty values when no schema is declared', () => {
+    expect(convert({}, [{ name: 'custom', value: '' }], ['custom'])).toEqual({
+      success: true,
+      arguments: {
+        custom: '',
+      },
+    });
+  });
 });

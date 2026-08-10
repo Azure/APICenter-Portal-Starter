@@ -27,6 +27,8 @@ const EXPECTED_TYPE_LABELS: Record<string, string> = {
   null: 'null',
 };
 
+const STRICT_SCHEMA_TYPES = new Set(['string', 'integer', 'number', 'boolean', 'object', 'array', 'null']);
+
 function invalidType(name: string, type: string): McpArgumentsConversionFailure {
   return {
     success: false,
@@ -126,7 +128,12 @@ export function convertMcpToolArguments(
         continue;
       }
 
-      if (schema?.type === 'string') {
+      if (!schema?.type || !STRICT_SCHEMA_TYPES.has(schema.type)) {
+        convertedArguments[name] = '';
+        continue;
+      }
+
+      if (schema.type === 'string') {
         convertedArguments[name] = '';
         continue;
       }

@@ -41,9 +41,10 @@ For each argument with a declared property schema:
 | `null` | Accept an empty value or the JSON literal `null`. |
 
 Optional empty arguments are omitted. A required empty `string` remains an empty
-string, and a required empty `null` becomes `null`; other required empty values
-are rejected. Invalid values return an error that identifies the argument and
-expected type.
+string, a required empty `null` becomes `null`, and a required empty value with
+no declared schema or an unsupported schema type is preserved as an empty
+string. Other required empty values are rejected. Invalid values return an error
+that identifies the argument and expected type.
 
 Arguments with unsupported or missing schema types remain strings for
 compatibility. This matches the fallback behavior of the official MCP Inspector
@@ -76,7 +77,7 @@ Add focused Vitest coverage for:
 - non-finite number rejection
 - invalid JSON rejection
 - object and array shape mismatches
-- unsupported or missing schema type fallback
+- unsupported or missing schema type fallback, including required empty-value preservation
 
 The utility is the behavior boundary and can be tested without transport or
 React mocks. The controller integration remains a small success/error branch
