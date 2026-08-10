@@ -116,7 +116,7 @@ export function convertMcpToolArguments(
   const required = new Set(inputSchema.required ?? []);
   const values = new Map(args.map(({ name, value }) => [name, value]));
   const names = new Set([...values.keys(), ...required]);
-  const convertedArguments: Record<string, unknown> = {};
+  const convertedArguments: Array<[string, unknown]> = [];
 
   for (const name of names) {
     const value = values.get(name);
@@ -129,17 +129,17 @@ export function convertMcpToolArguments(
       }
 
       if (!schema?.type || !STRICT_SCHEMA_TYPES.has(schema.type)) {
-        convertedArguments[name] = '';
+        convertedArguments.push([name, '']);
         continue;
       }
 
       if (schema.type === 'string') {
-        convertedArguments[name] = '';
+        convertedArguments.push([name, '']);
         continue;
       }
 
       if (schema?.type === 'null') {
-        convertedArguments[name] = null;
+        convertedArguments.push([name, null]);
         continue;
       }
 
@@ -154,11 +154,11 @@ export function convertMcpToolArguments(
       return converted;
     }
 
-    convertedArguments[name] = converted.value;
+    convertedArguments.push([name, converted.value]);
   }
 
   return {
     success: true,
-    arguments: convertedArguments,
+    arguments: Object.fromEntries(convertedArguments),
   };
 }

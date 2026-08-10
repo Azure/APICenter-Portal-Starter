@@ -54,6 +54,29 @@ describe('convertMcpToolArguments', () => {
     });
   });
 
+  it.each([
+    ['string', 'shadow', 'shadow'],
+    ['object', '{"enabled":true}', { enabled: true }],
+  ] as const)('preserves "__proto__" for %s schemas', (type, inputValue, expectedValue) => {
+    const globalPrototype = Object.getPrototypeOf({});
+    const expectedArguments = Object.fromEntries([['__proto__', expectedValue]]);
+    const properties = Object.fromEntries([['__proto__', { type }]]) as Record<string, McpToolInputProperty>;
+    const conversion = convert(properties, [{ name: '__proto__', value: inputValue }]);
+
+    expect(conversion.success).toBe(true);
+    const result = conversion as Extract<typeof conversion, { success: true }>;
+
+    expect(result).toEqual({
+      success: true,
+      arguments: expectedArguments,
+    });
+    expect(Object.hasOwn(result.arguments, '__proto__')).toBe(true);
+    expect(Object.prototype.propertyIsEnumerable.call(result.arguments, '__proto__')).toBe(true);
+    expect(result.arguments.__proto__).toEqual(expectedValue);
+    expect(Object.getPrototypeOf(result.arguments)).toBe(Object.prototype);
+    expect(Object.getPrototypeOf({})).toBe(globalPrototype);
+  });
+
   it('omits optional empty arguments', () => {
     expect(
       convert(
