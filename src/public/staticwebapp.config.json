@@ -6,5 +6,9 @@
         "cache-control": "no-store"
       }
     }
-  ]
+  ],
+  "navigationFallback": {
+    "rewrite": "/index.html",
+    "exclude": ["/assets/*", "/config.json", "/entraid-redirect.html"]
+  }
 }

@@ -264,7 +264,9 @@ dist/
 
 **File**: `src/public/staticwebapp.config.json` (copied to `dist/staticwebapp.config.json` by Vite's `publicDir` on every production build)
 
-**Purpose**: The Entra ID redirect bridge (`/entraid-redirect.html`) must never be served from cache — a stale cached copy could return a stale/incorrect MSAL redirect response — so its route is pinned to `cache-control: no-store`. This route intentionally carries **no** `Cross-Origin-Opener-Policy` header: adding COOP there breaks the popup's ability to call back into the main frame (see `docs/superpowers/specs/2026-08-12-entra-popup-login-design.md` for the historical root-cause analysis — a callback-bridge collision, not the COOP warning, caused the regression).
+**Purpose**: The Entra ID redirect bridge (`/entraid-redirect.html`) must never be served from cache — a stale cached copy could return a stale/incorrect MSAL redirect response — so its route is pinned to `cache-control: no-store`. This route intentionally carries **no** `Cross-Origin-Opener-Policy` header: adding COOP there breaks the popup's ability to call back into the main frame. Historically, PR #139 (commit `47ab821`) caused a callback-bridge collision, PR #99 (commit `4b1538c`) amplified it, and the COOP warning that appeared alongside was collateral, not the root cause.
+
+The config also declares a `navigationFallback` so client-side routes (SPA deep links) resolve correctly on refresh/direct navigation: any unmatched request is rewritten to `/index.html`, except `/assets/*` (built static assets), `/config.json` (runtime configuration, must be served as-is), and `/entraid-redirect.html` (the dedicated MSAL bridge page, must be served as-is and never rewritten to the SPA shell).
 
 **Config**:
 ```json
@@ -276,11 +278,15 @@ dist/
         "cache-control": "no-store"
       }
     }
-  ]
+  ],
+  "navigationFallback": {
+    "rewrite": "/index.html",
+    "exclude": ["/assets/*", "/config.json", "/entraid-redirect.html"]
+  }
 }
 ```
 
-**Verification**: `src/services/staticwebappConfig.test.ts` asserts the exact route/header shape, and `npm run build` must emit this file unchanged at `dist/staticwebapp.config.json`.
+**Verification**: `src/services/staticwebappConfig.test.ts` asserts the exact route/header shape and the exact `navigationFallback` object, and `npm run build` must emit this file unchanged at `dist/staticwebapp.config.json`.
 
 ---
 
@@ -449,7 +455,7 @@ const appInsights = new ApplicationInsights({ config: { ... } });
 
 ## TODO: Deployment Questions
 
-- [x] `staticwebapp.config.json` exists at `src/public/staticwebapp.config.json` (copied to `dist/` on build); pins `/entraid-redirect.html` to `cache-control: no-store` with no COOP header
+- [x] `staticwebapp.config.json` exists at `src/public/staticwebapp.config.json` (copied to `dist/` on build); pins `/entraid-redirect.html` to `cache-control: no-store` with no COOP header, and declares a `navigationFallback` rewriting deep links to `/index.html` (excluding `/assets/*`, `/config.json`, `/entraid-redirect.html`)
 - [ ] CORS configuration location and method
 - [ ] Application Insights integration details
 - [ ] Custom domain setup process

@@ -13,4 +13,11 @@ describe('staticwebapp.config.json', () => {
     });
     expect(bridgeRoute?.headers).not.toHaveProperty('cross-origin-opener-policy');
   });
+
+  it('rewrites unmatched deep links to /index.html while excluding assets, config, and the redirect bridge', () => {
+    expect(config.navigationFallback).toEqual({
+      rewrite: '/index.html',
+      exclude: ['/assets/*', '/config.json', '/entraid-redirect.html'],
+    });
+  });
 });
