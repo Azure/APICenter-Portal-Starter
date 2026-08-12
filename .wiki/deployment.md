@@ -235,6 +235,7 @@ dist/
 │   └── (images, fonts, etc.)
 ├── config.json
 ├── entraid-redirect.html
+├── staticwebapp.config.json
 └── index.html
 ```
 
@@ -261,29 +262,25 @@ dist/
 
 ## Static Web App Configuration
 
-**File**: `staticwebapp.config.json` (if exists, TODO: verify)
+**File**: `src/public/staticwebapp.config.json` (copied to `dist/staticwebapp.config.json` by Vite's `publicDir` on every production build)
 
-**Typical Config**:
+**Purpose**: The Entra ID redirect bridge (`/entraid-redirect.html`) must never be served from cache — a stale cached copy could return a stale/incorrect MSAL redirect response — so its route is pinned to `cache-control: no-store`. This route intentionally carries **no** `Cross-Origin-Opener-Policy` header: adding COOP there breaks the popup's ability to call back into the main frame (see `docs/superpowers/specs/2026-08-12-entra-popup-login-design.md` for the historical root-cause analysis — a callback-bridge collision, not the COOP warning, caused the regression).
+
+**Config**:
 ```json
 {
   "routes": [
     {
-      "route": "/config.json",
+      "route": "/entraid-redirect.html",
       "headers": {
-        "cache-control": "no-cache"
+        "cache-control": "no-store"
       }
     }
-  ],
-  "navigationFallback": {
-    "rewrite": "/index.html",
-    "exclude": ["/config.json", "/assets/*"]
-  },
-  "globalHeaders": {
-    "content-security-policy": "default-src 'self'; ...",
-    "x-frame-options": "DENY"
-  }
+  ]
 }
 ```
+
+**Verification**: `src/public/staticwebapp.config.test.ts` asserts the exact route/header shape, and `npm run build` must emit this file unchanged at `dist/staticwebapp.config.json`.
 
 ---
 
@@ -349,7 +346,7 @@ scp -r dist/* user@server:/var/www/portal/
 **Configure**:
 1. Create `config.json` with API Center endpoint
 2. Create Azure AD app registration (if authenticated mode)
-3. Register `https://<portal-origin>/entraid-redirect.html` as a **Single-page application (SPA)** redirect URI. The protocol, host, port, and path must match exactly. Keep the bridge response free of COOP headers so it can communicate with the portal through MSAL's redirect bridge.
+3. Register `https://<portal-origin>/entraid-redirect.html` as a **Single-page application (SPA)** redirect URI. The protocol, host, port, and path must match exactly. Keep the bridge response free of COOP headers and served with `cache-control: no-store` (see `src/public/staticwebapp.config.json`) so it can reliably communicate with the portal through MSAL's redirect bridge.
 4. Update `config.json` with auth details
 5. Test portal
 
@@ -452,7 +449,7 @@ const appInsights = new ApplicationInsights({ config: { ... } });
 
 ## TODO: Deployment Questions
 
-- [ ] Verify `staticwebapp.config.json` exists and contents
+- [x] `staticwebapp.config.json` exists at `src/public/staticwebapp.config.json` (copied to `dist/` on build); pins `/entraid-redirect.html` to `cache-control: no-store` with no COOP header
 - [ ] CORS configuration location and method
 - [ ] Application Insights integration details
 - [ ] Custom domain setup process

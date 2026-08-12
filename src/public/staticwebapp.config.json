@@ -1,0 +1,10 @@
+{
+  "routes": [
+    {
+      "route": "/entraid-redirect.html",
+      "headers": {
+        "cache-control": "no-store"
+      }
+    }
+  ]
+}

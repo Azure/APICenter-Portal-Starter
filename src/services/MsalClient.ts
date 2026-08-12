@@ -19,16 +19,23 @@ export function getMsalClient(authentication: MsalSettings): Promise<msal.Public
         clientId: authentication.clientId,
         authority,
         redirectUri: getEntraRedirectUri(),
+        postLogoutRedirectUri: getEntraRedirectUri(),
       },
     });
 
-    msalInstancePromise = instance.initialize().then(() => {
-      const [account] = instance.getAllAccounts();
-      if (account) {
-        instance.setActiveAccount(account);
-      }
-      return instance;
-    });
+    msalInstancePromise = instance
+      .initialize()
+      .then(() => {
+        const [account] = instance.getAllAccounts();
+        if (account) {
+          instance.setActiveAccount(account);
+        }
+        return instance;
+      })
+      .catch((error: unknown) => {
+        msalInstancePromise = undefined;
+        throw error;
+      });
   }
 
   return msalInstancePromise;

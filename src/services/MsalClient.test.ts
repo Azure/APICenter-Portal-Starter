@@ -1,5 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+interface MockPublicClientApplicationConfig {
+  auth: {
+    clientId: string;
+    authority: string;
+    redirectUri: string;
+    postLogoutRedirectUri: string;
+  };
+}
+
 const mocks = vi.hoisted(() => {
   const initialize = vi.fn(() => Promise.resolve());
   const getAllAccounts = vi.fn(() => []);
@@ -54,7 +63,34 @@ describe('MsalClient', () => {
         clientId: 'client-id',
         authority: 'https://login.microsoftonline.com/tenant-id',
         redirectUri: 'http://localhost:3000/entraid-redirect.html',
+        postLogoutRedirectUri: 'http://localhost:3000/entraid-redirect.html',
       },
     });
+  });
+
+  it('configures the same dedicated bridge URI for redirect and post-logout redirect', async () => {
+    const { getMsalClient } = await import('./MsalClient');
+
+    await getMsalClient(authentication);
+
+    const [config] = mocks.PublicClientApplication.mock.calls[0] as unknown as [MockPublicClientApplicationConfig];
+    expect(config.auth.redirectUri).toBe('http://localhost:3000/entraid-redirect.html');
+    expect(config.auth.postLogoutRedirectUri).toBe('http://localhost:3000/entraid-redirect.html');
+    expect(config.auth.redirectUri).toBe(config.auth.postLogoutRedirectUri);
+  });
+
+  it('propagates the first initialization rejection and retries with a fresh client on the next call', async () => {
+    const initError = new Error('init failed');
+    mocks.initialize.mockRejectedValueOnce(initError);
+
+    const { getMsalClient } = await import('./MsalClient');
+
+    await expect(getMsalClient(authentication)).rejects.toThrow(initError);
+
+    const second = await getMsalClient(authentication);
+
+    expect(second).toBeDefined();
+    expect(mocks.PublicClientApplication).toHaveBeenCalledTimes(2);
+    expect(mocks.initialize).toHaveBeenCalledTimes(2);
   });
 });

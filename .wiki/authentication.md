@@ -41,10 +41,15 @@
 
 `MsalAuthService` and `McpMsalAuthService` both reuse the same lazily initialized
 `PublicClientApplication`. The MSAL config resolves the redirect URI from the
-current origin as `${window.location.origin}/entraid-redirect.html`. The bridge page imports
-`broadcastResponseToMainFrame` from `@azure/msal-browser/redirect-bridge`,
-forwards popup and silent responses back to the main frame, and must not be
-served with a `Cross-Origin-Opener-Policy` header.
+current origin as `${window.location.origin}/entraid-redirect.html`, and reuses the
+same URI for `auth.postLogoutRedirectUri` so `logoutPopup()` targets the dedicated
+bridge too. The bridge page imports `broadcastResponseToMainFrame` from
+`@azure/msal-browser/redirect-bridge`, forwards popup and silent responses back to
+the main frame, and must not be served with a `Cross-Origin-Opener-Policy` header.
+It must also never be served from cache: `src/public/staticwebapp.config.json`
+pins the `/entraid-redirect.html` route to `cache-control: no-store` so a stale
+cached bridge response can never be returned. Together, "no COOP header" and
+"no-store cache-control" are both required for the bridge to function reliably.
 
 **MSAL Config**:
 ```typescript
@@ -53,6 +58,7 @@ served with a `Cross-Origin-Opener-Policy` header.
     clientId: config.authentication.clientId,
     authority: `${config.authentication.authority}${config.authentication.tenantId}`,
     redirectUri: getEntraRedirectUri(),
+    postLogoutRedirectUri: getEntraRedirectUri(),
   },
   cache: {
     cacheLocation: 'sessionStorage',
