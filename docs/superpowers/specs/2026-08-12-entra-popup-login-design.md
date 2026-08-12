@@ -32,9 +32,11 @@ the established user experience without being necessary.
 
 `MsalAuthService` will:
 
-- Configure a dedicated redirect URI at `/redirect.html`, resolved against
+- Configure a dedicated redirect URI at `/entraid-redirect.html`, resolved against
   `window.location.origin`.
-- Continue lazy initialization of a single `PublicClientApplication`.
+- Continue lazy initialization of a single `PublicClientApplication`. One
+  module-level singleton will own account cache, active-account state, and
+  interactive request state for the application.
 - Continue using `loginPopup` and setting the returned account as active.
 - Continue using `acquireTokenSilent` for API tokens.
 - Preserve backward-compatible scope and authority normalization.
@@ -44,11 +46,11 @@ same redirect bridge URI so its interactive token popup remains COOP-safe.
 
 ### Redirect bridge
 
-A minimal root-level `redirect.html` Vite entry will import
+A minimal root-level `entraid-redirect.html` Vite entry will import
 `broadcastResponseToMainFrame` from `@azure/msal-browser/redirect-bridge`.
 It will not initialize React, routing, application services, or API requests.
 
-`vite.config.ts` will define both `index.html` and `redirect.html` as build
+`vite.config.ts` will define both `index.html` and `entraid-redirect.html` as build
 inputs so the production bundle always contains the bridge page.
 
 The bridge page must not be served with a COOP header. The repository does not
@@ -57,14 +59,14 @@ currently define such headers, so no hosting-header change is required.
 ### Entra app registration
 
 The provisioning hooks will retain the existing root redirect URIs and also
-register `/redirect.html` for:
+register `/entraid-redirect.html` for:
 
 - `http://localhost:5173`
 - `https://localhost:5173`
 - The provisioned Azure Static Web Apps origin
 
 Existing manually managed app registrations must add the exact production
-`https://<portal-origin>/redirect.html` URI as a SPA redirect URI before the
+`https://<portal-origin>/entraid-redirect.html` URI as a SPA redirect URI before the
 updated portal is deployed.
 
 ### User-facing error handling
@@ -83,7 +85,7 @@ without exposing tokens or account data.
 
 1. The user selects **Sign in**.
 2. `MsalAuthService` opens the Entra authorization endpoint in a popup with
-   `/redirect.html` as the redirect URI.
+   `/entraid-redirect.html` as the redirect URI.
 3. Entra redirects the popup to the bridge page with the authorization response.
 4. The bridge broadcasts the response to the main frame using MSAL v5.
 5. `loginPopup` resolves, the returned account becomes active, and the portal
@@ -101,7 +103,7 @@ Automated tests will verify:
 - Successful popup login activates the returned account.
 - Popup rejection does not set authenticated state or escape as an unhandled
   rejection.
-- The Vite production build emits `redirect.html`.
+- The Vite production build emits `entraid-redirect.html`.
 - Existing authentication and API authorization tests continue to pass.
 
 Targeted tests, type checking, linting, and a production build will validate the
