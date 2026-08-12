@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import config from './staticwebapp.config.json';
+import config from '@/public/staticwebapp.config.json';
 
 describe('staticwebapp.config.json', () => {
   it('declares a no-store cache-control route for the Entra redirect bridge with no COOP header', () => {

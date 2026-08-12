@@ -280,7 +280,7 @@ dist/
 }
 ```
 
-**Verification**: `src/public/staticwebapp.config.test.ts` asserts the exact route/header shape, and `npm run build` must emit this file unchanged at `dist/staticwebapp.config.json`.
+**Verification**: `src/services/staticwebappConfig.test.ts` asserts the exact route/header shape, and `npm run build` must emit this file unchanged at `dist/staticwebapp.config.json`.
 
 ---
 
