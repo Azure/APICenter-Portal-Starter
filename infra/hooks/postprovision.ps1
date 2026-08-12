@@ -37,7 +37,16 @@ if ([string]::IsNullOrEmpty($env:GITHUB_WORKSPACE)) {
     $objectId = az ad app show --id $appId --query "id" -o tsv
 
     # Add redirect URLs and required permissions to the app
-    $spa = @{ redirectUris = @( "http://localhost:5173", "https://localhost:5173", "$env:AZURE_STATIC_APP_URL" ) }
+    $spa = @{
+        redirectUris = @(
+            "http://localhost:5173"
+            "https://localhost:5173"
+            "$env:AZURE_STATIC_APP_URL"
+            "http://localhost:5173/entraid-redirect.html"
+            "https://localhost:5173/entraid-redirect.html"
+            "$env:AZURE_STATIC_APP_URL/entraid-redirect.html"
+        )
+    }
     $requiredResourceAccess = @( @{ resourceAppId = "c3ca1a77-7a87-4dba-b8f8-eea115ae4573"; resourceAccess = @( @{ type = "Scope"; id = "44327351-3395-414e-882e-7aa4a9c3b25d" } ) } )
 
     $payload = @{ requiredResourceAccess = $requiredResourceAccess; spa = $spa } | ConvertTo-Json -Depth 100 -Compress | ConvertTo-Json

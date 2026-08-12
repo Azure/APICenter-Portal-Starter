@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Completing sign in</title>
+</head>
+<body>
+  <p>Completing sign in...</p>
+  <script type="module">
+    import { broadcastResponseToMainFrame } from '@azure/msal-browser/redirect-bridge';
+
+    broadcastResponseToMainFrame().catch((error) => {
+      console.error('Failed to return the authentication response to the portal.', error);
+    });
+  </script>
+</body>
+</html>

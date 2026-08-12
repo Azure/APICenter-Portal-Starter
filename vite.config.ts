@@ -1,4 +1,5 @@
 import path from 'path';
+import { fileURLToPath, URL } from 'node:url';
 import { defineConfig } from 'vitest/config';
 
 // https://vitejs.dev/config/
@@ -14,6 +15,12 @@ export default defineConfig({
   build: {
     // Suppress empty rule "{}" warnings from third-party CSS (api-docs-ui)
     cssMinify: 'esbuild',
+    rollupOptions: {
+      input: {
+        main: fileURLToPath(new URL('./index.html', import.meta.url)),
+        entraidRedirect: fileURLToPath(new URL('./entraid-redirect.html', import.meta.url)),
+      },
+    },
   },
   esbuild: {
     logOverride: {
