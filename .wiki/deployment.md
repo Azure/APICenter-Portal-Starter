@@ -234,6 +234,7 @@ dist/
 │   ├── index-[hash].css
 │   └── (images, fonts, etc.)
 ├── config.json
+├── entraid-redirect.html
 └── index.html
 ```
 
@@ -348,7 +349,7 @@ scp -r dist/* user@server:/var/www/portal/
 **Configure**:
 1. Create `config.json` with API Center endpoint
 2. Create Azure AD app registration (if authenticated mode)
-3. Set redirect URIs in app registration
+3. Register `https://<portal-origin>/entraid-redirect.html` as a **Single-page application (SPA)** redirect URI. The protocol, host, port, and path must match exactly. Keep the bridge response free of COOP headers so it can communicate with the portal through MSAL's redirect bridge.
 4. Update `config.json` with auth details
 5. Test portal
 

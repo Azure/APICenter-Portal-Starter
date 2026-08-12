@@ -52,7 +52,7 @@
 
 | Package | Version | Purpose | Usage |
 |---------|---------|---------|-------|
-| `@azure/msal-browser` | 3.13.0 | Azure AD auth | MsalAuthService |
+| `@azure/msal-browser` | 5.18.0 | Azure AD auth | MsalAuthService |
 | `client-oauth2` | 4.3.3 | OAuth 2.0 flows | Test console auth |
 
 **Modes**:
@@ -186,7 +186,7 @@ const { data, isLoading, error } = useQuery({
 
 ### Browser Compatibility
 **Target**: Modern browsers (ES2020+)
-**MSAL**: IE11 not supported (MSAL 3.x)
+**MSAL**: IE11 not supported (MSAL v5)
 
 ---
 

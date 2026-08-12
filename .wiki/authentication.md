@@ -12,14 +12,14 @@
   "authentication": {
     "clientId": "app-registration-guid",
     "tenantId": "tenant-guid",
-    "scopes": "https://azure-apicenter.net/Data.Read.All",
+    "scopes": ["https://azure-apicenter.net/Data.Read.All"],
     "authority": "https://login.microsoftonline.com/"
   }
 }
 ```
 
 **Service**: `MsalAuthService`
-**Library**: `@azure/msal-browser` v3.13.0
+**Library**: `@azure/msal-browser` v5.18.0
 
 ---
 
@@ -34,10 +34,17 @@
 
 ## MSAL Integration
 
-### Initialization
+### Shared client initialization
 
-**When**: First call to `MsalAuthService` method
-**Where**: `MsalAuthService.ts` (lazy initialization)
+**When**: First call to an auth method
+**Where**: `MsalClient.ts` (lazy initialization)
+
+`MsalAuthService` and `McpMsalAuthService` both reuse the same lazily initialized
+`PublicClientApplication`. The MSAL config resolves the redirect URI from the
+current origin as `${window.location.origin}/entraid-redirect.html`. The bridge page imports
+`broadcastResponseToMainFrame` from `@azure/msal-browser/redirect-bridge`,
+forwards popup and silent responses back to the main frame, and must not be
+served with a `Cross-Origin-Opener-Policy` header.
 
 **MSAL Config**:
 ```typescript
@@ -45,48 +52,31 @@
   auth: {
     clientId: config.authentication.clientId,
     authority: `${config.authentication.authority}${config.authentication.tenantId}`,
-    redirectUri: window.location.origin,
+    redirectUri: getEntraRedirectUri(),
   },
   cache: {
-    cacheLocation: 'sessionStorage',  // or localStorage
+    cacheLocation: 'sessionStorage',
     storeAuthStateInCookie: false,
   },
 }
 ```
 
-### Token Acquisition Flow
+### Popup sign-in flow
 
-```
-Component needs data
-  └─► HttpService.get('/apis')
-       └─► AuthService.getAccessToken()
-            ├─► Try acquireTokenSilent() (from cache/refresh)
-            │    └─► Success → return token
-            │
-            └─► On failure → acquireTokenRedirect()
-                 └─► Redirect to login.microsoftonline.com
-                      └─► User signs in
-                           └─► Redirect back to app
-                                └─► Handle redirect response
-                                     └─► Get token from response
+```text
+loginPopup()
+  -> Microsoft Entra ID
+  -> /entraid-redirect.html
+  -> broadcastResponseToMainFrame()
+  -> popup promise resolves
+  -> active account is set
 ```
 
-### Token Scopes
+### Token acquisition
 
-**Default**: `https://azure-apicenter.net/Data.Read.All`
-**Custom**: Configured in `config.authentication.scopes`
-**Format**: Space-separated string or array
-
-**Example**:
-```json
-"scopes": "https://azure-apicenter.net/Data.Read.All https://graph.microsoft.com/User.Read"
-```
-
-### Silent Token Refresh
-
-**Mechanism**: MSAL automatically refreshes tokens using refresh token
-**Trigger**: Token expires (typically 1 hour for access tokens)
-**Fallback**: If silent fails, redirect to interactive login
+`getAccessToken()` continues to use `acquireTokenSilent()` for portal API calls.
+MCP interactive token requests use `acquireTokenPopup()` through the same bridge
+when user interaction is required.
 
 ---
 
@@ -172,17 +162,19 @@ get: ({ get }) => {
 
 ### Sign-In Flow (Authenticated Mode)
 
-```
+```text
 User lands on portal
   └─► isAuthenticatedAtom = false
        └─► Home page renders "Sign in to view APIs"
             └─► User clicks "Sign In" button
                  └─► AuthService.signIn()
-                      └─► MSAL redirects to Azure AD
-                           └─► User authenticates
-                                └─► Redirect back to portal
-                                     └─► isAuthenticatedAtom updates to true
-                                          └─► Home page fetches APIs
+                      └─► MSAL opens Entra sign-in popup
+                           └─► Entra redirects the popup to /entraid-redirect.html
+                                └─► bridge posts the response back
+                                     └─► popup promise resolves
+                                          └─► active account is set
+                                               └─► isAuthenticatedAtom updates to true
+                                                    └─► Home page fetches APIs
 ```
 
 ### Auto-Sign-In (if user has active session)
@@ -237,7 +229,7 @@ User lands on portal
 - `interaction_required`: Silent token refresh failed, needs interaction
 - `consent_required`: User hasn't consented to scopes
 
-**Portal Behavior**: Redirect to interactive login
+**Portal Behavior**: Leave auth state unchanged and surface a retryable popup error
 
 ### API Access Denied
 
@@ -249,7 +241,7 @@ User lands on portal
 
 **Scenario**: Token expired mid-session
 **MSAL Behavior**: Auto-refresh on next API call
-**Fallback**: Redirect to login if refresh fails
+**Fallback**: Surface an interaction_required error and let the caller retry through the popup-based auth flow
 
 ---
 
@@ -347,21 +339,21 @@ interface IAuthService {
 
 **Purpose**: Get access token for API calls
 **Returns**: `Promise<string>` (empty string if no token)
-**MSAL**: Silent refresh or interactive login
+**MSAL**: Silent token acquisition; popup for interactive MCP requests
 **Anonymous**: Returns `''`
 
 ### signIn()
 
 **Purpose**: Initiate sign-in flow
 **Returns**: `Promise<void>`
-**MSAL**: Redirect to Azure AD login
+**MSAL**: Open Entra sign-in popup
 **Anonymous**: No-op
 
 ### signOut()
 
 **Purpose**: Sign out user
 **Returns**: `Promise<void>`
-**MSAL**: Clear cache, redirect to logout endpoint
+**MSAL**: Open Entra sign-out popup and clear cache
 **Anonymous**: No-op
 
 ---

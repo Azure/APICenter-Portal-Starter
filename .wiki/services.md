@@ -124,9 +124,9 @@ const makeRequestWithCache = memoizee(makeRequest);
 | Method | Purpose | Returns |
 |--------|---------|---------|
 | `isAuthenticated()` | Check auth state | `Promise<boolean>` |
-| `getAccessToken()` | Get token (silent or interactive) | `Promise<string>` |
-| `signIn()` | Redirect to Azure AD | `Promise<void>` |
-| `signOut()` | Sign out and redirect | `Promise<void>` |
+| `getAccessToken()` | Get token (silent) | `Promise<string>` |
+| `signIn()` | Open Entra sign-in popup | `Promise<void>` |
+| `signOut()` | Open Entra sign-out popup | `Promise<void>` |
 
 #### MSAL Configuration
 
@@ -137,7 +137,8 @@ const makeRequestWithCache = memoizee(makeRequest);
 
 #### Token Acquisition Flow
 1. Try `acquireTokenSilent()` (from cache or refresh token)
-2. If fails, fall back to `acquireTokenRedirect()` (interactive)
+2. If the portal needs interactive sign-in, use `loginPopup()` with the redirect bridge page
+3. MCP interactive token requests use `acquireTokenPopup()` through the same bridge
 
 ---
 

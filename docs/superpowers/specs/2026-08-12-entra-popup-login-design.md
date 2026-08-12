@@ -8,12 +8,14 @@ sign-in experience.
 
 ## Root Cause
 
-The portal uses `@azure/msal-browser` 3.13.0 and sends the full SPA page as the
-popup redirect target. Microsoft Entra ID now enables COOP by default. That
-policy can sever the opener relationship that MSAL v3 relies on to return the
-authentication response from the popup. The rejected `loginPopup` promise is
-also unhandled by the sign-in button, so the global error boundary replaces the
-application with the generic error page.
+The regression began in commit `47ab821`, which changed the inline OAuth
+callback bridge in `index.html` to parse URL fragments. Because MSAL v3 had no
+dedicated redirect URI, Entra redirected its `#code=...` response to
+`index.html`; the OAuth bridge misidentified it as its own callback, posted it,
+and closed the popup. MSAL then rejected while polling `window.closed`. The
+console COOP warning was collateral, not the root cause. Commit `4b1538c`
+turned that rejection into the global "Oops, something went wrong" page through
+the unhandled-rejection error boundary.
 
 ## Approach
 

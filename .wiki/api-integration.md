@@ -135,7 +135,7 @@ Authorization: Bearer {token}
 ```
 
 **Token Source**:
-- Authenticated mode: MSAL `acquireTokenSilent()` or `acquireTokenRedirect()`
+- Authenticated mode: MSAL `acquireTokenSilent()` for portal API calls or `acquireTokenPopup()` for popup-based interactive requests
 - Anonymous mode: No header
 
 ### Accept Header

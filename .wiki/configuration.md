@@ -25,8 +25,9 @@ The application uses a **runtime configuration** approach via `config.json`, all
   "apiCenterDataPlaneUri": "https://{workspace}.data.azure-apicenter.ms",
   "authentication": {
     "clientId": "{azure-ad-app-client-id}",
-    "authority": "https://login.microsoftonline.com/{tenant-id}",
-    "redirectUri": "https://{deployed-portal-url}"
+    "tenantId": "{tenant-id}",
+    "scopes": ["https://azure-apicenter.net/Data.Read.All"],
+    "authority": "https://login.microsoftonline.com/"
   },
   "apiFilters": {
     "lifecycle": ["design", "development", "testing", "production"],
@@ -44,6 +45,8 @@ The application uses a **runtime configuration** approach via `config.json`, all
 }
 ```
 
+Redirect URI is not a `config.json` property. The MSAL client derives it at runtime from the current origin and the fixed `/entraid-redirect.html` bridge page.
+
 ### Configuration Properties
 
 | Property | Type | Required | Purpose |
@@ -53,8 +56,9 @@ The application uses a **runtime configuration** approach via `config.json`, all
 | `apiCenterDataPlaneUri` | string | Yes | API Center data plane base URL |
 | `authentication` | object | **No** | MSAL configuration (omit for anonymous access) |
 | `authentication.clientId` | string | If auth | Azure AD app registration client ID |
+| `authentication.tenantId` | string | If auth | Azure AD tenant ID used to build the authority |
+| `authentication.scopes` | string[] | If auth | Scopes requested during login and token acquisition |
 | `authentication.authority` | string | If auth | Azure AD authority URL (tenant-specific or common) |
-| `authentication.redirectUri` | string | If auth | OAuth redirect URI (must match portal URL) |
 | `apiFilters` | object | No | Available filter options in UI |
 | `apiFilters.lifecycle` | string[] | No | Lifecycle stage values for filter |
 | `apiFilters.kind` | string[] | No | API kind/type values for filter |
@@ -170,7 +174,7 @@ const lifecycleOptions = config?.apiFilters?.lifecycle || DEFAULT_LIFECYCLE;
 
 **File**: `public/config.json` (local dev file)
 
-**Content**: Points to development API Center instance, localhost redirect URI.
+**Content**: Points to development API Center instance. The redirect URI is derived from the current origin and `/entraid-redirect.html`.
 
 **Example**:
 ```json
@@ -178,7 +182,9 @@ const lifecycleOptions = config?.apiFilters?.lifecycle || DEFAULT_LIFECYCLE;
   "apiCenterDataPlaneUri": "https://dev-apicenter.data.azure-apicenter.ms",
   "authentication": {
     "clientId": "dev-client-id",
-    "redirectUri": "http://localhost:5173"
+    "tenantId": "dev-tenant-id",
+    "scopes": ["https://azure-apicenter.net/Data.Read.All"],
+    "authority": "https://login.microsoftonline.com/"
   }
 }
 ```
@@ -200,8 +206,9 @@ $config = @{
   apiCenterAudience = $env:API_CENTER_AUDIENCE
   authentication = @{
     clientId = $env:AZURE_CLIENT_ID
-    authority = "https://login.microsoftonline.com/$env:AZURE_TENANT_ID"
-    redirectUri = $env:STATIC_WEB_APP_URL
+    tenantId = $env:AZURE_TENANT_ID
+    scopes = @('https://azure-apicenter.net/Data.Read.All')
+    authority = 'https://login.microsoftonline.com/'
   }
 } | ConvertTo-Json
 
@@ -253,8 +260,9 @@ export interface IConfig {
   apiCenterDataPlaneUri: string;
   authentication?: {
     clientId: string;
+    tenantId: string;
+    scopes: string[];
     authority: string;
-    redirectUri: string;
   };
   apiFilters?: {
     lifecycle?: string[];
