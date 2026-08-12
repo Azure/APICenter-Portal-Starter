@@ -1,10 +1,8 @@
-import * as msal from '@azure/msal-browser';
 import { getRecoil } from 'recoil-nexus';
-import { MsalSettings } from '@/types/msalSettings';
 import { configAtom } from '@/atoms/configAtom';
 import { isAnonymousAccessEnabledAtom } from '@/atoms/isAnonymousAccessEnabledAtom';
-
-let msalInstance: msal.PublicClientApplication | undefined;
+import { getMsalClient } from '@/services/MsalClient';
+import { MsalSettings } from '@/types/msalSettings';
 
 function getAuthConfig(): MsalSettings {
   const { authentication } = getRecoil(configAtom);
@@ -15,36 +13,8 @@ function getAuthConfig(): MsalSettings {
 
   return {
     ...authentication,
-    // Fixing scopes for backward compatibility
     scopes: [authentication.scopes].flat(),
   };
-}
-
-async function getMsalInstance(config: MsalSettings): Promise<msal.PublicClientApplication> {
-  if (msalInstance) {
-    return msalInstance;
-  }
-
-  // Fixing authority for backward compatibility
-  const authorityUrl = (config.authority || config.azureAdInstance) + config.tenantId;
-
-  const msalConfig: msal.Configuration = {
-    auth: {
-      clientId: config.clientId,
-      authority: authorityUrl,
-    },
-  };
-
-  msalInstance = new msal.PublicClientApplication(msalConfig);
-  await msalInstance.initialize();
-
-  const accounts = msalInstance.getAllAccounts();
-
-  if (accounts.length > 0) {
-    msalInstance.setActiveAccount(accounts[0]);
-  }
-
-  return msalInstance;
 }
 
 export const MsalAuthService = {
@@ -54,7 +24,7 @@ export const MsalAuthService = {
     }
 
     const config = getAuthConfig();
-    const msalInstance = await getMsalInstance(config);
+    const msalInstance = await getMsalClient(config);
     const accounts = msalInstance.getAllAccounts();
 
     return accounts.length > 0;
@@ -66,7 +36,7 @@ export const MsalAuthService = {
     }
 
     const config = getAuthConfig();
-    const msalInstance = await getMsalInstance(config);
+    const msalInstance = await getMsalClient(config);
     const authResult = await msalInstance.acquireTokenSilent({ scopes: config.scopes });
 
     return authResult.accessToken;
@@ -78,7 +48,7 @@ export const MsalAuthService = {
     }
 
     const config = getAuthConfig();
-    const msalInstance = await getMsalInstance(config);
+    const msalInstance = await getMsalClient(config);
     const authResult = await msalInstance.loginPopup({ scopes: config.scopes });
 
     msalInstance.setActiveAccount(authResult.account);
@@ -90,7 +60,7 @@ export const MsalAuthService = {
     }
 
     const config = getAuthConfig();
-    const msalInstance = await getMsalInstance(config);
+    const msalInstance = await getMsalClient(config);
     await msalInstance.logoutPopup();
   },
 };

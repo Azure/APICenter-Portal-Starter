@@ -2,42 +2,7 @@ import * as msal from '@azure/msal-browser';
 import { getRecoil } from 'recoil-nexus';
 import { configAtom } from '@/atoms/configAtom';
 import { isAnonymousAccessEnabledAtom } from '@/atoms/isAnonymousAccessEnabledAtom';
-
-let msalInstance: msal.PublicClientApplication | undefined;
-
-async function getMsalInstance(): Promise<msal.PublicClientApplication | undefined> {
-  if (msalInstance) {
-    return msalInstance;
-  }
-
-  if (getRecoil(isAnonymousAccessEnabledAtom)) {
-    return undefined;
-  }
-
-  const { authentication } = getRecoil(configAtom);
-  if (!authentication) {
-    return undefined;
-  }
-
-  const authorityUrl = (authentication.authority || authentication.azureAdInstance) + authentication.tenantId;
-
-  const msalConfig: msal.Configuration = {
-    auth: {
-      clientId: authentication.clientId,
-      authority: authorityUrl,
-    },
-  };
-
-  msalInstance = new msal.PublicClientApplication(msalConfig);
-  await msalInstance.initialize();
-
-  const accounts = msalInstance.getAllAccounts();
-  if (accounts.length > 0) {
-    msalInstance.setActiveAccount(accounts[0]);
-  }
-
-  return msalInstance;
-}
+import { getMsalClient } from '@/services/MsalClient';
 
 /**
  * Self-contained service for acquiring MSAL tokens for MCP servers
@@ -51,7 +16,7 @@ export const McpMsalAuthService = {
    * Throws on non-interactive errors (misconfiguration, wrong tenant, etc.).
    */
   async acquireToken(scopes: string[], authority?: string): Promise<string | undefined> {
-    const instance = await getMsalInstance();
+    const instance = await getConfiguredMsalClient();
     if (!instance) {
       return undefined;
     }
@@ -74,7 +39,7 @@ export const McpMsalAuthService = {
    * Sets the active account after successful authentication.
    */
   async acquireTokenInteractive(scopes: string[], authority?: string): Promise<string> {
-    const instance = await getMsalInstance();
+    const instance = await getConfiguredMsalClient();
     if (!instance) {
       throw new Error(
         'MSAL is not available. The portal must be configured with Entra ID authentication to use this feature.'
@@ -92,7 +57,16 @@ export const McpMsalAuthService = {
    * Check if MSAL is available (portal has Entra ID auth configured and user is not anonymous).
    */
   async isAvailable(): Promise<boolean> {
-    const instance = await getMsalInstance();
+    const instance = await getConfiguredMsalClient();
     return instance !== undefined;
   },
 };
+
+async function getConfiguredMsalClient(): Promise<msal.PublicClientApplication | undefined> {
+  if (getRecoil(isAnonymousAccessEnabledAtom)) {
+    return undefined;
+  }
+
+  const { authentication } = getRecoil(configAtom);
+  return authentication ? getMsalClient(authentication) : undefined;
+}
