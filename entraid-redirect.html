@@ -11,7 +11,8 @@
     import { broadcastResponseToMainFrame } from '@azure/msal-browser/redirect-bridge';
 
     broadcastResponseToMainFrame().catch((error) => {
-      console.error('Failed to return the authentication response to the portal.', error);
+      const errorCode = typeof error?.errorCode === 'string' && error.errorCode ? error.errorCode : 'unknown_error';
+      console.error(`Failed to return the authentication response to the portal. Error code: ${errorCode}`);
     });
   </script>
 </body>
