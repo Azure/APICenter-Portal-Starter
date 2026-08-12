@@ -1,5 +1,5 @@
 import React from 'react';
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, waitFor } from '@testing-library/react';
 import { RecoilRoot } from 'recoil';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { appServicesAtom } from '@/atoms/appServicesAtom';
@@ -7,8 +7,10 @@ import { configAtom } from '@/atoms/configAtom';
 import { isAuthenticatedAtom } from '@/atoms/isAuthenticatedAtom';
 import AuthBtn from './AuthBtn';
 
-function renderAuthButton(signIn: () => Promise<void>): void {
-  render(
+let unmountAuthButton: (() => void) | undefined;
+
+function renderAuthButton(signIn: () => Promise<void>) {
+  const rendered = render(
     <RecoilRoot
       initializeState={({ set }) => {
         set(configAtom, {
@@ -38,11 +40,13 @@ function renderAuthButton(signIn: () => Promise<void>): void {
       <AuthBtn />
     </RecoilRoot>
   );
+
+  unmountAuthButton = rendered.unmount;
+  return rendered;
 }
 
 describe('AuthBtn', () => {
   beforeEach(() => {
-    cleanup();
     vi.restoreAllMocks();
     vi.stubGlobal(
       'ResizeObserver',
@@ -57,18 +61,20 @@ describe('AuthBtn', () => {
   });
 
   afterEach(() => {
+    unmountAuthButton?.();
+    unmountAuthButton = undefined;
     vi.unstubAllGlobals();
   });
 
   it('keeps the portal usable when popup sign-in fails', async () => {
     const signIn = vi.fn(() => Promise.reject(new Error('popup_window_error')));
     const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
-    renderAuthButton(signIn);
+    const { getByRole, findByRole } = renderAuthButton(signIn);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Sign in' }));
+    fireEvent.click(getByRole('button', { name: 'Sign in' }));
 
-    expect((await screen.findByRole('alert')).textContent).toContain('Sign-in was not completed. Please try again.');
-    expect(screen.getByRole('button', { name: 'Sign in' })).toHaveProperty('disabled', false);
+    expect((await findByRole('alert')).textContent).toContain('Sign-in was not completed. Please try again.');
+    expect(getByRole('button', { name: 'Sign in' })).toHaveProperty('disabled', false);
     expect(consoleError).toHaveBeenCalledWith('Authentication interaction failed (unknown_error).');
   });
 
@@ -80,15 +86,15 @@ describe('AuthBtn', () => {
           resolveSignIn = resolve;
         })
     );
-    renderAuthButton(signIn);
+    const { getByRole } = renderAuthButton(signIn);
 
-    const button = screen.getByRole('button', { name: 'Sign in' });
+    const button = getByRole('button', { name: 'Sign in' });
     fireEvent.click(button);
     fireEvent.click(button);
 
     expect(signIn).toHaveBeenCalledTimes(1);
-    expect(screen.getByRole('button', { name: 'Signing in...' })).toHaveProperty('disabled', true);
+    expect(getByRole('button', { name: 'Signing in...' })).toHaveProperty('disabled', true);
     resolveSignIn();
-    await waitFor(() => expect(screen.getByRole('button', { name: 'Sign out' })).toHaveProperty('disabled', false));
+    await waitFor(() => expect(getByRole('button', { name: 'Sign out' })).toHaveProperty('disabled', false));
   });
 });

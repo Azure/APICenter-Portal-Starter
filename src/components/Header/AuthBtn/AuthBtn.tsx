@@ -46,8 +46,6 @@ export const AuthBtn: React.FC = () => {
       } finally {
         setIsPending(false);
       }
-
-      return;
     }
 
     try {
