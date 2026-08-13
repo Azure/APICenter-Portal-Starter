@@ -17,11 +17,36 @@
      * the portal asks for - fragments are never sent to the server, so no server-side URL/query
      * length limit can ever truncate or reject the callback) or in the query string (providers
      * that ignore `response_mode`). Both are parsed, with the fragment taking precedence.
+     *
+     * This page is also the default redirect target of other authentication libraries running on
+     * this origin - notably the MSAL sign-in popup, which likewise comes back with `code` and
+     * `state` in the fragment. Closing that popup would abort its flow, so the bridge only claims
+     * a response whose `state` this portal issued. `OAUTH_PENDING_STATES_KEY` below mirrors
+     * `src/utils/oauthState.ts`; keep the two in sync.
      */
     (() => {
       if (!window.opener) {
         return;
       }
+
+      const OAUTH_PENDING_STATES_KEY = 'apic.oauth.pendingStates';
+
+      const isPortalIssuedState = (state) => {
+        try {
+          const raw = window.localStorage.getItem(OAUTH_PENDING_STATES_KEY);
+
+          if (!raw) {
+            return false;
+          }
+
+          const expiresAt = JSON.parse(raw)[state];
+
+          return typeof expiresAt === 'number' && expiresAt > Date.now();
+        } catch (e) {
+          // Storage unavailable or corrupt - we cannot attribute the response, so do not claim it.
+          return false;
+        }
+      };
 
       const hash = window.location.hash.replace(/^#/, '');
       const search = window.location.search.replace(/^\?/, '');
@@ -48,6 +73,15 @@
       };
 
       if (!payload.code && !payload.error && !payload.uri) {
+        return;
+      }
+
+      /*
+       * Responses from providers that drop `state` altogether cannot be attributed, so they are
+       * still claimed - the opener re-checks `event.origin` and the PKCE code verifier binds the
+       * code to this session.
+       */
+      if (payload.state && !isPortalIssuedState(payload.state)) {
         return;
       }
 

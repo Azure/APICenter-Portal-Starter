@@ -225,6 +225,23 @@ The flows are driven from a popup window (`openAuthPopup`), not a full-page redi
 
 **`index.html` and `OAuthService.ts` are two halves of one contract** — change them together.
 
+#### Claiming only our own responses
+
+This page is the default redirect target of every authentication library on this origin, not just
+`OAuthService`. In particular the **MSAL sign-in popup** (`MsalAuthService.signIn()`) is configured
+with no `redirectUri`, so MSAL defaults it to the portal page, and MSAL's own response also carries
+`code` and `state` in the fragment. A bridge that claimed it would `window.close()` the MSAL popup,
+MSAL's `monitorPopupForHash` would then observe `popupWindow.closed` and reject the sign-in with
+`user_cancelled`.
+
+The bridge therefore claims a response only when its `state` was issued by this portal.
+`src/utils/oauthState.ts` records issued values in `localStorage` under `apic.oauth.pendingStates`
+(with a TTL, released when the attempt settles) and the bridge reads that key directly — it runs
+before the bundle loads, so **the key literal is duplicated in `index.html`; keep the two in sync**.
+
+Responses carrying no `state` at all cannot be attributed and are still claimed, so providers that
+drop `state` keep working; `event.origin` and the PKCE code verifier remain the guards there.
+
 #### `response_mode=fragment`
 
 Both flows request `response_mode=fragment`, so the authorization code / token comes back in the URL
