@@ -3,6 +3,7 @@ import * as uuid from 'uuid';
 import { capitalize } from 'lodash';
 import { Oauth2Credentials, OAuthGrantTypes } from '@/types/apiAuth';
 import { apimFetchProxy } from '@/utils/apimProxy';
+import { issueOAuthState, releaseOAuthState } from '@/utils/oauthState';
 
 export interface OAuthTokenResponse {
   /** Access token. */
@@ -99,6 +100,7 @@ function openAuthPopup(
 ): Promise<string | undefined> {
   return new Promise<string | undefined>((resolve, reject) => {
     if (!validateUriScheme(uri)) {
+      releaseOAuthState(expectedState);
       reject(new Error('The authorization endpoint uses an unsupported URL scheme and was blocked.'));
       return;
     }
@@ -106,6 +108,7 @@ function openAuthPopup(
     const popup = window.open(uri, '_blank', 'width=400,height=500');
 
     if (!popup) {
+      releaseOAuthState(expectedState);
       reject(new Error('Unable to open the sign-in window. Allow pop-ups for this site and try again.'));
       return;
     }
@@ -114,6 +117,7 @@ function openAuthPopup(
 
     const cleanUp = (): void => {
       isSettled = true;
+      releaseOAuthState(expectedState);
       window.removeEventListener('message', receiveMessage, false);
       clearInterval(closePollTimer);
       clearTimeout(timeoutTimer);
@@ -207,7 +211,7 @@ export const OAuthService = {
 
   /** Acquires access token using "implicit" grant flow. */
   authenticateImplicit(backendUrl: string, credentials: Oauth2Credentials): Promise<string | undefined> {
-    const state = uuid.v4();
+    const state = issueOAuthState();
 
     const query = {
       state,
@@ -264,7 +268,7 @@ export const OAuthService = {
 
     const codeVerifier = generateRandomString(64);
     const challengeMethod = crypto.subtle ? 'S256' : 'plain';
-    const state = uuid.v4();
+    const state = issueOAuthState();
 
     const codeChallenge = challengeMethod === 'S256' ? await generateCodeChallenge(codeVerifier) : codeVerifier;
 
