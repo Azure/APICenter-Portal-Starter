@@ -67,7 +67,12 @@ function getUsableBrowserFlows(supportedFlows: unknown, tokenUrl: unknown): OAut
 
   const hasTokenUrl = isNonEmptyString(tokenUrl);
 
-  const usableFlows = supportedFlows.filter((flow, index, flows): flow is OAuthGrantTypes => {
+  // getCredentials returns enum member names (e.g. 'authorizationCode'); map them to grant type values.
+  const normalizedFlows = supportedFlows.map(
+    (flow) => (OAuthGrantTypes as Record<string, string>)[flow as keyof typeof OAuthGrantTypes] ?? flow
+  );
+
+  const usableFlows = normalizedFlows.filter((flow, index, flows): flow is OAuthGrantTypes => {
     if (!supportedBrowserFlows.includes(flow as OAuthGrantTypes) || flows.indexOf(flow) !== index) {
       return false;
     }

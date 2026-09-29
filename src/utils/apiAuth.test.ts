@@ -150,6 +150,21 @@ describe('isUsableOauthScheme', () => {
     });
   });
 
+  it('accepts OAuth flows in the getCredentials wire format', () => {
+    expect(
+      getUsableOauthScheme({
+        securityScheme: ApiAuthType.oauth2,
+        oauth2: {
+          clientId: 'portal-client',
+          authorizationUrl: 'https://login.example.test/authorize',
+          tokenUrl: 'https://login.example.test/token',
+          supportedScopes: ['.default'],
+          supportedFlows: ['authorizationCode', 'clientCredentials'],
+        },
+      })?.oauth2.supportedFlows
+    ).toEqual([OAuthGrantTypes.authorizationCode]);
+  });
+
   it('rejects OAuth flows that are unsupported by the browser client', () => {
     expect(
       isUsableOauthScheme({
