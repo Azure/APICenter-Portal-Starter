@@ -9,7 +9,7 @@ import { HomeLocationState } from '@/types/homeDrawer';
 import SemanticSearchToggle from '@/components/SemanticSearchToggle';
 import styles from './ApiSearchAutoComplete.module.scss';
 
-function getNavigationTarget(api: ApiMetadata): { to: string; state?: HomeLocationState } {
+export function getNavigationTarget(api: ApiMetadata): { to: string; state?: HomeLocationState } {
   const kind = api.kind?.toLowerCase();
   if (kind === 'skill') {
     return { to: LocationsService.getSkillInfoUrl(api.name) };
@@ -28,7 +28,7 @@ function getNavigationTarget(api: ApiMetadata): { to: string; state?: HomeLocati
   }
 
   return {
-    to: LocationsService.getHomeUrl(true),
+    to: LocationsService.getApiSearchUrl(api.name),
     state: { drawer: { kind: 'api', name: api.name } },
   };
 }
