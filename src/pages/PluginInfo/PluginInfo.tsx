@@ -10,11 +10,10 @@ import { usePlugin } from '@/hooks/usePlugin';
 import { configAtom } from '@/atoms/configAtom';
 import { setDocumentTitle } from '@/utils/dom';
 import { formatKindDisplay } from '@/utils/formatKind';
-import { LocationsService } from '@/services/LocationsService';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import { DetailPageLayout, BreadcrumbItem } from '@/components/DetailPageLayout/DetailPageLayout';
 import { InstallationBlock } from '@/components/InstallationBlock';
-import { HomeLocationState } from '@/types/homeDrawer';
+import { getPluginResourceNavigation } from './pluginResourceNavigation';
 import styles from './PluginInfo.module.scss';
 
 // VS Code Codicons — aligned with VS Code Agents app
@@ -36,19 +35,6 @@ const CATEGORY_LABELS: Record<string, string> = {
 
 function getCategoryLabel(kind: string): string {
   return CATEGORY_LABELS[kind] ?? `${formatKindDisplay(kind)}s`;
-}
-
-function getResourceNavigation(name: string, kind?: string): { to: string; state?: HomeLocationState } {
-  const k = kind?.toLowerCase();
-  if (k === 'agent') return { to: LocationsService.getAgentInfoUrl(name) };
-  if (k === 'skill') return { to: LocationsService.getSkillInfoUrl(name) };
-  if (k === 'model' || k === 'languagemodel') {
-    return { to: LocationsService.getModelDetailUrl(name) };
-  }
-  return {
-    to: LocationsService.getHomeUrl(true),
-    state: { drawer: { kind: 'api', name } },
-  };
 }
 
 interface ResolvedResource {
@@ -132,7 +118,7 @@ export const PluginInfo: React.FC = () => {
               </h3>
               <div className={styles.resourceList}>
                 {items.map((resource) => {
-                  const navigation = getResourceNavigation(resource.name, resource.kind);
+                  const navigation = getPluginResourceNavigation(resource.name, resource.kind);
                   return (
                     <Link
                       key={resource.name}
