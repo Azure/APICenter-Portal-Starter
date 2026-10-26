@@ -22,8 +22,16 @@ import { EmptyStateMessage } from '@/components/EmptyStateMessage/EmptyStateMess
 import { InstallationBlock } from '@/components/InstallationBlock';
 import VsCodeLogo from '@/assets/vsCodeLogo.svg';
 
-/** Hardcoded source URL for skill installation deeplinks. */
-const SKILL_SOURCE_URL = 'https://github.com/vercel-labs/agent-skills/tree/main/skills';
+/** Extracts a non-empty skill source URL from custom properties. */
+export function getSkillSourceUrl(customProperties?: Record<string, unknown>): string | undefined {
+  const sourceUrl = customProperties?.['sourceUrl'];
+  if (typeof sourceUrl !== 'string') {
+    return undefined;
+  }
+
+  const trimmed = sourceUrl.trim();
+  return trimmed ? trimmed : undefined;
+}
 
 /** Skill-specific descriptions for known L0/L1 assertion names. */
 const SKILL_ASSERTION_DESCRIPTIONS: Record<string, string> = {
@@ -57,10 +65,7 @@ export const SkillInfo: React.FC = () => {
     [api.data?.title, name]
   );
 
-  const skillSourceUrl = useMemo(
-    () => (api.data?.customProperties?.['sourceUrl'] as string | undefined) ?? SKILL_SOURCE_URL,
-    [api.data]
-  );
+  const skillSourceUrl = useMemo(() => getSkillSourceUrl(api.data?.customProperties), [api.data]);
 
   // Auto-select the first version once versions load.
   useEffect(() => {
@@ -85,7 +90,7 @@ export const SkillInfo: React.FC = () => {
   }, [selectedTab, evalResult.isFetched, evalResult.isFetching, evalResult.data]);
 
   const handleSkillInstall = useCallback(() => {
-    if (!api.data?.name) return;
+    if (!skillSourceUrl || !api.data?.name) return;
     const deeplink = buildSkillDeeplink({ sourceUrl: skillSourceUrl, name: api.data.name }, 'vscode');
     window.open(deeplink);
   }, [skillSourceUrl, api.data?.name]);
