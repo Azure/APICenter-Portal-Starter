@@ -65,29 +65,50 @@ export async function openApiV3Reader(specStr: string): Promise<ApiSpecReader> {
   });
 
   const getOperationCategories = memoize((): Array<OperationCategory<OpenAPIV3.OperationObject>> => {
-    return [
-      {
-        name: 'default',
-        label: 'Operations',
-        operations: Object.entries(apiSpec.paths).flatMap(([pathName, pathData]) => {
-          return httpMethodsList
-            .filter((method) => pathData.hasOwnProperty(method))
-            .map((method: string) => {
-              const opData = pathData[method];
-              return {
-                type: OperationTypes.DEFAULT,
-                category: 'default',
-                displayName: opData.summary || pathName,
-                description: opData.summary,
-                name: `${method}${pathName}`,
-                urlTemplate: pathName,
-                method,
-                spec: opData,
-              };
-            });
-        }),
-      },
-    ];
+    const grouped = new Map<string, Array<OperationMetadata<OpenAPIV3.OperationObject>>>();
+
+    Object.entries(apiSpec.paths).forEach(([pathName, pathData]) => {
+      httpMethodsList
+        .filter((method) => pathData.hasOwnProperty(method))
+        .forEach((method: string) => {
+          const opData = pathData[method];
+          const tagName = opData.tags?.[0] || 'default';
+          const categoryOps = grouped.get(tagName) || [];
+
+          categoryOps.push({
+            type: OperationTypes.DEFAULT,
+            category: tagName,
+            displayName: opData.summary || pathName,
+            description: opData.description,
+            name: `${method}${pathName}`,
+            urlTemplate: pathName,
+            method,
+            spec: opData,
+          });
+
+          grouped.set(tagName, categoryOps);
+        });
+    });
+
+    const tagOrder = apiSpec.tags?.map((tag) => tag.name) || [];
+    const categories = [...grouped.entries()].map(([name, operations]) => ({
+      name,
+      label: name === 'default' ? 'Operations' : name,
+      operations,
+    }));
+
+    return sortBy(categories, (category) => {
+      if (category.name === 'default') {
+        return `${String(tagOrder.length + 1).padStart(6, '0')}-zzzz`;
+      }
+
+      const idx = tagOrder.indexOf(category.name);
+      if (idx >= 0) {
+        return `${String(idx).padStart(6, '0')}-${category.name.toLowerCase()}`;
+      }
+
+      return `${String(tagOrder.length).padStart(6, '0')}-${category.name.toLowerCase()}`;
+    });
   });
 
   const getOperations = memoize((): Array<OperationMetadata<OpenAPIV3.OperationObject>> => {
@@ -98,8 +119,8 @@ export async function openApiV3Reader(specStr: string): Promise<ApiSpecReader> {
     return getOperations().find((operation) => operation.name === operationName);
   });
 
-  const REQUEST_PARAM_TYPES = ['path', 'query', 'cookie'];
-  const HEADER_PARAM_TYPES = ['header'];
+  const REQUEST_PARAM_TYPES = new Set(['path', 'query', 'cookie']);
+  const HEADER_PARAM_TYPES = new Set(['header']);
 
   const getRequestMetadata = memoize((operationName: string): RequestMetadata => {
     const operation = getOperation(operationName);
@@ -120,9 +141,9 @@ export async function openApiV3Reader(specStr: string): Promise<ApiSpecReader> {
 
     return {
       description: operation.spec?.description,
-      parameters: resultParams.filter((param) => REQUEST_PARAM_TYPES.includes(param.in)),
+      parameters: resultParams.filter((param) => REQUEST_PARAM_TYPES.has(param.in)),
       headers: uniqBy(
-        resultParams.filter((param) => HEADER_PARAM_TYPES.includes(param.in)),
+        resultParams.filter((param) => HEADER_PARAM_TYPES.has(param.in)),
         'name'
       ),
       body: resolveMediaContent(get(operation.spec, 'requestBody.content') as OpenAPIV3.RequestBodyObject['content']),
@@ -163,13 +184,14 @@ export async function openApiV3Reader(specStr: string): Promise<ApiSpecReader> {
           case 'schemas':
             return resolveSchema(resolveRef(apiSpec, ref) as OpenAPIV3.SchemaObject);
 
-          case 'responses':
+          case 'responses': {
             const responseData = resolveRef(apiSpec, ref) as OpenAPIV3.ResponseObject;
             return {
               ...resolveSchema(responseData.content[Object.keys(responseData.content)[0]].schema),
               $ref: ref,
               refLabel: getRefLabel(ref),
             };
+          }
 
           default:
             return undefined;
