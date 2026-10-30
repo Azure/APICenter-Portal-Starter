@@ -99,6 +99,27 @@ describe('McpServerDetailPage registry metadata', () => {
     });
   });
 
+  it('maps modern remote types to the VS Code HTTP transport payload', () => {
+    const open = vi.spyOn(window, 'open').mockImplementation(() => null);
+    mocks.useServer.mockReturnValue({
+      data: {
+        name: 'example',
+        remotes: [{ type: 'streamable-http', url: 'https://example.com/mcp' }],
+      },
+    });
+
+    render(<McpServerDetailPage />);
+    fireEvent.click(screen.getByRole('button', { name: /Install in VS Code/ }));
+
+    const uri = open.mock.calls[0][0] as string;
+    expect(JSON.parse(decodeURIComponent(uri.split('?')[1]))).toEqual({
+      name: 'Example',
+      type: 'http',
+      transport: 'http',
+      url: 'https://example.com/mcp',
+    });
+  });
+
   it('shows an error instead of opening a setup that would ignore the registry', () => {
     const open = vi.spyOn(window, 'open').mockImplementation(() => null);
     mocks.useServer.mockReturnValue({

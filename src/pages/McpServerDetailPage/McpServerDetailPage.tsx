@@ -20,6 +20,7 @@ import MarkdownRenderer from '@/components/MarkdownRenderer';
 import { InstallationBlock } from '@/components/InstallationBlock';
 import { McpServerMetadata } from '@/experiences/McpServerMetadata/McpServerMetadata';
 import { buildMcpPackageCommand } from '@/utils/mcpPackageInstall';
+import { getMcpRemoteTransport } from '@/utils/mcpRemoteTransport';
 import VsCodeLogo from '@/assets/vsCodeLogo.svg';
 
 export const McpServerDetailPage: React.FC = () => {
@@ -83,10 +84,10 @@ export const McpServerDetailPage: React.FC = () => {
         || server.data?.remotes?.[0]?.url;
       if (!runtimeUri) return;
       const matchingRemote = server.data?.remotes?.find((r) => r.url === runtimeUri);
-      const transportType = matchingRemote?.transport_type || 'sse';
       const payload = {
         name: hasLocalInstall ? `${baseName} (remote)` : baseName,
-        type: transportType,
+        type: 'http',
+        transport: getMcpRemoteTransport(matchingRemote),
         url: runtimeUri,
       };
       window.open(`vscode:mcp/install?${encodeURIComponent(JSON.stringify(payload))}`);

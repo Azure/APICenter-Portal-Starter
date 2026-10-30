@@ -5,7 +5,8 @@ import { useRecoilValue } from 'recoil';
 import DevPortalLogo from '@/assets/devPortal.png';
 import { ApiMetadata } from '@/types/api';
 import { ApiVersion } from '@/types/apiVersion';
-import { ApiDefinition, kindToResourceType } from '@/types/apiDefinition';import { useApiSpecUrl } from '@/hooks/useApiSpecUrl';
+import { ApiDefinition, kindToResourceType } from '@/types/apiDefinition';
+import { useApiSpecUrl } from '@/hooks/useApiSpecUrl';
 import { useDeploymentEnvironment } from '@/hooks/useDeploymentEnvironment';
 import { ApiDeployment } from '@/types/apiDeployment';
 import VsCodeLogo from '@/assets/vsCodeLogo.svg';
@@ -15,6 +16,7 @@ import CopyLink from '@/components/CopyLink';
 import { configAtom } from '@/atoms/configAtom';
 import { useServer } from '@/hooks/useServer';
 import { buildMcpPackageCommand } from '@/utils/mcpPackageInstall';
+import { getMcpRemoteTransport } from '@/utils/mcpRemoteTransport';
 import styles from './ApiInfoOptions.module.scss';
 
 /**
@@ -105,11 +107,11 @@ export const ApiInfoOptions: React.FC<Props> = ({ api, apiVersion, apiDefinition
         if (!runtimeUri) return;
 
         const matchingRemote = server.data?.remotes?.find((r) => r.url === runtimeUri);
-        const transportType = matchingRemote?.transport_type || 'sse';
 
         payload = {
           name: api.title || api.name,
-          type: transportType,
+          type: 'http',
+          transport: getMcpRemoteTransport(matchingRemote),
           url: runtimeUri,
         };
       }

@@ -13,12 +13,17 @@ describe('ApiService.getServer', () => {
     const server = {
       name: 'modern',
       packages: [{ identifier: 'pkg', registryBaseUrl: 'https://private.example/npm' }],
+      remotes: [{ type: 'streamable-http', url: 'https://example.com/mcp' }],
       repository: { url: 'https://example.com/source' },
     };
     const metadata = { 'io.modelcontextprotocol.registry/official': { status: 'active', isLatest: true } };
     vi.mocked(HttpService.get).mockResolvedValue({ server, _meta: metadata });
 
-    expect(await ApiService.getServer('modern')).toMatchObject({ ...server, registryMetadata: metadata });
+    expect(await ApiService.getServer('modern')).toMatchObject({
+      ...server,
+      remotes: [{ transport_type: 'streamable-http', url: 'https://example.com/mcp' }],
+      registryMetadata: metadata,
+    });
     expect(HttpService.get).toHaveBeenCalledWith('/v0/servers/modern');
   });
 

@@ -5,6 +5,7 @@ import VsCodeLogo from '@/assets/vsCodeLogo.svg';
 import { useServer } from '@/hooks/useServer';
 import { ApiDeployment } from '@/types/apiDeployment';
 import { buildMcpPackageCommand } from '@/utils/mcpPackageInstall';
+import { getMcpRemoteTransport } from '@/utils/mcpRemoteTransport';
 import styles from './McpInstallPanel.module.scss';
 
 interface McpInstallPanelProps {
@@ -54,12 +55,12 @@ export const McpInstallPanel: React.FC<McpInstallPanelProps> = ({ apiName, apiTi
         if (!runtimeUri) return;
 
         const matchingRemote = server.data?.remotes?.find((r) => r.url === runtimeUri);
-        const transportType = matchingRemote?.transport_type || 'sse';
 
         const baseName = apiTitle || apiName;
         payload = {
           name: hasLocalInstall ? `${baseName} (remote)` : baseName,
-          type: transportType,
+          type: 'http',
+          transport: getMcpRemoteTransport(matchingRemote),
           url: runtimeUri,
         };
       }
