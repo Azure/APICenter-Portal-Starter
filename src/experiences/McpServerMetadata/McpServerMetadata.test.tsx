@@ -98,6 +98,9 @@ describe('McpServerMetadata', () => {
     ]) {
       expect(screen.getByText(text)).toBeTruthy();
     }
+    const remote = within(screen.getByRole('region', { name: 'Remote connection 1' }));
+    expect(remote.getByText('Transport type:')).toBeTruthy();
+    expect(remote.queryByText('Type:')).toBeNull();
   });
 
   it('shows legacy snake_case fields and masks secret values and defaults, including nested variables', () => {
@@ -121,7 +124,13 @@ describe('McpServerMetadata', () => {
                   is_secret: true,
                   value: 'secret-value',
                   default: 'secret-default',
-                  variables: { token: { isSecret: true, value: 'nested-secret' } },
+                  variables: {
+                    token: {
+                      isSecret: false,
+                      value: 'nested-secret',
+                      default: 'nested-default',
+                    },
+                  },
                 },
               ],
             },
@@ -140,10 +149,40 @@ describe('McpServerMetadata', () => {
     expect(screen.getByText('https://legacy.example/registry')).toBeTruthy();
     expect(screen.getByText('legacy-hash')).toBeTruthy();
     expect(screen.getByText('TOKEN')).toBeTruthy();
-    expect(screen.getAllByText('[redacted]')).toHaveLength(4);
+    expect(screen.getAllByText('[redacted]')).toHaveLength(5);
     for (const text of ['secret-value', 'secret-default', 'nested-secret', 'Bearer hidden']) {
       expect(screen.queryByText(text)).toBeNull();
     }
+    expect(screen.queryByText('nested-default')).toBeNull();
+  });
+
+  it('omits empty arrays and duplicate package names and labels repeated arguments', () => {
+    render(
+      <McpServerMetadata
+        server={{
+          name: 'example',
+          packages: [
+            {
+              name: 'example-package',
+              identifier: 'example-package',
+              registryType: 'npm',
+              version: '1.0',
+              runtimeHint: 'npx',
+              runtimeArguments: [],
+              packageArguments: [{ name: 'items', isRepeated: true }],
+              environmentVariables: [],
+            },
+          ],
+        }}
+      />
+    );
+
+    const packageRegion = within(screen.getByRole('region', { name: 'Package 1' }));
+    expect(packageRegion.getAllByText('example-package')).toHaveLength(2);
+    expect(packageRegion.getByText('Repeated:')).toBeTruthy();
+    expect(packageRegion.getByText('Yes')).toBeTruthy();
+    expect(packageRegion.queryByText('Runtime arguments:')).toBeNull();
+    expect(packageRegion.queryByText('Environment variables:')).toBeNull();
   });
 
   it('omits absent collections and null fields while preserving extension metadata keys', () => {

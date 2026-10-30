@@ -17,10 +17,7 @@ export function useMcpTransportTags(mcpNames: string[]): Record<string, string[]
   const serverQueries = useQueries({
     queries: mcpNames.map((name) => ({
       queryKey: [QueryKeys.Server, name],
-      queryFn: async () => {
-        const server = await ApiService.getServer(name);
-        return { name, server };
-      },
+      queryFn: async () => (await ApiService.getServer(name)) || null,
       staleTime: Infinity,
       enabled: isAuthenticated,
     })),
@@ -45,8 +42,8 @@ export function useMcpTransportTags(mcpNames: string[]): Record<string, string[]
     const serverData = serverQueries[i]?.data;
     const deploymentData = deploymentQueries[i]?.data;
 
-    const hasLocal = !!serverData?.server?.packages?.length;
-    const hasRemote = !!serverData?.server?.remotes?.length ||
+    const hasLocal = !!serverData?.packages?.length;
+    const hasRemote = !!serverData?.remotes?.length ||
       deploymentData?.deployments?.some(
         (d) => d.server.runtimeUri.length > 0
       );

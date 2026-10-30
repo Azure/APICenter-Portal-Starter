@@ -19,9 +19,11 @@ const registryCommands: Record<RegistryType, string> = {
 function getRegistryType(registryType: string | undefined, runtimeHint: string | undefined): RegistryType | undefined {
   const type = registryType?.toLowerCase();
   if (type === 'npm' || type === 'pypi' || type === 'oci' || type === 'nuget') return type;
-  if (type === 'docker-hub') return 'oci';
+  if (type === 'docker' || type === 'docker-hub') return 'oci';
   if (type) return undefined;
-  return (Object.keys(registryCommands) as RegistryType[]).find((key) => registryCommands[key] === runtimeHint);
+  return (Object.keys(registryCommands) as RegistryType[]).find(
+    (key) => registryCommands[key] === runtimeHint?.toLowerCase()
+  );
 }
 
 function getDockerImage(
@@ -59,6 +61,7 @@ export function buildMcpPackageCommand(pkg: Package): PackageCommandResult {
   const runtimeArgs = (pkg.runtimeArguments ?? pkg.runtime_arguments ?? [])
     .map((arg) => arg.value)
     .filter((value): value is string => typeof value === 'string' && value.length > 0);
+  const normalizedRuntimeHint = runtimeHint?.toLowerCase();
   const packageRef = pkg.version ? `${identifier}@${pkg.version}` : identifier;
 
   if (!registryType) {
@@ -73,13 +76,13 @@ export function buildMcpPackageCommand(pkg: Package): PackageCommandResult {
       success: true,
       value: {
         command: runtimeHint,
-        args: runtimeHint === 'npx' ? ['-y', packageRef, ...runtimeArgs] : runtimeArgs,
+        args: normalizedRuntimeHint === 'npx' ? ['-y', packageRef, ...runtimeArgs] : runtimeArgs,
       },
     };
   }
 
   const defaultCommand = registryCommands[registryType];
-  if (runtimeHint && runtimeHint !== defaultCommand) {
+  if (runtimeHint && normalizedRuntimeHint !== defaultCommand) {
     if (registryBaseUrl) {
       return {
         success: false,
@@ -90,7 +93,7 @@ export function buildMcpPackageCommand(pkg: Package): PackageCommandResult {
       success: true,
       value: {
         command: runtimeHint,
-        args: runtimeHint === 'npx' ? ['-y', packageRef, ...runtimeArgs] : runtimeArgs,
+        args: normalizedRuntimeHint === 'npx' ? ['-y', packageRef, ...runtimeArgs] : runtimeArgs,
       },
     };
   }

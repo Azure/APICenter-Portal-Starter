@@ -129,6 +129,58 @@ describe('buildMcpPackageCommand', () => {
     });
   });
 
+  it('maps backend docker registry packages to a complete container command', () => {
+    expect(
+      buildMcpPackageCommand(
+        packageWith({
+          registryType: 'docker',
+          identifier: 'team/server',
+          runtimeHint: undefined,
+          registryBaseUrl: 'https://registry.example:5000',
+        })
+      )
+    ).toEqual({
+      success: true,
+      value: {
+        command: 'docker',
+        args: ['run', '-i', '--rm', 'registry.example:5000/team/server:1.2.3'],
+      },
+    });
+    expect(
+      buildMcpPackageCommand(
+        packageWith({
+          registryType: 'docker',
+          identifier: 'team/server',
+          runtimeHint: 'docker',
+        })
+      )
+    ).toEqual({
+      success: true,
+      value: {
+        command: 'docker',
+        args: ['run', '-i', '--rm', 'team/server:1.2.3'],
+      },
+    });
+  });
+
+  it('matches runtime hints without regard to case', () => {
+    expect(
+      buildMcpPackageCommand(
+        packageWith({
+          registryType: undefined,
+          runtimeHint: 'NPX',
+          registryBaseUrl: 'https://private.example/npm',
+        })
+      )
+    ).toEqual({
+      success: true,
+      value: {
+        command: 'npx',
+        args: ['-y', '--registry', 'https://private.example/npm', '@example/server@1.2.3'],
+      },
+    });
+  });
+
   it('passes the NuGet source after the package reference', () => {
     expect(
       buildMcpPackageCommand(

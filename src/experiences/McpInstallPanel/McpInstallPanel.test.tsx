@@ -6,7 +6,7 @@ import { McpInstallPanel } from './McpInstallPanel';
 vi.mock('@/hooks/useServer', () => ({
   useServer: () => ({
     data: {
-      remotes: [{ url: 'https://example.com/mcp', transport_type: 'http' }],
+      remotes: [{ url: 'https://example.com/mcp', type: 'streamable-http' }],
       packages: [
         {
           identifier: 'example-server',
@@ -61,6 +61,7 @@ describe('McpInstallPanel', () => {
     expect(JSON.parse(decodeURIComponent(uri.split('?')[1]))).toEqual({
       name: 'Example (remote)',
       type: 'http',
+      transport: 'http',
       url: 'https://example.com/mcp',
     });
   });

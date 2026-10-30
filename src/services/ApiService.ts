@@ -113,6 +113,13 @@ export const ApiService: IApiService = {
         packageArguments: pkg.packageArguments ?? pkg.package_arguments,
         environmentVariables: pkg.environmentVariables ?? pkg.environment_variables,
       })),
+      remotes: server.remotes?.map((remote) => {
+        const { type, ...details } = remote;
+        return {
+          ...details,
+          transport_type: type ?? remote.transport_type,
+        };
+      }),
     };
   },
 

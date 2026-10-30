@@ -733,6 +733,8 @@ MCP backend contracts. `ApiService.getServer` accepts both the legacy direct
 server response and modern `{ server, _meta }` envelope. It fills camelCase
 package fields from legacy aliases for existing consumers while retaining the
 original fields. Modern fields take precedence when both names are supplied.
+Remote `type` is normalized to `transport_type`, and the service query cache
+stores the same `Server` shape for both `useServer` and `useMcpTransportTags`.
 Envelope `_meta` is exposed as `registryMetadata`, separate from server extension
 metadata, so official registry status and timestamps remain available.
 Values and defaults marked `isSecret` or `is_secret` are

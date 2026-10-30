@@ -47,6 +47,8 @@ const fieldLabels: Record<string, string> = {
   format: 'Format',
   isRequired: 'Required',
   is_required: 'Required',
+  isRepeated: 'Repeated',
+  is_repeated: 'Repeated',
   isSecret: 'Secret',
   is_secret: 'Secret',
   valueHint: 'Value hint',
@@ -61,17 +63,19 @@ const fieldLabels: Record<string, string> = {
   theme: 'Theme',
 };
 
-function formatMetadata(value: unknown, labelFields = true): unknown {
-  if (Array.isArray(value)) return value.map((entry) => formatMetadata(entry, labelFields));
+function formatMetadata(value: unknown, labelFields = true, parentSecret = false): unknown {
+  if (Array.isArray(value)) return value.map((entry) => formatMetadata(entry, labelFields, parentSecret));
   if (value === null || typeof value !== 'object') return value;
 
   const entries = Object.entries(value);
   const fields = Object.fromEntries(entries);
-  const isSecret = entries.some(([key, entry]) => (key === 'isSecret' || key === 'is_secret') && entry === true);
+  const isSecret =
+    parentSecret || entries.some(([key, entry]) => (key === 'isSecret' || key === 'is_secret') && entry === true);
   return Object.fromEntries(
     entries
       .filter(([key, entry]) => {
         if (entry === undefined || entry === null) return false;
+        if (Array.isArray(entry) && entry.length === 0) return false;
         const canonicalKey = key.replace(/_([a-z])/g, (_match, letter: string) => letter.toUpperCase());
         return !labelFields || !fieldLabels[key] || canonicalKey === key || fields[canonicalKey] == null;
       })
@@ -80,9 +84,11 @@ function formatMetadata(value: unknown, labelFields = true): unknown {
         if (isSecret && (key === 'value' || key === 'default')) {
           formatted = '[redacted]';
         } else if (key === 'variables' && entry && typeof entry === 'object' && !Array.isArray(entry)) {
-          formatted = Object.fromEntries(Object.entries(entry).map(([name, input]) => [name, formatMetadata(input)]));
+          formatted = Object.fromEntries(
+            Object.entries(entry).map(([name, input]) => [name, formatMetadata(input, true, isSecret)])
+          );
         } else {
-          formatted = formatMetadata(entry, labelFields && key !== '_meta' && key !== 'registryMetadata');
+          formatted = formatMetadata(entry, labelFields && key !== '_meta' && key !== 'registryMetadata', isSecret);
         }
         return [labelFields ? (fieldLabels[key] ?? key) : key, formatted];
       })
@@ -109,7 +115,12 @@ export const McpServerMetadata: React.FC<McpServerMetadataProps> = ({ server }) 
           {packages.map((pkg, index) => (
             <section key={index} aria-label={`Package ${index + 1}`}>
               <h4>{pkg.identifier || pkg.name || `Package ${index + 1}`}</h4>
-              <CustomMetadata value={formatMetadata(pkg)} isRoot={false} />
+              <CustomMetadata
+                value={formatMetadata(
+                  pkg.identifier && pkg.identifier === pkg.name ? { ...pkg, name: undefined } : pkg
+                )}
+                isRoot={false}
+              />
             </section>
           ))}
         </section>
@@ -120,7 +131,14 @@ export const McpServerMetadata: React.FC<McpServerMetadataProps> = ({ server }) 
           {remotes.map((remote, index) => (
             <section key={index} aria-label={`Remote connection ${index + 1}`}>
               <h4>Remote connection {index + 1}</h4>
-              <CustomMetadata value={formatMetadata(remote)} isRoot={false} />
+              <CustomMetadata
+                value={formatMetadata({
+                  ...remote,
+                  transport_type: remote.type ?? remote.transport_type,
+                  type: undefined,
+                })}
+                isRoot={false}
+              />
             </section>
           ))}
         </section>

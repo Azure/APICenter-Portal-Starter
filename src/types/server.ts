@@ -3,6 +3,8 @@ export interface PackageArgument {
   description?: string;
   is_required?: boolean;
   isRequired?: boolean;
+  is_repeated?: boolean;
+  isRepeated?: boolean;
   is_secret?: boolean;
   isSecret?: boolean;
   type?: 'named' | 'positional';
@@ -48,7 +50,7 @@ export interface Package {
 }
 
 export interface Remote {
-  transport_type: string;
+  transport_type?: string;
   type?: string;
   url: string;
   headers?: PackageArgument[];
