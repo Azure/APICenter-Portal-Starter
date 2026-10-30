@@ -65,4 +65,28 @@ describe('McpInstallPanel', () => {
       url: 'https://example.com/mcp',
     });
   });
+
+  it('does not force SSE for a deployment without matching remote metadata', () => {
+    const open = vi.spyOn(window, 'open').mockImplementation(() => null);
+    render(
+      <McpInstallPanel
+        apiName="example"
+        apiTitle="Example"
+        deployment={{
+          name: 'deployment',
+          title: 'Deployment',
+          environmentId: 'environment',
+          server: { runtimeUri: ['https://deployment.example.com/mcp'] },
+        }}
+      />
+    );
+    fireEvent.click(screen.getByRole('button', { name: /Visual Studio Code \(remote\)/ }));
+
+    const uri = open.mock.calls[0][0] as string;
+    expect(JSON.parse(decodeURIComponent(uri.split('?')[1]))).toEqual({
+      name: 'Example (remote)',
+      type: 'http',
+      url: 'https://deployment.example.com/mcp',
+    });
+  });
 });
