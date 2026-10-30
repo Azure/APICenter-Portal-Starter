@@ -1,9 +1,10 @@
-import React, { useCallback } from 'react';
-import { Button } from '@fluentui/react-components';
+import React, { useCallback, useState } from 'react';
+import { Button, MessageBar, MessageBarBody } from '@fluentui/react-components';
 import { ArrowDownloadRegular } from '@fluentui/react-icons';
 import VsCodeLogo from '@/assets/vsCodeLogo.svg';
 import { useServer } from '@/hooks/useServer';
 import { ApiDeployment } from '@/types/apiDeployment';
+import { buildMcpPackageCommand } from '@/utils/mcpPackageInstall';
 import styles from './McpInstallPanel.module.scss';
 
 interface McpInstallPanelProps {
@@ -18,6 +19,7 @@ enum VsCodeTypes {
 
 export const McpInstallPanel: React.FC<McpInstallPanelProps> = ({ apiName, apiTitle, deployment }) => {
   const server = useServer(apiName);
+  const [installError, setInstallError] = useState<string | undefined>();
 
   const hasRemoteInstall = !!deployment?.server.runtimeUri.length;
   const hasLocalInstall = !!server.data?.packages;
@@ -25,6 +27,7 @@ export const McpInstallPanel: React.FC<McpInstallPanelProps> = ({ apiName, apiTi
 
   const handleInstall = useCallback(
     (e: React.PointerEvent<HTMLButtonElement>) => {
+      setInstallError(undefined);
       const vsCodeType = (e.currentTarget.value || VsCodeTypes.Stable) as string;
       const isLocal = e.currentTarget.getAttribute('data-local') === 'true';
 
@@ -34,16 +37,17 @@ export const McpInstallPanel: React.FC<McpInstallPanelProps> = ({ apiName, apiTi
         const [pkg] = server.data!.packages!;
         if (!pkg) return;
 
-        const runtimeArgs = (pkg.runtimeArguments ?? []).map((arg) => arg.value);
-        const packageRef = pkg.version ? `${pkg.identifier}@${pkg.version}` : pkg.identifier;
-        const args = pkg.runtimeHint === 'npx' ? ['-y', packageRef, ...runtimeArgs] : runtimeArgs;
+        const result = buildMcpPackageCommand(pkg);
+        if (result.success === false) {
+          setInstallError(result.error);
+          return;
+        }
 
-        const baseName = apiTitle || pkg.identifier.split('/').pop() || pkg.identifier;
+        const baseName = apiTitle || pkg.identifier?.split('/').pop() || pkg.name || pkg.identifier;
         payload = {
           name: hasRemoteInstall ? `${baseName} (local)` : baseName,
           type: pkg.transport?.type || 'stdio',
-          command: pkg.runtimeHint,
-          args,
+          ...result.value,
         };
       } else {
         const runtimeUri = deployment?.server.runtimeUri[0];
@@ -69,6 +73,11 @@ export const McpInstallPanel: React.FC<McpInstallPanelProps> = ({ apiName, apiTi
 
   return (
     <div className={styles.mcpInstall}>
+      {installError && (
+        <MessageBar intent="error">
+          <MessageBarBody>{installError}</MessageBarBody>
+        </MessageBar>
+      )}
       <h3>
         <span className={styles.panelLabel}>
           <ArrowDownloadRegular />

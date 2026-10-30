@@ -1,0 +1,14 @@
+.metadata {
+  min-width: 0;
+  overflow-wrap: anywhere;
+
+  > section {
+    margin-top: 24px;
+    padding: 0;
+
+    > section {
+      margin-top: 16px;
+      padding: 0;
+    }
+  }
+}

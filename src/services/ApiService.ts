@@ -94,8 +94,26 @@ export const ApiService: IApiService = {
   },
 
   async getServer(name: string): Promise<Server | undefined> {
-    const response = await HttpService.get<ServerResponse>(`/v0/servers/${name}`);
-    return response?.server;
+    const response = await HttpService.get<ServerResponse | Server>(`/v0/servers/${name}`);
+    if (!response) return undefined;
+    const server = 'server' in response
+      ? response.server && { ...response.server, registryMetadata: response._meta }
+      : response;
+    if (!server) return undefined;
+    return {
+      ...server,
+      packages: server.packages?.map((pkg) => ({
+        ...pkg,
+        identifier: pkg.identifier ?? pkg.name,
+        registryType: pkg.registryType ?? pkg.registry_type,
+        registryBaseUrl: pkg.registryBaseUrl ?? pkg.registry_base_url,
+        fileSha256: pkg.fileSha256 ?? pkg.file_sha256,
+        runtimeHint: pkg.runtimeHint ?? pkg.runtime_hint,
+        runtimeArguments: pkg.runtimeArguments ?? pkg.runtime_arguments ?? [],
+        packageArguments: pkg.packageArguments ?? pkg.package_arguments,
+        environmentVariables: pkg.environmentVariables ?? pkg.environment_variables,
+      })),
+    };
   },
 
   async getVersions(apiName: string, _resourceType: ResourceType = 'apis'): Promise<ApiVersion[]> {

@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import {
-  Badge, Button, Spinner, Tab, TabList,
+  Badge, Button, Spinner, Tab, TabList, MessageBar, MessageBarBody,
   Menu, MenuTrigger, MenuPopover, MenuList, MenuItem, MenuButton,
 } from '@fluentui/react-components';
 import { DocumentRegular, TagRegular, WindowConsoleRegular } from '@fluentui/react-icons';
@@ -18,6 +18,8 @@ import { getLifecycleBadgeColor, formatLifecycleStage } from '@/utils/badgeSyste
 import McpSpecPage from '@/pages/ApiSpec/McpSpecPage';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import { InstallationBlock } from '@/components/InstallationBlock';
+import { McpServerMetadata } from '@/experiences/McpServerMetadata/McpServerMetadata';
+import { buildMcpPackageCommand } from '@/utils/mcpPackageInstall';
 import VsCodeLogo from '@/assets/vsCodeLogo.svg';
 
 export const McpServerDetailPage: React.FC = () => {
@@ -25,6 +27,7 @@ export const McpServerDetailPage: React.FC = () => {
   const api = useApi(apiName);
   const [definitionSelection, setDefinitionSelection] = useState<ApiDefinitionSelection | undefined>();
   const [selectedTab, setSelectedTab] = useState<string>('documentation');
+  const [installError, setInstallError] = useState<string | undefined>();
 
   setDocumentTitle(`MCP server${api.data?.title ? ` - ${api.data.title}` : ''}`);
 
@@ -71,6 +74,7 @@ export const McpServerDetailPage: React.FC = () => {
   const transportBadge = apiName ? transportTags[apiName]?.[0] : undefined;
 
   const handleMcpInstall = useCallback((target?: 'remote' | 'local') => {
+    setInstallError(undefined);
     const useRemote = target ? target === 'remote' : hasRemoteInstall;
     const baseName = api.data?.title || apiName || '';
 
@@ -89,15 +93,16 @@ export const McpServerDetailPage: React.FC = () => {
     } else if (hasLocalInstall) {
       const [pkg] = server.data!.packages!;
       if (!pkg) return;
-      const runtimeArgs = (pkg.runtimeArguments ?? []).map((arg: { value?: string }) => arg.value).filter(Boolean);
-      const packageRef = pkg.version ? `${pkg.identifier}@${pkg.version}` : pkg.identifier;
-      const args = pkg.runtimeHint === 'npx' ? ['-y', packageRef, ...runtimeArgs] : runtimeArgs;
-      const localBase = baseName || pkg.identifier.split('/').pop() || pkg.identifier;
+      const result = buildMcpPackageCommand(pkg);
+      if (result.success === false) {
+        setInstallError(result.error);
+        return;
+      }
+      const localBase = baseName || pkg.identifier?.split('/').pop() || pkg.name || pkg.identifier;
       const payload = {
         name: hasRemoteInstall ? `${localBase} (local)` : localBase,
         type: pkg.transport?.type || 'stdio',
-        command: pkg.runtimeHint,
-        args,
+        ...result.value,
       };
       window.open(`vscode:mcp/install?${encodeURIComponent(JSON.stringify(payload))}`);
     }
@@ -228,7 +233,7 @@ export const McpServerDetailPage: React.FC = () => {
                       <div style={{ display: 'flex', flexDirection: 'column' }}>
                         <span>Install local MCP server</span>
                         <span style={{ fontSize: '12px', color: 'var(--colorNeutralForeground3)' }}>
-                          Runs on your machine via npx
+                          Runs on your machine
                         </span>
                       </div>
                     </MenuItem>
@@ -252,12 +257,27 @@ export const McpServerDetailPage: React.FC = () => {
       emptyMessage={!api.isLoading && !api.isError && !api.data ? 'The specified MCP server does not exist.' : undefined}
       sidebar={undefined}
     >
+      {installError && (
+        <MessageBar intent="error">
+          <MessageBarBody>{installError}</MessageBarBody>
+        </MessageBar>
+      )}
       {api.data && selectedTab === 'documentation' && (
         <>
           {renderInstallationBlock()}
           {api.data.description && api.data.description !== api.data.summary && (
             <MarkdownRenderer markdown={api.data.description} />
           )}
+          {server.isLoading && <Spinner size="small" label="Loading MCP registry details..." />}
+          {server.isError && (
+            <MessageBar intent="error">
+              <MessageBarBody>
+                Failed to load MCP registry details.{' '}
+                <Button appearance="subtle" onClick={() => server.refetch()}>Retry</Button>
+              </MessageBarBody>
+            </MessageBar>
+          )}
+          {server.data && <McpServerMetadata server={server.data} />}
           <ApiAdditionalInfo api={api.data} />
         </>
       )}

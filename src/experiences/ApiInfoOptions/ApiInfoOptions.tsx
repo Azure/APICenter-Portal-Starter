@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Button, Link, MessageBar, MessageBarBody, Spinner } from '@fluentui/react-components';
 import { ArrowDownloadRegular, Document20Regular, Link20Regular, OpenRegular } from '@fluentui/react-icons';
 import { useRecoilValue } from 'recoil';
@@ -14,6 +14,7 @@ import MarkdownRenderer from '@/components/MarkdownRenderer';
 import CopyLink from '@/components/CopyLink';
 import { configAtom } from '@/atoms/configAtom';
 import { useServer } from '@/hooks/useServer';
+import { buildMcpPackageCommand } from '@/utils/mcpPackageInstall';
 import styles from './ApiInfoOptions.module.scss';
 
 /**
@@ -41,6 +42,7 @@ const DEFAULT_INSTRUCTIONS = 'Gain comprehensive insights into the API.';
 
 export const ApiInfoOptions: React.FC<Props> = ({ api, apiVersion, apiDefinition, apiDeployment, isLoading, hideInstallation }) => {
   const config = useRecoilValue(configAtom);
+  const [installError, setInstallError] = useState<string | undefined>();
 
   const definitionId = useMemo(
     () => ({
@@ -75,6 +77,7 @@ export const ApiInfoOptions: React.FC<Props> = ({ api, apiVersion, apiDefinition
 
   const handleInstallMcpInVsCodeClick = useCallback(
     (e: React.PointerEvent<HTMLButtonElement>) => {
+      setInstallError(undefined);
       const vsCodeType = e.currentTarget.value || VsCodeTypes.Stable;
       const isLocal = e.currentTarget.getAttribute('data-local') === 'true';
 
@@ -86,14 +89,16 @@ export const ApiInfoOptions: React.FC<Props> = ({ api, apiVersion, apiDefinition
           return;
         }
 
-        const runtimeArgs = pkg.runtimeArguments.map((arg) => arg.value);
-        const args = pkg.runtimeHint === 'npx' ? ['-y', pkg.identifier, ...runtimeArgs] : runtimeArgs;
+        const result = buildMcpPackageCommand(pkg);
+        if (result.success === false) {
+          setInstallError(result.error);
+          return;
+        }
 
         payload = {
-          name: api.title || pkg.identifier.split('/').pop() || pkg.identifier,
+          name: api.title || pkg.identifier?.split('/').pop() || pkg.name || pkg.identifier,
           type: pkg.transport?.type || 'stdio',
-          command: pkg.runtimeHint,
-          args,
+          ...result.value,
         };
       } else {
         const runtimeUri = apiDeployment?.server.runtimeUri[0];
@@ -111,7 +116,7 @@ export const ApiInfoOptions: React.FC<Props> = ({ api, apiVersion, apiDefinition
 
       window.open(`${vsCodeType}:mcp/install?${encodeURIComponent(JSON.stringify(payload))}`);
     },
-    [api.name, apiDeployment?.server.runtimeUri, server.data]
+    [api.name, api.title, apiDeployment?.server.runtimeUri, server.data]
   );
 
   function renderContent() {
@@ -199,6 +204,11 @@ export const ApiInfoOptions: React.FC<Props> = ({ api, apiVersion, apiDefinition
 
         {!hideInstallation && hasMcpInstallableContent && (
           <div className={styles.section}>
+            {installError && (
+              <MessageBar intent="error">
+                <MessageBarBody>{installError}</MessageBarBody>
+              </MessageBar>
+            )}
             <h3>
               <span className={styles.panelLabel}>
                 <img src={VsCodeLogo} alt="VS Code" />
