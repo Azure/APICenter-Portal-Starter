@@ -98,6 +98,11 @@ kind eq 'rest'
 |----------|--------|---------|----------|
 | `/apis/{apiName}/deployments` | GET | List deployments | `{ value: ApiDeployment[] }` |
 
+For MCP deployments, `server.runtimeUri` contains the complete runtime endpoint.
+`server.mcpTransportProtocol` is nullable and uses the Data API values `sse` and
+`streamable-http`. This Data API field is distinct from the Resource Provider's
+`mcpTransportType` JSON field.
+
 ---
 
 ### Environments

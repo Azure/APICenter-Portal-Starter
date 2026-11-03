@@ -20,6 +20,7 @@
         "classnames": "2.5.1",
         "client-oauth2": "4.3.3",
         "eventsource": "3.0.6",
+        "eventsource-parser": "3.0.6",
         "graphql": "16.10.0",
         "lodash": "4.18.1",
         "memoizee": "0.4.17",

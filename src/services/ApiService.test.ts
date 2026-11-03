@@ -62,6 +62,34 @@ describe('ApiService.getServer', () => {
     });
   });
 
+  describe('ApiService.getDeployments', () => {
+    beforeEach(() => vi.clearAllMocks());
+
+    it('preserves Data API transport metadata and exact MCP and non-MCP endpoints', async () => {
+      const deployments = [
+        {
+          name: 'mcp',
+          title: 'MCP',
+          environmentId: 'environment',
+          server: {
+            runtimeUri: ['https://host/sqlcl/sse?api-version=1&name=a%2Fb'],
+            mcpTransportProtocol: 'sse',
+          },
+        },
+        {
+          name: 'rest',
+          title: 'REST',
+          environmentId: 'environment',
+          server: { runtimeUri: ['https://host/api/v1/'] },
+        },
+      ];
+      vi.mocked(HttpService.get).mockResolvedValue({ value: deployments });
+
+      expect(await ApiService.getDeployments('example')).toEqual(deployments);
+      expect(HttpService.get).toHaveBeenCalledWith('/apis/example/deployments?$top=50');
+    });
+  });
+
   it('preserves an unavailable response', async () => {
     vi.mocked(HttpService.get).mockResolvedValue(undefined);
     expect(await ApiService.getServer('missing')).toBeUndefined();

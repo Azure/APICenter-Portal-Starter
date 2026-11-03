@@ -1,5 +1,7 @@
 export interface ApiDeploymentServer {
   runtimeUri: string[];
+  /** MCP transport from the Data API; unknown values must be reported to the user. */
+  mcpTransportProtocol?: string | null;
 }
 
 export interface ApiDeployment {

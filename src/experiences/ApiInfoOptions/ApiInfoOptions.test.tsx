@@ -102,4 +102,44 @@ describe('ApiInfoOptions', () => {
       url: 'https://example.com/mcp',
     });
   });
+
+  it('copies the exact deployment URL without transport normalization', () => {
+    const runtimeUri = 'https://host/sqlcl/sse?api-version=1&name=a%2Fb';
+    const originalClipboard = Object.getOwnPropertyDescriptor(navigator, 'clipboard');
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText } });
+
+    try {
+      render(
+        <RecoilRoot
+          initializeState={({ set }) => {
+            set(configAtom, {
+              dataApiHostName: 'example.data.eastus.azure-apicenter.ms',
+              title: 'API portal',
+              scopingFilter: '',
+              capabilities: [],
+            });
+          }}
+        >
+          <ApiInfoOptions
+            api={{ name: 'example', title: 'Example', kind: 'mcp' }}
+            apiDeployment={{
+              name: 'deployment',
+              title: 'Deployment',
+              environmentId: 'environment',
+              server: { runtimeUri: [runtimeUri], mcpTransportProtocol: 'sse' },
+            }}
+          />
+        </RecoilRoot>
+      );
+      fireEvent.click(screen.getByRole('link', { name: /Copy URL/ }));
+      expect(writeText).toHaveBeenCalledWith(runtimeUri);
+    } finally {
+      if (originalClipboard) {
+        Object.defineProperty(navigator, 'clipboard', originalClipboard);
+      } else {
+        Reflect.deleteProperty(navigator, 'clipboard');
+      }
+    }
+  });
 });

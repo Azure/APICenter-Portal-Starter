@@ -171,16 +171,39 @@ Two factories are exported:
 
 | Factory | Ownership | Used by |
 |---------|-----------|---------|
-| `getMcpService(uri, credentials?)` | Module-level shared instance, reused across calls | `McpSpecPage` (connect + capability listing) |
-| `createMcpService(uri, credentials?)` | Standalone instance owned by the caller | `useMcpTestRunController` (test console drawer) |
+| `getMcpService(deployment, definitionKey, credentials?)` | Module-level shared instance, reused across calls | `McpSpecPage` (connect + capability listing) |
+| `createMcpService(deployment, credentials?)` | Standalone instance owned by the caller | `useMcpTestRunController` (test console drawer) |
 
-`getMcpService` only rebuilds the shared instance when the server URI changes or the caller
-explicitly passes *different* credentials. Omitting `authCredentials` means "reuse whatever is
-already connected" and must never downgrade an authenticated instance to an anonymous one.
+`getMcpService` rebuilds the shared instance when the deployment, owning definition, endpoint, transport,
+or explicitly supplied credentials change. Failed and closed instances are not reused. Omitting
+`authCredentials` for the same deployment means "reuse whatever is already connected" and must
+never downgrade an authenticated instance to an anonymous one.
 
 Consumers with their own connection lifetime (the test console tears the connection down when the
 drawer closes) must use `createMcpService`, so that `closeConnection()` does not affect the shared
 instance the spec page is still using.
+
+#### Endpoint and transport
+
+The Data API's `server.runtimeUri[0]` is the complete endpoint; the client does not strip or append
+paths, change query strings, or select a different endpoint when the CORS proxy is enabled.
+`server.mcpTransportProtocol` selects `sse` or `streamable-http` per deployment.
+
+- Streamable HTTP sends initialization and subsequent JSON-RPC requests to the configured endpoint.
+  Event-stream responses complete when their matching JSON-RPC result arrives, even if the stream
+  remains open; unrelated notifications do not complete the request.
+- SSE opens the event stream at the configured endpoint and sends JSON-RPC requests to the
+  server-announced endpoint. Relative endpoints resolve against the configured URL, and announced
+  endpoints must share its origin before credentials are sent.
+- If transport is absent or null, the client tries only the initialization POST first. HTTP 400,
+  404, or 405 permits an SSE GET at the same endpoint; other failures do not trigger fallback.
+  An explicitly unknown transport produces an error without connecting.
+
+Closing or failing a connection aborts pending requests and prevents a late initialization response
+from opening an SSE stream. After an established SSE stream disconnects, pending operations fail
+without retry; the next stream must announce an endpoint and initialize a new session before use.
+The proxy forwards the original target through `Ocp-Apim-Url` and the upstream method through
+`Ocp-Apim-Method`; it does not determine the transport.
 
 #### Credential propagation
 
@@ -189,7 +212,8 @@ subscription key, OAuth bearer token, and Entra ID / MSAL token alike. Credentia
 `McpSpecPage` and published to the subtree through `McpAuthProvider`
 (`src/contexts/McpAuthContext.tsx`); `useMcpTestRunController` reads them via
 `useMcpAuthCredentials()` so tool/prompt/resource execution is authenticated the same way
-discovery is.
+discovery is. Streamable HTTP retains `MCP-Session-Id` between requests. A 401 during HTTP or
+SSE initialization preserves `WWW-Authenticate` for reactive OAuth discovery.
 
 #### TODO: Methods & Protocol
 - [ ] Document MCP server API

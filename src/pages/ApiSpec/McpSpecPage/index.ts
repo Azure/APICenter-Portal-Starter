@@ -1,3 +1,3 @@
-import McpSpecPage from './McpSpecPage';
+import McpSpecPage from './McpSpecPageBoundary';
 
 export default McpSpecPage;
