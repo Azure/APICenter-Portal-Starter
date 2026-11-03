@@ -27,6 +27,8 @@ export function useMcpTestRunController(
 
   const authCredentials = useMcpAuthCredentials();
   const runtimeUri = deployment?.server?.runtimeUri?.[0];
+  const transport = deployment?.server?.mcpTransportProtocol ?? undefined;
+  const deploymentName = deployment?.name;
 
   useEffect(() => {
     if (!runtimeUri || !shouldConnect) {
@@ -35,20 +37,20 @@ export function useMcpTestRunController(
 
     // The test console owns its connection: it is torn down when the drawer closes, so it must
     // not share the instance the spec page keeps alive.
-    const service = createMcpService(runtimeUri, authCredentials);
+    const service = createMcpService(runtimeUri, authCredentials, transport);
     setMcpService(service);
 
     return () => {
       service?.closeConnection();
       setMcpService(undefined);
     };
-  }, [authCredentials, runtimeUri, shouldConnect]);
+  }, [authCredentials, runtimeUri, shouldConnect, transport, deploymentName]);
 
   useEffect(() => {
     setResult(undefined);
     setError(undefined);
     setIsRunning(false);
-  }, [operation]);
+  }, [operation, authCredentials, runtimeUri, shouldConnect, transport, deploymentName]);
 
   const run = useCallback(
     async (args: HttpReqParam[]) => {
@@ -72,19 +74,19 @@ export function useMcpTestRunController(
             }
 
             const result = await mcpService.runTool(name, conversion.arguments);
-            setResult(JSON.stringify(result, null, 2));
+            if (!mcpService.isClosed) setResult(JSON.stringify(result, null, 2));
             break;
           }
 
           case McpCapabilityTypes.PROMPTS: {
             const result = await mcpService.getPrompt(name, operationArguments);
-            setResult(JSON.stringify(result, null, 2));
+            if (!mcpService.isClosed) setResult(JSON.stringify(result, null, 2));
             break;
           }
 
           case McpCapabilityTypes.RESOURCES: {
             const result = await mcpService.readResource(operationArguments.uri);
-            setResult(JSON.stringify(result, null, 2));
+            if (!mcpService.isClosed) setResult(JSON.stringify(result, null, 2));
             break;
           }
 
@@ -92,8 +94,9 @@ export function useMcpTestRunController(
             throw new Error(`Unsupported MCP capability type: ${operation.category}`);
         }
 
-        setError(undefined);
+        if (!mcpService.isClosed) setError(undefined);
       } catch (e) {
+        if (mcpService?.isClosed) return;
         setResult(undefined);
 
         if (e instanceof TypeError) {
@@ -104,7 +107,7 @@ export function useMcpTestRunController(
           setError(e.message || 'Unable to complete request');
         }
       } finally {
-        setIsRunning(false);
+        if (!mcpService?.isClosed) setIsRunning(false);
       }
     },
     [isRunning, mcpService, operation]

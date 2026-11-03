@@ -1,10 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Spinner } from '@fluentui/react-components';
 import { getRecoil } from 'recoil-nexus';
 import ApiAccessAuthForm from '@/experiences/ApiAccessAuthForm';
 import { ApiDefinitionId } from '@/types/apiDefinition';
 import { ApiDeployment } from '@/types/apiDeployment';
-import { getMcpService, McpUnauthorizedError } from '@/services/McpService';
+import { getMcpService, getUnsupportedMcpTransportMessage, McpUnauthorizedError } from '@/services/McpService';
 import { ApiSpecReader } from '@/types/apiSpec';
 import { getSpecReader } from '@/specReaders/getSpecReader';
 import { useApiDefinition } from '@/hooks/useApiDefinition';
@@ -17,6 +17,7 @@ import { McpDiscoveredAuth } from '@/types/mcp';
 import { McpMsalAuthService } from '@/services/McpMsalAuthService';
 import { configAtom } from '@/atoms/configAtom';
 import { McpAuthProvider } from '@/contexts/McpAuthContext';
+import { getApiDefinitionKey } from '@/utils/apiAuth';
 import styles from './McpSpecPage.module.scss';
 import McpMetadataBasedAuthForm from './McpMetadataBasedAuthForm';
 
@@ -41,14 +42,19 @@ export const McpSpecPage: React.FC<Props> = ({ definitionId, deployment }) => {
   const [isSpecLoading, setIsSpecLoading] = useState(false);
   const [error, setError] = useState<string | undefined>();
   const [msalDiscoveredAuth, setMsalDiscoveredAuth] = useState<McpDiscoveredAuth | undefined>();
+  const specRequest = useRef(0);
 
   const ApiService = useApiService();
   const definition = useApiDefinition(definitionId);
 
   const isAuthorized = authState === McpServerAuthState.AUTHORIZED;
+  const runtimeUri = deployment?.server?.runtimeUri?.[0];
+  const transport = deployment?.server?.mcpTransportProtocol ?? undefined;
+  const connectionKey = definitionId && JSON.stringify([getApiDefinitionKey(definitionId), deployment?.name]);
+  const transportError = getUnsupportedMcpTransportMessage(transport);
 
   const determineAuthFlow = useCallback(async () => {
-    if (!definitionId || !deployment || authState !== McpServerAuthState.NOT_AUTHORIZED) {
+    if (!definitionId || !deployment || transportError || authState !== McpServerAuthState.NOT_AUTHORIZED) {
       return;
     }
 
@@ -71,22 +77,25 @@ export const McpSpecPage: React.FC<Props> = ({ definitionId, deployment }) => {
 
     // Otherwise, we can assume that the server is authorized
     setAuthState(McpServerAuthState.AUTHORIZED);
-  }, [ApiService, authState, definitionId, deployment]);
+  }, [ApiService, authState, definitionId, deployment, transportError]);
 
   useEffect(() => {
     void determineAuthFlow();
   }, [determineAuthFlow]);
 
   const mcpService = useMemo(() => {
-    if (!isAuthorized || !deployment?.server.runtimeUri) {
+    if (!isAuthorized || !runtimeUri) {
       return undefined;
     }
 
-    return getMcpService(deployment.server.runtimeUri[0], authCredentials);
-  }, [isAuthorized, deployment, authCredentials]);
+    return getMcpService(runtimeUri, authCredentials, transport, connectionKey);
+  }, [isAuthorized, runtimeUri, authCredentials, transport, connectionKey]);
 
   const makeApiSpec = useCallback(async () => {
+    const request = ++specRequest.current;
+    const isCurrent = (): boolean => specRequest.current === request;
     if (!isAuthorized || !mcpService || !definition.data) {
+      setIsSpecLoading(false);
       return;
     }
 
@@ -94,6 +103,7 @@ export const McpSpecPage: React.FC<Props> = ({ definitionId, deployment }) => {
       setIsSpecLoading(true);
       setError(undefined);
       const spec = await mcpService.collectMcpSpec();
+      if (!isCurrent()) return;
       const reader = await getSpecReader(spec, {
         ...definition.data,
         specification: {
@@ -102,11 +112,13 @@ export const McpSpecPage: React.FC<Props> = ({ definitionId, deployment }) => {
           name: 'mcp',
         },
       });
-      setApiSpec(reader);
+      if (isCurrent()) setApiSpec(reader);
     } catch (err) {
+      if (!isCurrent()) return;
       if (err instanceof McpUnauthorizedError && err.wwwAuthenticate) {
         const serverUri = deployment.server.runtimeUri[0];
         const discoveryResult = await McpAuthService.discoverFromWwwAuthenticate(err.wwwAuthenticate, serverUri);
+        if (!isCurrent()) return;
 
         // Check if this is an MSAL/Entra ID discovery result
         if (discoveryResult && 'type' in discoveryResult && discoveryResult.type === 'msal') {
@@ -123,6 +135,7 @@ export const McpSpecPage: React.FC<Props> = ({ definitionId, deployment }) => {
 
           try {
             const token = await McpMsalAuthService.acquireToken(discoveryResult.scopes, discoveryResult.authority);
+            if (!isCurrent()) return;
             if (token) {
               setApiSpec(undefined);
               setError(undefined);
@@ -140,6 +153,7 @@ export const McpSpecPage: React.FC<Props> = ({ definitionId, deployment }) => {
             setMsalDiscoveredAuth(discoveryResult);
             setAuthState(McpServerAuthState.MSAL_CONSENT_NEEDED);
           } catch (msalErr) {
+            if (!isCurrent()) return;
             const message = msalErr instanceof Error ? msalErr.message : 'Unknown error';
             setError(`Authentication failed: ${message}`);
           }
@@ -175,12 +189,15 @@ export const McpSpecPage: React.FC<Props> = ({ definitionId, deployment }) => {
         }
       }
     } finally {
-      setIsSpecLoading(false);
+      if (isCurrent()) setIsSpecLoading(false);
     }
   }, [definition.data, deployment, isAuthorized, mcpService]);
 
   useEffect(() => {
     void makeApiSpec();
+    return () => {
+      specRequest.current += 1;
+    };
   }, [makeApiSpec]);
 
   const handleAuthCredentialsChange = useCallback((credentials?: ApiAuthCredentials) => {
@@ -212,6 +229,10 @@ export const McpSpecPage: React.FC<Props> = ({ definitionId, deployment }) => {
       setError(`Authentication failed: ${e instanceof Error ? e.message : 'Unknown error'}`);
     }
   }, [msalDiscoveredAuth]);
+
+  if (transportError) {
+    return <div className={styles.authPanel}>Failed to connect to the MCP server: {transportError}</div>;
+  }
 
   if (authState === McpServerAuthState.NOT_AUTHORIZED || definition.isLoading || isSpecLoading) {
     return <Spinner className={pageStyles.spinner} />;

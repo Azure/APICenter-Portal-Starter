@@ -16,10 +16,8 @@ export function getMcpCorsProxyEnabled(): boolean {
   }
 }
 
-/** MCP transport protocol to use for the documentation page. */
+/** MCP transport protocols reported by the Data API. */
 export enum McpTransport {
   SSE = 'sse',
-  StreamableHttp = 'streamableHttp',
+  StreamableHttp = 'streamable-http',
 }
-
-export const mcpTransport: McpTransport = McpTransport.StreamableHttp;

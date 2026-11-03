@@ -171,16 +171,28 @@ Two factories are exported:
 
 | Factory | Ownership | Used by |
 |---------|-----------|---------|
-| `getMcpService(uri, credentials?)` | Module-level shared instance, reused across calls | `McpSpecPage` (connect + capability listing) |
-| `createMcpService(uri, credentials?)` | Standalone instance owned by the caller | `useMcpTestRunController` (test console drawer) |
+| `getMcpService(uri, credentials?, transport?, connectionKey?)` | Module-level shared instance, reused across calls | `McpSpecPage` (connect + capability listing) |
+| `createMcpService(uri, credentials?, transport?)` | Standalone instance owned by the caller | `useMcpTestRunController` (test console drawer) |
 
-`getMcpService` only rebuilds the shared instance when the server URI changes or the caller
-explicitly passes *different* credentials. Omitting `authCredentials` means "reuse whatever is
-already connected" and must never downgrade an authenticated instance to an anonymous one.
+`getMcpService` rebuilds the shared instance when URI, transport, the stable deployment/definition
+key, or explicit credentials change. Omitted credentials retain an authenticated connection only
+within the same identity. Re-fetching an equivalent deployment does not recreate its connection.
 
 Consumers with their own connection lifetime (the test console tears the connection down when the
 drawer closes) must use `createMcpService`, so that `closeConnection()` does not affect the shared
 instance the spec page is still using.
+
+#### Endpoint and transport
+
+The Data API's `server.mcpTransportProtocol` is `sse` or `streamable-http` (not the ARM field
+`mcpTransportType`). Both transports use the complete `server.runtimeUri[0]`, including paths
+and queries, directly or through the CORS proxy. SSE messages use the announced endpoint:
+absolute URLs are unchanged, and relative URLs resolve against the configured server URI.
+Missing/null metadata permits an initialization POST followed by SSE GET at the same
+URL only on HTTP 400/404/405; unknown values and other failures do not trigger detection.
+User operations are never retried for detection. Closing prevents a late initialization response
+from starting fallback. Existing response parsing and HTTP request cancellation behavior are
+unchanged; this fix does not add SSE reconnection management.
 
 #### Credential propagation
 
@@ -189,7 +201,8 @@ subscription key, OAuth bearer token, and Entra ID / MSAL token alike. Credentia
 `McpSpecPage` and published to the subtree through `McpAuthProvider`
 (`src/contexts/McpAuthContext.tsx`); `useMcpTestRunController` reads them via
 `useMcpAuthCredentials()` so tool/prompt/resource execution is authenticated the same way
-discovery is.
+discovery is. Streamable HTTP retains `MCP-Session-Id` between requests. A 401 during HTTP or
+SSE initialization preserves `WWW-Authenticate` for reactive OAuth discovery.
 
 #### TODO: Methods & Protocol
 - [ ] Document MCP server API
