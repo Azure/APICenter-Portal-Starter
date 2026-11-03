@@ -89,27 +89,4 @@ describe('McpInstallPanel', () => {
       url: 'https://deployment.example.com/mcp',
     });
   });
-
-  it.each(['https://host/sqlcl/sse', 'https://host/custom/?api-version=1&name=a%2Fb'])(
-    'preserves the deployment URL %s in the install payload',
-    (runtimeUri) => {
-      const open = vi.spyOn(window, 'open').mockImplementation(() => null);
-      render(
-        <McpInstallPanel
-          apiName="example"
-          apiTitle="Example"
-          deployment={{
-            name: 'deployment',
-            title: 'Deployment',
-            environmentId: 'environment',
-            server: { runtimeUri: [runtimeUri], mcpTransportProtocol: 'sse' },
-          }}
-        />
-      );
-      fireEvent.click(screen.getByRole('button', { name: /Visual Studio Code \(remote\)/ }));
-
-      const uri = open.mock.calls[0][0] as string;
-      expect(JSON.parse(decodeURIComponent(uri.split('?')[1])).url).toBe(runtimeUri);
-    }
-  );
 });

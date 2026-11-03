@@ -174,10 +174,9 @@ Two factories are exported:
 | `getMcpService(deployment, definitionKey, credentials?)` | Module-level shared instance, reused across calls | `McpSpecPage` (connect + capability listing) |
 | `createMcpService(deployment, credentials?)` | Standalone instance owned by the caller | `useMcpTestRunController` (test console drawer) |
 
-`getMcpService` rebuilds the shared instance when the deployment, owning definition, endpoint, transport,
-or explicitly supplied credentials change. Failed and closed instances are not reused. Omitting
-`authCredentials` for the same deployment means "reuse whatever is already connected" and must
-never downgrade an authenticated instance to an anonymous one.
+`getMcpService` rebuilds the shared instance when deployment, definition, URI, transport, or
+explicit credentials change. Closed instances are not reused. Omitted credentials retain an
+authenticated connection only within the same deployment and definition.
 
 Consumers with their own connection lifetime (the test console tears the connection down when the
 drawer closes) must use `createMcpService`, so that `closeConnection()` does not affect the shared
@@ -185,25 +184,13 @@ instance the spec page is still using.
 
 #### Endpoint and transport
 
-The Data API's `server.runtimeUri[0]` is the complete endpoint; the client does not strip or append
-paths, change query strings, or select a different endpoint when the CORS proxy is enabled.
-`server.mcpTransportProtocol` selects `sse` or `streamable-http` per deployment.
-
-- Streamable HTTP sends initialization and subsequent JSON-RPC requests to the configured endpoint.
-  Event-stream responses complete when their matching JSON-RPC result arrives, even if the stream
-  remains open; unrelated notifications do not complete the request.
-- SSE opens the event stream at the configured endpoint and sends JSON-RPC requests to the
-  server-announced endpoint. Relative endpoints resolve against the configured URL, and announced
-  endpoints must share its origin before credentials are sent.
-- If transport is absent or null, the client tries only the initialization POST first. HTTP 400,
-  404, or 405 permits an SSE GET at the same endpoint; other failures do not trigger fallback.
-  An explicitly unknown transport produces an error without connecting.
-
-Closing or failing a connection aborts pending requests and prevents a late initialization response
-from opening an SSE stream. After an established SSE stream disconnects, pending operations fail
-without retry; the next stream must announce an endpoint and initialize a new session before use.
-The proxy forwards the original target through `Ocp-Apim-Url` and the upstream method through
-`Ocp-Apim-Method`; it does not determine the transport.
+The Data API's `server.mcpTransportProtocol` is `sse` or `streamable-http` (not the ARM field
+`mcpTransportType`). Both transports use the complete `server.runtimeUri[0]`, including paths
+and queries, directly or through the CORS proxy. SSE messages use the announced same-origin
+endpoint. Missing/null metadata permits an initialization POST followed by SSE GET at the same
+URL only on HTTP 400/404/405; unknown values and other failures do not trigger detection.
+User operations are never retried. Closing aborts pending requests; SSE reconnects initialize
+a fresh session without replaying pending operations.
 
 #### Credential propagation
 

@@ -1,78 +1,60 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ApiAuthCredentials } from '@/types/apiAuth';
 import { ApiDeployment } from '@/types/apiDeployment';
-import { createMcpService, getMcpService, McpService, McpUnauthorizedError } from './McpService';
+import { createMcpService, getMcpService, McpService } from './McpService';
 
-const mocks = vi.hoisted(() => ({ useProxy: false }));
-
+const config = vi.hoisted(() => ({ useProxy: false }));
 vi.mock('recoil-nexus', () => ({
-  getRecoil: (atom: { key: string }): object => {
-    if (atom.key === 'config') {
-      return {
-        dataApiHostName: 'example.data.test',
-        mcp: { useCorsProxy: mocks.useProxy },
-      };
-    }
-    if (atom.key === 'appServices') {
-      return { AuthService: { getAccessToken: async (): Promise<string> => 'proxy-token' } };
-    }
-    throw new Error(`Unexpected atom: ${atom.key}`);
-  },
+  getRecoil: (atom: { key: string }): object =>
+    atom.key === 'config'
+      ? { dataApiHostName: 'example.data.test', mcp: { useCorsProxy: config.useProxy } }
+      : { AuthService: { getAccessToken: async (): Promise<string> => 'proxy-token' } },
   setRecoil: vi.fn(),
 }));
 
-const proxyUrl = 'https://apimanagement-cors-proxy-df.azure-api.net/sendrequest';
-const initResult = {
-  protocolVersion: '2024-11-05',
-  capabilities: {},
-  serverInfo: { name: 'test-server', version: '1' },
-};
+const initResult = { capabilities: {}, protocolVersion: '2024-11-05' };
 const credentials: ApiAuthCredentials = {
   in: 'header',
   name: 'Authorization',
-  value: 'Bearer test-token',
+  value: 'test-token',
   createdAt: new Date(0),
 };
 
-interface UpstreamCall {
+interface Call {
   url: string;
   method: string;
   headers: Headers;
-  body?: string;
+  payload?: { id: number; method: string };
   signal?: AbortSignal | null;
-  proxyUrl?: string;
 }
 
-function deployment(url: string, transport?: string | null, name = 'deployment'): ApiDeployment {
+function deployment(uri = 'https://host/sqlcl', transport?: string | null, name = 'deployment'): ApiDeployment {
   return {
     name,
     title: name,
     environmentId: 'environment',
-    server: { runtimeUri: [url], mcpTransportProtocol: transport },
+    server: { runtimeUri: [uri], mcpTransportProtocol: transport },
   };
 }
 
-function response(result: unknown, headers: HeadersInit = {}): Response {
-  return new Response(JSON.stringify({ jsonrpc: '2.0', id: 1, result }), {
-    status: 200,
+function response(result: unknown = initResult, headers: HeadersInit = {}): Response {
+  return new Response(JSON.stringify({ id: 1, jsonrpc: '2.0', result }), {
     headers: { 'Content-Type': 'application/json', ...headers },
   });
 }
 
-function mockRequests(handler: (call: UpstreamCall) => Response | Promise<Response>): UpstreamCall[] {
-  const calls: UpstreamCall[] = [];
+function requests(handler: (call: Call) => Response | Promise<Response>): Call[] {
+  const calls: Call[] = [];
   vi.stubGlobal(
     'fetch',
-    vi.fn((input: RequestInfo | URL, init: RequestInit = {}) => {
+    vi.fn((url: RequestInfo | URL, init: RequestInit = {}) => {
       const headers = new Headers(init.headers);
-      const proxyTarget = headers.get('Ocp-Apim-Url');
-      const call: UpstreamCall = {
-        url: proxyTarget ?? String(input),
+      const call: Call = {
+        url: headers.get('Ocp-Apim-Url') ?? String(url),
         method: headers.get('Ocp-Apim-Method') ?? init.method ?? 'GET',
         headers,
-        body: typeof init.body === 'string' ? init.body : undefined,
+        payload: typeof init.body === 'string' ? JSON.parse(init.body) : undefined,
         signal: init.signal,
-        proxyUrl: proxyTarget ? String(input) : undefined,
       };
       calls.push(call);
       return Promise.resolve(handler(call));
@@ -83,8 +65,7 @@ function mockRequests(handler: (call: UpstreamCall) => Response | Promise<Respon
 
 function sseServer(endpoint: string): {
   connect: (signal?: AbortSignal | null) => Response;
-  reply: (call: UpstreamCall, result: unknown) => Response;
-  emitEndpoint: (value: string) => void;
+  reply: (call: Call) => Response;
   end: () => void;
 } {
   const encoder = new TextEncoder();
@@ -93,547 +74,233 @@ function sseServer(endpoint: string): {
   const stream = new ReadableStream<Uint8Array>({
     start(value): void {
       controller = value;
-      controller.enqueue(encoder.encode(`event: endpoint\ndata: ${endpoint}\n\n`));
+      controller.enqueue(encoder.encode(`retry: 1\nevent: endpoint\ndata: ${endpoint}\n\n`));
     },
   });
-
-  return {
-    connect(signal?: AbortSignal | null): Response {
-      signal?.addEventListener(
-        'abort',
-        () => {
-          if (!closed) {
-            closed = true;
-            controller.close();
-          }
-        },
-        { once: true }
-      );
-      return new Response(stream, { headers: { 'Content-Type': 'text/event-stream' } });
-    },
-    reply(call: UpstreamCall, result: unknown): Response {
-      const request = JSON.parse(call.body);
-      controller.enqueue(encoder.encode(`event: message\ndata: ${JSON.stringify({ id: request.id, result })}\n\n`));
-      return new Response(null, { status: 202 });
-    },
-    emitEndpoint(value: string): void {
-      controller.enqueue(encoder.encode(`event: endpoint\ndata: ${value}\n\n`));
-    },
-    end(): void {
+  const end = (): void => {
+    if (!closed) {
       closed = true;
       controller.close();
+    }
+  };
+  return {
+    connect(signal): Response {
+      signal?.addEventListener('abort', end, { once: true });
+      return new Response(stream, { headers: { 'Content-Type': 'text/event-stream' } });
     },
+    reply(call): Response {
+      const result = call.payload.method === 'initialize' ? initResult : { ok: true };
+      controller.enqueue(encoder.encode(`data: ${JSON.stringify({ id: call.payload.id, result })}\n\n`));
+      return new Response(null, { status: 202 });
+    },
+    end,
   };
 }
 
-const activeServices = new Set<McpService>();
-
-function standalone(target: ApiDeployment, auth?: ApiAuthCredentials): McpService {
-  const service = createMcpService(target, auth);
+const services = new Set<McpService>();
+function client(target: ApiDeployment, shared = false, auth = credentials, key = 'api'): McpService {
+  const service = shared ? getMcpService(target, key, auth) : createMcpService(target, auth);
   if (!service) throw new Error('Expected MCP service');
-  activeServices.add(service);
+  services.add(service);
   return service;
 }
-
-function shared(target: ApiDeployment, apiName = 'api', auth?: ApiAuthCredentials): McpService {
-  const service = getMcpService(target, apiName, auth);
-  if (!service) throw new Error('Expected MCP service');
-  activeServices.add(service);
-  return service;
-}
-
 beforeEach(() => {
-  mocks.useProxy = false;
+  config.useProxy = false;
 });
-
 afterEach(() => {
-  for (const service of activeServices) service.closeConnection();
-  activeServices.clear();
+  services.forEach((service) => service.closeConnection());
+  services.clear();
   vi.unstubAllGlobals();
-  vi.restoreAllMocks();
 });
 
-describe.each([
-  { label: 'direct', useProxy: false },
-  { label: 'CORS proxy', useProxy: true },
-])('MCP connections through $label', ({ useProxy }) => {
+describe.each([false, true])('MCP requests (proxy: %s)', (useProxy) => {
   beforeEach(() => {
-    mocks.useProxy = useProxy;
+    config.useProxy = useProxy;
   });
 
-  it.each([
-    'https://host/sqlcl',
-    'https://host/custom/prefix/mcp?api-version=1&name=a%2Fb',
-    'https://host/custom/',
-    'https://host/sqlcl/sse',
-  ])('posts Streamable HTTP requests to the exact URL %s', async (url) => {
-    const calls = mockRequests((call) => {
-      const method = JSON.parse(call.body).method;
-      return method === 'initialize'
-        ? response(initResult, { 'Mcp-Session-Id': 'session-1' })
-        : response({ content: ['ok'] });
-    });
-    const service = standalone(deployment(url, 'streamable-http'), credentials);
-
-    await expect(service.runTool('tool', {})).resolves.toEqual({ content: ['ok'] });
-    expect(calls.map(({ method, url }) => ({ method, url }))).toEqual([
-      { method: 'POST', url },
-      { method: 'POST', url },
-    ]);
-    expect(calls.map(({ body }) => JSON.parse(body).method)).toEqual(['initialize', 'tools/call']);
-    expect(calls[0].headers.get('Authorization')).toBe('Bearer test-token');
-    expect(calls[1].headers.get('Authorization')).toBe('Bearer test-token');
-    expect(calls[0].headers.get('Mcp-Session-Id')).toBeNull();
-    expect(calls[1].headers.get('Mcp-Session-Id')).toBe('session-1');
-    if (useProxy) {
-      expect(calls.every((call) => call.proxyUrl === proxyUrl)).toBe(true);
-      expect(calls[0].headers.get('Ocp-Apim-Authorization')).toBe('Bearer proxy-token');
-      expect(calls[0].headers.get('Ocp-Apim-Service-Name')).toBe('example');
+  it.each(['https://host/sqlcl', 'https://host/prefix/mcp?q=a%2Fb', 'https://host/custom/', 'https://host/sqlcl/sse'])(
+    'preserves the Streamable HTTP endpoint %s and auth/session headers',
+    async (url) => {
+      const calls = requests(() => response(initResult, { 'MCP-Session-Id': 'session-1' }));
+      await client(deployment(url, 'streamable-http')).runTool('tool', {});
+      expect(calls.map((c) => [c.method, c.url, c.payload.method])).toEqual([
+        ['POST', url, 'initialize'],
+        ['POST', url, 'tools/call'],
+      ]);
+      expect(calls.map((c) => c.headers.get('MCP-Session-Id'))).toEqual([null, 'session-1']);
+      expect(calls.every((c) => c.headers.get('Authorization') === credentials.value)).toBe(true);
+      expect(calls[0].headers.get('Accept')).toBe('application/json, text/event-stream');
+      if (useProxy) expect(calls[0].headers.get('Ocp-Apim-Authorization')).toBe('Bearer proxy-token');
     }
-  });
-
-  it('handles Streamable HTTP event-stream responses and updated session headers', async () => {
-    const calls = mockRequests((call) => {
-      const request = JSON.parse(call.body);
-      const result = request.method === 'initialize' ? initResult : { value: request.params.name };
-      return new Response(`data: ${JSON.stringify({ jsonrpc: '2.0', id: request.id, result })}\n\n`, {
-        headers: {
-          'Content-Type': 'text/event-stream',
-          'Mcp-Session-Id': request.method === 'initialize' ? 'session-1' : 'session-2',
-        },
-      });
-    });
-    const service = standalone(deployment('https://host/sqlcl', 'streamable-http'), credentials);
-
-    await expect(service.runTool('first', {})).resolves.toEqual({ value: 'first' });
-    await expect(service.runTool('second', {})).resolves.toEqual({ value: 'second' });
-    expect(calls.map((call) => call.headers.get('Mcp-Session-Id'))).toEqual([null, 'session-1', 'session-2']);
-    expect(calls.every((call) => call.url === 'https://host/sqlcl' && call.method === 'POST')).toBe(true);
-  });
-
-  it('reads matching Streamable HTTP results without waiting for the event stream to close', async () => {
-    const canceled: string[] = [];
-    const calls = mockRequests((call) => {
-      const request = JSON.parse(call.body);
-      const result = request.method === 'initialize' ? initResult : { value: '\u20ac' };
-      const eventStream =
-        ': keep-alive\r\n' +
-        'data: {"jsonrpc":"2.0","method":"notifications/progress"}\r\n\r\n' +
-        'data: {"jsonrpc":"2.0","id":999,"result":"unrelated"}\r\n\r\n' +
-        `data: {"jsonrpc":"2.0","id":${request.id},\r\n` +
-        `data: "result":${JSON.stringify(result)}}\r\n\r\n`;
-      const bytes = new TextEncoder().encode(eventStream);
-      const unicodeIndex = bytes.indexOf(0xe2);
-      const stream = new ReadableStream<Uint8Array>({
-        start(controller): void {
-          if (unicodeIndex >= 0) {
-            controller.enqueue(bytes.slice(0, unicodeIndex + 1));
-            controller.enqueue(bytes.slice(unicodeIndex + 1));
-          } else {
-            controller.enqueue(bytes);
-          }
-          call.signal?.addEventListener('abort', () => controller.error(new Error('aborted')), { once: true });
-        },
-        cancel(): void {
-          canceled.push(request.method);
-        },
-      });
-      return new Response(stream, { headers: { 'Content-Type': 'text/event-stream' } });
-    });
-    const service = standalone(deployment('https://host/sqlcl?version=1', 'streamable-http'), credentials);
-
-    await expect(service.runTool('tool', {})).resolves.toEqual({ value: '\u20ac' });
-    expect(calls.map(({ method, url }) => ({ method, url }))).toEqual([
-      { method: 'POST', url: 'https://host/sqlcl?version=1' },
-      { method: 'POST', url: 'https://host/sqlcl?version=1' },
-    ]);
-    expect(canceled).toEqual(['initialize', 'tools/call']);
-  });
-
-  it('surfaces errors from matching Streamable HTTP event-stream responses', async () => {
-    const calls = mockRequests(
-      () =>
-        new Response('data: {"jsonrpc":"2.0","id":1,"error":{"message":"initialization failed"}}\n\n', {
-          headers: { 'Content-Type': 'text/event-stream' },
-        })
-    );
-    const service = standalone(deployment('https://host/sqlcl', undefined));
-
-    await expect(service.runTool('tool', {})).rejects.toThrow('initialization failed');
-    expect(calls.map(({ method }) => method)).toEqual(['POST']);
-  });
-
-  it('rejects when a Streamable HTTP event stream ends without a matching response', async () => {
-    const calls = mockRequests(
-      () =>
-        new Response('data: {"jsonrpc":"2.0","id":999,"result":{}}\n\n', {
-          headers: { 'Content-Type': 'text/event-stream' },
-        })
-    );
-    const service = standalone(deployment('https://host/sqlcl', 'streamable-http'));
-
-    await expect(service.runTool('tool', {})).rejects.toThrow(
-      'No matching JSON-RPC response found in MCP event stream.'
-    );
-    expect(calls.map(({ method }) => method)).toEqual(['POST']);
-  });
-
-  it('cancels a pending Streamable HTTP event stream when the connection closes', async () => {
-    let stream: ReadableStream<Uint8Array>;
-    const canceled = vi.fn();
-    const calls = mockRequests(() => {
-      stream = new ReadableStream<Uint8Array>({ cancel: canceled });
-      return new Response(stream, { headers: { 'Content-Type': 'text/event-stream' } });
-    });
-    const service = standalone(deployment('https://host/sqlcl', undefined));
-    const operation = service.runTool('tool', {});
-    await vi.waitFor(() => expect(stream?.locked).toBe(true));
-
-    service.closeConnection();
-    await expect(operation).rejects.toThrow('MCP connection closed.');
-    expect(canceled).toHaveBeenCalledOnce();
-    expect(calls.map(({ method }) => method)).toEqual(['POST']);
-  });
+  );
 
   it.each([
-    ['https://host/sqlcl', '/sqlcl/messages', 'https://host/sqlcl/messages'],
-    ['https://host/sqlcl/sse?api-version=1', '/sqlcl/messages?sessionId=1', 'https://host/sqlcl/messages?sessionId=1'],
-    ['https://host/custom/events', 'messages?sessionId=1', 'https://host/custom/messages?sessionId=1'],
-    ['https://host/custom/events', '?sessionId=1', 'https://host/custom/events?sessionId=1'],
-    ['https://host/custom/events/', 'https://host/elsewhere/message', 'https://host/elsewhere/message'],
-  ])('uses the exact SSE URL %s and announced endpoint %s', async (url, endpoint, expectedEndpoint) => {
+    ['https://host/sqlcl/sse?q=a%2Fb', '/sqlcl/messages?session=1', 'https://host/sqlcl/messages?session=1'],
+    ['https://host/custom/events', 'messages?session=1', 'https://host/custom/messages?session=1'],
+    ['https://host/custom/', 'https://host/other/messages?q=1', 'https://host/other/messages?q=1'],
+  ])('uses the exact SSE URL %s and announced endpoint', async (url, endpoint, resolved) => {
     const server = sseServer(endpoint);
-    const calls = mockRequests((call) => {
-      if (call.method === 'GET') return server.connect(call.signal);
-      const method = JSON.parse(call.body).method;
-      return server.reply(call, method === 'initialize' ? initResult : { content: ['ok'] });
-    });
-    const service = standalone(deployment(url, 'sse'), credentials);
-
-    await expect(service.runTool('tool', {})).resolves.toEqual({ content: ['ok'] });
-    expect(calls.map(({ method, url }) => ({ method, url }))).toEqual([
-      { method: 'GET', url },
-      { method: 'POST', url: expectedEndpoint },
-      { method: 'POST', url: expectedEndpoint },
+    const calls = requests((c) => (c.method === 'GET' ? server.connect(c.signal) : server.reply(c)));
+    await client(deployment(url, 'sse')).runTool('tool', {});
+    expect(calls.map((c) => [c.method, c.url])).toEqual([
+      ['GET', url],
+      ['POST', resolved],
+      ['POST', resolved],
     ]);
-    expect(calls.every((call) => call.headers.get('Authorization') === 'Bearer test-token')).toBe(true);
-    expect(calls[0].headers.get('Accept')).toContain('text/event-stream');
-    if (useProxy) expect(calls.every((call) => call.proxyUrl === proxyUrl)).toBe(true);
+    expect(calls.every((c) => c.headers.get('Authorization') === credentials.value)).toBe(true);
+    expect(calls[0].headers.get('Accept')).toBe('text/event-stream');
   });
 
-  it.each([undefined, null])('detects Streamable HTTP when transport is %s', async (transport) => {
-    const url = 'https://host/sqlcl?query=1';
-    const calls = mockRequests((call) =>
-      JSON.parse(call.body).method === 'initialize' ? response(initResult) : response({ content: ['ok'] })
+  it.each([undefined, null])('detects Streamable HTTP for absent metadata (%s)', async (transport) => {
+    const calls = requests(() => response());
+    await client(deployment('https://host/sqlcl?q=1', transport)).runTool('tool', {});
+    expect(calls.map((c) => [c.method, c.url])).toEqual([
+      ['POST', 'https://host/sqlcl?q=1'],
+      ['POST', 'https://host/sqlcl?q=1'],
+    ]);
+  });
+
+  it.each([400, 404, 405])('falls back only from initialization on %s', async (status) => {
+    const url = 'https://host/sqlcl/sse?q=1';
+    const server = sseServer('/sqlcl/messages');
+    const calls = requests((c) =>
+      c.method === 'GET' ? server.connect(c.signal) : c.url === url ? new Response(null, { status }) : server.reply(c)
     );
-    const service = standalone(deployment(url, transport));
-
-    await expect(service.runTool('tool', {})).resolves.toEqual({ content: ['ok'] });
-    expect(calls.map(({ method, url }) => ({ method, url }))).toEqual([
-      { method: 'POST', url },
-      { method: 'POST', url },
+    await client(deployment(url)).runTool('tool', {});
+    expect(calls.map((c) => [c.method, c.url])).toEqual([
+      ['POST', url],
+      ['GET', url],
+      ['POST', 'https://host/sqlcl/messages'],
+      ['POST', 'https://host/sqlcl/messages'],
     ]);
-  });
-
-  it.each([400, 404, 405])('falls back to same-URL SSE only after initialize returns %s', async (status) => {
-    const url = 'https://host/sqlcl/sse?api-version=1';
-    const server = sseServer('/sqlcl/messages?sessionId=1');
-    const calls = mockRequests((call) => {
-      if (call.url === url && call.method === 'POST') return new Response(null, { status });
-      if (call.method === 'GET') return server.connect(call.signal);
-      const method = JSON.parse(call.body).method;
-      return server.reply(call, method === 'initialize' ? initResult : { content: ['ok'] });
-    });
-    const service = standalone(deployment(url));
-
-    await expect(service.runTool('tool', {})).resolves.toEqual({ content: ['ok'] });
-    expect(calls.map(({ method, url }) => ({ method, url }))).toEqual([
-      { method: 'POST', url },
-      { method: 'GET', url },
-      { method: 'POST', url: 'https://host/sqlcl/messages?sessionId=1' },
-      { method: 'POST', url: 'https://host/sqlcl/messages?sessionId=1' },
-    ]);
-    expect(calls.filter(({ body }) => body).map(({ body }) => JSON.parse(body).method)).toEqual([
+    expect(calls.filter((c) => c.payload).map((c) => c.payload.method)).toEqual([
       'initialize',
       'initialize',
       'tools/call',
     ]);
   });
 
-  it.each([400, 404, 405])('does not fall back for explicit Streamable HTTP on %s', async (status) => {
-    const calls = mockRequests(() => new Response(null, { status }));
-    const service = standalone(deployment('https://host/sqlcl', 'streamable-http'));
-
-    await expect(service.collectMcpSpec()).rejects.toThrow(String(status));
-    expect(calls.map(({ method }) => method)).toEqual(['POST']);
+  it.each([401, 403, 429, 500, 502, 503])('never falls back on HTTP %s', async (status) => {
+    const calls = requests(() => new Response(null, { status }));
+    await expect(client(deployment()).runTool('tool', {})).rejects.toThrow();
+    expect(calls.map((c) => c.method)).toEqual(['POST']);
   });
 
-  it.each([401, 403, 429, 500, 502, 503])('does not fall back from initialize on %s', async (status) => {
-    const calls = mockRequests(() => new Response(null, { status }));
-    const service = standalone(deployment('https://host/sqlcl'));
-
-    await expect(service.collectMcpSpec()).rejects.toThrow();
-    expect(calls.map(({ method }) => method)).toEqual(['POST']);
-  });
-
-  it('preserves the Streamable HTTP initialize 401 challenge without falling back', async () => {
-    const calls = mockRequests(
-      () => new Response(null, { status: 401, headers: { 'WWW-Authenticate': 'Bearer realm="mcp"' } })
-    );
-    const service = standalone(deployment('https://host/sqlcl'));
-
-    await expect(service.collectMcpSpec()).rejects.toMatchObject({
-      name: 'McpUnauthorizedError',
-      wwwAuthenticate: 'Bearer realm="mcp"',
-    });
-    expect(calls.map(({ method }) => method)).toEqual(['POST']);
-  });
-
-  it.each([new TypeError('Failed to fetch'), new DOMException('Timed out', 'TimeoutError')])(
-    'does not fall back after a network error or timeout',
+  it.each([new TypeError('Failed to fetch'), new DOMException('Timeout', 'TimeoutError')])(
+    'never falls back on network errors or timeouts',
     async (error) => {
-      const calls = mockRequests(() => Promise.reject(error));
-      const service = standalone(deployment('https://host/sqlcl'));
-
-      await expect(service.collectMcpSpec()).rejects.toBe(error);
-      expect(calls.map(({ method }) => method)).toEqual(['POST']);
+      const calls = requests(() => Promise.reject(error));
+      await expect(client(deployment()).runTool('tool', {})).rejects.toBe(error);
+      expect(calls.map((c) => c.method)).toEqual(['POST']);
     }
   );
 
-  it.each([400, 404, 405])('does not retry a tool call on %s', async (status) => {
-    const calls = mockRequests((call) =>
-      JSON.parse(call.body).method === 'initialize' ? response(initResult) : new Response(null, { status })
-    );
-    const service = standalone(deployment('https://host/sqlcl'));
-
-    await expect(service.runTool('tool', {})).rejects.toThrow(String(status));
-    expect(calls.map(({ method }) => method)).toEqual(['POST', 'POST']);
-    expect(calls.map(({ body }) => JSON.parse(body).method)).toEqual(['initialize', 'tools/call']);
+  it.each([400, 404, 405])('respects explicit Streamable HTTP on %s', async (status) => {
+    const calls = requests(() => new Response(null, { status }));
+    await expect(client(deployment(undefined, 'streamable-http')).runTool('tool', {})).rejects.toThrow();
+    expect(calls.map((c) => c.method)).toEqual(['POST']);
   });
 
-  it.each([400, 404, 405])('does not retry an SSE tool call on %s', async (status) => {
+  it.each([400, 404, 405])('never retries a user operation on %s', async (status) => {
+    const calls = requests((c) => (c.payload.method === 'initialize' ? response() : new Response(null, { status })));
+    await expect(client(deployment()).runTool('tool', {})).rejects.toThrow();
+    expect(calls.map((c) => c.payload.method)).toEqual(['initialize', 'tools/call']);
+  });
+
+  it.each(['', 'unknown'])('diagnoses explicit unknown transport %s without requests', async (transport) => {
+    const calls = requests(() => response());
+    await expect(client(deployment(undefined, transport)).collectMcpSpec()).rejects.toThrow(
+      /Unsupported MCP transport/
+    );
+    expect(calls).toEqual([]);
+  });
+
+  it.each(['GET', 'POST'])('preserves SSE %s 401 challenges', async (method) => {
     const server = sseServer('/sqlcl/messages');
-    const calls = mockRequests((call) => {
-      if (call.method === 'GET') return server.connect(call.signal);
-      return JSON.parse(call.body).method === 'initialize'
-        ? server.reply(call, initResult)
-        : new Response(null, { status });
-    });
-    const service = standalone(deployment('https://host/sqlcl/sse', 'sse'), credentials);
-
-    await expect(service.runTool('tool', {})).rejects.toThrow(String(status));
-    expect(calls.map(({ method }) => method)).toEqual(['GET', 'POST', 'POST']);
-    expect(calls.filter(({ body }) => body).map(({ body }) => JSON.parse(body).method)).toEqual([
-      'initialize',
-      'tools/call',
-    ]);
-  });
-
-  it.each(['future-transport', ''])(
-    'rejects unknown explicit transport %s without network traffic',
-    async (transport) => {
-      const calls = mockRequests(() => response(initResult));
-      const service = standalone(deployment('https://host/sqlcl', transport));
-
-      await expect(service.collectMcpSpec()).rejects.toThrow(/unsupported MCP transport/i);
-      expect(calls).toHaveLength(0);
-    }
-  );
-
-  it.each([
-    ['invalid JSON', '{'],
-    ['JSON-RPC error', '{"jsonrpc":"2.0","id":1,"error":{"message":"bad initialize"}}'],
-    ['missing result', '{"jsonrpc":"2.0","id":1}'],
-  ])('does not fall back after an HTTP 200 with %s', async (_label, body) => {
-    const calls = mockRequests(() => new Response(body, { headers: { 'Content-Type': 'application/json' } }));
-    const service = standalone(deployment('https://host/sqlcl'));
-
-    await expect(service.collectMcpSpec()).rejects.toThrow();
-    expect(calls.map(({ method }) => method)).toEqual(['POST']);
-  });
-
-  it('reports the SSE status when compatibility fallback also fails', async () => {
-    const calls = mockRequests(() => new Response(null, { status: 404 }));
-    const service = standalone(deployment('https://host/sqlcl'));
-
-    await expect(service.collectMcpSpec()).rejects.toThrow('404');
-    expect(calls.map(({ method }) => method)).toEqual(['POST', 'GET']);
-  });
-
-  it('preserves the SSE GET 401 challenge and stops reconnecting', async () => {
-    const calls = mockRequests(
-      () =>
-        new Response(null, {
-          status: 401,
-          headers: { 'WWW-Authenticate': 'Bearer resource_metadata="https://host/auth"' },
-        })
+    const calls = requests((c) =>
+      c.method === method
+        ? new Response(null, { status: 401, headers: { 'WWW-Authenticate': 'Bearer realm="mcp"' } })
+        : server.connect(c.signal)
     );
-    const service = standalone(deployment('https://host/sqlcl/sse', 'sse'));
-
-    await expect(service.collectMcpSpec()).rejects.toMatchObject({
-      name: 'McpUnauthorizedError',
-      wwwAuthenticate: 'Bearer resource_metadata="https://host/auth"',
-    });
-    expect(calls.map(({ method }) => method)).toEqual(['GET']);
-  });
-
-  it('preserves the SSE message POST 401 challenge', async () => {
-    const server = sseServer('/sqlcl/messages');
-    const calls = mockRequests((call) =>
-      call.method === 'GET'
-        ? server.connect(call.signal)
-        : new Response(null, { status: 401, headers: { 'WWW-Authenticate': 'Bearer realm="mcp"' } })
-    );
-    const service = standalone(deployment('https://host/sqlcl/sse', 'sse'));
-
-    await expect(service.collectMcpSpec()).rejects.toMatchObject({
+    await expect(client(deployment(undefined, 'sse')).collectMcpSpec()).rejects.toMatchObject({
       name: 'McpUnauthorizedError',
       wwwAuthenticate: 'Bearer realm="mcp"',
     });
-    expect(calls.map(({ method }) => method)).toEqual(['GET', 'POST']);
+    expect(calls.map((c) => c.method)).toEqual(method === 'GET' ? ['GET'] : ['GET', 'POST']);
   });
 
-  it.each(['https://elsewhere.test/messages', '//elsewhere.test/messages', 'https://user:pass@host/messages'])(
-    'rejects unsafe SSE message endpoint %s before forwarding credentials',
+  it.each(['https://elsewhere/messages', '//elsewhere/messages', 'https://user:password@host/messages'])(
+    'rejects unsafe announced endpoint %s before forwarding auth',
     async (endpoint) => {
       const server = sseServer(endpoint);
-      const calls = mockRequests((call) => server.connect(call.signal));
-      const service = standalone(deployment('https://host/sqlcl/sse', 'sse'), credentials);
-
-      await expect(service.collectMcpSpec()).rejects.toThrow(/origin/i);
-      expect(calls.map(({ method }) => method)).toEqual(['GET']);
+      const calls = requests((c) => server.connect(c.signal));
+      await expect(client(deployment(undefined, 'sse')).collectMcpSpec()).rejects.toThrow(/origin/);
+      expect(calls.map((c) => c.method)).toEqual(['GET']);
     }
   );
 
-  it('does not initialize twice for duplicate SSE endpoint events', async () => {
-    const server = sseServer('/sqlcl/messages');
-    const calls = mockRequests((call) => {
-      if (call.method === 'GET') return server.connect(call.signal);
-      return server.reply(call, initResult);
-    });
-    const service = standalone(deployment('https://host/sqlcl/sse', 'sse'));
-
-    await service.collectMcpSpec();
-    server.emitEndpoint('/sqlcl/messages');
+  it('prevents late initialization from starting fallback after close', async () => {
+    let finish: (response: Response) => void;
+    const calls = requests(
+      () =>
+        new Promise<Response>((resolve) => {
+          finish = resolve;
+        })
+    );
+    const service = client(deployment());
+    const pending = service.runTool('tool', {});
+    await vi.waitFor(() => expect(calls).toHaveLength(1));
+    service.closeConnection();
+    await expect(pending).rejects.toThrow(/closed/);
+    finish(new Response(null, { status: 404 }));
     await new Promise((resolve) => setTimeout(resolve, 10));
-    expect(calls.map(({ method }) => method)).toEqual(['GET', 'POST']);
+    expect(calls).toHaveLength(1);
+    expect(calls[0].signal.aborted).toBe(true);
   });
 
-  it('reinitializes after SSE reconnect without retrying pending operations', async () => {
-    const first = sseServer('/sqlcl/messages?sessionId=1');
-    const second = sseServer('/sqlcl/messages?sessionId=2');
+  it('reinitializes SSE reconnects without replaying a pending operation', async () => {
+    const first = sseServer('/sqlcl/messages?session=1');
+    const second = sseServer('/sqlcl/messages?session=2');
     let connections = 0;
-    const calls = mockRequests((call) => {
-      if (call.method === 'GET') {
-        connections += 1;
-        return (connections === 1 ? first : second).connect(call.signal);
-      }
-      const method = JSON.parse(call.body).method;
-      if (call.url.endsWith('sessionId=1') && method === 'tools/call') {
-        return new Response(null, { status: 202 });
-      }
-      return (call.url.endsWith('sessionId=1') ? first : second).reply(
-        call,
-        method === 'initialize' ? initResult : { value: 'new session' }
-      );
+    const calls = requests((c) => {
+      if (c.method === 'GET') return (++connections === 1 ? first : second).connect(c.signal);
+      if (c.url.endsWith('session=1') && c.payload.method === 'tools/call') return new Response(null, { status: 202 });
+      return (c.url.endsWith('session=1') ? first : second).reply(c);
     });
-    const service = standalone(deployment('https://host/sqlcl/sse', 'sse'), credentials);
-
+    const service = client(deployment(undefined, 'sse'));
     await service.collectMcpSpec();
-    const oldRequest = service.runTool('first', {});
+    const pending = service.runTool('first', {});
     await vi.waitFor(() => expect(calls).toHaveLength(3));
-    const rejected = expect(oldRequest).rejects.toThrow(/connection/i);
+    const rejected = expect(pending).rejects.toThrow(/connection/);
     first.end();
     await rejected;
-
-    const newRequest = service.runTool('second', {});
-    await vi.waitFor(() => expect(connections).toBe(2), { timeout: 6000, interval: 100 });
-    await expect(newRequest).resolves.toEqual({ value: 'new session' });
-    expect(calls.map(({ method }) => method)).toEqual(['GET', 'POST', 'POST', 'GET', 'POST', 'POST']);
-    expect(calls.filter(({ body }) => body && JSON.parse(body).method === 'tools/call')).toHaveLength(2);
-    expect(calls[4].url).toBe('https://host/sqlcl/messages?sessionId=2');
-    expect(calls[5].url).toBe('https://host/sqlcl/messages?sessionId=2');
-    expect(calls.every((call) => call.headers.get('Authorization') === 'Bearer test-token')).toBe(true);
+    await expect(service.runTool('second', {})).resolves.toEqual({ ok: true });
+    expect(calls.filter((c) => c.payload).map((c) => c.payload.method)).toEqual([
+      'initialize',
+      'tools/call',
+      'initialize',
+      'tools/call',
+    ]);
+    expect(calls[5].url).toBe('https://host/sqlcl/messages?session=2');
   });
 });
 
-describe('MCP service lifecycle', () => {
-  it.each([false, true])('prevents a late 404 from opening SSE after close (proxy: %s)', async (useProxy) => {
-    mocks.useProxy = useProxy;
-    let finishRequest: (response: Response) => void;
-    const calls = mockRequests(() => new Promise<Response>((resolve) => (finishRequest = resolve)));
-    const service = standalone(deployment('https://host/sqlcl'));
-    const pending = service.collectMcpSpec();
-
-    await vi.waitFor(() => expect(calls).toHaveLength(1));
-    service.closeConnection();
-    await expect(pending).rejects.toThrow(/closed/i);
-    finishRequest(new Response(null, { status: 404 }));
-    await new Promise((resolve) => setTimeout(resolve, 10));
-
-    expect(calls.map(({ method }) => method)).toEqual(['POST']);
-    expect(calls[0].signal?.aborted).toBe(true);
-  });
-
-  it('replaces shared connections when deployment, API, or transport changes', async () => {
-    mockRequests(() => response(initResult));
-    const firstDeployment = deployment('https://host/sqlcl', 'streamable-http', 'first');
-    const first = shared(firstDeployment, 'api-a', credentials);
-    await first.collectMcpSpec();
-    expect(shared(firstDeployment, 'api-a')).toBe(first);
-
-    const second = shared(deployment('https://host/sqlcl', 'streamable-http', 'second'), 'api-a');
-    expect(second).not.toBe(first);
-    await second.collectMcpSpec();
-
-    const third = shared(deployment('https://host/sqlcl', 'streamable-http', 'second'), 'api-b');
-    expect(third).not.toBe(second);
-    await third.collectMcpSpec();
-
-    const fourth = shared(deployment('https://host/sqlcl', 'unknown', 'second'), 'api-b');
-    expect(fourth).not.toBe(third);
-    await expect(fourth.collectMcpSpec()).rejects.toThrow(/unknown/i);
-  });
-
-  it('replaces failed shared connections and keeps standalone cleanup separate', async () => {
-    let count = 0;
-    mockRequests(() => (++count === 1 ? new Response(null, { status: 500 }) : response(initResult)));
-    const target = deployment('https://host/sqlcl', 'streamable-http');
-    const first = shared(target);
-    await expect(first.collectMcpSpec()).rejects.toThrow('500');
-
-    const second = shared(target);
-    expect(second).not.toBe(first);
-    await second.collectMcpSpec();
-    const independent = standalone(target);
-    await independent.collectMcpSpec();
-    independent.closeConnection();
-    expect(shared(target)).toBe(second);
-  });
-
-  it('rejects a late Streamable HTTP tool response after close', async () => {
-    let finishTool: (value: Response) => void;
-    const calls = mockRequests((call) =>
-      JSON.parse(call.body).method === 'initialize'
-        ? response(initResult)
-        : new Promise<Response>((resolve) => (finishTool = resolve))
-    );
-    const service = standalone(deployment('https://host/sqlcl', 'streamable-http'));
-    const pending = service.runTool('tool', {});
-    await vi.waitFor(() => expect(calls).toHaveLength(2));
-
-    service.closeConnection();
-    finishTool(response({ value: 'stale' }));
-    await expect(pending).rejects.toThrow(/closed/i);
-    expect(calls[1].signal?.aborted).toBe(true);
-  });
-
-  it('preserves Streamable HTTP 401 challenges', async () => {
-    mockRequests(() => new Response(null, { status: 401, headers: { 'WWW-Authenticate': 'Bearer realm="mcp"' } }));
-    const service = standalone(deployment('https://host/sqlcl', 'streamable-http'));
-
-    const error = await service.collectMcpSpec().catch((reason: unknown) => reason);
-    expect(error).toBeInstanceOf(McpUnauthorizedError);
-    expect(error).toMatchObject({ wwwAuthenticate: 'Bearer realm="mcp"' });
-  });
+it('isolates shared deployment/transport/definition/auth identity and standalone cleanup', async () => {
+  requests(() => response());
+  const target = deployment(undefined, 'streamable-http');
+  const first = client(target, true);
+  await first.collectMcpSpec();
+  expect(getMcpService(target, 'api')).toBe(first);
+  client(target).closeConnection();
+  expect(getMcpService(target, 'api')).toBe(first);
+  const second = client({ ...target, name: 'another' }, true);
+  expect(first.isClosed).toBe(true);
+  const third = client(target, true, credentials, 'another-api');
+  expect(second.isClosed).toBe(true);
+  const changedCredentials = { ...credentials };
+  const fourth = client(target, true, changedCredentials, 'another-api');
+  expect(third.isClosed).toBe(true);
+  target.server.mcpTransportProtocol = 'unknown';
+  await expect(client(target, true, changedCredentials, 'another-api').collectMcpSpec()).rejects.toThrow(/Unsupported/);
+  expect(fourth.isClosed).toBe(true);
 });

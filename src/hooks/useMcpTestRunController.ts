@@ -24,21 +24,13 @@ export function useMcpTestRunController(
   const [result, setResult] = useState<string>(undefined);
   const [error, setError] = useState<string>(undefined);
   const [isRunning, setIsRunning] = useState(false);
-  const activeDeployment = useRef<ApiDeployment>();
   const connectionVersion = useRef(0);
-  const operationVersion = useRef(0);
 
   const authCredentials = useMcpAuthCredentials();
   const runtimeUri = deployment?.server?.runtimeUri?.[0];
   const transport = deployment?.server?.mcpTransportProtocol;
 
   useEffect(() => {
-    connectionVersion.current += 1;
-    activeDeployment.current = undefined;
-    setResult(undefined);
-    setError(undefined);
-    setIsRunning(false);
-
     if (!runtimeUri || !shouldConnect) {
       setMcpService(undefined);
       return undefined;
@@ -47,23 +39,21 @@ export function useMcpTestRunController(
     // The test console owns its connection: it is torn down when the drawer closes, so it must
     // not share the instance the spec page keeps alive.
     const service = createMcpService(deployment, authCredentials);
-    activeDeployment.current = deployment;
     setMcpService(service);
 
     return () => {
       connectionVersion.current += 1;
-      activeDeployment.current = undefined;
       service?.closeConnection();
-      setMcpService((current) => (current === service ? undefined : current));
+      setMcpService(undefined);
     };
   }, [authCredentials, deployment, runtimeUri, shouldConnect, transport]);
 
   useEffect(() => {
-    operationVersion.current += 1;
+    connectionVersion.current += 1;
     setResult(undefined);
     setError(undefined);
     setIsRunning(false);
-  }, [operation]);
+  }, [authCredentials, deployment, operation, runtimeUri, shouldConnect, transport]);
 
   const run = useCallback(
     async (args: HttpReqParam[]) => {
@@ -72,16 +62,13 @@ export function useMcpTestRunController(
       }
 
       const version = connectionVersion.current;
-      const selectedOperationVersion = operationVersion.current;
-      const isCurrentRun = (): boolean =>
-        connectionVersion.current === version && operationVersion.current === selectedOperationVersion;
+      const isCurrentRun = (): boolean => connectionVersion.current === version;
       try {
         setIsRunning(true);
 
         if (
           !shouldConnect ||
           !mcpService ||
-          activeDeployment.current !== deployment ||
           mcpService.serverUri !== runtimeUri ||
           mcpService.declaredTransport !== transport ||
           mcpService.authCredentials !== authCredentials
@@ -143,7 +130,7 @@ export function useMcpTestRunController(
         if (isCurrentRun()) setIsRunning(false);
       }
     },
-    [authCredentials, deployment, isRunning, mcpService, operation, runtimeUri, shouldConnect, transport]
+    [authCredentials, isRunning, mcpService, operation, runtimeUri, shouldConnect, transport]
   );
 
   return {
