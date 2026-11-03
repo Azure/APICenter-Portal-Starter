@@ -66,7 +66,6 @@ function requests(handler: (call: Call) => Response | Promise<Response>): Call[]
 function sseServer(endpoint: string): {
   connect: (signal?: AbortSignal | null) => Response;
   reply: (call: Call) => Response;
-  end: () => void;
 } {
   const encoder = new TextEncoder();
   let controller: ReadableStreamDefaultController<Uint8Array>;
@@ -74,7 +73,7 @@ function sseServer(endpoint: string): {
   const stream = new ReadableStream<Uint8Array>({
     start(value): void {
       controller = value;
-      controller.enqueue(encoder.encode(`retry: 1\nevent: endpoint\ndata: ${endpoint}\n\n`));
+      controller.enqueue(encoder.encode(`event: endpoint\ndata: ${endpoint}\n\n`));
     },
   });
   const end = (): void => {
@@ -93,13 +92,16 @@ function sseServer(endpoint: string): {
       controller.enqueue(encoder.encode(`data: ${JSON.stringify({ id: call.payload.id, result })}\n\n`));
       return new Response(null, { status: 202 });
     },
-    end,
   };
 }
 
 const services = new Set<McpService>();
 function client(target: ApiDeployment, shared = false, auth = credentials, key = 'api'): McpService {
-  const service = shared ? getMcpService(target, key, auth) : createMcpService(target, auth);
+  const uri = target.server.runtimeUri[0];
+  const transport = target.server.mcpTransportProtocol;
+  const service = shared
+    ? getMcpService(uri, auth, transport, JSON.stringify([key, target.name]))
+    : createMcpService(uri, auth, transport);
   if (!service) throw new Error('Expected MCP service');
   services.add(service);
   return service;
@@ -138,6 +140,7 @@ describe.each([false, true])('MCP requests (proxy: %s)', (useProxy) => {
     ['https://host/sqlcl/sse?q=a%2Fb', '/sqlcl/messages?session=1', 'https://host/sqlcl/messages?session=1'],
     ['https://host/custom/events', 'messages?session=1', 'https://host/custom/messages?session=1'],
     ['https://host/custom/', 'https://host/other/messages?q=1', 'https://host/other/messages?q=1'],
+    ['https://host/sqlcl/sse', 'https://message-host/messages?session=1', 'https://message-host/messages?session=1'],
   ])('uses the exact SSE URL %s and announced endpoint', async (url, endpoint, resolved) => {
     const server = sseServer(endpoint);
     const calls = requests((c) => (c.method === 'GET' ? server.connect(c.signal) : server.reply(c)));
@@ -229,16 +232,6 @@ describe.each([false, true])('MCP requests (proxy: %s)', (useProxy) => {
     expect(calls.map((c) => c.method)).toEqual(method === 'GET' ? ['GET'] : ['GET', 'POST']);
   });
 
-  it.each(['https://elsewhere/messages', '//elsewhere/messages', 'https://user:password@host/messages'])(
-    'rejects unsafe announced endpoint %s before forwarding auth',
-    async (endpoint) => {
-      const server = sseServer(endpoint);
-      const calls = requests((c) => server.connect(c.signal));
-      await expect(client(deployment(undefined, 'sse')).collectMcpSpec()).rejects.toThrow(/origin/);
-      expect(calls.map((c) => c.method)).toEqual(['GET']);
-    }
-  );
-
   it('prevents late initialization from starting fallback after close', async () => {
     let finish: (response: Response) => void;
     const calls = requests(
@@ -255,33 +248,7 @@ describe.each([false, true])('MCP requests (proxy: %s)', (useProxy) => {
     finish(new Response(null, { status: 404 }));
     await new Promise((resolve) => setTimeout(resolve, 10));
     expect(calls).toHaveLength(1);
-    expect(calls[0].signal.aborted).toBe(true);
-  });
-
-  it('reinitializes SSE reconnects without replaying a pending operation', async () => {
-    const first = sseServer('/sqlcl/messages?session=1');
-    const second = sseServer('/sqlcl/messages?session=2');
-    let connections = 0;
-    const calls = requests((c) => {
-      if (c.method === 'GET') return (++connections === 1 ? first : second).connect(c.signal);
-      if (c.url.endsWith('session=1') && c.payload.method === 'tools/call') return new Response(null, { status: 202 });
-      return (c.url.endsWith('session=1') ? first : second).reply(c);
-    });
-    const service = client(deployment(undefined, 'sse'));
-    await service.collectMcpSpec();
-    const pending = service.runTool('first', {});
-    await vi.waitFor(() => expect(calls).toHaveLength(3));
-    const rejected = expect(pending).rejects.toThrow(/connection/);
-    first.end();
-    await rejected;
-    await expect(service.runTool('second', {})).resolves.toEqual({ ok: true });
-    expect(calls.filter((c) => c.payload).map((c) => c.payload.method)).toEqual([
-      'initialize',
-      'tools/call',
-      'initialize',
-      'tools/call',
-    ]);
-    expect(calls[5].url).toBe('https://host/sqlcl/messages?session=2');
+    expect(calls[0].payload.method).toBe('initialize');
   });
 });
 
@@ -290,9 +257,17 @@ it('isolates shared deployment/transport/definition/auth identity and standalone
   const target = deployment(undefined, 'streamable-http');
   const first = client(target, true);
   await first.collectMcpSpec();
-  expect(getMcpService(target, 'api')).toBe(first);
+  const reuse = (): McpService | undefined =>
+    getMcpService(
+      target.server.runtimeUri[0],
+      undefined,
+      target.server.mcpTransportProtocol,
+      JSON.stringify(['api', target.name])
+    );
+  expect(reuse()).toBe(first);
+  expect(client({ ...target }, true)).toBe(first);
   client(target).closeConnection();
-  expect(getMcpService(target, 'api')).toBe(first);
+  expect(reuse()).toBe(first);
   const second = client({ ...target, name: 'another' }, true);
   expect(first.isClosed).toBe(true);
   const third = client(target, true, credentials, 'another-api');

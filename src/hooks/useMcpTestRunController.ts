@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { HttpReqParam } from 'api-docs-ui';
 import { OperationMetadata } from '@/types/apiSpec';
 import { ApiDeployment } from '@/types/apiDeployment';
@@ -24,36 +24,33 @@ export function useMcpTestRunController(
   const [result, setResult] = useState<string>(undefined);
   const [error, setError] = useState<string>(undefined);
   const [isRunning, setIsRunning] = useState(false);
-  const connectionVersion = useRef(0);
 
   const authCredentials = useMcpAuthCredentials();
   const runtimeUri = deployment?.server?.runtimeUri?.[0];
-  const transport = deployment?.server?.mcpTransportProtocol;
+  const transport = deployment?.server?.mcpTransportProtocol ?? undefined;
+  const deploymentName = deployment?.name;
 
   useEffect(() => {
     if (!runtimeUri || !shouldConnect) {
-      setMcpService(undefined);
       return undefined;
     }
 
     // The test console owns its connection: it is torn down when the drawer closes, so it must
     // not share the instance the spec page keeps alive.
-    const service = createMcpService(deployment, authCredentials);
+    const service = createMcpService(runtimeUri, authCredentials, transport);
     setMcpService(service);
 
     return () => {
-      connectionVersion.current += 1;
       service?.closeConnection();
       setMcpService(undefined);
     };
-  }, [authCredentials, deployment, runtimeUri, shouldConnect, transport]);
+  }, [authCredentials, runtimeUri, shouldConnect, transport, deploymentName]);
 
   useEffect(() => {
-    connectionVersion.current += 1;
     setResult(undefined);
     setError(undefined);
     setIsRunning(false);
-  }, [authCredentials, deployment, operation, runtimeUri, shouldConnect, transport]);
+  }, [operation, authCredentials, runtimeUri, shouldConnect, transport, deploymentName]);
 
   const run = useCallback(
     async (args: HttpReqParam[]) => {
@@ -61,23 +58,8 @@ export function useMcpTestRunController(
         return;
       }
 
-      const version = connectionVersion.current;
-      const isCurrentRun = (): boolean => connectionVersion.current === version;
       try {
         setIsRunning(true);
-
-        if (
-          !shouldConnect ||
-          !mcpService ||
-          mcpService.serverUri !== runtimeUri ||
-          mcpService.declaredTransport !== transport ||
-          mcpService.authCredentials !== authCredentials
-        ) {
-          throw new Error('MCP connection is not ready.');
-        }
-        if (!operation) {
-          throw new Error('MCP operation is unavailable.');
-        }
 
         const name = operation.name.split('/').pop();
         const operationArguments = Object.fromEntries(args.map(({ name, value }) => [name, value]));
@@ -92,19 +74,19 @@ export function useMcpTestRunController(
             }
 
             const result = await mcpService.runTool(name, conversion.arguments);
-            if (isCurrentRun()) setResult(JSON.stringify(result, null, 2));
+            if (!mcpService.isClosed) setResult(JSON.stringify(result, null, 2));
             break;
           }
 
           case McpCapabilityTypes.PROMPTS: {
             const result = await mcpService.getPrompt(name, operationArguments);
-            if (isCurrentRun()) setResult(JSON.stringify(result, null, 2));
+            if (!mcpService.isClosed) setResult(JSON.stringify(result, null, 2));
             break;
           }
 
           case McpCapabilityTypes.RESOURCES: {
             const result = await mcpService.readResource(operationArguments.uri);
-            if (isCurrentRun()) setResult(JSON.stringify(result, null, 2));
+            if (!mcpService.isClosed) setResult(JSON.stringify(result, null, 2));
             break;
           }
 
@@ -112,11 +94,9 @@ export function useMcpTestRunController(
             throw new Error(`Unsupported MCP capability type: ${operation.category}`);
         }
 
-        if (isCurrentRun()) setError(undefined);
+        if (!mcpService.isClosed) setError(undefined);
       } catch (e) {
-        if (!isCurrentRun()) {
-          return;
-        }
+        if (mcpService?.isClosed) return;
         setResult(undefined);
 
         if (e instanceof TypeError) {
@@ -127,10 +107,10 @@ export function useMcpTestRunController(
           setError(e.message || 'Unable to complete request');
         }
       } finally {
-        if (isCurrentRun()) setIsRunning(false);
+        if (!mcpService?.isClosed) setIsRunning(false);
       }
     },
-    [authCredentials, isRunning, mcpService, operation, runtimeUri, shouldConnect, transport]
+    [isRunning, mcpService, operation]
   );
 
   return {

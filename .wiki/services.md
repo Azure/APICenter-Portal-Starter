@@ -171,12 +171,12 @@ Two factories are exported:
 
 | Factory | Ownership | Used by |
 |---------|-----------|---------|
-| `getMcpService(deployment, definitionKey, credentials?)` | Module-level shared instance, reused across calls | `McpSpecPage` (connect + capability listing) |
-| `createMcpService(deployment, credentials?)` | Standalone instance owned by the caller | `useMcpTestRunController` (test console drawer) |
+| `getMcpService(uri, credentials?, transport?, connectionKey?)` | Module-level shared instance, reused across calls | `McpSpecPage` (connect + capability listing) |
+| `createMcpService(uri, credentials?, transport?)` | Standalone instance owned by the caller | `useMcpTestRunController` (test console drawer) |
 
-`getMcpService` rebuilds the shared instance when deployment, definition, URI, transport, or
-explicit credentials change. Closed instances are not reused. Omitted credentials retain an
-authenticated connection only within the same deployment and definition.
+`getMcpService` rebuilds the shared instance when URI, transport, the stable deployment/definition
+key, or explicit credentials change. Omitted credentials retain an authenticated connection only
+within the same identity. Re-fetching an equivalent deployment does not recreate its connection.
 
 Consumers with their own connection lifetime (the test console tears the connection down when the
 drawer closes) must use `createMcpService`, so that `closeConnection()` does not affect the shared
@@ -186,11 +186,13 @@ instance the spec page is still using.
 
 The Data API's `server.mcpTransportProtocol` is `sse` or `streamable-http` (not the ARM field
 `mcpTransportType`). Both transports use the complete `server.runtimeUri[0]`, including paths
-and queries, directly or through the CORS proxy. SSE messages use the announced same-origin
-endpoint. Missing/null metadata permits an initialization POST followed by SSE GET at the same
+and queries, directly or through the CORS proxy. SSE messages use the announced endpoint:
+absolute URLs are unchanged, and relative URLs resolve against the configured server URI.
+Missing/null metadata permits an initialization POST followed by SSE GET at the same
 URL only on HTTP 400/404/405; unknown values and other failures do not trigger detection.
-User operations are never retried. Closing aborts pending requests; SSE reconnects initialize
-a fresh session without replaying pending operations.
+User operations are never retried for detection. Closing prevents a late initialization response
+from starting fallback. Existing response parsing and HTTP request cancellation behavior are
+unchanged; this fix does not add SSE reconnection management.
 
 #### Credential propagation
 

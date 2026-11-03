@@ -2,7 +2,6 @@ import { ErrorEvent as EventSourceErrorEvent, EventSource } from 'eventsource';
 import { DeferredPromise, makeDeferredPromise } from '@/utils/promise';
 import { McpCapabilityTypes, McpInitData, McpOperation, McpResource, McpSpec } from '@/types/mcp';
 import { ApiAuthCredentials } from '@/types/apiAuth';
-import { ApiDeployment } from '@/types/apiDeployment';
 import { apimFetchProxy } from '@/utils/apimProxy';
 import { getMcpCorsProxyEnabled, McpTransport } from '@/constants';
 
@@ -25,8 +24,8 @@ export class McpUnauthorizedError extends Error {
 }
 
 /**
- * @param transport - Data API transport metadata; absent metadata enables compatibility detection.
- * @returns A diagnostic when an explicit transport is unsupported.
+ * @param transport - Data API transport metadata.
+ * @returns A diagnostic for unsupported explicit metadata; absent metadata enables detection.
  */
 export function getUnsupportedMcpTransportMessage(transport?: string | null): string | undefined {
   if (transport != null && transport !== McpTransport.SSE && transport !== McpTransport.StreamableHttp) {
@@ -38,11 +37,9 @@ export class McpService {
   public readonly serverUri: string;
 
   public readonly authCredentials?: ApiAuthCredentials;
-  public readonly declaredTransport?: string | null;
+  public readonly declaredTransport?: string;
   private transport: McpTransport;
-  private readonly abortController = new AbortController();
   private closed = false;
-  private closeReason: unknown;
   private sse?: EventSource;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private pendingMessages = new Map<number, DeferredPromise<any>>();
@@ -55,8 +52,9 @@ export class McpService {
 
   constructor(serverUri: string, authCredentials?: ApiAuthCredentials, transport?: string | null) {
     this.authCredentials = authCredentials;
+
     this.serverUri = serverUri;
-    this.declaredTransport = transport;
+    this.declaredTransport = transport ?? undefined;
     this.transport = transport === McpTransport.SSE ? McpTransport.SSE : McpTransport.StreamableHttp;
 
     // Prevent unhandled promise rejection if init fails before a consumer awaits.
@@ -70,8 +68,13 @@ export class McpService {
 
     const error = getUnsupportedMcpTransportMessage(transport);
     if (error) {
-      this.closeConnection(new Error(error));
-    } else if (this.transport === McpTransport.SSE) {
+      this.initDeferredPromise.reject(new Error(error));
+      return;
+    }
+
+    this.pendingMessages.set(INIT_ID, makeDeferredPromise());
+
+    if (this.transport === McpTransport.SSE) {
       this.openSseConnection();
     } else {
       void this.initializeStreamableHttp();
@@ -82,16 +85,11 @@ export class McpService {
     return this.closed;
   }
 
-  public closeConnection(reason: unknown = new Error('MCP connection closed.')): void {
-    if (this.closed) return;
+  public closeConnection(): void {
     this.closed = true;
-    this.closeReason = reason;
-    this.abortController.abort();
-    if (!this.initDeferredPromise.isComplete) this.initDeferredPromise.reject(reason);
-    for (const pending of this.pendingMessages.values()) {
-      if (!pending.isComplete) pending.reject(reason);
+    if (!this.initDeferredPromise.isComplete) {
+      this.initDeferredPromise.reject(new Error('MCP connection closed.'));
     }
-    this.pendingMessages.clear();
     if (this.sse) {
       this.sse.removeEventListener('endpoint', this.handleEndpointReceived);
       this.sse.removeEventListener('error', this.handleErrorReceived);
@@ -103,8 +101,7 @@ export class McpService {
     // through createMcpService() are owned by their caller and must not clear it.
     if (currentInstance === this) {
       currentInstance = undefined;
-      currentDeployment = undefined;
-      currentDefinitionKey = undefined;
+      currentConnectionKey = undefined;
     }
   }
 
@@ -166,32 +163,29 @@ export class McpService {
   }
 
   private ensureInitialized(): Promise<void> {
-    if (this.closed) return Promise.reject(this.closeReason);
-    return this.initDeferredPromise.promise.then(() => {
-      if (this.closed) throw this.closeReason;
-    });
+    return this.closed ? Promise.reject(new Error('MCP connection closed.')) : this.initDeferredPromise.promise;
   }
 
-  private async initializeConnection(): Promise<void> {
-    try {
-      this.initData = await this.sendRequest<McpInitData>({
-        id: INIT_ID,
-        method: 'initialize',
-        params: {
-          protocolVersion: '2024-11-05',
-          capabilities: {},
-          clientInfo: {
-            name: 'apic-mcp-explorer',
-            version: '1.0.0',
-          },
+  private initializeConnection(): Promise<void> {
+    return this.sendRequest<McpInitData>({
+      id: INIT_ID,
+      method: 'initialize',
+      params: {
+        protocolVersion: '2024-11-05',
+        capabilities: {},
+        clientInfo: {
+          name: 'apic-mcp-explorer',
+          version: '1.0.0',
         },
-      });
-
-      if (!this.initData?.capabilities) throw new Error('Invalid MCP initialize response: missing capabilities.');
-      if (!this.closed) this.initDeferredPromise.resolve();
-    } catch (error) {
-      this.closeConnection(error);
-    }
+      },
+    }).then(
+      (initData) => {
+        if (this.closed) return;
+        this.initData = initData;
+        this.initDeferredPromise.resolve();
+      },
+      (error) => this.initDeferredPromise.reject(error)
+    );
   }
 
   private async initializeStreamableHttp(): Promise<void> {
@@ -221,13 +215,21 @@ export class McpService {
       });
 
       if (this.closed) return;
-      if (this.declaredTransport == null && [400, 404, 405].includes(response.status)) {
+      if (this.declaredTransport === undefined && [400, 404, 405].includes(response.status)) {
         this.transport = McpTransport.SSE;
         this.openSseConnection();
         return;
       }
+
+      if (response.status === 401) {
+        const wwwAuth = response.headers.get('www-authenticate') || undefined;
+        this.initDeferredPromise.reject(new McpUnauthorizedError(undefined, wwwAuth));
+        return;
+      }
+
       if (!response.ok) {
-        throw this.responseError(response);
+        this.initDeferredPromise.reject(new Error(`Initialize failed: ${response.status} ${response.statusText}`));
+        return;
       }
 
       const mcpSessionId = response.headers.get('mcp-session-id');
@@ -240,14 +242,18 @@ export class McpService {
         this.initData = await this.parseStreamableResponse<McpInitData>(response);
       } else {
         const data = await response.json();
-        if (data.error) throw new Error(data.error.message || 'MCP initialization failed.');
         this.initData = data.result;
       }
 
-      if (!this.initData?.capabilities) throw new Error('Invalid MCP initialize response: missing capabilities.');
-      if (!this.closed) this.initDeferredPromise.resolve();
+      if (this.closed) return;
+      const deferred = this.pendingMessages.get(INIT_ID);
+      if (deferred && !deferred.isComplete) {
+        deferred.resolve(this.initData);
+      }
+
+      this.initDeferredPromise.resolve();
     } catch (err) {
-      this.closeConnection(err);
+      this.initDeferredPromise.reject(err);
     }
   }
 
@@ -270,69 +276,43 @@ export class McpService {
   }
 
   private handleEndpointReceived(event: MessageEvent): void {
-    if (this.closed) return;
     try {
       if (typeof event.data !== 'string' || !event.data) throw new Error('Invalid MCP SSE message endpoint.');
-      const server = new URL(this.serverUri);
-      const endpoint = new URL(event.data, server);
-      if (endpoint.origin !== server.origin || endpoint.username || endpoint.password) {
-        throw new Error('MCP SSE message endpoint must use the server origin.');
-      }
-      if (this.messagingEndpoint) {
-        if (new URL(this.messagingEndpoint).href !== endpoint.href) {
-          throw new Error('MCP SSE message endpoint changed during the connection.');
-        }
-        return;
-      }
-      this.messagingEndpoint = /^https?:\/\//i.test(event.data) ? event.data : endpoint.href;
+      this.messagingEndpoint = /^https?:\/\//i.test(event.data) ? event.data : new URL(event.data, this.serverUri).href;
       void this.initializeConnection();
     } catch (error) {
-      this.closeConnection(error);
+      this.messagingEndpoint = undefined;
+      this.initDeferredPromise.reject(error);
+      this.sse?.close();
     }
   }
 
   private handleErrorReceived(event: EventSourceErrorEvent): void {
-    const error = new Error(`MCP SSE connection failed: ${event.message || 'connection closed'}`);
-    if (!this.initDeferredPromise.isResolved || this.sse?.readyState === EventSource.CLOSED) {
-      this.closeConnection(error);
-      return;
+    if (!this.initDeferredPromise.isComplete) {
+      this.initDeferredPromise.reject(new Error(`MCP SSE connection failed: ${event.message}`));
+      this.sse?.close();
     }
-    this.messagingEndpoint = undefined;
-    this.initDeferredPromise = makeDeferredPromise<void>();
-    this.initDeferredPromise.promise.catch(() => {});
-    for (const pending of this.pendingMessages.values()) {
-      if (!pending.isComplete) pending.reject(error);
-    }
-    this.pendingMessages.clear();
   }
 
   private openSseConnection(): void {
-    if (this.closed) return;
     try {
       this.sse = new EventSource(this.serverUri, {
         fetch: async (_url, init): Promise<Response> => {
-          try {
-            const response = await this.fetchProxy(this.serverUri, init);
-            if (response.status !== 200) this.closeConnection(this.responseError(response));
-            return response;
-          } catch (error) {
-            this.closeConnection(error);
-            throw error;
+          const response = await this.fetchProxy(this.serverUri, init);
+          if (response.status === 401) {
+            this.initDeferredPromise.reject(
+              new McpUnauthorizedError(undefined, response.headers.get('www-authenticate') || undefined)
+            );
           }
+          return response;
         },
       });
       this.sse.addEventListener('endpoint', this.handleEndpointReceived);
       this.sse.addEventListener('error', this.handleErrorReceived);
       this.sse.addEventListener('message', this.handleMessageReceived);
     } catch (error) {
-      this.closeConnection(error);
+      this.initDeferredPromise.reject(error);
     }
-  }
-
-  private responseError(response: Response): Error {
-    return response.status === 401
-      ? new McpUnauthorizedError(undefined, response.headers.get('www-authenticate') || undefined)
-      : new Error(`Error ${response.status}: ${response.statusText}`);
   }
 
   private handleMessageReceived(event: MessageEvent): void {
@@ -357,20 +337,26 @@ export class McpService {
   }
 
   private async fetchProxy(url: string, requestInit?: RequestInit): ReturnType<typeof fetch> {
-    const headers = new Headers(requestInit?.headers);
+    const headers = { ...requestInit.headers };
     if (this.authCredentials && this.authCredentials.in === 'header') {
-      headers.set(this.authCredentials.name, this.authCredentials.value);
+      headers[this.authCredentials.name] = this.authCredentials.value;
     }
-    const init = {
+
+    if (!getMcpCorsProxyEnabled()) {
+      return fetch(url, {
+        ...requestInit,
+        headers,
+      });
+    }
+
+    return apimFetchProxy(url, {
       ...requestInit,
-      headers: Object.fromEntries(headers.entries()),
-      signal: requestInit?.signal ?? this.abortController.signal,
-    };
-    return getMcpCorsProxyEnabled() ? apimFetchProxy(url, init) : fetch(url, init);
+      headers,
+    });
   }
 
   private sendRequest<T = void>(payload: MessagePayload): Promise<T> {
-    if (this.closed) return Promise.reject(this.closeReason);
+    if (this.closed) return Promise.reject(new Error('MCP connection closed.'));
     if (this.transport === McpTransport.StreamableHttp) {
       return this.sendStreamableRequest<T>(payload);
     }
@@ -401,9 +387,14 @@ export class McpService {
       }),
     })
       .then(async (response) => {
-        if (deferred.isComplete) return;
+        if (response.status === 401) {
+          const wwwAuth = response.headers.get('www-authenticate') || undefined;
+          deferred.reject(new McpUnauthorizedError(undefined, wwwAuth));
+          return;
+        }
+
         if (!response.ok) {
-          deferred.reject(this.responseError(response));
+          deferred.reject(new Error(`Error ${response.status}: ${response.statusText}`));
           return;
         }
 
@@ -415,30 +406,39 @@ export class McpService {
         const contentType = response.headers.get('content-type') || '';
         if (contentType.includes('text/event-stream')) {
           const result = await this.parseStreamableResponse<T>(response);
-          if (!deferred.isComplete) deferred.resolve(result);
+          deferred.resolve(result);
         } else {
           const data = await response.json();
           if (data.error) {
             deferred.reject(data.error);
           } else {
-            if (!deferred.isComplete) deferred.resolve(data.result);
+            deferred.resolve(data.result);
           }
         }
       })
       .catch((err) => {
-        if (!deferred.isComplete) deferred.reject(err);
+        deferred.reject(err);
       });
 
-    return deferred.promise.finally(() => this.pendingMessages.delete(messageId));
+    return deferred.promise;
   }
 
   private sendSseRequest<T = void>(payload: MessagePayload): Promise<T> {
     if (!this.messagingEndpoint) {
       return Promise.reject(new Error('MCP SSE message endpoint is unavailable.'));
     }
+
+    const isInit = payload.id === INIT_ID;
+    let deferred: DeferredPromise<T> = this.pendingMessages.get(INIT_ID);
+    if (deferred && !deferred.isComplete && !isInit) {
+      return Promise.reject(new Error('MCP SSE connection is initializing.'));
+    }
+
     const messageId = payload.id || ++this.lastMessageId;
-    const deferred = makeDeferredPromise<T>();
-    this.pendingMessages.set(messageId, deferred);
+    if (!deferred || deferred.isComplete) {
+      deferred = makeDeferredPromise<T>();
+      this.pendingMessages.set(messageId, deferred);
+    }
 
     this.fetchProxy(this.messagingEndpoint, {
       method: 'POST',
@@ -451,15 +451,19 @@ export class McpService {
       }),
     })
       .then((response) => {
-        if (!response.ok && !deferred.isComplete) {
-          deferred.reject(this.responseError(response));
+        if (response.status === 401) {
+          deferred.reject(new McpUnauthorizedError(undefined, response.headers.get('www-authenticate') || undefined));
+          return;
+        }
+        if (!response.ok) {
+          deferred.reject(new Error(`Error ${response.status}: ${response.statusText}`));
         }
       })
       .catch((err) => {
-        if (!deferred.isComplete) deferred.reject(err);
+        deferred.reject(err);
       });
 
-    return deferred.promise.finally(() => this.pendingMessages.delete(messageId));
+    return deferred.promise;
   }
 }
 
@@ -470,24 +474,24 @@ export class McpService {
  * which tears the connection down on close) so that closing it doesn't affect the shared
  * instance returned by getMcpService().
  *
- * @param deployment - Deployment with its complete endpoint and transport.
- * @param authCredentials - Credentials sent to the server.
+ * @param uri - Complete deployment runtime endpoint.
+ * @param authCredentials - Optional server credentials.
+ * @param transport - Data API transport metadata.
  */
 export function createMcpService(
-  deployment?: ApiDeployment,
-  authCredentials?: ApiAuthCredentials
+  uri?: string,
+  authCredentials?: ApiAuthCredentials,
+  transport?: string | null
 ): McpService | undefined {
-  const serverUri = deployment?.server?.runtimeUri?.[0];
-  if (!serverUri) {
+  if (!uri) {
     return undefined;
   }
 
-  return new McpService(serverUri, authCredentials, deployment.server.mcpTransportProtocol);
+  return new McpService(uri, authCredentials, transport);
 }
 
 let currentInstance: McpService | undefined;
-let currentDeployment: ApiDeployment | undefined;
-let currentDefinitionKey: string | undefined;
+let currentConnectionKey: string | undefined;
 
 /**
  * Returns the shared McpService for the given server URI.
@@ -495,37 +499,31 @@ let currentDefinitionKey: string | undefined;
  * Omitting `authCredentials` means "reuse whatever is already connected" — it must never
  * downgrade an authenticated instance to an anonymous one.
  *
- * @param deployment - Deployment with its complete endpoint and transport.
- * @param definitionKey - Definition owning the shared connection.
- * @param authCredentials - Explicit credentials, or omitted to reuse existing credentials.
+ * @param uri - Complete deployment runtime endpoint.
+ * @param authCredentials - Explicit credentials, or omitted to retain existing credentials.
+ * @param transport - Data API transport metadata.
+ * @param connectionKey - Stable deployment/definition identity.
  */
 export function getMcpService(
-  deployment?: ApiDeployment,
-  definitionKey?: string,
-  authCredentials?: ApiAuthCredentials
+  uri?: string,
+  authCredentials?: ApiAuthCredentials,
+  transport?: string | null,
+  connectionKey?: string
 ): McpService | undefined {
-  const serverUri = deployment?.server?.runtimeUri?.[0];
-  if (!serverUri) {
+  if (!uri) {
     return undefined;
   }
 
-  const isDifferentServer = currentInstance?.serverUri !== serverUri;
-  const isDifferentDeployment = currentDeployment !== deployment || currentDefinitionKey !== definitionKey;
-  const isDifferentTransport = currentInstance?.declaredTransport !== deployment.server.mcpTransportProtocol;
+  const isDifferentServer = currentInstance?.serverUri !== uri;
+  const isDifferentTransport = currentInstance?.declaredTransport !== (transport ?? undefined);
+  const isDifferentConnection = currentConnectionKey !== connectionKey;
   const isExplicitCredentialsChange =
     !!currentInstance && authCredentials !== undefined && currentInstance.authCredentials !== authCredentials;
 
-  if (
-    isDifferentServer ||
-    isDifferentDeployment ||
-    isDifferentTransport ||
-    isExplicitCredentialsChange ||
-    currentInstance?.isClosed
-  ) {
+  if (isDifferentServer || isDifferentTransport || isDifferentConnection || isExplicitCredentialsChange) {
     currentInstance?.closeConnection();
-    currentInstance = new McpService(serverUri, authCredentials, deployment.server.mcpTransportProtocol);
-    currentDeployment = deployment;
-    currentDefinitionKey = definitionKey;
+    currentInstance = new McpService(uri, authCredentials, transport);
+    currentConnectionKey = connectionKey;
   }
 
   return currentInstance;
