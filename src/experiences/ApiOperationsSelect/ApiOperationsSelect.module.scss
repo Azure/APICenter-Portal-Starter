@@ -1,0 +1,15 @@
+.operationsSelect {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.searchInput {
+  width: 100%;
+}
+
+.emptyState {
+  color: var(--colorNeutralForeground3);
+  padding: 8px 0;
+  font-size: 0.875rem;
+}
