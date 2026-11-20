@@ -17,14 +17,8 @@ import { configAtom } from '@/atoms/configAtom';
 import { useServer } from '@/hooks/useServer';
 import { buildMcpPackageCommand } from '@/utils/mcpPackageInstall';
 import { getMcpRemoteTransport } from '@/utils/mcpRemoteTransport';
+import { getSkillSourceUrl } from '@/utils/skillInstall';
 import styles from './ApiInfoOptions.module.scss';
-
-/**
- * Extracts the `sourceUrl` for a skill-type API from its custom properties.
- */
-function getSkillSourceUrl(api: ApiMetadata): string | undefined {
-  return api.customProperties?.['sourceUrl'] as string | undefined;
-}
 
 interface Props {
   api: ApiMetadata;

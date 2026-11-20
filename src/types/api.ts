@@ -4,6 +4,16 @@ export interface ApiContact {
   email?: string;
 }
 
+/**
+ * Source information for Git-imported assets such as skills.
+ */
+export interface ApiSource {
+  /** The source type, e.g. "git". */
+  type?: string;
+  /** Browsable URL of the repository folder containing the asset, when it can be resolved. */
+  url?: string;
+}
+
 export interface ApiExternalDocumentation {
   title?: string;
   description?: string;
@@ -27,4 +37,6 @@ export interface ApiMetadata {
   customProperties?: Record<string, unknown>;
   lastUpdated?: string;
   resourceIds?: string[];
+  /** Source information for Git-imported assets such as skills. */
+  source?: ApiSource;
 }

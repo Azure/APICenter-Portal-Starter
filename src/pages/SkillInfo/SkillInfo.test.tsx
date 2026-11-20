@@ -1,11 +1,12 @@
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { RecoilRoot } from 'recoil';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { configAtom } from '@/atoms/configAtom';
 import { ApiMetadata } from '@/types/api';
-import { getSkillSourceUrl, SkillInfo } from './SkillInfo';
+import { Config } from '@/types/config';
+import { SkillInfo } from './SkillInfo';
 
 const mocks = vi.hoisted(() => ({
   useApi: vi.fn(),
@@ -30,7 +31,7 @@ vi.mock('@/hooks/useAIAssetEvaluationResult', () => ({
   useAIAssetEvaluationResult: (...args: unknown[]) => mocks.useAIAssetEvaluationResult(...args),
 }));
 
-function renderSkillInfo(apiData: ApiMetadata) {
+function renderSkillInfo(apiData: ApiMetadata, authentication?: Config['authentication']) {
   mocks.useApi.mockReturnValue({
     data: apiData,
     isLoading: false,
@@ -46,6 +47,7 @@ function renderSkillInfo(apiData: ApiMetadata) {
           title: 'API portal',
           scopingFilter: '',
           capabilities: [],
+          authentication,
         });
       }}
     >
@@ -58,25 +60,11 @@ function renderSkillInfo(apiData: ApiMetadata) {
   );
 }
 
-describe('getSkillSourceUrl', () => {
-  it('returns undefined when customProperties or sourceUrl is missing, null, or blank', () => {
-    expect(getSkillSourceUrl(undefined)).toBeUndefined();
-    expect(getSkillSourceUrl({})).toBeUndefined();
-    expect(getSkillSourceUrl({ sourceUrl: null })).toBeUndefined();
-    expect(getSkillSourceUrl({ sourceUrl: '' })).toBeUndefined();
-    expect(getSkillSourceUrl({ sourceUrl: '   ' })).toBeUndefined();
-  });
-
-  it('returns the trimmed skill-specific sourceUrl when present', () => {
-    expect(
-      getSkillSourceUrl({
-        sourceUrl: '  https://github.com/owner/repo/tree/main/skills/my-skill  ',
-      })
-    ).toBe('https://github.com/owner/repo/tree/main/skills/my-skill');
-  });
-});
-
 describe('SkillInfo', () => {
+  afterEach(() => {
+    cleanup();
+  });
+
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.useAIAssetVersions.mockReturnValue({ data: [], isLoading: false });
@@ -89,14 +77,51 @@ describe('SkillInfo', () => {
     });
   });
 
-  it('does not render Install in VS Code when customProperties.sourceUrl is missing', () => {
+  it('disables Install in VS Code with guidance when the skill has no installable source', () => {
     renderSkillInfo({
       name: 'skill-without-source',
       title: 'Skill Without Source',
       kind: 'skill',
     });
 
-    expect(screen.queryByRole('button', { name: /Install in VS Code/i })).toBeNull();
+    const installButton = screen.getByRole('button', { name: /Install in VS Code/i });
+    expect(installButton.getAttribute('aria-disabled')).toBe('true');
+  });
+
+  it('opens a deeplink with the API Center source when the portal uses Entra ID authentication', () => {
+    const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
+
+    renderSkillInfo(
+      { name: 'my-skill', title: 'My Skill', kind: 'skill' },
+      { clientId: 'client-id', tenantId: 'tenant-id', scopes: [], authority: '', azureAdInstance: '' }
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /Install in VS Code/i }));
+
+    expect(openSpy).toHaveBeenCalledWith(
+      'vscode://apidev.azure-api-center/install?name=my-skill&dataApiHost=example.data.eastus.azure-apicenter.ms&workspace=default&clientId=client-id&tenantId=tenant-id'
+    );
+
+    openSpy.mockRestore();
+  });
+
+  it('uses the Git source folder URL resolved by API Center when sourceUrl is not set', () => {
+    const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
+
+    renderSkillInfo({
+      name: 'my-skill',
+      title: 'My Skill',
+      kind: 'skill',
+      source: { type: 'git', url: 'https://github.com/owner/repo/tree/main/skills/my-skill' },
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /Install in VS Code/i }));
+
+    expect(openSpy).toHaveBeenCalledWith(
+      'vscode://apidev.azure-api-center/install?sourceUrl=https%3A%2F%2Fgithub.com%2Fowner%2Frepo%2Ftree%2Fmain%2Fskills%2Fmy-skill&name=my-skill'
+    );
+
+    openSpy.mockRestore();
   });
 
   it('opens a skill-specific VS Code deeplink when customProperties.sourceUrl is present', () => {
