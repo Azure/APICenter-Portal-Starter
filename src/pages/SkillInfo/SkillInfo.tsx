@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Badge, Button, Tab, TabList } from '@fluentui/react-components';
+import { Badge, Button, Tab, TabList, Tooltip } from '@fluentui/react-components';
 import { CodeRegular, DocumentRegular } from '@fluentui/react-icons';
 import { useRecoilValue } from 'recoil';
 import { useApi } from '@/hooks/useApi';
@@ -16,22 +16,15 @@ import { VersionSelect } from '@/experiences/VersionSelect';
 import { AIAssetDefinition } from '@/experiences/AIAssetDefinition';
 import { EvaluationDetails } from '@/experiences/EvaluationDetails';
 import { buildSkillDeeplink } from '@/utils/skillDeeplink';
+import { getSkillInstallParams } from '@/utils/skillInstall';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import CustomMetadata from '@/components/CustomMetadata';
 import { EmptyStateMessage } from '@/components/EmptyStateMessage/EmptyStateMessage';
 import { InstallationBlock } from '@/components/InstallationBlock';
 import VsCodeLogo from '@/assets/vsCodeLogo.svg';
 
-/** Extracts a non-empty skill source URL from custom properties. */
-export function getSkillSourceUrl(customProperties?: Record<string, unknown>): string | undefined {
-  const sourceUrl = customProperties?.['sourceUrl'];
-  if (typeof sourceUrl !== 'string') {
-    return undefined;
-  }
-
-  const trimmed = sourceUrl.trim();
-  return trimmed ? trimmed : undefined;
-}
+export const SKILL_NOT_INSTALLABLE_MESSAGE =
+  'This skill has no installable source. Ask your API Center administrator to sync it from a Git repository or set its "sourceUrl" property to a public GitHub folder.';
 
 /** Skill-specific descriptions for known L0/L1 assertion names. */
 const SKILL_ASSERTION_DESCRIPTIONS: Record<string, string> = {
@@ -65,8 +58,6 @@ export const SkillInfo: React.FC = () => {
     [api.data?.title, name]
   );
 
-  const skillSourceUrl = useMemo(() => getSkillSourceUrl(api.data?.customProperties), [api.data]);
-
   // Auto-select the first version once versions load.
   useEffect(() => {
     if (!selectedVersion && versions.data && versions.data.length > 0) {
@@ -79,6 +70,11 @@ export const SkillInfo: React.FC = () => {
     setSelectedVersion(undefined);
   }, [name]);
 
+  const skillInstall = useMemo(
+    () => getSkillInstallParams(api.data, config, selectedVersion),
+    [api.data, config, selectedVersion]
+  );
+
   const definition = useAIAssetDefinition(api.data?.name, selectedVersion, 'skills');
   const evalResult = useAIAssetEvaluationResult(api.data?.name, selectedVersion, 'skills');
 
@@ -90,14 +86,12 @@ export const SkillInfo: React.FC = () => {
   }, [selectedTab, evalResult.isFetched, evalResult.isFetching, evalResult.data]);
 
   const handleSkillInstall = useCallback(() => {
-    if (!skillSourceUrl || !api.data?.name) return;
-    const deeplink = buildSkillDeeplink({ sourceUrl: skillSourceUrl, name: api.data.name }, 'vscode');
-    window.open(deeplink);
-  }, [skillSourceUrl, api.data?.name]);
+    if (!skillInstall) return;
+    window.open(buildSkillDeeplink(skillInstall, 'vscode'));
+  }, [skillInstall]);
 
   const versionOptions = useMemo(() => versions.data ?? [], [versions.data]);
   const hasCustomProps = !!Object.keys(api.data?.customProperties || {}).length;
-  const canInstall = !!skillSourceUrl;
 
   const headerSelector =
     versionOptions.length > 0 ? (
@@ -160,11 +154,19 @@ export const SkillInfo: React.FC = () => {
         </TabList>
       }
       headerActions={
-        canInstall ? (
-          <HeaderActions showExtensionHint>
-            <Button icon={<img height={18} src={VsCodeLogo} alt="VS Code" />} onClick={handleSkillInstall}>
-              Install in VS Code
-            </Button>
+        api.data ? (
+          <HeaderActions showExtensionHint={!!skillInstall}>
+            {skillInstall ? (
+              <Button icon={<img height={18} src={VsCodeLogo} alt="VS Code" />} onClick={handleSkillInstall}>
+                Install in VS Code
+              </Button>
+            ) : (
+              <Tooltip content={SKILL_NOT_INSTALLABLE_MESSAGE} relationship="description">
+                <Button icon={<img height={18} src={VsCodeLogo} alt="VS Code" />} disabledFocusable>
+                  Install in VS Code
+                </Button>
+              </Tooltip>
+            )}
           </HeaderActions>
         ) : undefined
       }

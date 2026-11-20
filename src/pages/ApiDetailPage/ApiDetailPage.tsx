@@ -12,6 +12,7 @@ import { HeaderActions } from '@/experiences/HeaderActions';
 import { formatKindDisplay } from '@/utils/formatKind';
 import { getLifecycleBadgeColor, formatLifecycleStage } from '@/utils/badgeSystem';
 import { buildSkillDeeplink } from '@/utils/skillDeeplink';
+import { getSkillInstallParams, getSkillSourceUrl } from '@/utils/skillInstall';
 import { useApiSpec } from '@/hooks/useApiSpec';
 import { useApiSpecUrl } from '@/hooks/useApiSpecUrl';
 import { useApiDefinitions } from '@/hooks/useApiDefinitions';
@@ -63,10 +64,7 @@ export const ApiDetailPage: React.FC = () => {
     ? (['definition', 'deployment'] as Array<keyof ApiDefinitionSelection>)
     : (['definition'] as Array<keyof ApiDefinitionSelection>);
 
-  const skillSourceUrl = useMemo(
-    () => api.data?.customProperties?.['sourceUrl'] as string | undefined,
-    [api.data]
-  );
+  const skillSourceUrl = useMemo(() => getSkillSourceUrl(api.data), [api.data]);
 
   const customPropertyTags = useMemo(() => {
     const props = api.data?.customProperties;
@@ -92,13 +90,17 @@ export const ApiDetailPage: React.FC = () => {
   }, [api.data?.customProperties]);
 
   // Skill install
-  const handleSkillInstall = useCallback(() => {
-    if (!skillSourceUrl || !api.data?.name) return;
-    const deeplink = buildSkillDeeplink({ sourceUrl: skillSourceUrl, name: api.data.name }, 'vscode');
-    window.open(deeplink);
-  }, [skillSourceUrl, api.data?.name]);
+  const skillInstall = useMemo(
+    () => (kind === 'skill' ? getSkillInstallParams(api.data, config) : undefined),
+    [kind, api.data, config]
+  );
 
-  const hasInstall = kind === 'skill' && !!skillSourceUrl;
+  const handleSkillInstall = useCallback(() => {
+    if (!skillInstall) return;
+    window.open(buildSkillDeeplink(skillInstall, 'vscode'));
+  }, [skillInstall]);
+
+  const hasInstall = !!skillInstall;
 
   // Copyable endpoint URL for devs to use in CLI / other tools
   const endpointUrl = useMemo(() => {
